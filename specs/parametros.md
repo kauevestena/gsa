@@ -45,6 +45,7 @@ Proteção contra bloqueio econômico: carrinho e kit inicial são recuperáveis
 | Câmeras avançadas | Picape: resolução simulada 1920×1080 a 4 Hz; van: panorâmica de seis faces 1024×1024 a 2 Hz e pavimento 1920×1080 a 4 Hz; miniaturas mantêm 256×144 |
 | GNSS | 5 Hz; sigma posicional base: celular 3 m, navegação 1,5 m, DGNSS 0,5 m, RTK float 0,15 m, fix 0,03 m; multiplicar por DOP |
 | Heading níveis 0–2 | 3°, 2°, 1° de sigma; correção por controle observado; não inferir heading de deslocamento parado |
+| GNSS comum/célula em M1 | Erro comum com sigma e tempo de correlação explícitos; fixtures usam 0,5 m e 30 s. Viés horizontal por célula tem amplitude e fator de fachada explícitos. Não são removidos da observação sem dados de correção |
 | Multiconstelação níveis 5–6 | Quatro constelações representadas por fator DOP reduzido: `1+4*(1-openness)/sqrt(4)`; perfis anteriores usam uma constelação e fórmula básica; abertura mínima para solução não muda |
 | Base | Raio útil inicial 2 km; residual adicional 0,02 m/km DGNSS e 0,005 m/km RTK; abertura mínima 0,8 |
 | IMU | 100 Hz; gyro noise sigma MEMS/tática/navegação: 0,005/0,001/0,0002 rad/s por amostra; accel: 0,1/0,03/0,01 m/s² por amostra |

@@ -1,0 +1,27 @@
+  Gsa.Localization.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll
+Test run for /workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Results File: /workspace/gsa/work/m1-world/artifacts/logs/linux/test-results/_9b43ca2302e5_2026-11-14_17_26_05_net10.0.trx
+
+Passed!  - Failed:     0, Passed:    18, Skipped:     0, Total:    18, Duration: 102 ms - Gsa.Localization.Tests.dll (net10.0)
+  Gsa.Core -> /workspace/gsa/work/m1-world/src/Gsa.Core/bin/Debug/net10.0/Gsa.Core.dll
+  Gsa.Missions -> /workspace/gsa/work/m1-world/src/Gsa.Missions/bin/Debug/net10.0/Gsa.Missions.dll
+  Gsa.Missions.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Missions.Tests/bin/Debug/net10.0/Gsa.Missions.Tests.dll
+Test run for /workspace/gsa/work/m1-world/tests/Gsa.Missions.Tests/bin/Debug/net10.0/Gsa.Missions.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+  Gsa.Core.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll
+Test run for /workspace/gsa/work/m1-world/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Results File: /workspace/gsa/work/m1-world/artifacts/logs/linux/test-results/_9b43ca2302e5_2026-11-14_17_26_13_net10.0.trx
+
+Passed!  - Failed:     0, Passed:    85, Skipped:     0, Total:    85, Duration: 288 ms - Gsa.Missions.Tests.dll (net10.0)
+  Gsa.Tools -> /workspace/gsa/work/m1-world/src/Gsa.Tools/bin/Debug/net10.0/gsa-tools.dll
+  Gsa.Tools.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll
+Test run for /workspace/gsa/work/m1-world/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll (.NETCoreApp,Version=v10.0)
+Results File: /workspace/gsa/work/m1-world/artifacts/logs/linux/test-results/_9b43ca2302e5_2026-11-14_17_26_13_net10.0[1].trx
+
+Passed!  - Failed:     0, Passed:   140, Skipped:     0, Total:   140, Duration: 536 ms - Gsa.Core.Tests.dll (net10.0)
+A total of 1 test files matched the specified pattern.
+Results File: /workspace/gsa/work/m1-world/artifacts/logs/linux/test-results/_9b43ca2302e5_2026-11-14_17_26_15_net10.0.trx
+
+Passed!  - Failed:     0, Passed:    31, Skipped:     0, Total:    31, Duration: 439 ms - Gsa.Tools.Tests.dll (net10.0)

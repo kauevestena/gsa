@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M1–M7. Origem: Mundo; Direção de arte e orçamento técnico; Público e objetivos pedagógicos. Estado: especificado; não implementado.
+Marcos: M1–M7. Origem: Mundo; Direção de arte e orçamento técnico; Público e objetivos pedagógicos. Estado: graybox semântico, alturas e pré-cálculo de céu em revisão; expansão/streaming posteriores pendentes.
 
 ## Requisitos
 

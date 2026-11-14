@@ -12,10 +12,17 @@ public partial class Bootstrap : Control
     public override void _Ready()
     {
         _smokeTest = OS.GetCmdlineUserArgs().Contains("--smoke-test");
+        if (OS.GetCmdlineUserArgs().Contains("--bench-smoke"))
+        {
+            SetProcess(false);
+            Callable.From(OpenBench).CallDeferred();
+            return;
+        }
         _localization.Initialize();
         _localization.LocaleChanged += _ => RefreshText();
         GetNode<Button>("Center/Panel/Languages/Portuguese").Pressed += () => ChangeLanguage("pt-BR");
         GetNode<Button>("Center/Panel/Languages/English").Pressed += () => ChangeLanguage("en-US");
+        GetNode<Button>("Center/Panel/OpenBench").Pressed += OpenBench;
         RefreshText();
         if (_smokeTest)
         {
@@ -42,6 +49,19 @@ public partial class Bootstrap : Control
             GetNode<Label>("Center/Panel/Status").Text = _localization.Translate("bootstrap.language_error");
     }
 
+    private void OpenBench()
+    {
+        var result = GetTree().ChangeSceneToFile("res://world/TutorialBlock.tscn");
+        if (result != Error.Ok)
+        {
+            GD.PushError($"Cannot open tutorial block: {result}");
+            if (OS.GetCmdlineUserArgs().Contains("--bench-smoke"))
+                GetTree().Quit(1);
+        }
+    }
+
+    public override void _ExitTree() => _localization.Dispose();
+
     private void RefreshText()
     {
         GetNode<Label>("Center/Panel/Title").Text = _localization.Translate("bootstrap.title");
@@ -52,6 +72,7 @@ public partial class Bootstrap : Control
         GetNode<Label>("Center/Panel/Language").Text = _localization.Translate("bootstrap.language");
         GetNode<Button>("Center/Panel/Languages/Portuguese").Text = _localization.Translate("language.pt_BR");
         GetNode<Button>("Center/Panel/Languages/English").Text = _localization.Translate("language.en_US");
+        GetNode<Button>("Center/Panel/OpenBench").Text = _localization.Translate("bootstrap.open_bench");
     }
 
     public override void _Process(double delta)

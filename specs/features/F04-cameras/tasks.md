@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F04-01/README.md). 34 testes analíticos passaram para projeção/extrínsecos/tempo. Captura e avaliação dos próximos incrementos permanecem pendentes.
+
 **Marco:** M1
 
 **Dependências:** T-F01-02, T-F02-01

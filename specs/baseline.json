@@ -3,7 +3,12 @@
   "date": "2026-11-13",
   "source": "../spec_inicial.md",
   "source_sha256": "f727582d24cacc248b3dbea2292b141b908196da60f0a095ccc3191d4875b6b2",
-  "status": "m0_in_review",
-  "active_tasks": ["T-F01-01", "T-F01-02", "T-F06-01", "T-F01-03", "T-F11-01", "T-F01-04"],
+  "status": "m1_in_review",
+  "active_tasks": [
+    "T-F02-01",
+    "T-F02-02",
+    "T-F04-01",
+    "T-F05-01"
+  ],
   "language": "pt-BR"
 }

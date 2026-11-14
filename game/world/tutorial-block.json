@@ -1,0 +1,1297 @@
+{
+  "schema_version": 1,
+  "scene_id": "old_center_tutorial_block",
+  "map_version": 1,
+  "datum_id": "SAO_DATUM_LOCAL_V1",
+  "origin_enu": [
+    500000,
+    7400000,
+    100
+  ],
+  "bounds_enu": {
+    "min": [
+      500000,
+      7400000,
+      99.5
+    ],
+    "max": [
+      500240,
+      7400060,
+      115
+    ]
+  },
+  "cells": [
+    {
+      "id": "old_center_0_0",
+      "bounds_enu": {
+        "min": [
+          500000,
+          7400000,
+          99.5
+        ],
+        "max": [
+          500100,
+          7400060,
+          115
+        ]
+      },
+      "environment_class": "urban"
+    },
+    {
+      "id": "old_center_1_0",
+      "bounds_enu": {
+        "min": [
+          500100,
+          7400000,
+          99.5
+        ],
+        "max": [
+          500200,
+          7400060,
+          115
+        ]
+      },
+      "environment_class": "urban"
+    },
+    {
+      "id": "old_center_2_0",
+      "bounds_enu": {
+        "min": [
+          500200,
+          7400000,
+          99.5
+        ],
+        "max": [
+          500240,
+          7400060,
+          115
+        ]
+      },
+      "environment_class": "urban"
+    }
+  ],
+  "objects": [
+    {
+      "id": "tutorial_ground",
+      "class": "ground",
+      "material": "asphalt",
+      "region_id": "old_center",
+      "surface_ids": [
+        "tutorial_ground_surface"
+      ],
+      "tags": [
+        "walkable",
+        "ground"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500120,
+        7400030,
+        99.75
+      ],
+      "size_enu": [
+        240,
+        60,
+        0.5
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_01",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500020,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_01",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_01"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500020,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_02",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500030,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_02",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_02"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500030,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_03",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500040,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_03",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_03"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500040,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_04",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500050,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_04",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_04"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500050,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_05",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500060,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_05",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_05"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500060,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_06",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500070,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_06",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_06"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500070,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_07",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500080,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_07",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_07"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500080,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_08",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500090,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_08",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_08"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500090,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_09",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500100,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_09",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_09"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500100,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_10",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500110,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_10",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_10"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500110,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_11",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500120,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_11",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_11"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500120,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_12",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500130,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_12",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_12"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500130,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_13",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500140,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_13",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_13"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500140,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_14",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500150,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_14",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_14"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500150,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_15",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500160,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_15",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_15"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500160,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_16",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500170,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_16",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_16"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500170,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_17",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500180,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_17",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_17"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500180,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_18",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500190,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_18",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_18"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500190,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_19",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500200,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_19",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_19"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500200,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "facade_20",
+      "class": "building_facade",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "commerce_facade_planes"
+      ],
+      "tags": [
+        "facade",
+        "feature",
+        "privacy_review"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500210,
+        7400005,
+        101
+      ],
+      "size_enu": [
+        8,
+        0.2,
+        2
+      ],
+      "collision": true
+    },
+    {
+      "id": "building_shell_20",
+      "class": "building_shell",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "building_shell_surface_20"
+      ],
+      "tags": [
+        "building",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500210,
+        7400010.4,
+        104
+      ],
+      "size_enu": [
+        8,
+        10,
+        8
+      ],
+      "collision": true
+    },
+    {
+      "id": "office_entry",
+      "class": "office_entry",
+      "material": "metal",
+      "region_id": "old_center",
+      "surface_ids": [
+        "office_entry_surface"
+      ],
+      "tags": [
+        "office",
+        "entrance",
+        "interaction"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500232,
+        7400005,
+        101.5
+      ],
+      "size_enu": [
+        4,
+        0.2,
+        3
+      ],
+      "collision": true
+    },
+    {
+      "id": "unload_point",
+      "class": "unload_point",
+      "material": "metal",
+      "region_id": "old_center",
+      "surface_ids": [
+        "unload_point_surface"
+      ],
+      "tags": [
+        "unload_point",
+        "interaction"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500225,
+        7400002,
+        100.1
+      ],
+      "size_enu": [
+        2,
+        2,
+        0.2
+      ],
+      "collision": true
+    },
+    {
+      "id": "control_old_center_01",
+      "class": "survey_control",
+      "material": "metal",
+      "region_id": "old_center",
+      "surface_ids": [
+        "control_old_center_surface_01"
+      ],
+      "tags": [
+        "control",
+        "occupiable"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500010,
+        7400002,
+        100.05
+      ],
+      "size_enu": [
+        0.25,
+        0.25,
+        0.1
+      ],
+      "collision": true
+    },
+    {
+      "id": "control_old_center_02",
+      "class": "survey_control",
+      "material": "metal",
+      "region_id": "old_center",
+      "surface_ids": [
+        "control_old_center_surface_02"
+      ],
+      "tags": [
+        "control",
+        "occupiable"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500230,
+        7400025,
+        100.05
+      ],
+      "size_enu": [
+        0.25,
+        0.25,
+        0.1
+      ],
+      "collision": true
+    },
+    {
+      "id": "glass_sample",
+      "class": "material_sample",
+      "material": "glass",
+      "region_id": "old_center",
+      "surface_ids": [
+        "glass_sample_surface"
+      ],
+      "tags": [
+        "glass",
+        "occluder",
+        "material_fixture"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500020,
+        7400030,
+        102
+      ],
+      "size_enu": [
+        12,
+        0.2,
+        4
+      ],
+      "collision": true
+    },
+    {
+      "id": "water_sample",
+      "class": "material_sample",
+      "material": "water",
+      "region_id": "old_center",
+      "surface_ids": [
+        "water_sample_surface"
+      ],
+      "tags": [
+        "water",
+        "material_fixture"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500045,
+        7400035,
+        100.05
+      ],
+      "size_enu": [
+        12,
+        10,
+        0.1
+      ],
+      "collision": false
+    },
+    {
+      "id": "walk_obstacle",
+      "class": "obstacle",
+      "material": "concrete",
+      "region_id": "old_center",
+      "surface_ids": [
+        "walk_obstacle_surface"
+      ],
+      "tags": [
+        "obstacle",
+        "occluder"
+      ],
+      "dynamic": false,
+      "position_enu": [
+        500125,
+        7400035,
+        100.5
+      ],
+      "size_enu": [
+        2,
+        2,
+        1
+      ],
+      "collision": true
+    }
+  ]
+}

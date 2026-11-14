@@ -1,0 +1,15 @@
+  Gsa.Core -> /workspace/gsa/work/m1-world/src/Gsa.Core/bin/Debug/net10.0/Gsa.Core.dll
+  Gsa.Localization.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll
+  Gsa.Core.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll
+  Gsa.Missions -> /workspace/gsa/work/m1-world/src/Gsa.Missions/bin/Debug/net10.0/Gsa.Missions.dll
+  Gsa.Tools -> /workspace/gsa/work/m1-world/src/Gsa.Tools/bin/Debug/net10.0/gsa-tools.dll
+  Gsa.Missions.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Missions.Tests/bin/Debug/net10.0/Gsa.Missions.Tests.dll
+  Gsa.Engine -> /workspace/gsa/work/m1-world/src/Gsa.Engine/.godot/mono/temp/bin/Debug/Gsa.Engine.dll
+  Gsa.Tools.Tests -> /workspace/gsa/work/m1-world/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll
+  Gsa -> /workspace/gsa/work/m1-world/game/.godot/mono/temp/bin/Debug/Gsa.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.32

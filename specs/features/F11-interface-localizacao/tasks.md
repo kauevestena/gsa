@@ -2,13 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F11-01 — Criar localização e glossário inicial
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F11-01/README.md). 18 testes puros e smoke real de PO/plural/contexto/persistência passaram no projeto e no export Linux. Inspeção visual e revisão linguística humana pendentes.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #1 após CI Linux/Windows verde no SHA de773cd8227994cc9da18a36d352d02a9654c583. Critério local verificado; registros históricos e pendências de inspeção visual/isolamento Windows preservados em artifacts/evidence/M0-ci/summary.json.
 
 **Marco:** M0
 

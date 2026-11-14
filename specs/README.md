@@ -1,10 +1,12 @@
 # GSA — Especificação de implementação v1.0
 
-Baseline documental: 13/11/2026. Estado: fundação M0 implementada para revisão, após o [bootstrap T-F01-01](../artifacts/evidence/T-F01-01/README.md). Ver [evidências da continuação](../artifacts/evidence/T-F01-02/README.md); o gate ainda não foi aceito.
+Baseline documental: 13/11/2026. Estado: M0 integrado com aceite técnico delegado e [CI Linux/Windows](../artifacts/evidence/M0-ci/summary.json); primeiros incrementos M1 em implementação. O [bootstrap](../artifacts/evidence/T-F01-01/README.md) e suas [evidências locais](../artifacts/evidence/T-F01-02/README.md) são registros históricos.
 
 Continuação autorizada pelo usuário em 14/11/2026: o desenvolvimento dos incrementos M0 prossegue enquanto a verificação nativa Windows e o aceite formal permanecem pendentes. Essa autorização permite avançar no código; não transforma testes não realizados em sucesso nem marca gates ou tarefas como aceitos. Evidências e revisão humana continuam obrigatórias.
 
 Autorização ampliada em 14/11/2026: o usuário delegou a abertura e o merge de PRs, desde que a CI passe, e pediu desenvolvimento contínuo. Branches, commits, PRs, correções de CI e merges no repositório existente estão autorizados sem nova confirmação rotineira. A revisão técnica pode ser realizada pelo agente; antes de cada merge, conferir a CI do SHA atual e eventuais bloqueios/revisões. Requisitos de inspeção visual, hardware de referência, playtest e produção humana continuam registrados conforme as evidências realmente disponíveis. Essa delegação substitui a restrição inicial a alterações apenas locais; não atribui uma licença ao jogo.
+
+Para tarefas de código, o aceite técnico pode ser registrado pela revisão delegada após cumprir o critério local e obter CI verde no SHA integrado. Isso substitui a exigência geral de uma nova revisão humana por incremento de código. Não substitui inspeção visual, playtest, gravação ou medição de hardware quando esses forem o próprio critério da tarefa. A fundação M0 foi integrada no [PR #1](https://github.com/kauevestena/gsa/pull/1), com [CI Linux/Windows aprovada](https://github.com/kauevestena/gsa/actions/runs/43594346633); os registros históricos locais são preservados.
 
 Este pacote transforma a [especificação inicial](../spec_inicial.md) em requisitos, interfaces, tarefas e critérios de aceite para desenvolvimento guiado por especificação. O documento inicial permanece como histórico. As decisões confirmadas pelo usuário nesta conversa prevalecem sobre suas alternativas em aberto.
 
@@ -44,7 +46,7 @@ Para cada tarefa:
 2. Registrar início e implementar apenas o incremento delimitado; criar testes de comportamento quando aplicáveis.
 3. Executar os testes indicados e verificações do subsistema afetado. Não alegar aprovação de ambiente indisponível.
 4. Entregar resumo da alteração, evidências reproduzíveis, limitações e atualização da rastreabilidade quando necessária.
-5. Submeter a entrega concreta à revisão humana. A revisão aprova o resultado, sem exigir nova autorização para cada operação rotineira.
+5. Submeter a entrega concreta à revisão técnica delegada e à CI do PR. Revisões humanas de conteúdo, playtest e inspeção visual permanecem necessárias quando forem o critério da tarefa.
 
 Evidências futuras ficam em `artifacts/evidence/<task-id>/`: comando/configuração, revisão do código, versões, seed, entradas, resultado e anexos pertinentes. Produção artística usa manifesto e revisão visual; narrativa e áudio usam checklist de conteúdo e idiomas; não criar testes artificiais para esses trabalhos.
 

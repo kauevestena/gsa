@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2eb04d34-c062-4f55-a6e8-4c7bce18c662" name="@9b43ca2302e5 2026-11-14 17:26:05" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-14T17:26:05.4705503-03:00" queuing="2026-11-14T17:26:05.4705504-03:00" start="2026-11-14T17:26:04.0815732-03:00" finish="2026-11-14T17:26:05.5331893-03:00" />
+  <TestSettings name="default" id="9aa31579-e77b-4a65-8aab-2973f6190950">
+    <Deployment runDeploymentRoot="_9b43ca2302e5_2026-11-14_17_26_05" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="6eb21a09-98fa-438d-9942-f10931c1d735" testId="eed9154f-99a6-b651-141a-5e92512e0d99" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;pt&quot;, expected: &quot;pt-BR&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0000070" startTime="2026-11-14T17:26:05.3430389-03:00" endTime="2026-11-14T17:26:05.3433478-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6eb21a09-98fa-438d-9942-f10931c1d735" />
+    <UnitTestResult executionId="99c90c91-9981-4ac0-b111-a31ad2b153b0" testId="ab6a2c99-e4ab-b0c7-6a81-8f02dc9c65db" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: null, expected: &quot;en-US&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0000106" startTime="2026-11-14T17:26:05.3416429-03:00" endTime="2026-11-14T17:26:05.3419212-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="99c90c91-9981-4ac0-b111-a31ad2b153b0" />
+    <UnitTestResult executionId="16eb0cdc-28ee-4058-8ea9-ede299a7fb8d" testId="cd2ac0f6-26c3-ced0-0ae2-2662112d9ee1" testName="Gsa.Localization.Tests.LocalePolicyTests.ExplicitSupportedChoiceOverridesSystem(system: &quot;pt-BR&quot;, selected: &quot;de-DE&quot;, expected: &quot;pt-BR&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0001239" startTime="2026-11-14T17:26:05.4013127-03:00" endTime="2026-11-14T17:26:05.4015268-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16eb0cdc-28ee-4058-8ea9-ede299a7fb8d" />
+    <UnitTestResult executionId="22f861f1-2340-4964-bf10-07806b0765d9" testId="52d571c8-87cd-e34c-fca9-963a509be857" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;&quot;, expected: &quot;en-US&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0000108" startTime="2026-11-14T17:26:05.3410845-03:00" endTime="2026-11-14T17:26:05.3412645-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="22f861f1-2340-4964-bf10-07806b0765d9" />
+    <UnitTestResult executionId="0e5584a2-a970-4dd8-aff8-fa3ba134120e" testId="6c28be9c-5560-b15f-fe15-a106a1eb0849" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;pt-BR&quot;, expected: &quot;pt-BR&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0000036" startTime="2026-11-14T17:26:05.3423792-03:00" endTime="2026-11-14T17:26:05.3425453-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0e5584a2-a970-4dd8-aff8-fa3ba134120e" />
+    <UnitTestResult executionId="be1a28b2-efca-4b8d-aeb1-bc3e1dc70e88" testId="0965d74f-9908-6ed6-d200-bfe287b79b1e" testName="Gsa.Localization.Tests.LocalePolicyTests.NonfiniteCoordinatesAreRejected(value: Infinity)" computerName="9b43ca2302e5" duration="00:00:00.0000342" startTime="2026-11-14T17:26:05.4046698-03:00" endTime="2026-11-14T17:26:05.4048446-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="be1a28b2-efca-4b8d-aeb1-bc3e1dc70e88" />
+    <UnitTestResult executionId="dc7b5007-baa1-4679-90e8-31cf79bc53fa" testId="386bb25e-ede8-aae4-9e75-a5ee6d226c1e" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;ja_JP&quot;, expected: &quot;en-US&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0003377" startTime="2026-11-14T17:26:05.3401353-03:00" endTime="2026-11-14T17:26:05.3403022-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dc7b5007-baa1-4679-90e8-31cf79bc53fa" />
+    <UnitTestResult executionId="709b3ba0-6df4-4502-a11c-6d40312a04fe" testId="bd50e949-412a-3baf-08c1-0b17c88111b0" testName="Gsa.Localization.Tests.LocalePolicyTests.InvalidPrecisionIsRejected(decimals: -1)" computerName="9b43ca2302e5" duration="00:00:00.0051795" startTime="2026-11-14T17:26:05.3044290-03:00" endTime="2026-11-14T17:26:05.3190614-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="709b3ba0-6df4-4502-a11c-6d40312a04fe" />
+    <UnitTestResult executionId="95401813-b30d-444f-9063-81ef6a73d9e6" testId="285219b7-49ac-0056-6f88-0eed82aa063f" testName="Gsa.Localization.Tests.LocalePolicyTests.NonfiniteCoordinatesAreRejected(value: NaN)" computerName="9b43ca2302e5" duration="00:00:00.0003924" startTime="2026-11-14T17:26:05.4035366-03:00" endTime="2026-11-14T17:26:05.4037658-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="95401813-b30d-444f-9063-81ef6a73d9e6" />
+    <UnitTestResult executionId="d1de0365-4bf5-4bef-90ff-b264bca6d655" testId="cda48adf-e820-e611-2637-91b2cd521536" testName="Gsa.Localization.Tests.LocalePolicyTests.CoordinatesUseNormativeCultureFixture(locale: &quot;en-US&quot;, expected: &quot;1,234.56&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0002258" startTime="2026-11-14T17:26:05.4061573-03:00" endTime="2026-11-14T17:26:05.4063288-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d1de0365-4bf5-4bef-90ff-b264bca6d655" />
+    <UnitTestResult executionId="2d802697-3c1d-41a1-9fa4-7131e26ffecb" testId="a0c47e5a-19ac-6446-efe2-73c968ef599f" testName="Gsa.Localization.Tests.LocalePolicyTests.NonfiniteCoordinatesAreRejected(value: -Infinity)" computerName="9b43ca2302e5" duration="00:00:00.0002447" startTime="2026-11-14T17:26:05.4040865-03:00" endTime="2026-11-14T17:26:05.4042595-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2d802697-3c1d-41a1-9fa4-7131e26ffecb" />
+    <UnitTestResult executionId="6f7ebaf3-bdfc-434e-bd7f-66f334c2521e" testId="1372afd6-5623-3859-f611-37ee5aa9dd7f" testName="Gsa.Localization.Tests.LocalePolicyTests.InvalidPrecisionIsRejected(decimals: 16)" computerName="9b43ca2302e5" duration="00:00:00.0003423" startTime="2026-11-14T17:26:05.3368177-03:00" endTime="2026-11-14T17:26:05.3370995-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6f7ebaf3-bdfc-434e-bd7f-66f334c2521e" />
+    <UnitTestResult executionId="7c7147b3-be33-40ee-887b-e50751fe4d34" testId="31ff65e4-3e5a-03ce-2a63-2e8bdc6435c0" testName="Gsa.Localization.Tests.LocalePolicyTests.CoordinatesUseNormativeCultureFixture(locale: &quot;pt-BR&quot;, expected: &quot;1234,56&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0002209" startTime="2026-11-14T17:26:05.4066490-03:00" endTime="2026-11-14T17:26:05.4068109-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7c7147b3-be33-40ee-887b-e50751fe4d34" />
+    <UnitTestResult executionId="21a584d6-3af4-4f45-935a-f8738c40a30b" testId="8eb22e2e-daca-91aa-9292-6393d4def528" testName="Gsa.Localization.Tests.LocalePolicyTests.ExplicitSupportedChoiceOverridesSystem(system: &quot;pt-BR&quot;, selected: &quot;en-US&quot;, expected: &quot;en-US&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0000109" startTime="2026-11-14T17:26:05.4028038-03:00" endTime="2026-11-14T17:26:05.4029796-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="21a584d6-3af4-4f45-935a-f8738c40a30b" />
+    <UnitTestResult executionId="79883d5f-0788-436c-8f49-a748e7f24d9a" testId="4b69ca3f-892b-e330-5ebf-07fb963fed7c" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;pt_PT&quot;, expected: &quot;pt-BR&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0017218" startTime="2026-11-14T17:26:05.3395508-03:00" endTime="2026-11-14T17:26:05.3397787-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="79883d5f-0788-436c-8f49-a748e7f24d9a" />
+    <UnitTestResult executionId="71a47e65-c64d-485c-bc20-bac0b47f59ea" testId="6e6bbb80-ea00-016e-a92d-b36765662a0f" testName="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;en_GB&quot;, expected: &quot;en-US&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0000034" startTime="2026-11-14T17:26:05.3438197-03:00" endTime="2026-11-14T17:26:05.3441316-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="71a47e65-c64d-485c-bc20-bac0b47f59ea" />
+    <UnitTestResult executionId="13a18851-18d0-406c-88ff-41d12cdf9681" testId="dc402296-1d66-0c70-132a-ac343fde6da1" testName="Gsa.Localization.Tests.LocalePolicyTests.ExplicitSupportedChoiceOverridesSystem(system: &quot;en-US&quot;, selected: &quot;pt_BR&quot;, expected: &quot;pt-BR&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0004066" startTime="2026-11-14T17:26:05.4021491-03:00" endTime="2026-11-14T17:26:05.4023113-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13a18851-18d0-406c-88ff-41d12cdf9681" />
+    <UnitTestResult executionId="49e72ee6-5449-4cf4-9b0e-a647621e1091" testId="eb43a2ff-c8ef-b3f8-3a22-6cdf1e8d8904" testName="Gsa.Localization.Tests.LocalePolicyTests.LanguageChangesDoNotMutateAmbientCultureOrScientificJson" computerName="9b43ca2302e5" duration="00:00:00.0464989" startTime="2026-11-14T17:26:05.4053445-03:00" endTime="2026-11-14T17:26:05.4055300-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="49e72ee6-5449-4cf4-9b0e-a647621e1091" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: null, expected: &quot;en-US&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="ab6a2c99-e4ab-b0c7-6a81-8f02dc9c65db">
+      <Execution id="99c90c91-9981-4ac0-b111-a31ad2b153b0" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;pt-BR&quot;, expected: &quot;pt-BR&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="6c28be9c-5560-b15f-fe15-a106a1eb0849">
+      <Execution id="0e5584a2-a970-4dd8-aff8-fa3ba134120e" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.CoordinatesUseNormativeCultureFixture(locale: &quot;en-US&quot;, expected: &quot;1,234.56&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="cda48adf-e820-e611-2637-91b2cd521536">
+      <Execution id="d1de0365-4bf5-4bef-90ff-b264bca6d655" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="CoordinatesUseNormativeCultureFixture" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.InvalidPrecisionIsRejected(decimals: -1)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="bd50e949-412a-3baf-08c1-0b17c88111b0">
+      <Execution id="709b3ba0-6df4-4502-a11c-6d40312a04fe" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="InvalidPrecisionIsRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.ExplicitSupportedChoiceOverridesSystem(system: &quot;pt-BR&quot;, selected: &quot;en-US&quot;, expected: &quot;en-US&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="8eb22e2e-daca-91aa-9292-6393d4def528">
+      <Execution id="21a584d6-3af4-4f45-935a-f8738c40a30b" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="ExplicitSupportedChoiceOverridesSystem" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;&quot;, expected: &quot;en-US&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="52d571c8-87cd-e34c-fca9-963a509be857">
+      <Execution id="22f861f1-2340-4964-bf10-07806b0765d9" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.InvalidPrecisionIsRejected(decimals: 16)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="1372afd6-5623-3859-f611-37ee5aa9dd7f">
+      <Execution id="6f7ebaf3-bdfc-434e-bd7f-66f334c2521e" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="InvalidPrecisionIsRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;pt_PT&quot;, expected: &quot;pt-BR&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="4b69ca3f-892b-e330-5ebf-07fb963fed7c">
+      <Execution id="79883d5f-0788-436c-8f49-a748e7f24d9a" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.CoordinatesUseNormativeCultureFixture(locale: &quot;pt-BR&quot;, expected: &quot;1234,56&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="31ff65e4-3e5a-03ce-2a63-2e8bdc6435c0">
+      <Execution id="7c7147b3-be33-40ee-887b-e50751fe4d34" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="CoordinatesUseNormativeCultureFixture" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;pt&quot;, expected: &quot;pt-BR&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="eed9154f-99a6-b651-141a-5e92512e0d99">
+      <Execution id="6eb21a09-98fa-438d-9942-f10931c1d735" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.ExplicitSupportedChoiceOverridesSystem(system: &quot;pt-BR&quot;, selected: &quot;de-DE&quot;, expected: &quot;pt-BR&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="cd2ac0f6-26c3-ced0-0ae2-2662112d9ee1">
+      <Execution id="16eb0cdc-28ee-4058-8ea9-ede299a7fb8d" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="ExplicitSupportedChoiceOverridesSystem" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.LanguageChangesDoNotMutateAmbientCultureOrScientificJson" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="eb43a2ff-c8ef-b3f8-3a22-6cdf1e8d8904">
+      <Execution id="49e72ee6-5449-4cf4-9b0e-a647621e1091" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="LanguageChangesDoNotMutateAmbientCultureOrScientificJson" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;ja_JP&quot;, expected: &quot;en-US&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="386bb25e-ede8-aae4-9e75-a5ee6d226c1e">
+      <Execution id="dc7b5007-baa1-4679-90e8-31cf79bc53fa" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.ExplicitSupportedChoiceOverridesSystem(system: &quot;en-US&quot;, selected: &quot;pt_BR&quot;, expected: &quot;pt-BR&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="dc402296-1d66-0c70-132a-ac343fde6da1">
+      <Execution id="13a18851-18d0-406c-88ff-41d12cdf9681" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="ExplicitSupportedChoiceOverridesSystem" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.NonfiniteCoordinatesAreRejected(value: -Infinity)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="a0c47e5a-19ac-6446-efe2-73c968ef599f">
+      <Execution id="2d802697-3c1d-41a1-9fa4-7131e26ffecb" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="NonfiniteCoordinatesAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.SystemLanguageUsesSupportedFallback(system: &quot;en_GB&quot;, expected: &quot;en-US&quot;)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="6e6bbb80-ea00-016e-a92d-b36765662a0f">
+      <Execution id="71a47e65-c64d-485c-bc20-bac0b47f59ea" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="SystemLanguageUsesSupportedFallback" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.NonfiniteCoordinatesAreRejected(value: NaN)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="285219b7-49ac-0056-6f88-0eed82aa063f">
+      <Execution id="95401813-b30d-444f-9063-81ef6a73d9e6" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="NonfiniteCoordinatesAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Localization.Tests.LocalePolicyTests.NonfiniteCoordinatesAreRejected(value: Infinity)" storage="/workspace/gsa/work/m1-world/tests/gsa.localization.tests/bin/debug/net10.0/gsa.localization.tests.dll" id="0965d74f-9908-6ed6-d200-bfe287b79b1e">
+      <Execution id="be1a28b2-efca-4b8d-aeb1-bc3e1dc70e88" />
+      <TestMethod codeBase="/workspace/gsa/work/m1-world/tests/Gsa.Localization.Tests/bin/Debug/net10.0/Gsa.Localization.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Localization.Tests.LocalePolicyTests" name="NonfiniteCoordinatesAreRejected" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="eed9154f-99a6-b651-141a-5e92512e0d99" executionId="6eb21a09-98fa-438d-9942-f10931c1d735" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ab6a2c99-e4ab-b0c7-6a81-8f02dc9c65db" executionId="99c90c91-9981-4ac0-b111-a31ad2b153b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cd2ac0f6-26c3-ced0-0ae2-2662112d9ee1" executionId="16eb0cdc-28ee-4058-8ea9-ede299a7fb8d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="52d571c8-87cd-e34c-fca9-963a509be857" executionId="22f861f1-2340-4964-bf10-07806b0765d9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6c28be9c-5560-b15f-fe15-a106a1eb0849" executionId="0e5584a2-a970-4dd8-aff8-fa3ba134120e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0965d74f-9908-6ed6-d200-bfe287b79b1e" executionId="be1a28b2-efca-4b8d-aeb1-bc3e1dc70e88" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="386bb25e-ede8-aae4-9e75-a5ee6d226c1e" executionId="dc7b5007-baa1-4679-90e8-31cf79bc53fa" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bd50e949-412a-3baf-08c1-0b17c88111b0" executionId="709b3ba0-6df4-4502-a11c-6d40312a04fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="285219b7-49ac-0056-6f88-0eed82aa063f" executionId="95401813-b30d-444f-9063-81ef6a73d9e6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cda48adf-e820-e611-2637-91b2cd521536" executionId="d1de0365-4bf5-4bef-90ff-b264bca6d655" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a0c47e5a-19ac-6446-efe2-73c968ef599f" executionId="2d802697-3c1d-41a1-9fa4-7131e26ffecb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1372afd6-5623-3859-f611-37ee5aa9dd7f" executionId="6f7ebaf3-bdfc-434e-bd7f-66f334c2521e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="31ff65e4-3e5a-03ce-2a63-2e8bdc6435c0" executionId="7c7147b3-be33-40ee-887b-e50751fe4d34" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8eb22e2e-daca-91aa-9292-6393d4def528" executionId="21a584d6-3af4-4f45-935a-f8738c40a30b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4b69ca3f-892b-e330-5ebf-07fb963fed7c" executionId="79883d5f-0788-436c-8f49-a748e7f24d9a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6e6bbb80-ea00-016e-a92d-b36765662a0f" executionId="71a47e65-c64d-485c-bc20-bac0b47f59ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dc402296-1d66-0c70-132a-ac343fde6da1" executionId="13a18851-18d0-406c-88ff-41d12cdf9681" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb43a2ff-c8ef-b3f8-3a22-6cdf1e8d8904" executionId="49e72ee6-5449-4cf4-9b0e-a647621e1091" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="18" executed="18" passed="18" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.15)
+[xUnit.net 00:00:00.13]   Discovering: Gsa.Localization.Tests
+[xUnit.net 00:00:00.23]   Discovered:  Gsa.Localization.Tests
+[xUnit.net 00:00:00.30]   Starting:    Gsa.Localization.Tests
+[xUnit.net 00:00:00.45]   Finished:    Gsa.Localization.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

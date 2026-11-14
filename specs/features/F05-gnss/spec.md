@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M1–M4. Origem: Núcleo de simulação MMS; Público e objetivos pedagógicos; Progressão de plataformas e sensores. Estado: especificado; não implementado.
+Marcos: M1–M4. Origem: Núcleo de simulação MMS; Público e objetivos pedagógicos; Progressão de plataformas e sensores. Estado: modelos puros de observação/heading em revisão; integração de plataforma e base/RTK posteriores pendentes.
 
 ## Requisitos
 

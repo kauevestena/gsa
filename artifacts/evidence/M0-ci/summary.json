@@ -1,0 +1,17 @@
+{
+  "milestone": "M0",
+  "pull_request": "https://github.com/kauevestena/gsa/pull/1",
+  "tested_head_sha": "de773cd8227994cc9da18a36d352d02a9654c583",
+  "merge_sha": "427fd32d624b7dcfe809ccffe168d368062cb28e",
+  "workflow_run": "https://github.com/kauevestena/gsa/actions/runs/43594346633",
+  "workflow_event": "pull_request",
+  "conclusion": "success",
+  "jobs": [
+    {"id": 132445557697, "name": "Foundation (Linux x64)", "conclusion": "success"},
+    {"id": 132445557854, "name": "Foundation (Windows x64)", "conclusion": "success"}
+  ],
+  "acceptance": "technical_review_delegated_by_repository_owner",
+  "native_windows_smoke": "passed_headless_in_ci",
+  "windows_network_isolation": "not_tested",
+  "graphical_inspection": "not_tested"
+}

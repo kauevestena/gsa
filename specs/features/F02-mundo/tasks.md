@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F02-01/README.md). Quarteirão de 48 objetos/47 colliders, IDs, alturas e raycast passaram no projeto/export Linux. CI do PR, inspeção visual e futuros incrementos de streaming separados.
+
 **Marco:** M1
 
 **Dependências:** T-F01-02
@@ -25,6 +27,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 ### T-F02-02 — Pré-calcular visibilidade de céu
 
 - [ ] Aceita
+
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F02-02/README.md). CLI, 22 testes puros de céu, importador e cache do export Linux passaram; CI nativa do PR pendente antes do merge.
 
 **Marco:** M1
 

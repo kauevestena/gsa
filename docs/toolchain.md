@@ -40,7 +40,7 @@ Windows requer edição x86-64 suportada pelo .NET 10 e pelo Godot. O SDK é nec
 
 ## Build, testes e exports da fundação
 
-`Gsa.sln` reúne Core/Missions/Engine/Tools, jogo e testes. `Gsa.Domain.slnf` restringe execução ao domínio, ferramentas e testes puros, sem Godot. `game/Gsa.sln` permanece como solução mínima exigida pelo exportador. A cena demonstra a fachada, idioma/plural/números e persistência apenas da preferência de idioma; gameplay começa nos marcos seguintes.
+`Gsa.sln` reúne Core/Missions/Engine/Tools, jogo e testes. `Gsa.Domain.slnf` restringe execução ao domínio, ferramentas e testes puros, sem Godot. `game/Gsa.sln` permanece como solução mínima exigida pelo exportador. A tela inicial demonstra a fachada e localização e abre o quarteirão semântico M1. O pipeline prepara o cache de céu antes do import/export; o mesmo manifesto alimenta desenho e colisão. A preferência de idioma persiste separadamente dos dados científicos.
 
 `Directory.Build.targets` seleciona locks por configuração/RID em todos os projetos: `packages.Debug.lock.json` e, para projetos publicados, `packages.ExportRelease.linux-x64.lock.json` / `packages.ExportRelease.win-x64.lock.json`. Os grafos diferem porque o editor usa GodotSharpEditor e os exports incluem runtime específico. Uma instalação normal não regenera locks; alterar dependências exige revisão dos arquivos afetados. Versões, finalidade e licenças adicionais estão em [dependências](dependencies.md).
 
@@ -87,6 +87,6 @@ python3 -m unittest discover -s tests/toolchain -v
 
 ## Estado e revisão
 
-Os incrementos M0 permanecem sem aceite humano. O usuário autorizou continuar o desenvolvimento durante as pendências de plataforma, conforme `specs/README.md`; essa autorização não equivale a testes executados nem aceite dos gates. Ausência de Windows nativo fica registrada: AC-F01-01 não é declarado aprovado por export cruzado. A verificação gráfica também permanece pendente nesta sessão sem ferramentas de desktop.
+M0 foi integrado no PR #1 com aceite técnico delegado após CI nativa Linux/Windows. O usuário autorizou desenvolvimento contínuo e merges após CI verde, conforme `specs/README.md`. A execução nativa Windows headless já foi verificada; inspeção gráfica e isolamento de rede Windows continuam separados. A aprovação do gate M1 exige também os incrementos restantes e medição na máquina de referência.
 
 Godot e seu SDK usam licença MIT; o SDK .NET inclui licença MIT e avisos de terceiros dentro do pacote. A licença do jogo permanece pendente em EXT-02; esta seleção de ferramentas não resolve a autorização institucional de publicação.

@@ -7,9 +7,12 @@ public static class ToolApplication
 {
     public static int Run(string[] args, TextWriter output)
     {
+        if (args.Length > 0 && args[0] == "precompute-sky")
+            return Sky.SkyTool.Run(args, output);
+
         if (args.Length != 2 || args[0] != "validate-content")
         {
-            Write(output, false, [new ContentDiagnostic("", "$command", "Usage: gsa-tools validate-content <directory>")]);
+            Write(output, false, [new ContentDiagnostic("", "$command", "Usage: gsa-tools validate-content <directory> | precompute-sky <scene-manifest> <output>")]);
             return 1;
         }
 

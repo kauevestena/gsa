@@ -1,0 +1,9 @@
+{
+  "valid": true,
+  "diagnostics": [],
+  "scene_id": "old_center_tutorial_block",
+  "map_version": 1,
+  "geometry_sha256": "8bb5fafa4d764fba0d9281dbca0b7e7618ce08a96e8afe25d3cd68a6dfe812cc",
+  "cells": 144,
+  "output": "/workspace/gsa/work/m1-world/game/world/tutorial-sky.json"
+}
