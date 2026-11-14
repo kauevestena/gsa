@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F11-01/README.md). 18 testes puros e smoke real de PO/plural/contexto/persistência passaram no projeto e no export Linux. Inspeção visual e revisão linguística humana pendentes.
+
 **Marco:** M0
 
 **Dependências:** T-F01-02

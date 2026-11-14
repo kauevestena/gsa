@@ -1,0 +1,18 @@
+Revisão automatizada do incremento T-F01-01 (não substitui revisão humana).
+
+Escopo: cena e bootstrap C#, presets e scripts/check_bootstrap.py contra
+specs/features/F01-fundacao e arquitetura.
+
+Achados corrigidos:
+1. Diretórios de export reutilizados poderiam preservar arquivos antigos.
+   O verificador agora limpa o diretório gerado de cada plataforma solicitada.
+2. Editor Debug e export ExportRelease/RID têm grafos NuGet diferentes.
+   Há locks separados, RestoreLockedMode=true também para o publish da engine,
+   e comparação dos hashes de locks antes/depois de toda a verificação.
+
+Revisão posterior das correções: nenhum bloqueio concreto remanescente.
+Relatório final confirma ambos os exports e smoke Linux em rede isolada.
+Não há domínio científico nem gameplay antecipado no bootstrap.
+
+Pendências preservadas: teste nativo Windows/offline, verificação gráfica
+Linux/Windows e aceite humano. Nenhuma caixa de aceite foi marcada.

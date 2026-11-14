@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "id": "contract_point_cloud_01",
+  "title_key": "mission.point_cloud.title",
+  "client_id": "city_hall",
+  "region_id": "old_center",
+  "area_id": "commerce_street_facades",
+  "product": "point_cloud",
+  "required_feature_ids": [],
+  "requirements": [
+    {
+      "kind": "threshold",
+      "metric": "area_coverage",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.9,
+      "excellent": 0.98,
+      "surface_id": "commerce_facade_planes",
+      "cell_size_m": 1
+    },
+    {
+      "kind": "threshold",
+      "metric": "density_coverage",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.9,
+      "excellent": 0.98,
+      "surface_id": "commerce_facade_planes",
+      "cell_size_m": 1,
+      "target_density_points_per_m2": 5
+    },
+    {
+      "kind": "threshold",
+      "metric": "absolute_rmse",
+      "unit": "m",
+      "direction": "max",
+      "limit": 0.2,
+      "excellent": 0.05
+    },
+    {
+      "kind": "threshold",
+      "metric": "relative_rmse",
+      "unit": "m",
+      "direction": "max",
+      "limit": 0.1,
+      "excellent": 0.02
+    },
+    {
+      "kind": "predicate",
+      "metric": "privacy_redacted",
+      "expected": true
+    },
+    {
+      "kind": "predicate",
+      "metric": "format_valid",
+      "expected": true
+    }
+  ],
+  "required_capabilities": [
+    "lidar",
+    "gnss_basic"
+  ],
+  "risk": "easy",
+  "calm": true,
+  "deadline": {
+    "due_after_s": 21600,
+    "expires_after_s": 27000,
+    "late_penalty_per_hour": 0.05,
+    "late_penalty_cap": 0.5
+  },
+  "reward": {
+    "base_coords": 400,
+    "base_xp": 100,
+    "reputation": 2,
+    "story_unlocks": [
+      "HIST-02"
+    ]
+  },
+  "partial_policy": {
+    "mode": "disabled"
+  },
+  "delivery_format": "gsa_bundle_v1",
+  "story_prerequisites": []
+}

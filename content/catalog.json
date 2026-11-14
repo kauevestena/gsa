@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "clients": [
+    "city_hall"
+  ],
+  "capabilities": [
+    "camera",
+    "gnss_basic",
+    "lidar"
+  ],
+  "mounting_slots": [
+    {
+      "id": "handheld",
+      "capacity": 1
+    },
+    {
+      "id": "rack",
+      "capacity": 4
+    }
+  ]
+}

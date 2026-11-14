@@ -4,6 +4,8 @@
 
 Cada requisito liga uma seção de origem a tarefas e cenários de aceite. IDs das tarefas apontam para seus documentos. A coluna de cenários reúne os aceites das tarefas responsáveis, complementados pelos fixtures comuns de validacao.md.
 
+Os incrementos M0 estão em revisão: [toolchain](../artifacts/evidence/T-F01-01/README.md), [módulos e integração](../artifacts/evidence/T-F01-02/README.md), [validação de conteúdo](../artifacts/evidence/T-F01-03/README.md), [automação](../artifacts/evidence/T-F01-04/README.md), [schemas de contrato](../artifacts/evidence/T-F06-01/README.md) e [localização](../artifacts/evidence/T-F11-01/README.md). Nenhuma tarefa ou gate foi marcado como aceito. Cenários de CQ/interface de marcos posteriores não são declarados concluídos pelos fixtures de M0.
+
 | Requisito | Origem no documento inicial | Tarefas | Cenários |
 | --- | --- | --- | --- |
 | REQ-F01-01 | Arquitetura técnica; Escolha de engine; Escopo, MVP e roadmap | [T-F01-01](features/F01-fundacao/tasks.md) | AC-F01-01 |

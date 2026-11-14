@@ -63,6 +63,8 @@ Ver [contrato de fachadas](examples/contract-fachadas.json) e [relatório com pr
 
 Para cada resultado quantitativo, `QualityReport.metrics` guarda `metric`, `value`, `unit`, `limit`, `excellent`, `direction` e `status`; para predicados, `metric`, `value` booleano, `expected` e `status`. Status por métrica: `passed`, `failed` ou `insufficient`; dado insuficiente omite `value` e adiciona `reason_key`. Status do relatório: `approved` ou `rework_required`. A expiração pertence ao contrato e bloqueia entrega mesmo com relatório previamente aprovado.
 
+Concretização de M0: o [schema e o catálogo de métricas](../content/schemas/README.md) fixam os nomes serializados dos requisitos; o [formato dos catálogos neutros](../content/README.md) fixa perfis, proxies geométricos e referências de missão usados pela CLI. `density_coverage` é a fração de células que alcançam `target_density_points_per_m2`, com `surface_id` e `cell_size_m` explícitos. Esses documentos detalham o formato inicial sem implementar aquisição, CQ ou pagamento.
+
 `PaymentQuote` é saída de Missions, separada do relatório científico: instância, revisão do produto, valor-base, fator de qualidade, multa, valor final e moeda. A proposta não altera saldo; só o comando de entrega aceito cria a transação no ledger. Os exemplos ilustram uma proposta, não pagamento efetuado.
 
 `partial_policy` usa `{"mode":"disabled"}` ou `mode: "deliverables"` com lista de `id`, `weight`, `area_id`, `required_feature_ids` e `requirements`. Pesos positivos somam 1 (tolerância 1e-9); um mesmo entregável/feição não pode ser cobrado duas vezes. Cada conjunto é avaliado independentemente, preservando conformidade global. Aceitar parcial é comando explícito; não há liquidação automática por atingir uma fração da coleta.

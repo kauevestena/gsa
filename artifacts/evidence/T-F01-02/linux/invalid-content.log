@@ -1,0 +1,10 @@
+{
+  "valid": false,
+  "diagnostics": [
+    {
+      "path": "/workspace/gsa/work/invalid-content-hn87hlvh/contracts/facades.json",
+      "field": "$.required_feature_ids[0]",
+      "reason": "Feature \u0027missing_feature_for_smoke_test\u0027 does not resolve in contract region/area."
+    }
+  ]
+}

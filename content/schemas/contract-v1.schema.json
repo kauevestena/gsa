@@ -1,0 +1,713 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gsa.invalid/schemas/contract-v1.schema.json",
+  "title": "GSA ContractDefinition v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title_key",
+    "client_id",
+    "region_id",
+    "area_id",
+    "product",
+    "required_feature_ids",
+    "requirements",
+    "required_capabilities",
+    "risk",
+    "calm",
+    "deadline",
+    "reward",
+    "partial_policy",
+    "delivery_format",
+    "story_prerequisites"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "title_key": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "client_id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "region_id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "area_id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "product": {
+      "enum": [
+        "images",
+        "feature_inventory",
+        "point_cloud",
+        "pavement_profile"
+      ]
+    },
+    "required_feature_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "required_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      },
+      "minItems": 1
+    },
+    "risk": {
+      "enum": [
+        "easy",
+        "moderate",
+        "hard",
+        "dangerous"
+      ]
+    },
+    "calm": {
+      "type": "boolean"
+    },
+    "deadline": {
+      "$ref": "#/$defs/deadline"
+    },
+    "reward": {
+      "$ref": "#/$defs/reward"
+    },
+    "partial_policy": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "const": "disabled"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "deliverables"
+          ],
+          "properties": {
+            "mode": {
+              "const": "deliverables"
+            },
+            "deliverables": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/deliverable"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "delivery_format": {
+      "const": "gsa_bundle_v1"
+    },
+    "story_prerequisites": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      }
+    }
+  },
+  "$comment": "ContractValidator additionally enforces finite values, strict excellence, metric uniqueness, deadline ordering, partial weight sum/feature ownership and catalog-independent semantics. Catalog references are checked by gsa-tools.",
+  "$defs": {
+    "requirement": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "metric",
+            "unit",
+            "direction",
+            "limit",
+            "excellent"
+          ],
+          "properties": {
+            "kind": {
+              "const": "threshold"
+            },
+            "metric": {
+              "enum": [
+                "area_coverage",
+                "feature_completeness",
+                "valid_image_fraction",
+                "absolute_rmse",
+                "relative_rmse",
+                "density_coverage"
+              ]
+            },
+            "unit": {
+              "enum": [
+                "ratio",
+                "m"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "min",
+                "max"
+              ]
+            },
+            "limit": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1.7976931348623157e+308
+            },
+            "excellent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1.7976931348623157e+308
+            },
+            "surface_id": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "cell_size_m": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1.7976931348623157e+308
+            },
+            "target_density_points_per_m2": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1.7976931348623157e+308
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "metric": {
+                    "enum": [
+                      "area_coverage",
+                      "feature_completeness",
+                      "valid_image_fraction",
+                      "density_coverage"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "unit": {
+                    "const": "ratio"
+                  },
+                  "direction": {
+                    "const": "min"
+                  },
+                  "limit": {
+                    "maximum": 1
+                  },
+                  "excellent": {
+                    "maximum": 1
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "unit": {
+                    "const": "m"
+                  },
+                  "direction": {
+                    "const": "max"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "metric": {
+                    "enum": [
+                      "area_coverage",
+                      "density_coverage"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "surface_id",
+                  "cell_size_m"
+                ]
+              },
+              "else": {
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "surface_id"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "cell_size_m"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "metric": {
+                    "const": "density_coverage"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "target_density_points_per_m2"
+                ]
+              },
+              "else": {
+                "not": {
+                  "required": [
+                    "target_density_points_per_m2"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "metric",
+            "expected"
+          ],
+          "properties": {
+            "kind": {
+              "const": "predicate"
+            },
+            "metric": {
+              "enum": [
+                "all_required_features",
+                "privacy_redacted",
+                "format_valid"
+              ]
+            },
+            "expected": {
+              "const": true
+            }
+          }
+        }
+      ]
+    },
+    "deadline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "due_after_s",
+        "expires_after_s",
+        "late_penalty_per_hour",
+        "late_penalty_cap"
+      ],
+      "properties": {
+        "due_after_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1.7976931348623157e+308
+        },
+        "expires_after_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1.7976931348623157e+308
+        },
+        "late_penalty_per_hour": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "late_penalty_cap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "reward": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_coords",
+        "base_xp",
+        "reputation",
+        "story_unlocks"
+      ],
+      "properties": {
+        "base_coords": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "base_xp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "reputation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "story_unlocks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "weight",
+        "area_id",
+        "required_feature_ids",
+        "requirements"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "area_id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "required_feature_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/requirement"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "images"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "requirements": {
+            "items": {
+              "properties": {
+                "metric": {
+                  "enum": [
+                    "area_coverage",
+                    "valid_image_fraction",
+                    "absolute_rmse",
+                    "all_required_features",
+                    "privacy_redacted",
+                    "format_valid"
+                  ]
+                }
+              }
+            }
+          },
+          "required_capabilities": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "camera"
+                }
+              }
+            ]
+          },
+          "partial_policy": {
+            "properties": {
+              "deliverables": {
+                "items": {
+                  "properties": {
+                    "requirements": {
+                      "items": {
+                        "properties": {
+                          "metric": {
+                            "enum": [
+                              "area_coverage",
+                              "valid_image_fraction",
+                              "absolute_rmse",
+                              "all_required_features",
+                              "privacy_redacted",
+                              "format_valid"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "feature_inventory"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "requirements": {
+            "items": {
+              "properties": {
+                "metric": {
+                  "enum": [
+                    "area_coverage",
+                    "feature_completeness",
+                    "valid_image_fraction",
+                    "absolute_rmse",
+                    "relative_rmse",
+                    "all_required_features",
+                    "privacy_redacted",
+                    "format_valid"
+                  ]
+                }
+              }
+            }
+          },
+          "required_capabilities": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "camera"
+                }
+              }
+            ]
+          },
+          "partial_policy": {
+            "properties": {
+              "deliverables": {
+                "items": {
+                  "properties": {
+                    "requirements": {
+                      "items": {
+                        "properties": {
+                          "metric": {
+                            "enum": [
+                              "area_coverage",
+                              "feature_completeness",
+                              "valid_image_fraction",
+                              "absolute_rmse",
+                              "relative_rmse",
+                              "all_required_features",
+                              "privacy_redacted",
+                              "format_valid"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "point_cloud"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "requirements": {
+            "items": {
+              "properties": {
+                "metric": {
+                  "enum": [
+                    "area_coverage",
+                    "absolute_rmse",
+                    "relative_rmse",
+                    "density_coverage",
+                    "privacy_redacted",
+                    "format_valid"
+                  ]
+                }
+              }
+            }
+          },
+          "required_capabilities": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "lidar"
+                }
+              }
+            ]
+          },
+          "partial_policy": {
+            "properties": {
+              "deliverables": {
+                "items": {
+                  "properties": {
+                    "requirements": {
+                      "items": {
+                        "properties": {
+                          "metric": {
+                            "enum": [
+                              "area_coverage",
+                              "absolute_rmse",
+                              "relative_rmse",
+                              "density_coverage",
+                              "privacy_redacted",
+                              "format_valid"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "pavement_profile"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "requirements": {
+            "items": {
+              "properties": {
+                "metric": {
+                  "enum": [
+                    "area_coverage",
+                    "valid_image_fraction",
+                    "absolute_rmse",
+                    "relative_rmse",
+                    "privacy_redacted",
+                    "format_valid"
+                  ]
+                }
+              }
+            }
+          },
+          "required_capabilities": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "camera"
+                }
+              },
+              {
+                "contains": {
+                  "const": "lidar"
+                }
+              }
+            ]
+          },
+          "partial_policy": {
+            "properties": {
+              "deliverables": {
+                "items": {
+                  "properties": {
+                    "requirements": {
+                      "items": {
+                        "properties": {
+                          "metric": {
+                            "enum": [
+                              "area_coverage",
+                              "valid_image_fraction",
+                              "absolute_rmse",
+                              "relative_rmse",
+                              "privacy_redacted",
+                              "format_valid"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

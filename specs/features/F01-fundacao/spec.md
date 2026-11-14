@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M0. Origem: Arquitetura técnica; Escolha de engine; Escopo, MVP e roadmap. Estado: especificado; não implementado.
+Marcos: M0. Origem: Arquitetura técnica; Escolha de engine; Escopo, MVP e roadmap. Estado: incrementos de fundação em revisão, com execução nativa Windows, verificação gráfica e aceite humano pendentes.
 
 ## Requisitos
 
@@ -24,7 +24,7 @@ Automatizar build, testes e exports Windows/Linux sem serviços necessários ao 
 
 ## Comportamento e limites
 
-M0 inicia com a pasta atual, ainda sem solução ou Git. Criar o repositório local e ignores de build/cache sem publicar remoto. Não versionar saves pessoais, caches Godot ou executáveis gerados. O primeiro commit, se usado, abrange somente arquivos revisados; a especificação original é preservada.
+M0 começou sem solução implementada; reutilizar o Git existente e manter ignores de build/cache. A autorização posterior registrada em specs/README.md permite publicar branches e PRs no remoto existente e mesclar quando a CI do SHA atual passar. Não versionar saves pessoais, caches Godot ou executáveis gerados. Commits abrangem somente arquivos revisados; a especificação original é preservada.
 
 Escolha de versão: consultar download oficial estável Godot 4 .NET, selecionar seu patch estável mais recente e o SDK .NET LTS suportado por essa edição, testar export mínimo nos dois sistemas e registrar o resultado. Não usar beta nem copiar versões não comprovadas da v0.1. Persistir `global.json`, versão do Godot e lock de pacotes. Se o par falhar, testar o patch estável anterior e registrar a evidência, mantendo Godot 4 .NET.
 

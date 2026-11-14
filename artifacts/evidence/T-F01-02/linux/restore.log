@@ -1,0 +1,4 @@
+  Determining projects to restore...
+  Restored /workspace/gsa/game/Gsa.csproj (in 615 ms).
+  Restored /workspace/gsa/src/Gsa.Engine/Gsa.Engine.csproj (in 615 ms).
+  7 of 9 projects are up-to-date for restore.

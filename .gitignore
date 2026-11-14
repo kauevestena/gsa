@@ -1,0 +1,25 @@
+# Dependencies and tools downloaded locally
+/work/
+
+# Godot imports, .NET outputs and editor state
+**/.godot/
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+
+# Generated distributables and transient verification output
+/artifacts/build/
+/artifacts/exports/
+/artifacts/logs/
+TestResults/
+__pycache__/
+*.pyc
+
+# Local game data must never be committed
+/saves/
+*.save
+*.save.bak
+.DS_Store
+Thumbs.db

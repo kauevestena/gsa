@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "lidar-bench",
+  "type": "lidar",
+  "grade": 4,
+  "rate_hz": 10,
+  "range_m": 50,
+  "resolution": {
+    "channels": 1,
+    "samples_per_line": 100
+  },
+  "noise": {
+    "range_sigma_m": 0.02
+  },
+  "power_w": 10,
+  "storage_bytes_per_sample": 6400,
+  "buffer_capacity_bytes": 102400,
+  "capabilities": [
+    "lidar"
+  ],
+  "mounting_requirements": {
+    "slot_id": "rack",
+    "count": 1
+  }
+}

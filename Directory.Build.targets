@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <NuGetLockFilePath>$(MSBuildProjectDirectory)/packages.$(Configuration).lock.json</NuGetLockFilePath>
+    <NuGetLockFilePath Condition="'$(RuntimeIdentifier)' != ''">$(MSBuildProjectDirectory)/packages.$(Configuration).$(RuntimeIdentifier).lock.json</NuGetLockFilePath>
+  </PropertyGroup>
+</Project>

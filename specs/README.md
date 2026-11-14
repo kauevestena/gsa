@@ -1,6 +1,10 @@
 # GSA — Especificação de implementação v1.0
 
-Baseline documental: 13/11/2026. Estado: especificação preparada; implementação do jogo ainda não iniciada.
+Baseline documental: 13/11/2026. Estado: fundação M0 implementada para revisão, após o [bootstrap T-F01-01](../artifacts/evidence/T-F01-01/README.md). Ver [evidências da continuação](../artifacts/evidence/T-F01-02/README.md); o gate ainda não foi aceito.
+
+Continuação autorizada pelo usuário em 14/11/2026: o desenvolvimento dos incrementos M0 prossegue enquanto a verificação nativa Windows e o aceite formal permanecem pendentes. Essa autorização permite avançar no código; não transforma testes não realizados em sucesso nem marca gates ou tarefas como aceitos. Evidências e revisão humana continuam obrigatórias.
+
+Autorização ampliada em 14/11/2026: o usuário delegou a abertura e o merge de PRs, desde que a CI passe, e pediu desenvolvimento contínuo. Branches, commits, PRs, correções de CI e merges no repositório existente estão autorizados sem nova confirmação rotineira. A revisão técnica pode ser realizada pelo agente; antes de cada merge, conferir a CI do SHA atual e eventuais bloqueios/revisões. Requisitos de inspeção visual, hardware de referência, playtest e produção humana continuam registrados conforme as evidências realmente disponíveis. Essa delegação substitui a restrição inicial a alterações apenas locais; não atribui uma licença ao jogo.
 
 Este pacote transforma a [especificação inicial](../spec_inicial.md) em requisitos, interfaces, tarefas e critérios de aceite para desenvolvimento guiado por especificação. O documento inicial permanece como histórico. As decisões confirmadas pelo usuário nesta conversa prevalecem sobre suas alternativas em aberto.
 
@@ -8,7 +12,7 @@ Este pacote transforma a [especificação inicial](../spec_inicial.md) em requis
 
 1. Ler [visão e escopo](visao.md), [decisões](decisoes.md) e [arquitetura](arquitetura.md).
 2. Consultar [roadmap](roadmap.md) e o [índice de funcionalidades](features/README.md).
-3. Iniciar **T-F01-01**, em [tarefas de fundação](features/F01-fundacao/tasks.md). Não é necessário desenvolver os sensores avançados para começar.
+3. Consultar o estado dos incrementos M0 em [tarefas de fundação](features/F01-fundacao/tasks.md). A continuação autorizada acima preserva as pendências de plataforma e revisão. Não é necessário desenvolver os sensores avançados para começar.
 4. Executar o ciclo de trabalho abaixo, usando [interfaces](interfaces.md), [modelos](modelos.md) e [parâmetros](parametros.md) como contratos compartilhados.
 5. Verificar este pacote com `python3 specs/validate.py`, executado da raiz do projeto.
 
