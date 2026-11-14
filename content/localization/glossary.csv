@@ -1,0 +1,10 @@
+term_id,pt_BR,en_US,definition_pt_BR,definition_en_US,usage_note
+facade,fachada,facade,Superfície externa de um edifício a ser observada.,External building surface to be observed.,Usar em contratos e nomes das feições.
+camera,câmera,camera,Sensor que registra imagens por exposição.,Sensor that captures images during an exposure.,Não chamar uma imagem de ponto medido.
+gnss,GNSS,GNSS,Sistema global de navegação por satélite.,Global navigation satellite system.,Manter a sigla nos dois idiomas.
+coverage,cobertura,coverage,Fração da superfície exigida observada com qualidade suficiente.,Fraction of required surface observed with sufficient quality.,Distinguir cobertura provisória de campo do resultado oficial do CQ.
+quality_control,controle de qualidade,quality control,Verificação das exigências do contrato no produto processado.,Verification of contract requirements in the processed product.,Sigla de interface CQ em PT-BR e QC em EN-US.
+observation,observação,observation,Medida disponível ao estimador com erros e limitações.,Measurement available to the estimator with errors and limitations.,Não confundir com a referência verdadeira reservada à avaliação.
+datum,datum,datum,Referência que dá significado às coordenadas.,Reference that gives coordinates their meaning.,O datum de São Datum é fictício e não possui código EPSG.
+height,altura,height,Distância vertical relativa à referência indicada.,Vertical distance relative to the stated reference.,Explicitar a referência quando houver altitude ou altura ortométrica.
+privacy,privacidade,privacy,Conformidade do produto com máscaras e restrições aplicáveis.,Product compliance with applicable masks and restrictions.,Exigência obrigatória de entrega e não bônus de qualidade.

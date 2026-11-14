@@ -1,0 +1,10 @@
+Verified cached archive: dotnet-sdk-10.0.404-linux-x64.tar.gz
+Installed: /workspace/gsa/work/toolchain/dotnet
+Verified cached archive: Godot_v4.7.2-stable_mono_linux_x86_64.zip
+Installed: /workspace/gsa/work/toolchain/godot
+Verified cached archive: Godot_v4.7.2-stable_mono_export_templates.tpz
+Installed: /workspace/gsa/work/toolchain/templates
+
+DOTNET_ROOT=/workspace/gsa/work/toolchain/dotnet
+Add to PATH: /workspace/gsa/work/toolchain/dotnet
+Godot editor extracted under: /workspace/gsa/work/toolchain/godot

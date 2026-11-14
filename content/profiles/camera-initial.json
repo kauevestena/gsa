@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "camera-initial",
+  "type": "camera",
+  "grade": 0,
+  "rate_hz": 2,
+  "range_m": 100,
+  "resolution": {
+    "width_px": 1280,
+    "height_px": 720
+  },
+  "noise": {
+    "image_sigma_px": 0.5
+  },
+  "power_w": 3,
+  "storage_bytes_per_sample": 1048576,
+  "buffer_capacity_bytes": 16777216,
+  "capabilities": [
+    "camera"
+  ],
+  "mounting_requirements": {
+    "slot_id": "handheld",
+    "count": 1
+  }
+}

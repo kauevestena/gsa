@@ -22,7 +22,7 @@ flowchart TD
 | Projeto Godot | Cenas, controle, tráfego, ambiente, interface, animação, áudio, narrativa | Fachada; não chama Core diretamente via GDScript |
 | `gsa_tools` | Validar conteúdo, preparar céu, reproduzir observações e gerar relatórios/exports | Core, Missions e leitores de arquivos neutros |
 
-Diretórios de implementação futura: `src/Gsa.Core`, `src/Gsa.Missions`, `src/Gsa.Engine`, `src/Gsa.Tools`, `game/`, `tests/`, `content/`, `assets/`. São destinos, não componentes já existentes. A solução .NET fica na raiz. Testes do domínio usam xUnit; smoke tests de integração usam cenas Godot executáveis em modo headless quando não dependem de GPU.
+Os módulos iniciais ficam em `src/Gsa.Core`, `src/Gsa.Missions`, `src/Gsa.Engine` e `src/Gsa.Tools`; cenas em `game/`, testes em `tests/` e catálogos neutros em `content/`. `assets/` continua destino futuro. A solução .NET `Gsa.sln` fica na raiz; o filtro `Gsa.Domain.slnf` compila/testa domínio e ferramentas sem carregar Godot. A solução mínima `game/Gsa.sln` atende à exigência do exportador e referencia o mesmo projeto, sem duplicar a implementação. Testes do domínio usam xUnit; smoke tests de integração usam cenas Godot executáveis em modo headless quando não dependem de GPU.
 
 ## Limites de confiança da simulação
 

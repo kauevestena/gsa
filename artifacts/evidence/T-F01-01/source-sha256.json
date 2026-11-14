@@ -1,0 +1,32 @@
+{
+  "task": "T-F01-01",
+  "base_commit": "477ae796f3fe60c8df04ad7b2254bc99132695bb",
+  "files": {
+    ".gitattributes": "acc07da4b7439dca134953536d8532d52592a6f506be400c0e9aab45834b9f10",
+    ".gitignore": "b9387fd67fcb53496b5a25bff03a6f4714861b816a7b5e7068b053fa4b69df55",
+    "Directory.Build.props": "3eaef9b852615669a5b3bb15fc2516c25cf31b591ab8fc29be6b16537d412030",
+    "NuGet.Config": "f545a7e2ea14ac53cdfb91217cae67b8ff14275313f6298f9a3331d205b6c948",
+    "README.md": "1825365e05ea4e442336f6e624974be666c2db0aaa633aed5ba276aec5357055",
+    "docs/toolchain.md": "127bc13a78ec840550601e76599bc74e8315fbdf2f6503c7ba8ab0c59bb00abb",
+    "game/Bootstrap.cs": "c1e9382248dc1ca78f7f5e9a978717c37727c5e23333383c4aad7bdcc89b4182",
+    "game/Bootstrap.cs.uid": "fd92779cf7fa74e36efd874aaf4034d139724159c13ccae142f38404fc667875",
+    "game/Bootstrap.tscn": "9e0f87642fbe08bad8edf5ae7e76d1b02c7a8b115d8fac8960524663aa2a3c27",
+    "game/Gsa.csproj": "19139609f77b897417063802b65c00a77d36eb9f29b267d422d92dbd115e3e3a",
+    "game/Gsa.sln": "eb596d75504fd8e7c1bc1b5fed67793b303b0721ff9642e5e577496ea5a94751",
+    "game/export_presets.cfg": "e4fea961ad676141bdd9212b92820df27363ab228838a2efd20fef65b0f209ae",
+    "game/packages.Debug.lock.json": "df9c46c353bd6489ae90abec5024962cee6d4517109e98d37e4405ee18882131",
+    "game/packages.ExportRelease.linux-x64.lock.json": "b0edb29b73fd04c360e62a58aba98eafe824a930a5dae5fa6c619f3cd62ca599",
+    "game/packages.ExportRelease.win-x64.lock.json": "3108325419dd99fcc34f40259024a20c597315ead08aafec483be19e57d2114f",
+    "game/project.godot": "d1faa6a159a52c5fa0db9c20f7640be640ffbdc9a9d6885b32ffd08abb210380",
+    "global.json": "1611fd8a78391a91ae11893b73f5eb4ab1ba64787a6d492d025a2ca5767de380",
+    "scripts/check_bootstrap.py": "3e532d2140c3c579bf6c556f366ef5b6968edaf7902e110f1f40f6de08d506de",
+    "scripts/install_toolchain.py": "95f523eae4be50c9662f0bef3795641efdcf0e9200807eaf24340397a2e79299",
+    "specs/README.md": "82ab477481dec3674553d14ddb46372b0166795bf8e340493754c53f829bce3f",
+    "specs/baseline.json": "f30764ebeff5e2d330ca66a26ba410fd06e961f0a24c6fa7101349384cd67b5b",
+    "specs/features/F01-fundacao/spec.md": "a2600183ff88ec451a3979443810d035bbf4eeb6aac68665f5652ca18293e9b9",
+    "specs/features/F01-fundacao/tasks.md": "3bde228ac2c07fc2f5f2544feb12d853e7b5e5c62fa3a6f598e774a8cfc27c0a",
+    "specs/rastreabilidade.md": "b85044815331c453715599b52ad78a3d0e83e5aec90b6e93da416229bc2c32d4",
+    "tests/toolchain/test_installer.py": "563906402d829c531be6b5e934a0dbf5665f1464d69b9f30152ea52f6226a3a5",
+    "toolchain/manifest.json": "3eee19c5dccefe01e4d188990705627e098b050fd417de1d83644b8e4109245f"
+  }
+}

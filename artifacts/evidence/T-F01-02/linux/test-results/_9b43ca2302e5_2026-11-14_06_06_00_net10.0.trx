@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="19cb9388-69e7-43a0-a55d-0c011554d360" name="@9b43ca2302e5 2026-11-14 06:06:00" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-14T06:06:00.1584045-03:00" queuing="2026-11-14T06:06:00.1584045-03:00" start="2026-11-14T06:05:57.8834370-03:00" finish="2026-11-14T06:06:00.3521644-03:00" />
+  <TestSettings name="default" id="c448aa38-d7d7-4a63-9982-fecf37473796">
+    <Deployment runDeploymentRoot="_9b43ca2302e5_2026-11-14_06_06_00" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="622a7e9e-048b-41fa-bcf6-796c92ab37e8" testId="6d9a6b9d-9616-e8d8-03fe-e9954d7acb31" testName="Gsa.Core.Tests.GeometryTests.RigidTransformAddsLeverArmAfterRotation" computerName="9b43ca2302e5" duration="00:00:00.0004218" startTime="2026-11-14T06:06:00.0730962-03:00" endTime="2026-11-14T06:06:00.0732200-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="622a7e9e-048b-41fa-bcf6-796c92ab37e8" />
+    <UnitTestResult executionId="03d8fea3-fe0e-4be4-8eec-6aabc4d1844a" testId="470f08d1-032f-c503-f691-a12050b1c7cc" testName="Gsa.Core.Tests.GeometryTests.IdentityPreservesAPointWithNonzeroComponents" computerName="9b43ca2302e5" duration="00:00:00.0018853" startTime="2026-11-14T06:05:59.9484377-03:00" endTime="2026-11-14T06:05:59.9487384-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="03d8fea3-fe0e-4be4-8eec-6aabc4d1844a" />
+    <UnitTestResult executionId="8e855c34-59fb-4d65-9b2f-0b55a4386857" testId="cc3a6709-0d83-a607-50cf-68bd7f4359f3" testName="Gsa.Core.Tests.GeometryTests.NonFiniteVectorsAndRotationsAreRejected(invalid: NaN)" computerName="9b43ca2302e5" duration="00:00:00.0006431" startTime="2026-11-14T06:05:59.9462467-03:00" endTime="2026-11-14T06:05:59.9464176-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8e855c34-59fb-4d65-9b2f-0b55a4386857" />
+    <UnitTestResult executionId="cfa42051-e555-48ef-a7ca-5530b7e7c5e5" testId="4efdfb49-4220-e4a4-befd-b4f269b12491" testName="Gsa.Core.Tests.GeometryTests.UndefinedRotationsAndDirectionsFailExplicitly" computerName="9b43ca2302e5" duration="00:00:00.0064053" startTime="2026-11-14T06:05:59.9515191-03:00" endTime="2026-11-14T06:05:59.9518589-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cfa42051-e555-48ef-a7ca-5530b7e7c5e5" />
+    <UnitTestResult executionId="c1672f52-3665-4bea-a0e0-b528eec08507" testId="2ee6a331-f3e9-eb8e-7648-5933394fff3e" testName="Gsa.Core.Tests.GeometryTests.QuaternionCompositionAppliesRightHandRotationFirst" computerName="9b43ca2302e5" duration="00:00:00.0003617" startTime="2026-11-14T06:06:00.0737080-03:00" endTime="2026-11-14T06:06:00.0737792-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c1672f52-3665-4bea-a0e0-b528eec08507" />
+    <UnitTestResult executionId="38f3631b-ee43-40c4-aedb-d147ea8adf6c" testId="1b67f717-8642-689d-1d24-4c490a1c1264" testName="Gsa.Core.Tests.GeometryTests.NonFiniteVectorsAndRotationsAreRejected(invalid: Infinity)" computerName="9b43ca2302e5" duration="00:00:00.0038666" startTime="2026-11-14T06:05:59.9407478-03:00" endTime="2026-11-14T06:05:59.9450897-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="38f3631b-ee43-40c4-aedb-d147ea8adf6c" />
+    <UnitTestResult executionId="ba248f46-ddfd-4379-ab5b-72c4716e4809" testId="351bbd9c-b793-51f3-37bc-30e9c70ac68a" testName="Gsa.Core.Tests.GeometryTests.LocalFrameRoundTripWorksWithCustomOriginAndNegativeOffsets" computerName="9b43ca2302e5" duration="00:00:00.0017215" startTime="2026-11-14T06:05:59.9474862-03:00" endTime="2026-11-14T06:05:59.9478616-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ba248f46-ddfd-4379-ab5b-72c4716e4809" />
+    <UnitTestResult executionId="8c590c06-f275-455f-abb0-79fa1e77abc2" testId="a3514013-93e2-2cc7-8236-1f729c539357" testName="Gsa.Core.Tests.GeometryTests.NonFiniteVectorsAndRotationsAreRejected(invalid: -Infinity)" computerName="9b43ca2302e5" duration="00:00:00.0004532" startTime="2026-11-14T06:05:59.9467685-03:00" endTime="2026-11-14T06:05:59.9470263-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8c590c06-f275-455f-abb0-79fa1e77abc2" />
+    <UnitTestResult executionId="771aab6f-2f30-4519-a249-4d67124f887b" testId="590db564-48b1-e5e4-bcb6-0e7aa157589b" testName="Gsa.Core.Tests.GeometryTests.TransformCompositionRotatesInnerTranslation" computerName="9b43ca2302e5" duration="00:00:00.0005295" startTime="2026-11-14T06:06:00.0739793-03:00" endTime="2026-11-14T06:06:00.0740430-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="771aab6f-2f30-4519-a249-4d67124f887b" />
+    <UnitTestResult executionId="d3b836d5-3355-4958-8d36-48a137aaa7ed" testId="7002e927-6d6f-d859-4b50-bf81aee5b723" testName="Gsa.Core.Tests.GeometryTests.InverseRecoversPointAfterNontrivialRotationAndTranslation" computerName="9b43ca2302e5" duration="00:00:00.0020775" startTime="2026-11-14T06:05:59.9510312-03:00" endTime="2026-11-14T06:05:59.9511755-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d3b836d5-3355-4958-8d36-48a137aaa7ed" />
+    <UnitTestResult executionId="fa66fadd-ccb2-4235-9b02-44a918951b59" testId="83744272-7109-2236-ff52-188d9d5bb44d" testName="Gsa.Core.Tests.GeometryTests.QuaternionNormalizesFiniteNonUnitInputWithoutOverflow" computerName="9b43ca2302e5" duration="00:00:00.0003691" startTime="2026-11-14T06:06:00.0742154-03:00" endTime="2026-11-14T06:06:00.0742777-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fa66fadd-ccb2-4235-9b02-44a918951b59" />
+    <UnitTestResult executionId="16dfe2f3-9126-468c-993d-771e0b220631" testId="c1bad232-3c26-6e7b-f707-0667dd61dbd3" testName="Gsa.Core.Tests.GeometryTests.LocalFramePreservesSubMillimetreOffsetsAtLargeMapCoordinates" computerName="9b43ca2302e5" duration="00:00:00.0004820" startTime="2026-11-14T06:05:59.9503707-03:00" endTime="2026-11-14T06:05:59.9504753-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16dfe2f3-9126-468c-993d-771e0b220631" />
+    <UnitTestResult executionId="9fef2d86-9977-410e-90ec-7798d61c906a" testId="b659cdce-8709-9b26-185c-812afbf6d544" testName="Gsa.Core.Tests.GeometryTests.LocalFrameMapsOriginAndEachPositiveEnuAxis" computerName="9b43ca2302e5" duration="00:00:00.0487148" startTime="2026-11-14T06:05:59.8023669-03:00" endTime="2026-11-14T06:05:59.8973968-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9fef2d86-9977-410e-90ec-7798d61c906a" />
+    <UnitTestResult executionId="f24140c5-2ead-4428-b6d6-c6e0e6cbfbe0" testId="156a9758-6146-e4b0-4ccb-82248edd8366" testName="Gsa.Core.Tests.GeometryTests.PositiveNinetyDegreesAboutUpRotatesEastToNorth" computerName="9b43ca2302e5" duration="00:00:00.0006466" startTime="2026-11-14T06:06:00.0744338-03:00" endTime="2026-11-14T06:06:00.0744962-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f24140c5-2ead-4428-b6d6-c6e0e6cbfbe0" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.QuaternionNormalizesFiniteNonUnitInputWithoutOverflow" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="83744272-7109-2236-ff52-188d9d5bb44d">
+      <Execution id="fa66fadd-ccb2-4235-9b02-44a918951b59" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="QuaternionNormalizesFiniteNonUnitInputWithoutOverflow" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.NonFiniteVectorsAndRotationsAreRejected(invalid: Infinity)" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="1b67f717-8642-689d-1d24-4c490a1c1264">
+      <Execution id="38f3631b-ee43-40c4-aedb-d147ea8adf6c" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="NonFiniteVectorsAndRotationsAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.QuaternionCompositionAppliesRightHandRotationFirst" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="2ee6a331-f3e9-eb8e-7648-5933394fff3e">
+      <Execution id="c1672f52-3665-4bea-a0e0-b528eec08507" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="QuaternionCompositionAppliesRightHandRotationFirst" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.LocalFrameMapsOriginAndEachPositiveEnuAxis" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="b659cdce-8709-9b26-185c-812afbf6d544">
+      <Execution id="9fef2d86-9977-410e-90ec-7798d61c906a" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="LocalFrameMapsOriginAndEachPositiveEnuAxis" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.IdentityPreservesAPointWithNonzeroComponents" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="470f08d1-032f-c503-f691-a12050b1c7cc">
+      <Execution id="03d8fea3-fe0e-4be4-8eec-6aabc4d1844a" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="IdentityPreservesAPointWithNonzeroComponents" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.PositiveNinetyDegreesAboutUpRotatesEastToNorth" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="156a9758-6146-e4b0-4ccb-82248edd8366">
+      <Execution id="f24140c5-2ead-4428-b6d6-c6e0e6cbfbe0" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="PositiveNinetyDegreesAboutUpRotatesEastToNorth" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.NonFiniteVectorsAndRotationsAreRejected(invalid: NaN)" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="cc3a6709-0d83-a607-50cf-68bd7f4359f3">
+      <Execution id="8e855c34-59fb-4d65-9b2f-0b55a4386857" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="NonFiniteVectorsAndRotationsAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.UndefinedRotationsAndDirectionsFailExplicitly" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="4efdfb49-4220-e4a4-befd-b4f269b12491">
+      <Execution id="cfa42051-e555-48ef-a7ca-5530b7e7c5e5" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="UndefinedRotationsAndDirectionsFailExplicitly" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.InverseRecoversPointAfterNontrivialRotationAndTranslation" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="7002e927-6d6f-d859-4b50-bf81aee5b723">
+      <Execution id="d3b836d5-3355-4958-8d36-48a137aaa7ed" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="InverseRecoversPointAfterNontrivialRotationAndTranslation" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.TransformCompositionRotatesInnerTranslation" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="590db564-48b1-e5e4-bcb6-0e7aa157589b">
+      <Execution id="771aab6f-2f30-4519-a249-4d67124f887b" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="TransformCompositionRotatesInnerTranslation" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.LocalFramePreservesSubMillimetreOffsetsAtLargeMapCoordinates" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="c1bad232-3c26-6e7b-f707-0667dd61dbd3">
+      <Execution id="16dfe2f3-9126-468c-993d-771e0b220631" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="LocalFramePreservesSubMillimetreOffsetsAtLargeMapCoordinates" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.RigidTransformAddsLeverArmAfterRotation" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="6d9a6b9d-9616-e8d8-03fe-e9954d7acb31">
+      <Execution id="622a7e9e-048b-41fa-bcf6-796c92ab37e8" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="RigidTransformAddsLeverArmAfterRotation" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.LocalFrameRoundTripWorksWithCustomOriginAndNegativeOffsets" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="351bbd9c-b793-51f3-37bc-30e9c70ac68a">
+      <Execution id="ba248f46-ddfd-4379-ab5b-72c4716e4809" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="LocalFrameRoundTripWorksWithCustomOriginAndNegativeOffsets" />
+    </UnitTest>
+    <UnitTest name="Gsa.Core.Tests.GeometryTests.NonFiniteVectorsAndRotationsAreRejected(invalid: -Infinity)" storage="/workspace/gsa/tests/gsa.core.tests/bin/debug/net10.0/gsa.core.tests.dll" id="a3514013-93e2-2cc7-8236-1f729c539357">
+      <Execution id="8c590c06-f275-455f-abb0-79fa1e77abc2" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Core.Tests/bin/Debug/net10.0/Gsa.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Core.Tests.GeometryTests" name="NonFiniteVectorsAndRotationsAreRejected" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6d9a6b9d-9616-e8d8-03fe-e9954d7acb31" executionId="622a7e9e-048b-41fa-bcf6-796c92ab37e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="470f08d1-032f-c503-f691-a12050b1c7cc" executionId="03d8fea3-fe0e-4be4-8eec-6aabc4d1844a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cc3a6709-0d83-a607-50cf-68bd7f4359f3" executionId="8e855c34-59fb-4d65-9b2f-0b55a4386857" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4efdfb49-4220-e4a4-befd-b4f269b12491" executionId="cfa42051-e555-48ef-a7ca-5530b7e7c5e5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2ee6a331-f3e9-eb8e-7648-5933394fff3e" executionId="c1672f52-3665-4bea-a0e0-b528eec08507" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b67f717-8642-689d-1d24-4c490a1c1264" executionId="38f3631b-ee43-40c4-aedb-d147ea8adf6c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="351bbd9c-b793-51f3-37bc-30e9c70ac68a" executionId="ba248f46-ddfd-4379-ab5b-72c4716e4809" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a3514013-93e2-2cc7-8236-1f729c539357" executionId="8c590c06-f275-455f-abb0-79fa1e77abc2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="590db564-48b1-e5e4-bcb6-0e7aa157589b" executionId="771aab6f-2f30-4519-a249-4d67124f887b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7002e927-6d6f-d859-4b50-bf81aee5b723" executionId="d3b836d5-3355-4958-8d36-48a137aaa7ed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="83744272-7109-2236-ff52-188d9d5bb44d" executionId="fa66fadd-ccb2-4235-9b02-44a918951b59" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c1bad232-3c26-6e7b-f707-0667dd61dbd3" executionId="16dfe2f3-9126-468c-993d-771e0b220631" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b659cdce-8709-9b26-185c-812afbf6d544" executionId="9fef2d86-9977-410e-90ec-7798d61c906a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="156a9758-6146-e4b0-4ccb-82248edd8366" executionId="f24140c5-2ead-4428-b6d6-c6e0e6cbfbe0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="14" executed="14" passed="14" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.15)
+[xUnit.net 00:00:00.14]   Discovering: Gsa.Core.Tests
+[xUnit.net 00:00:00.31]   Discovered:  Gsa.Core.Tests
+[xUnit.net 00:00:00.42]   Starting:    Gsa.Core.Tests
+[xUnit.net 00:00:00.87]   Finished:    Gsa.Core.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

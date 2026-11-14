@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "id": "contract_inventory_01",
+  "title_key": "mission.inventory.title",
+  "client_id": "city_hall",
+  "region_id": "old_center",
+  "area_id": "commerce_street_facades",
+  "product": "feature_inventory",
+  "required_feature_ids": [
+    "facade_01",
+    "facade_02",
+    "facade_03",
+    "facade_04",
+    "facade_05",
+    "facade_06",
+    "facade_07",
+    "facade_08",
+    "facade_09",
+    "facade_10",
+    "facade_11",
+    "facade_12",
+    "facade_13",
+    "facade_14",
+    "facade_15",
+    "facade_16",
+    "facade_17",
+    "facade_18",
+    "facade_19",
+    "facade_20"
+  ],
+  "requirements": [
+    {
+      "kind": "threshold",
+      "metric": "feature_completeness",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.9,
+      "excellent": 1
+    },
+    {
+      "kind": "threshold",
+      "metric": "absolute_rmse",
+      "unit": "m",
+      "direction": "max",
+      "limit": 2,
+      "excellent": 0.5
+    },
+    {
+      "kind": "threshold",
+      "metric": "valid_image_fraction",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.8,
+      "excellent": 0.98
+    },
+    {
+      "kind": "predicate",
+      "metric": "privacy_redacted",
+      "expected": true
+    },
+    {
+      "kind": "predicate",
+      "metric": "format_valid",
+      "expected": true
+    }
+  ],
+  "required_capabilities": [
+    "camera",
+    "gnss_basic"
+  ],
+  "risk": "easy",
+  "calm": true,
+  "deadline": {
+    "due_after_s": 21600,
+    "expires_after_s": 27000,
+    "late_penalty_per_hour": 0.05,
+    "late_penalty_cap": 0.5
+  },
+  "reward": {
+    "base_coords": 400,
+    "base_xp": 100,
+    "reputation": 2,
+    "story_unlocks": [
+      "HIST-02"
+    ]
+  },
+  "partial_policy": {
+    "mode": "deliverables",
+    "deliverables": [
+      {
+        "id": "block_a",
+        "weight": 0.5,
+        "area_id": "commerce_street_facades",
+        "required_feature_ids": [
+          "facade_01",
+          "facade_02",
+          "facade_03",
+          "facade_04",
+          "facade_05",
+          "facade_06",
+          "facade_07",
+          "facade_08",
+          "facade_09",
+          "facade_10"
+        ],
+        "requirements": [
+          {
+            "kind": "threshold",
+            "metric": "feature_completeness",
+            "unit": "ratio",
+            "direction": "min",
+            "limit": 0.9,
+            "excellent": 1
+          },
+          {
+            "kind": "threshold",
+            "metric": "absolute_rmse",
+            "unit": "m",
+            "direction": "max",
+            "limit": 2,
+            "excellent": 0.5
+          }
+        ]
+      },
+      {
+        "id": "block_b",
+        "weight": 0.5,
+        "area_id": "commerce_street_facades",
+        "required_feature_ids": [
+          "facade_11",
+          "facade_12",
+          "facade_13",
+          "facade_14",
+          "facade_15",
+          "facade_16",
+          "facade_17",
+          "facade_18",
+          "facade_19",
+          "facade_20"
+        ],
+        "requirements": [
+          {
+            "kind": "threshold",
+            "metric": "feature_completeness",
+            "unit": "ratio",
+            "direction": "min",
+            "limit": 0.9,
+            "excellent": 1
+          },
+          {
+            "kind": "threshold",
+            "metric": "absolute_rmse",
+            "unit": "m",
+            "direction": "max",
+            "limit": 2,
+            "excellent": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  "delivery_format": "gsa_bundle_v1",
+  "story_prerequisites": []
+}

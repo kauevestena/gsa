@@ -1,0 +1,14 @@
+{
+  "solution": {
+    "path": "Gsa.sln",
+    "projects": [
+      "src\\Gsa.Core\\Gsa.Core.csproj",
+      "src\\Gsa.Missions\\Gsa.Missions.csproj",
+      "src\\Gsa.Tools\\Gsa.Tools.csproj",
+      "tests\\Gsa.Core.Tests\\Gsa.Core.Tests.csproj",
+      "tests\\Gsa.Localization.Tests\\Gsa.Localization.Tests.csproj",
+      "tests\\Gsa.Missions.Tests\\Gsa.Missions.Tests.csproj",
+      "tests\\Gsa.Tools.Tests\\Gsa.Tools.Tests.csproj"
+    ]
+  }
+}

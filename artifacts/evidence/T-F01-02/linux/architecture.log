@@ -1,0 +1,31 @@
+{
+  "valid": true,
+  "projects": {
+    "game/Gsa.csproj": [
+      "src/Gsa.Engine/Gsa.Engine.csproj"
+    ],
+    "src/Gsa.Core/Gsa.Core.csproj": [],
+    "src/Gsa.Engine/Gsa.Engine.csproj": [
+      "src/Gsa.Core/Gsa.Core.csproj",
+      "src/Gsa.Missions/Gsa.Missions.csproj"
+    ],
+    "src/Gsa.Missions/Gsa.Missions.csproj": [
+      "src/Gsa.Core/Gsa.Core.csproj"
+    ],
+    "src/Gsa.Tools/Gsa.Tools.csproj": [
+      "src/Gsa.Core/Gsa.Core.csproj",
+      "src/Gsa.Missions/Gsa.Missions.csproj"
+    ],
+    "tests/Gsa.Core.Tests/Gsa.Core.Tests.csproj": [
+      "src/Gsa.Core/Gsa.Core.csproj"
+    ],
+    "tests/Gsa.Localization.Tests/Gsa.Localization.Tests.csproj": [],
+    "tests/Gsa.Missions.Tests/Gsa.Missions.Tests.csproj": [
+      "src/Gsa.Missions/Gsa.Missions.csproj"
+    ],
+    "tests/Gsa.Tools.Tests/Gsa.Tools.Tests.csproj": [
+      "src/Gsa.Tools/Gsa.Tools.csproj"
+    ]
+  },
+  "diagnostics": []
+}

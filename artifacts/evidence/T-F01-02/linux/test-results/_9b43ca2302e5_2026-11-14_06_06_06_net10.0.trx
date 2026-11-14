@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="289ccdd5-e3f6-462d-8d62-903435844790" name="@9b43ca2302e5 2026-11-14 06:06:06" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-14T06:06:06.6360751-03:00" queuing="2026-11-14T06:06:06.6360752-03:00" start="2026-11-14T06:06:04.8900144-03:00" finish="2026-11-14T06:06:06.7540768-03:00" />
+  <TestSettings name="default" id="6ad6f713-84ea-4c74-b9b2-3da9a2dca7f0">
+    <Deployment runDeploymentRoot="_9b43ca2302e5_2026-11-14_06_06_06" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="068df89c-ea13-4e2d-beef-d42731f4c884" testId="b8640ac6-e079-d264-937b-881d99bfcb48" testName="Gsa.Tools.Tests.ContentValidationTests.MissionPreconditionCyclesAreRejected" computerName="9b43ca2302e5" duration="00:00:00.0100208" startTime="2026-11-14T06:06:06.6199937-03:00" endTime="2026-11-14T06:06:06.6330410-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="068df89c-ea13-4e2d-beef-d42731f4c884" />
+    <UnitTestResult executionId="75e0a7ce-fb0e-434f-9e0f-e93acfcb4aff" testId="d42a6761-dd59-08d7-3b6c-f27c30b7df9f" testName="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralOverflowIsStillRejected(token: &quot;1e100&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0072613" startTime="2026-11-14T06:06:06.4140305-03:00" endTime="2026-11-14T06:06:06.4228918-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="75e0a7ce-fb0e-434f-9e0f-e93acfcb4aff" />
+    <UnitTestResult executionId="4839628d-0dca-44c0-9800-701329094e65" testId="b2cd00f1-e1f7-44bb-2300-9aff350a0170" testName="Gsa.Tools.Tests.ContentValidationTests.FiniteJsonSyntaxWithOverflowingNumberIsRejected" computerName="9b43ca2302e5" duration="00:00:00.0106857" startTime="2026-11-14T06:06:06.5874090-03:00" endTime="2026-11-14T06:06:06.5898267-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4839628d-0dca-44c0-9800-701329094e65" />
+    <UnitTestResult executionId="b50ab4b8-8919-4c5a-8d65-31ce3ab80f83" testId="6b562441-db10-ad24-515a-f2c2775cae68" testName="Gsa.Tools.Tests.ContentValidationTests.FractionalTokensAreNeverRoundedIntoIntegers(token: &quot;0.5&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0153064" startTime="2026-11-14T06:06:06.5411790-03:00" endTime="2026-11-14T06:06:06.5413204-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b50ab4b8-8919-4c5a-8d65-31ce3ab80f83" />
+    <UnitTestResult executionId="6f7adb29-ca4a-440a-94e4-4f714fb57024" testId="6925bcce-96f7-4e38-9407-56951a7e4f1d" testName="Gsa.Tools.Tests.ContentValidationTests.FutureSchemaVersionAndDuplicateJsonPropertyAreRejected" computerName="9b43ca2302e5" duration="00:00:00.0097623" startTime="2026-11-14T06:06:06.5317299-03:00" endTime="2026-11-14T06:06:06.5319627-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6f7adb29-ca4a-440a-94e4-4f714fb57024" />
+    <UnitTestResult executionId="2c3fd78e-72af-4756-8a28-53fb4f3a6525" testId="8f1c0257-24ac-825e-2bc0-70eb91b8ec3b" testName="Gsa.Tools.Tests.ContentValidationTests.FeatureOutsideBoundsIsRejected" computerName="9b43ca2302e5" duration="00:00:00.0099867" startTime="2026-11-14T06:06:06.4458729-03:00" endTime="2026-11-14T06:06:06.4555461-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2c3fd78e-72af-4756-8a28-53fb4f3a6525" />
+    <UnitTestResult executionId="6b988ea9-60c7-4b58-b0b0-50698321b1a9" testId="66f89e69-0c7e-7d6b-7938-891c5f3bd416" testName="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralOverflowIsStillRejected(token: &quot;9223372036854775808.0&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0097427" startTime="2026-11-14T06:06:06.4050260-03:00" endTime="2026-11-14T06:06:06.4137909-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6b988ea9-60c7-4b58-b0b0-50698321b1a9" />
+    <UnitTestResult executionId="e6909713-bb06-491e-96fd-38d30d80f90a" testId="c13a11f3-9afd-1904-148a-fc147066a02e" testName="Gsa.Tools.Tests.ContentValidationTests.InvalidThresholdIsReportedByMissions" computerName="9b43ca2302e5" duration="00:00:00.0095856" startTime="2026-11-14T06:06:06.5983285-03:00" endTime="2026-11-14T06:06:06.6077026-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6909713-bb06-491e-96fd-38d30d80f90a" />
+    <UnitTestResult executionId="e17fdd64-2323-4820-930e-0dce98e3f6fe" testId="187c090d-8cb9-9583-d301-a5fa3e5774d3" testName="Gsa.Tools.Tests.ContentValidationTests.SensorTypeCannotForgeAnotherKnownCapability" computerName="9b43ca2302e5" duration="00:00:00.0119288" startTime="2026-11-14T06:06:06.6079984-03:00" endTime="2026-11-14T06:06:06.6196587-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e17fdd64-2323-4820-930e-0dce98e3f6fe" />
+    <UnitTestResult executionId="10d09234-f099-46aa-8ca8-1ded52590157" testId="598fe191-da99-a07f-26c5-397c17a8905b" testName="Gsa.Tools.Tests.ContentValidationTests.DeclaredCapabilityWithoutProfileProviderIsRejected" computerName="9b43ca2302e5" duration="00:00:00.0115996" startTime="2026-11-14T06:06:06.6335414-03:00" endTime="2026-11-14T06:06:06.6415741-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="10d09234-f099-46aa-8ca8-1ded52590157" />
+    <UnitTestResult executionId="a00803fd-6f6b-43ec-b3db-1494dfa4069d" testId="4ec42689-e261-9724-3ad5-33533dc70dec" testName="Gsa.Tools.Tests.ContentValidationTests.ProfileCannotExceedStorageOrMountingCapacity(field: &quot;mount_count&quot;, value: 2, expected: &quot;$.mounting_requirements.count&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0109514" startTime="2026-11-14T06:06:06.4234114-03:00" endTime="2026-11-14T06:06:06.4323453-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a00803fd-6f6b-43ec-b3db-1494dfa4069d" />
+    <UnitTestResult executionId="e0ff34eb-c17c-4ac3-8ab0-886e3b4a4f34" testId="41102407-96b0-ba98-3a6b-17b020c6c8a7" testName="Gsa.Tools.Tests.ContentValidationTests.ProfileCannotExceedStorageOrMountingCapacity(field: &quot;buffer_capacity_bytes&quot;, value: 1, expected: &quot;$.buffer_capacity_bytes&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0098215" startTime="2026-11-14T06:06:06.4327328-03:00" endTime="2026-11-14T06:06:06.4420905-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e0ff34eb-c17c-4ac3-8ab0-886e3b4a4f34" />
+    <UnitTestResult executionId="44edfb14-0941-4c11-b1f0-a78b8a18dbd3" testId="eeb2055b-d137-52ed-6ba2-d885bc9a45d3" testName="Gsa.Tools.Tests.ContentValidationTests.NaNTokenAndMalformedJsonAreRejected" computerName="9b43ca2302e5" duration="00:00:00.0102889" startTime="2026-11-14T06:06:06.5533414-03:00" endTime="2026-11-14T06:06:06.5777497-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="44edfb14-0941-4c11-b1f0-a78b8a18dbd3" />
+    <UnitTestResult executionId="bec9f919-d530-43eb-b63d-6306af363dcf" testId="c7ad96e6-4783-640a-8bd6-e08d37ce2f4f" testName="Gsa.Tools.Tests.ContentValidationTests.UnknownCommandsAreUsageErrorsRatherThanImplementedPlaceholders" computerName="9b43ca2302e5" duration="00:00:00.0146729" startTime="2026-11-14T06:06:06.5859265-03:00" endTime="2026-11-14T06:06:06.5861284-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bec9f919-d530-43eb-b63d-6306af363dcf" />
+    <UnitTestResult executionId="9dfa23e5-0a87-4881-97f7-37425eb27cc0" testId="30bf140c-f66b-4cd6-3674-8696c542b250" testName="Gsa.Tools.Tests.ContentValidationTests.MissingDirectoryIsInvalidContentNotUsage" computerName="9b43ca2302e5" duration="00:00:00.0029611" startTime="2026-11-14T06:06:06.4427121-03:00" endTime="2026-11-14T06:06:06.4454694-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9dfa23e5-0a87-4881-97f7-37425eb27cc0" />
+    <UnitTestResult executionId="bf15e20f-3f15-447d-b483-2545a9faaef4" testId="80961a97-6c3a-1a57-1de9-042fdd4e3b7d" testName="Gsa.Tools.Tests.ContentValidationTests.FractionalTokensAreNeverRoundedIntoIntegers(token: &quot;1e-29&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0080585" startTime="2026-11-14T06:06:06.5416894-03:00" endTime="2026-11-14T06:06:06.5421764-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bf15e20f-3f15-447d-b483-2545a9faaef4" />
+    <UnitTestResult executionId="2ef842c3-793d-454b-9aca-aab5cdb771c7" testId="86b44392-8eb5-679d-3877-dccc8a3b7ce0" testName="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralOverflowIsStillRejected(token: &quot;9.223372036854775808e18&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0133157" startTime="2026-11-14T06:06:06.3916677-03:00" endTime="2026-11-14T06:06:06.4039122-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ef842c3-793d-454b-9aca-aab5cdb771c7" />
+    <UnitTestResult executionId="f7417d3d-fac9-4544-89ce-169f8ac8fc9f" testId="941888ea-867b-02c6-5f2a-280eebc105b7" testName="Gsa.Tools.Tests.ContentValidationTests.CollinearPolygonIsRejected" computerName="9b43ca2302e5" duration="00:00:00.0111380" startTime="2026-11-14T06:06:06.5297495-03:00" endTime="2026-11-14T06:06:06.5299461-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f7417d3d-fac9-4544-89ce-169f8ac8fc9f" />
+    <UnitTestResult executionId="9560bae7-7a96-4628-98d3-cb0cb1db7dac" testId="79d1fa86-87e5-e4dc-55b6-3339821db2e7" testName="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralNumberTokensMatchTheIntegerSchema" computerName="9b43ca2302e5" duration="00:00:00.0105316" startTime="2026-11-14T06:06:06.5425013-03:00" endTime="2026-11-14T06:06:06.5529427-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9560bae7-7a96-4628-98d3-cb0cb1db7dac" />
+    <UnitTestResult executionId="c1f99406-4185-4893-a154-c002a7a16fc6" testId="55ea62e0-2b23-004d-e368-839b8a7d25ee" testName="Gsa.Tools.Tests.ContentValidationTests.CrossingPolygonWithNonzeroSignedAreaIsRejected" computerName="9b43ca2302e5" duration="00:00:00.0101812" startTime="2026-11-14T06:06:06.5284819-03:00" endTime="2026-11-14T06:06:06.5287713-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c1f99406-4185-4893-a154-c002a7a16fc6" />
+    <UnitTestResult executionId="3555ec63-6a3e-46b0-aa1c-4830dd0bca8d" testId="d915dd5a-f90a-9738-96cd-6a8dfcc4f4e2" testName="Gsa.Tools.Tests.ContentValidationTests.FractionalTokensAreNeverRoundedIntoIntegers(token: &quot;1.00000000000000000000000000001&quot;)" computerName="9b43ca2302e5" duration="00:00:00.0112991" startTime="2026-11-14T06:06:06.5323977-03:00" endTime="2026-11-14T06:06:06.5327622-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3555ec63-6a3e-46b0-aa1c-4830dd0bca8d" />
+    <UnitTestResult executionId="8bd5526c-a318-48c5-a7c7-eed29f850b4a" testId="4e243609-0d9b-a7ee-17e8-a518e243a9ec" testName="Gsa.Tools.Tests.ContentValidationTests.ReferenceCatalogAndFourProductsAreValid" computerName="9b43ca2302e5" duration="00:00:00.0204246" startTime="2026-11-14T06:06:06.5309493-03:00" endTime="2026-11-14T06:06:06.5312700-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8bd5526c-a318-48c5-a7c7-eed29f850b4a" />
+    <UnitTestResult executionId="a0d57adb-dc62-42b1-9344-ee18176b3ad0" testId="a168528d-cc71-b983-d3ac-e65f66b374fb" testName="Gsa.Tools.Tests.ContentValidationTests.DuplicateAreasAcrossRegionsAreRejected" computerName="9b43ca2302e5" duration="00:00:00.0207118" startTime="2026-11-14T06:06:06.3901923-03:00" endTime="2026-11-14T06:06:06.3903916-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a0d57adb-dc62-42b1-9344-ee18176b3ad0" />
+    <UnitTestResult executionId="c472e392-94cb-4e9a-9142-33350d4226c5" testId="b533da8e-9dbf-e03b-a29d-58340d493ac0" testName="Gsa.Tools.Tests.ContentValidationTests.MissingFeatureReturnsExitTwoAndExactField" computerName="9b43ca2302e5" duration="00:00:00.1124720" startTime="2026-11-14T06:06:06.2432175-03:00" endTime="2026-11-14T06:06:06.3667760-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c472e392-94cb-4e9a-9142-33350d4226c5" />
+    <UnitTestResult executionId="790ff2d8-180e-4798-aa07-d4683ac6bca7" testId="e3b725f9-956b-20bd-2b95-55679e418ef7" testName="Gsa.Tools.Tests.ContentValidationTests.StoryMissionCannotPointToPartialContract" computerName="9b43ca2302e5" duration="00:00:00.0090522" startTime="2026-11-14T06:06:06.5902343-03:00" endTime="2026-11-14T06:06:06.5980182-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="790ff2d8-180e-4798-aa07-d4683ac6bca7" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.CrossingPolygonWithNonzeroSignedAreaIsRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="55ea62e0-2b23-004d-e368-839b8a7d25ee">
+      <Execution id="c1f99406-4185-4893-a154-c002a7a16fc6" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="CrossingPolygonWithNonzeroSignedAreaIsRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.UnknownCommandsAreUsageErrorsRatherThanImplementedPlaceholders" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="c7ad96e6-4783-640a-8bd6-e08d37ce2f4f">
+      <Execution id="bec9f919-d530-43eb-b63d-6306af363dcf" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="UnknownCommandsAreUsageErrorsRatherThanImplementedPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.ReferenceCatalogAndFourProductsAreValid" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="4e243609-0d9b-a7ee-17e8-a518e243a9ec">
+      <Execution id="8bd5526c-a318-48c5-a7c7-eed29f850b4a" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="ReferenceCatalogAndFourProductsAreValid" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.ProfileCannotExceedStorageOrMountingCapacity(field: &quot;buffer_capacity_bytes&quot;, value: 1, expected: &quot;$.buffer_capacity_bytes&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="41102407-96b0-ba98-3a6b-17b020c6c8a7">
+      <Execution id="e0ff34eb-c17c-4ac3-8ab0-886e3b4a4f34" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="ProfileCannotExceedStorageOrMountingCapacity" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralOverflowIsStillRejected(token: &quot;1e100&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="d42a6761-dd59-08d7-3b6c-f27c30b7df9f">
+      <Execution id="75e0a7ce-fb0e-434f-9e0f-e93acfcb4aff" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MathematicallyIntegralOverflowIsStillRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.DeclaredCapabilityWithoutProfileProviderIsRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="598fe191-da99-a07f-26c5-397c17a8905b">
+      <Execution id="10d09234-f099-46aa-8ca8-1ded52590157" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="DeclaredCapabilityWithoutProfileProviderIsRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.StoryMissionCannotPointToPartialContract" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="e3b725f9-956b-20bd-2b95-55679e418ef7">
+      <Execution id="790ff2d8-180e-4798-aa07-d4683ac6bca7" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="StoryMissionCannotPointToPartialContract" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.CollinearPolygonIsRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="941888ea-867b-02c6-5f2a-280eebc105b7">
+      <Execution id="f7417d3d-fac9-4544-89ce-169f8ac8fc9f" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="CollinearPolygonIsRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralOverflowIsStillRejected(token: &quot;9223372036854775808.0&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="66f89e69-0c7e-7d6b-7938-891c5f3bd416">
+      <Execution id="6b988ea9-60c7-4b58-b0b0-50698321b1a9" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MathematicallyIntegralOverflowIsStillRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralOverflowIsStillRejected(token: &quot;9.223372036854775808e18&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="86b44392-8eb5-679d-3877-dccc8a3b7ce0">
+      <Execution id="2ef842c3-793d-454b-9aca-aab5cdb771c7" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MathematicallyIntegralOverflowIsStillRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.NaNTokenAndMalformedJsonAreRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="eeb2055b-d137-52ed-6ba2-d885bc9a45d3">
+      <Execution id="44edfb14-0941-4c11-b1f0-a78b8a18dbd3" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="NaNTokenAndMalformedJsonAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.FractionalTokensAreNeverRoundedIntoIntegers(token: &quot;1.00000000000000000000000000001&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="d915dd5a-f90a-9738-96cd-6a8dfcc4f4e2">
+      <Execution id="3555ec63-6a3e-46b0-aa1c-4830dd0bca8d" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="FractionalTokensAreNeverRoundedIntoIntegers" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.FractionalTokensAreNeverRoundedIntoIntegers(token: &quot;0.5&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="6b562441-db10-ad24-515a-f2c2775cae68">
+      <Execution id="b50ab4b8-8919-4c5a-8d65-31ce3ab80f83" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="FractionalTokensAreNeverRoundedIntoIntegers" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.InvalidThresholdIsReportedByMissions" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="c13a11f3-9afd-1904-148a-fc147066a02e">
+      <Execution id="e6909713-bb06-491e-96fd-38d30d80f90a" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="InvalidThresholdIsReportedByMissions" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MissionPreconditionCyclesAreRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="b8640ac6-e079-d264-937b-881d99bfcb48">
+      <Execution id="068df89c-ea13-4e2d-beef-d42731f4c884" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MissionPreconditionCyclesAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.FutureSchemaVersionAndDuplicateJsonPropertyAreRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="6925bcce-96f7-4e38-9407-56951a7e4f1d">
+      <Execution id="6f7adb29-ca4a-440a-94e4-4f714fb57024" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="FutureSchemaVersionAndDuplicateJsonPropertyAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MissingFeatureReturnsExitTwoAndExactField" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="b533da8e-9dbf-e03b-a29d-58340d493ac0">
+      <Execution id="c472e392-94cb-4e9a-9142-33350d4226c5" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MissingFeatureReturnsExitTwoAndExactField" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MathematicallyIntegralNumberTokensMatchTheIntegerSchema" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="79d1fa86-87e5-e4dc-55b6-3339821db2e7">
+      <Execution id="9560bae7-7a96-4628-98d3-cb0cb1db7dac" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MathematicallyIntegralNumberTokensMatchTheIntegerSchema" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.ProfileCannotExceedStorageOrMountingCapacity(field: &quot;mount_count&quot;, value: 2, expected: &quot;$.mounting_requirements.count&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="4ec42689-e261-9724-3ad5-33533dc70dec">
+      <Execution id="a00803fd-6f6b-43ec-b3db-1494dfa4069d" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="ProfileCannotExceedStorageOrMountingCapacity" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.MissingDirectoryIsInvalidContentNotUsage" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="30bf140c-f66b-4cd6-3674-8696c542b250">
+      <Execution id="9dfa23e5-0a87-4881-97f7-37425eb27cc0" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="MissingDirectoryIsInvalidContentNotUsage" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.FiniteJsonSyntaxWithOverflowingNumberIsRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="b2cd00f1-e1f7-44bb-2300-9aff350a0170">
+      <Execution id="4839628d-0dca-44c0-9800-701329094e65" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="FiniteJsonSyntaxWithOverflowingNumberIsRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.DuplicateAreasAcrossRegionsAreRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="a168528d-cc71-b983-d3ac-e65f66b374fb">
+      <Execution id="a0d57adb-dc62-42b1-9344-ee18176b3ad0" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="DuplicateAreasAcrossRegionsAreRejected" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.SensorTypeCannotForgeAnotherKnownCapability" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="187c090d-8cb9-9583-d301-a5fa3e5774d3">
+      <Execution id="e17fdd64-2323-4820-930e-0dce98e3f6fe" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="SensorTypeCannotForgeAnotherKnownCapability" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.FractionalTokensAreNeverRoundedIntoIntegers(token: &quot;1e-29&quot;)" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="80961a97-6c3a-1a57-1de9-042fdd4e3b7d">
+      <Execution id="bf15e20f-3f15-447d-b483-2545a9faaef4" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="FractionalTokensAreNeverRoundedIntoIntegers" />
+    </UnitTest>
+    <UnitTest name="Gsa.Tools.Tests.ContentValidationTests.FeatureOutsideBoundsIsRejected" storage="/workspace/gsa/tests/gsa.tools.tests/bin/debug/net10.0/gsa.tools.tests.dll" id="8f1c0257-24ac-825e-2bc0-70eb91b8ec3b">
+      <Execution id="2c3fd78e-72af-4756-8a28-53fb4f3a6525" />
+      <TestMethod codeBase="/workspace/gsa/tests/Gsa.Tools.Tests/bin/Debug/net10.0/Gsa.Tools.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Gsa.Tools.Tests.ContentValidationTests" name="FeatureOutsideBoundsIsRejected" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="b8640ac6-e079-d264-937b-881d99bfcb48" executionId="068df89c-ea13-4e2d-beef-d42731f4c884" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d42a6761-dd59-08d7-3b6c-f27c30b7df9f" executionId="75e0a7ce-fb0e-434f-9e0f-e93acfcb4aff" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b2cd00f1-e1f7-44bb-2300-9aff350a0170" executionId="4839628d-0dca-44c0-9800-701329094e65" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b562441-db10-ad24-515a-f2c2775cae68" executionId="b50ab4b8-8919-4c5a-8d65-31ce3ab80f83" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6925bcce-96f7-4e38-9407-56951a7e4f1d" executionId="6f7adb29-ca4a-440a-94e4-4f714fb57024" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f1c0257-24ac-825e-2bc0-70eb91b8ec3b" executionId="2c3fd78e-72af-4756-8a28-53fb4f3a6525" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="66f89e69-0c7e-7d6b-7938-891c5f3bd416" executionId="6b988ea9-60c7-4b58-b0b0-50698321b1a9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c13a11f3-9afd-1904-148a-fc147066a02e" executionId="e6909713-bb06-491e-96fd-38d30d80f90a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="187c090d-8cb9-9583-d301-a5fa3e5774d3" executionId="e17fdd64-2323-4820-930e-0dce98e3f6fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="598fe191-da99-a07f-26c5-397c17a8905b" executionId="10d09234-f099-46aa-8ca8-1ded52590157" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4ec42689-e261-9724-3ad5-33533dc70dec" executionId="a00803fd-6f6b-43ec-b3db-1494dfa4069d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="41102407-96b0-ba98-3a6b-17b020c6c8a7" executionId="e0ff34eb-c17c-4ac3-8ab0-886e3b4a4f34" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eeb2055b-d137-52ed-6ba2-d885bc9a45d3" executionId="44edfb14-0941-4c11-b1f0-a78b8a18dbd3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c7ad96e6-4783-640a-8bd6-e08d37ce2f4f" executionId="bec9f919-d530-43eb-b63d-6306af363dcf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="30bf140c-f66b-4cd6-3674-8696c542b250" executionId="9dfa23e5-0a87-4881-97f7-37425eb27cc0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="80961a97-6c3a-1a57-1de9-042fdd4e3b7d" executionId="bf15e20f-3f15-447d-b483-2545a9faaef4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="86b44392-8eb5-679d-3877-dccc8a3b7ce0" executionId="2ef842c3-793d-454b-9aca-aab5cdb771c7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="941888ea-867b-02c6-5f2a-280eebc105b7" executionId="f7417d3d-fac9-4544-89ce-169f8ac8fc9f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="79d1fa86-87e5-e4dc-55b6-3339821db2e7" executionId="9560bae7-7a96-4628-98d3-cb0cb1db7dac" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="55ea62e0-2b23-004d-e368-839b8a7d25ee" executionId="c1f99406-4185-4893-a154-c002a7a16fc6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d915dd5a-f90a-9738-96cd-6a8dfcc4f4e2" executionId="3555ec63-6a3e-46b0-aa1c-4830dd0bca8d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e243609-0d9b-a7ee-17e8-a518e243a9ec" executionId="8bd5526c-a318-48c5-a7c7-eed29f850b4a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a168528d-cc71-b983-d3ac-e65f66b374fb" executionId="a0d57adb-dc62-42b1-9344-ee18176b3ad0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b533da8e-9dbf-e03b-a29d-58340d493ac0" executionId="c472e392-94cb-4e9a-9142-33350d4226c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3b725f9-956b-20bd-2b95-55679e418ef7" executionId="790ff2d8-180e-4798-aa07-d4683ac6bca7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="25" executed="25" passed="25" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.15)
+[xUnit.net 00:00:00.17]   Discovering: Gsa.Tools.Tests
+[xUnit.net 00:00:00.29]   Discovered:  Gsa.Tools.Tests
+[xUnit.net 00:00:00.37]   Starting:    Gsa.Tools.Tests
+[xUnit.net 00:00:00.83]   Finished:    Gsa.Tools.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

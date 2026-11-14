@@ -25,6 +25,8 @@ Os gates M2/M3 verificam diversão/aprendizado antes de investir no restante da 
 
 ### M0 — Fundação
 
+Estado de implementação: incrementos em revisão; 142 testes .NET e 10 Python passaram, com exports Windows/Linux e smoke Linux headless offline. Ver [evidências integradas](../artifacts/evidence/T-F01-02/README.md). Execução nativa Windows, inspeção gráfica e revisão humana pendentes; gate sem aceite. A continuação autorizada pelo usuário durante essas pendências está registrada em specs/README.md.
+
 **Gate de saída:** Projetos, ferramentas, schemas e localização disponíveis. Consultar o protocolo em [validação](validacao.md).
 
 | Tarefa | Incremento | Documento |

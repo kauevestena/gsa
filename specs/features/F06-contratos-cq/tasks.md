@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F06-01/README.md). Schema, quatro produtos e 85 testes de Missions passaram; CQ e interface de M2 continuam pendentes.
+
 **Marco:** M0
 
 **Dependências:** T-F01-02

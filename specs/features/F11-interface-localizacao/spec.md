@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M0–M8. Origem: Público e objetivos pedagógicos; Direção de arte e orçamento técnico; Localização bilíngue (EN-US / PT-BR). Estado: especificado; não implementado.
+Marcos: M0–M8. Origem: Público e objetivos pedagógicos; Direção de arte e orçamento técnico; Localização bilíngue (EN-US / PT-BR). Estado: localização inicial T-F11-01 em revisão; HUD, Geopédia e revisão linguística dos marcos seguintes pendentes.
 
 ## Requisitos
 

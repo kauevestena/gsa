@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "HIST-02",
+  "act": 1,
+  "objectives": [
+    {
+      "id": "facades_followup",
+      "contract_id": "contract_hist_01"
+    }
+  ],
+  "events": [],
+  "preconditions": [
+    "HIST-01"
+  ],
+  "calm": true,
+  "calm_variant": null,
+  "dialogue_keys": [],
+  "unlocks": []
+}

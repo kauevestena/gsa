@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "gnss-basic",
+  "type": "gnss",
+  "grade": 0,
+  "rate_hz": 5,
+  "range_m": 2000,
+  "resolution": {
+    "position_resolution_m": 0.01
+  },
+  "noise": {
+    "position_sigma_m": 3
+  },
+  "power_w": 1,
+  "storage_bytes_per_sample": 128,
+  "buffer_capacity_bytes": 2048,
+  "capabilities": [
+    "gnss_basic"
+  ],
+  "mounting_requirements": {
+    "slot_id": "handheld",
+    "count": 1
+  }
+}

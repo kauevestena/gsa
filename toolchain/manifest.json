@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-11-13",
+  "godot_version": "4.7.2.stable.mono",
+  "godot_sdk_version": "4.7.2",
+  "dotnet_sdk_version": "10.0.404",
+  "target_framework": "net10.0",
+  "sources": {
+    "godot_download": "https://godotengine.org/download/linux/",
+    "godot_release": "https://github.com/godotengine/godot-builds/releases/tag/4.7.2-stable",
+    "godot_sha512": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/SHA512-SUMS.txt",
+    "godot_csharp_requirements": "https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_basics.html",
+    "dotnet_release_index": "https://builds.dotnet.microsoft.com/dotnet/release-metadata/releases-index.json",
+    "dotnet_release": "https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json"
+  },
+  "artifacts": {
+    "godot-linux-x64": {
+      "filename": "Godot_v4.7.2-stable_mono_linux_x86_64.zip",
+      "url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_linux_x86_64.zip",
+      "sha512": "1855960b27ee3ef5e66e5e228cced69d55637b24334a7411162687dcd077d8f9f645348cdb8eae984bec8135d49ed855a1e3a16476786b8bce60774fd8402d13",
+      "license": "MIT"
+    },
+    "godot-windows-x64": {
+      "filename": "Godot_v4.7.2-stable_mono_win64.zip",
+      "url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_win64.zip",
+      "sha512": "79229fd112b0c9cbeab82363a4ef7be18ea70f1caf86bf912789335b136fbe7e01db0053a33461438c5da1c680c17bbb10040bd09bedc51221cd4423d0367757",
+      "license": "MIT"
+    },
+    "godot-templates": {
+      "filename": "Godot_v4.7.2-stable_mono_export_templates.tpz",
+      "url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_export_templates.tpz",
+      "sha512": "bb5c41d72370ed743660361f6228006f808ab04ca33abdc545d740b044f3fe057f32ae8cb7873a1bc86ddcd82ae683b9f6dfdfe4179852f2c0f1acde2ff6bd5a",
+      "license": "MIT"
+    },
+    "dotnet-linux-x64": {
+      "filename": "dotnet-sdk-10.0.404-linux-x64.tar.gz",
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.404/dotnet-sdk-10.0.404-linux-x64.tar.gz",
+      "sha512": "577d0eb17fec33d029104c5c63a1ab0accc3e28776274abef2218dbac5af18d2109b5406d26b31d76f5c245215e3ba0926a94c20246c672c41847c9e1eb1dc50",
+      "license": "MIT; notices included in SDK"
+    },
+    "dotnet-windows-x64": {
+      "filename": "dotnet-sdk-10.0.404-win-x64.zip",
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.404/dotnet-sdk-10.0.404-win-x64.zip",
+      "sha512": "330ddd2665b43cd2e428216a0d8ea1ac7bb19b5434fdc530e62010dc3b52823a620bf95489d628e1ed6f5122401793ee4887cca4a019122361a1231497f632ee",
+      "license": "MIT; notices included in SDK"
+    }
+  }
+}

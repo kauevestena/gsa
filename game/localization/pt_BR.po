@@ -1,0 +1,60 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: GSA M0\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "bootstrap.title"
+msgstr "GSA"
+
+msgid "bootstrap.status"
+msgstr "Fundação do projeto"
+
+msgid "bootstrap.language"
+msgstr "Idioma"
+
+msgid "bootstrap.coordinate_label"
+msgstr "Coordenada"
+
+msgid "bootstrap.language_error"
+msgstr "Não foi possível salvar o idioma. Tente novamente."
+
+msgid "language.pt_BR"
+msgstr "Português (Brasil)"
+
+msgid "language.en_US"
+msgstr "English (US)"
+
+msgid "fixture.sample_count"
+msgid_plural "fixture.sample_count.plural"
+msgstr[0] "{0} amostra"
+msgstr[1] "{0} amostras"
+
+msgctxt "quality"
+msgid "fixture.context_value"
+msgstr "Aprovado"
+
+msgctxt "quantity"
+msgid "fixture.context_value"
+msgstr "Quantidade"
+
+msgid "mission.facades.title"
+msgstr "Fachadas da Rua do Comércio"
+
+msgid "mission.inventory.title"
+msgstr "Inventário de feições urbanas"
+
+msgid "mission.point_cloud.title"
+msgstr "Levantamento de nuvem de pontos"
+
+msgid "mission.pavement.title"
+msgstr "Perfil do pavimento"
+
+msgid "sensor.camera"
+msgstr "Câmera"
+
+msgid "sensor.gnss"
+msgstr "GNSS"

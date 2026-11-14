@@ -1,0 +1,387 @@
+{
+  "schema_version": 1,
+  "id": "old_center",
+  "bounds_enu": {
+    "min": [
+      500000,
+      7400000,
+      90
+    ],
+    "max": [
+      500500,
+      7400500,
+      150
+    ]
+  },
+  "areas": [
+    {
+      "id": "commerce_street_facades",
+      "polygon_enu": [
+        [
+          500001,
+          7400001
+        ],
+        [
+          500499,
+          7400001
+        ],
+        [
+          500499,
+          7400499
+        ],
+        [
+          500001,
+          7400499
+        ]
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "commerce_facade_planes",
+      "area_id": "commerce_street_facades"
+    }
+  ],
+  "features": [
+    {
+      "id": "facade_01",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500020,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_02",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500030,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_03",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500040,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_04",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500050,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_05",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500060,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_06",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500070,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_07",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500080,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_08",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500090,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_09",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500100,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_10",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500110,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_11",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500120,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_12",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500130,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_13",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500140,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_14",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500150,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_15",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500160,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_16",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500170,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_17",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500180,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_18",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500190,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_19",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500200,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "facade_20",
+      "area_id": "commerce_street_facades",
+      "surface_id": "commerce_facade_planes",
+      "class": "building_facade",
+      "material": "concrete",
+      "position_enu": [
+        500210,
+        7400005,
+        101
+      ],
+      "tags": [
+        "facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    }
+  ]
+}
