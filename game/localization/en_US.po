@@ -187,3 +187,33 @@ msgstr "Step 4: Deliver approved product and confirm ledger payout"
 
 msgid "tutorial.control_vs_checkpoint.summary"
 msgstr "Control points help orient your survey; checkpoints remain isolated for independent quality evaluation."
+
+msgid "world.streaming.safety_band_unloaded"
+msgstr "Safety band sector unloaded; capture paused until adjacent sector finishes loading."
+
+msgid "world.portal.locked_by_campaign"
+msgstr "Region portal locked until the required story mission is completed."
+
+msgid "shop.platform.bicycle.mechanic"
+msgstr "Bicycle (L1): doubles max speed to 6 m/s, 400 virtual storage units, and 40 min physical autonomy."
+
+msgid "shop.platform.scooter.mechanic"
+msgstr "Scooter (L2): reaches 12 m/s, 800 virtual storage units, and 50 min physical autonomy."
+
+msgid "shop.error.lidar_requires_level_4"
+msgstr "LiDAR upgrades require a Level 4+ platform with heavy mounting slots."
+
+msgid "gnss.dgnss.base_unavailable"
+msgstr "DGNSS base station correction log unavailable for this epoch; falling back to autonomous GNSS."
+
+msgid "gnss.dgnss.outside_operating_window"
+msgstr "Observation timestamp falls outside the contracted DGNSS base operating window."
+
+msgid "gnss.dgnss.excessive_baseline_decorrelation"
+msgstr "Baseline exceeds maximum range for correlated error cancellation due to 0.02 m/km decorrelation."
+
+msgid "office.mode.arcade.preview"
+msgstr "Arcade mode: automatic selection, triangulation confirmation, and masking (5% base fee, waived on subsidized Calm jobs)."
+
+msgid "office.mode.technical.preview"
+msgstr "Technical mode: manual selection, feature confirmation, and masking review (0 Coords processing fee)."

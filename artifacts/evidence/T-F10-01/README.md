@@ -1,6 +1,6 @@
 # Evidência — T-F10-01 (Criar tutorial e catálogo inicial de história)
 
-Estado: Implementado localmente; aceitação final delegada ao CI multiplataforma do PR de M2 Wave 4.
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #9 (`ecfb666`, run `43678477743`); ver `artifacts/evidence/M2-wave4-ci/summary.json`.
 
 ## Escopo implementado
 - `StoryCampaignAndTutorial.cs` (`StoryCampaignCoordinator`, `TutorialMissionRunner`, `ControlVsCheckpointReference`, `MissionDefinition`, `CampaignState`) em `src/Gsa.Missions/Campaign/StoryCampaignAndTutorial.cs`:

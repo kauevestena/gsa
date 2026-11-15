@@ -295,11 +295,11 @@ public static class M2PlaytestAndGateValidator
         new("T-F07-01", "Criar processamento básico por receita", ["REQ-F07-01"], ["AC-F07-01"], "artifacts/evidence/T-F07-01/README.md", true),
         new("T-F07-04", "Implementar máscaras e conformidade", ["REQ-F07-03"], ["AC-F07-03"], "artifacts/evidence/T-F07-04/README.md", true),
         new("T-F08-01", "Implementar ledger e pagamentos", ["REQ-F08-01"], ["AC-F08-01"], "artifacts/evidence/T-F08-01/README.md", true),
-        new("T-F10-01", "Criar tutorial e catálogo inicial de história", ["REQ-F10-01", "REQ-F10-04"], ["AC-F10-01"], "artifacts/evidence/T-F10-01/README.md", Accepted: false, EvidenceVerified: true),
+        new("T-F10-01", "Criar tutorial e catálogo inicial de história", ["REQ-F10-01", "REQ-F10-04"], ["AC-F10-01"], "artifacts/evidence/T-F10-01/README.md", Accepted: true, EvidenceVerified: true),
         new("T-F11-02", "Implementar HUD, mapa e ajustes", ["REQ-F11-02", "REQ-F11-05"], ["AC-F11-02"], "artifacts/evidence/T-F11-02/README.md", true),
         new("T-F11-03", "Criar quadro, escritório e relatório", ["REQ-F11-02", "REQ-F11-03"], ["AC-F11-02", "AC-F11-03"], "artifacts/evidence/T-F11-03/README.md", true),
         new("T-F12-01", "Implementar lotes e descarregamento atômico", ["REQ-F12-01"], ["AC-F12-01"], "artifacts/evidence/T-F12-01/README.md", true),
         new("T-F12-02", "Implementar save e recuperação", ["REQ-F12-02"], ["AC-F12-01", "AC-F12-02"], "artifacts/evidence/T-F12-02/README.md", true),
-        new("T-F19-02", "Validar primeira experiência completa", ["REQ-F19-02"], ["AC-F19-02"], "artifacts/evidence/T-F19-02/README.md", Accepted: false, EvidenceVerified: true),
+        new("T-F19-02", "Validar primeira experiência completa", ["REQ-F19-02"], ["AC-F19-02"], "artifacts/evidence/T-F19-02/README.md", Accepted: true, EvidenceVerified: true),
     ];
 }

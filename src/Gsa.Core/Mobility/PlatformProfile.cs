@@ -4,9 +4,11 @@ public enum LocomotionMode
 {
     OnFoot = 0,
     Handcart = 1,
+    Bicycle = 2,
+    Scooter = 3,
 }
 
-/// <summary>Physical and resource parameters for the initial walking and handcart modes.</summary>
+/// <summary>Physical and resource parameters for the initial walking, handcart, bicycle, and scooter modes.</summary>
 public sealed record PlatformProfile
 {
     public int Level { get; }
@@ -101,6 +103,45 @@ public sealed record PlatformProfile
         hasFiniteAutonomy: true,
         physicalAutonomySeconds: 1800.0,
         priceCoords: 0);
+
+    public static PlatformProfile Bicycle { get; } = new(
+        level: 1,
+        id: "bicycle",
+        mode: LocomotionMode.Bicycle,
+        maxSpeedMetresPerSecond: 6.0,
+        accelerationMetresPerSecondSquared: 6.0,
+        decelerationMetresPerSecondSquared: 10.0,
+        turnRateRadiansPerSecond: 2.8,
+        collisionRadiusMetres: 0.45,
+        collisionHeightMetres: 1.65,
+        virtualStorageCapacityUnits: 400,
+        hasFiniteAutonomy: true,
+        physicalAutonomySeconds: 2400.0,
+        priceCoords: 400);
+
+    public static PlatformProfile Scooter { get; } = new(
+        level: 2,
+        id: "scooter",
+        mode: LocomotionMode.Scooter,
+        maxSpeedMetresPerSecond: 12.0,
+        accelerationMetresPerSecondSquared: 8.5,
+        decelerationMetresPerSecondSquared: 12.0,
+        turnRateRadiansPerSecond: 2.5,
+        collisionRadiusMetres: 0.55,
+        collisionHeightMetres: 1.50,
+        virtualStorageCapacityUnits: 800,
+        hasFiniteAutonomy: true,
+        physicalAutonomySeconds: 3000.0,
+        priceCoords: 1200);
+
+    public static PlatformProfile ForMode(LocomotionMode mode) => mode switch
+    {
+        LocomotionMode.OnFoot => OnFoot,
+        LocomotionMode.Handcart => Handcart,
+        LocomotionMode.Bicycle => Bicycle,
+        LocomotionMode.Scooter => Scooter,
+        _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown locomotion mode."),
+    };
 
     private static void EnsurePositiveFinite(double value, string paramName)
     {

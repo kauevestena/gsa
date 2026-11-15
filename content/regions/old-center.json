@@ -76,6 +76,27 @@
           7400055
         ]
       ]
+    },
+    {
+      "id": "commerce_street_signs",
+      "polygon_enu": [
+        [
+          500010,
+          7400060
+        ],
+        [
+          500490,
+          7400060
+        ],
+        [
+          500490,
+          7400100
+        ],
+        [
+          500010,
+          7400100
+        ]
+      ]
     }
   ],
   "surfaces": [
@@ -90,6 +111,10 @@
     {
       "id": "commerce_sidewalk_surface",
       "area_id": "commerce_street_sidewalks"
+    },
+    {
+      "id": "commerce_sign_planes",
+      "area_id": "commerce_street_signs"
     }
   ],
   "features": [
@@ -778,6 +803,210 @@
         "sidewalk",
         "accessibility",
         "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_01",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500035,
+        7400035,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_02",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500095,
+        7400080,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_03",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500165,
+        7400050,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_04",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500215,
+        7400140,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_05",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500280,
+        7400180,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_06",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500340,
+        7400110,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_07",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500390,
+        7400230,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_08",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500120,
+        7400280,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_09",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500240,
+        7400330,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_10",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500360,
+        7400370,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_11",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500440,
+        7400420,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sign_12",
+      "area_id": "commerce_street_signs",
+      "surface_id": "commerce_sign_planes",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500180,
+        7400450,
+        102.5
+      ],
+      "tags": [
+        "sign",
+        "inventory_target"
       ],
       "dynamic": false
     }

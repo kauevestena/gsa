@@ -15,4 +15,5 @@ public sealed record GnssProfile
 
     public static GnssProfile Cellphone { get; } = new("gnss_cellphone", 3);
     public static GnssProfile Navigation { get; } = new("gnss_navigation", 1.5);
+    public static GnssProfile Dgnss { get; } = new("gnss_dgnss", 0.5);
 }

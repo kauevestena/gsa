@@ -42,6 +42,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Comparação de produtos e roteiro de UI.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F07-02](../../../artifacts/evidence/T-F07-02/README.md)).
+
 ### T-F07-03 — Integrar processamento avançado
 
 - [ ] Aceita

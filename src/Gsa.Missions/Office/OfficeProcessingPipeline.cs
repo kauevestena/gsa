@@ -499,3 +499,180 @@ public sealed class OfficeProcessingQueue
     }
 }
 
+public sealed record OfficeJobPreview(
+    ProcessingMode Mode,
+    double DurationSeconds,
+    int BaseServiceFeeCoords,
+    int EffectiveServiceFeeCoords,
+    bool LowBalanceSubsidized,
+    int ProtectedBatchCount,
+    int SuggestedSampleCount,
+    int SensitiveRegionCount,
+    string PreviewKey);
+
+/// <summary>Builds Arcade (assisted/automated) and Technical (manual) simplified processing workflows over custody batches.</summary>
+public static class SimplifiedOfficeWorkstation
+{
+    public const double BasicBatchDurationSeconds = 600.0;
+    public const double ArcadeFeeFraction = 0.05;
+
+    public static OfficeJobPreview BuildCostAndTimePreview(
+        ContractStateMachine contract,
+        BatchCustodyStore custodyStore,
+        CareerLedger ledger,
+        ProcessingMode mode,
+        int processingSkillRank = 0,
+        IReadOnlyList<string>? sourceBatchIds = null)
+    {
+        ArgumentNullException.ThrowIfNull(contract);
+        ArgumentNullException.ThrowIfNull(custodyStore);
+        ArgumentNullException.ThrowIfNull(ledger);
+
+        var definition = contract.Snapshot?.Definition
+            ?? throw new InvalidOperationException("Contract must be accepted before previewing office processing.");
+
+        var artifacts = ResolveArtifacts(contract, custodyStore, sourceBatchIds);
+        var clampedRank = Math.Clamp(processingSkillRank, 0, FleetShopCatalog.MaxSkillRank);
+        var perBatchDuration = BasicBatchDurationSeconds * (1.0 - 0.10 * clampedRank);
+        var durationSeconds = artifacts.Count * perBatchDuration;
+
+        var baseFee = mode == ProcessingMode.Arcade
+            ? (int)Math.Round(definition.Reward.BaseCoords * ArcadeFeeFraction, MidpointRounding.AwayFromZero)
+            : 0;
+        var subsidized = mode == ProcessingMode.Arcade
+            && definition.Calm
+            && ledger.BalanceCoords < CareerLedger.LowBalanceSubsidyThresholdCoords;
+        var effectiveFee = subsidized ? 0 : baseFee;
+
+        var seenSamples = new HashSet<string>(StringComparer.Ordinal);
+        var sensitiveCount = 0;
+        foreach (var artifact in artifacts)
+        {
+            foreach (var sampleDto in artifact.Samples)
+            {
+                if (seenSamples.Add(sampleDto.SampleId))
+                    sensitiveCount += PrivacyMaskingService.DetectSensitiveRegions(sampleDto.ToDomain()).Count;
+            }
+        }
+
+        var previewKey = mode == ProcessingMode.Arcade
+            ? "office.mode.arcade.preview"
+            : "office.mode.technical.preview";
+
+        return new OfficeJobPreview(
+            Mode: mode,
+            DurationSeconds: durationSeconds,
+            BaseServiceFeeCoords: baseFee,
+            EffectiveServiceFeeCoords: effectiveFee,
+            LowBalanceSubsidized: subsidized,
+            ProtectedBatchCount: artifacts.Count,
+            SuggestedSampleCount: seenSamples.Count,
+            SensitiveRegionCount: sensitiveCount,
+            PreviewKey: previewKey);
+    }
+
+    public static ProcessingRecipe BuildArcadeAssistedRecipe(
+        string recipeId,
+        ContractStateMachine contract,
+        BatchCustodyStore custodyStore,
+        CareerLedger ledger,
+        int processingSkillRank = 0,
+        IReadOnlyList<string>? sourceBatchIds = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(recipeId);
+        var artifacts = ResolveArtifacts(contract, custodyStore, sourceBatchIds);
+        var preview = BuildCostAndTimePreview(contract, custodyStore, ledger, ProcessingMode.Arcade, processingSkillRank, sourceBatchIds);
+
+        var batchIds = artifacts.Select(a => a.BatchId).ToArray();
+        var sampleIds = new List<string>();
+        var seenSamples = new HashSet<string>(StringComparer.Ordinal);
+        var confirmedFeatureIds = new List<string>();
+        var seenFeatures = new HashSet<string>(StringComparer.Ordinal);
+        var confirmedMasksBySample = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+
+        foreach (var artifact in artifacts)
+        {
+            foreach (var sampleDto in artifact.Samples)
+            {
+                if (!seenSamples.Add(sampleDto.SampleId))
+                    continue;
+                sampleIds.Add(sampleDto.SampleId);
+                var regions = PrivacyMaskingService.DetectSensitiveRegions(sampleDto.ToDomain());
+                if (regions.Count > 0)
+                    confirmedMasksBySample[sampleDto.SampleId] = regions.Select(r => r.TargetId).ToArray();
+            }
+
+            foreach (var feat in artifact.Features)
+            {
+                if (feat.Confirmed && feat.Status == TriangulationStatus.Resolved && seenFeatures.Add(feat.TargetId))
+                    confirmedFeatureIds.Add(feat.TargetId);
+            }
+        }
+
+        return new ProcessingRecipe(
+            SchemaVersion: 1,
+            RecipeId: recipeId,
+            ContractId: contract.ContractId,
+            Mode: ProcessingMode.Arcade,
+            SourceBatchIds: batchIds,
+            SelectedSampleIds: sampleIds,
+            ConfirmedFeatureTargetIds: confirmedFeatureIds,
+            ConfirmedMasksBySampleId: confirmedMasksBySample,
+            CalendarDurationSeconds: preview.DurationSeconds,
+            ServiceFeeCoords: preview.EffectiveServiceFeeCoords);
+    }
+
+    public static ProcessingRecipe BuildTechnicalManualRecipe(
+        string recipeId,
+        ContractStateMachine contract,
+        BatchCustodyStore custodyStore,
+        CareerLedger ledger,
+        IReadOnlyList<string> sourceBatchIds,
+        IReadOnlyList<string> selectedSampleIds,
+        IReadOnlyList<string> confirmedFeatureTargetIds,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> confirmedMasksBySampleId,
+        int processingSkillRank = 0)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(recipeId);
+        ArgumentNullException.ThrowIfNull(sourceBatchIds);
+        ArgumentNullException.ThrowIfNull(selectedSampleIds);
+        ArgumentNullException.ThrowIfNull(confirmedFeatureTargetIds);
+        ArgumentNullException.ThrowIfNull(confirmedMasksBySampleId);
+
+        var artifacts = ResolveArtifacts(contract, custodyStore, sourceBatchIds);
+        var preview = BuildCostAndTimePreview(contract, custodyStore, ledger, ProcessingMode.Technical, processingSkillRank, sourceBatchIds);
+
+        return new ProcessingRecipe(
+            SchemaVersion: 1,
+            RecipeId: recipeId,
+            ContractId: contract.ContractId,
+            Mode: ProcessingMode.Technical,
+            SourceBatchIds: artifacts.Select(a => a.BatchId).ToArray(),
+            SelectedSampleIds: selectedSampleIds,
+            ConfirmedFeatureTargetIds: confirmedFeatureTargetIds,
+            ConfirmedMasksBySampleId: confirmedMasksBySampleId,
+            CalendarDurationSeconds: preview.DurationSeconds,
+            ServiceFeeCoords: preview.EffectiveServiceFeeCoords);
+    }
+
+    private static IReadOnlyList<SurveyBatchArtifact> ResolveArtifacts(
+        ContractStateMachine contract,
+        BatchCustodyStore custodyStore,
+        IReadOnlyList<string>? sourceBatchIds)
+    {
+        var contractProtectedIds = contract.ProtectedBatches
+            .Select(b => b.BatchId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        HashSet<string>? requestedIds = sourceBatchIds is null
+            ? null
+            : new HashSet<string>(sourceBatchIds, StringComparer.Ordinal);
+
+        return custodyStore.GetProtectedArtifactsForContract(contract.ContractId)
+            .Where(a => contractProtectedIds.Contains(a.BatchId) && (requestedIds is null || requestedIds.Contains(a.BatchId)))
+            .OrderBy(a => a.StartTimeSeconds)
+            .ThenBy(a => a.BatchId, StringComparer.Ordinal)
+            .ToArray();
+    }
+}
+
