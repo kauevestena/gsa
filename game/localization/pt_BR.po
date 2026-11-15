@@ -187,3 +187,33 @@ msgstr "Passo 4: Entregar produto aprovado e confirmar pagamento no livro-caixa"
 
 msgid "tutorial.control_vs_checkpoint.summary"
 msgstr "Pontos de controle orientam o levantamento; pontos de checagem permanecem isolados para avaliação independente de qualidade."
+
+msgid "world.streaming.safety_band_unloaded"
+msgstr "Setor da banda de segurança descarregado; captura pausada até o carregamento do setor adjacente."
+
+msgid "world.portal.locked_by_campaign"
+msgstr "Portal regional bloqueado até a conclusão da missão de história exigida."
+
+msgid "shop.platform.bicycle.mechanic"
+msgstr "Bicicleta (N1): eleva velocidade para 6 m/s, 400 unidades de armazenamento virtual e 40 min de autonomia física."
+
+msgid "shop.platform.scooter.mechanic"
+msgstr "Motoneta (N2): alcança 12 m/s, 800 unidades de armazenamento virtual e 50 min de autonomia física."
+
+msgid "shop.error.lidar_requires_level_4"
+msgstr "Upgrades LiDAR exigem uma plataforma nível 4 ou superior com slots de montagem."
+
+msgid "gnss.dgnss.base_unavailable"
+msgstr "Log da estação-base DGNSS indisponível nesta época; mantendo solução GNSS autônoma."
+
+msgid "gnss.dgnss.outside_operating_window"
+msgstr "Época da observação fora da janela contratada de operação da base DGNSS."
+
+msgid "gnss.dgnss.excessive_baseline_decorrelation"
+msgstr "Linha de base excede o limite para cancelamento do erro comum pela descorrelação de 0,02 m/km."
+
+msgid "office.mode.arcade.preview"
+msgstr "Modo Arcade: seleção, confirmação e mascaramento assistidos (taxa de 5%, isenta em contratos Calm subsidiados)."
+
+msgid "office.mode.technical.preview"
+msgstr "Modo Técnico: seleção, confirmação de feições e revisão de máscaras manuais (taxa de 0 Coords)."

@@ -3,7 +3,7 @@ using Gsa.Core.Randomness;
 
 namespace Gsa.Core.Sensors.Gnss;
 
-public enum GnssSolutionKind { Unavailable, Autonomous }
+public enum GnssSolutionKind { Unavailable, Autonomous, Dgnss }
 
 /// <summary>Measurement-only output. Sigma describes independent noise, not total error.</summary>
 public sealed record GnssObservation
@@ -15,7 +15,7 @@ public sealed record GnssObservation
     public Vector3d? MeasuredPositionEnu { get; }
     public double Dop { get; }
     public double? IndependentSigmaMetres { get; }
-    public bool IsAvailable => Solution == GnssSolutionKind.Autonomous;
+    public bool IsAvailable => Solution != GnssSolutionKind.Unavailable;
 
     internal GnssObservation(long sequence, double timestamp, string profileId,
         GnssSolutionKind solution, Vector3d? position, double dop, double? sigma)

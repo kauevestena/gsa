@@ -1,6 +1,6 @@
 # Evidência — T-F19-02 (Validar primeira experiência completa)
 
-Estado: Implementado localmente; aceitação final delegada ao CI multiplataforma do PR de M2 Wave 4.
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #9 (`ecfb666`, run `43678477743`); ver `artifacts/evidence/M2-wave4-ci/summary.json`.
 
 ## Escopo implementado
 - `M2PlaytestAndGateValidator` (`M2PlaytestSessionRecord`, `M2CorrectionItem`, `M2GateReport`) em `src/Gsa.Missions/Diagnostics/M2PlaytestAndGateValidator.cs` e comando CLI `M2GateTool` (`run-m2-gate`) em `src/Gsa.Tools/Campaign/M2GateTool.cs`:

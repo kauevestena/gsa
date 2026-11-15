@@ -365,7 +365,7 @@
         "AC-F10-01"
       ],
       "evidence_path": "artifacts/evidence/T-F10-01/README.md",
-      "accepted": false,
+      "accepted": true,
       "evidence_verified": true
     },
     {
@@ -434,7 +434,7 @@
         "AC-F19-02"
       ],
       "evidence_path": "artifacts/evidence/T-F19-02/README.md",
-      "accepted": false,
+      "accepted": true,
       "evidence_verified": true
     }
   ]

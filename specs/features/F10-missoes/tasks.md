@@ -6,9 +6,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F10-01 — Criar tutorial e catálogo inicial de história
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave4-tutorial-playtest-gate`; em revisão (aguardando CI do PR #9); [evidências](../../../artifacts/evidence/T-F10-01/README.md) e [relatório](../../../artifacts/evidence/T-F10-01/tutorial-execution-report.json). `StoryCampaignAndTutorial.cs` (`StoryCampaignCoordinator`, `TutorialMissionRunner`, `ControlVsCheckpointReference`) + `content/missions/HIST-{01,02,03}.json` + `content/contracts/hist-{02-drainage,03-sidewalks}.json` + chaves `.po` + `GameFacade.RunM2TutorialSmoke`: tutorial completo `HIST-01` (coleta sem sensores futuros, CQ com retrabalho, máscara RGB `(32,32,32)` em miniatura, 5 estrelas, liquidação idempotente, round-trip de save) e catálogo acíclico do Ato 1 desbloqueando `bicycle` e `scooter`.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #9 (`ecfb666`, run `43678477743`); [resumo CI](../../../artifacts/evidence/M2-wave4-ci/summary.json), [evidências](../../../artifacts/evidence/T-F10-01/README.md) e [relatório](../../../artifacts/evidence/T-F10-01/tutorial-execution-report.json). `StoryCampaignAndTutorial.cs` (`StoryCampaignCoordinator`, `TutorialMissionRunner`, `ControlVsCheckpointReference`) + `content/missions/HIST-{01,02,03}.json` + `content/contracts/hist-{02-drainage,03-sidewalks}.json` + chaves `.po` + `GameFacade.RunM2TutorialSmoke`: tutorial completo `HIST-01` (coleta sem sensores futuros, CQ com retrabalho, máscara RGB `(32,32,32)` em miniatura, 5 estrelas, liquidação idempotente, round-trip de save) e catálogo acíclico do Ato 1 desbloqueando `bicycle` e `scooter`.
 
 **Marco:** M2
 

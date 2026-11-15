@@ -80,7 +80,7 @@ public sealed class WorldSceneManifest
     public IReadOnlyList<WorldBoxObject> Objects { get; }
     public string CanonicalGeometryHash { get; }
 
-    private WorldSceneManifest(string sceneId, int mapVersion, string datumId, Vector3d origin,
+    internal WorldSceneManifest(string sceneId, int mapVersion, string datumId, Vector3d origin,
         WorldBounds bounds, WorldCellDefinition[] cells, WorldBoxObject[] objects)
     {
         (SceneId, MapVersion, DatumId, OriginEnu, Bounds) = (sceneId, mapVersion, datumId, origin, bounds);

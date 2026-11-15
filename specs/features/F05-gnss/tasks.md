@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Comparação com/sem base e registro de cobrança.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F05-03](../../../artifacts/evidence/T-F05-03/README.md)).
+
 ### T-F05-04 — Adicionar RTK e instalação de base
 
 - [ ] Aceita

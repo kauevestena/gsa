@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Mapa de alvos, percurso gravado e teste de streaming.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-03](../../../artifacts/evidence/T-F02-03/README.md)).
+
 ### T-F02-04 — Expandir Centro, Porto e Orla
 
 - [ ] Aceita

@@ -35,10 +35,10 @@ public sealed class M2PlaytestAndGateTests
         Assert.Equal(3, gateReport.ProtocolThresholds.MinChoseAnotherContract);
 
         Assert.Equal(15, gateReport.Tasks.Count);
-        Assert.Equal(13, gateReport.Tasks.Count(t => t.Accepted));
+        Assert.Equal(15, gateReport.Tasks.Count(t => t.Accepted));
         Assert.All(gateReport.Tasks, t => Assert.True(t.EvidenceVerified));
-        Assert.Contains(gateReport.Tasks, t => t.TaskId == "T-F10-01" && !t.Accepted);
-        Assert.Contains(gateReport.Tasks, t => t.TaskId == "T-F19-02" && !t.Accepted);
+        Assert.Contains(gateReport.Tasks, t => t.TaskId == "T-F10-01" && t.Accepted);
+        Assert.Contains(gateReport.Tasks, t => t.TaskId == "T-F19-02" && t.Accepted);
         Assert.All(gateReport.CorrectionsLog, c => Assert.True(c.VerifiedByRetest));
     }
 

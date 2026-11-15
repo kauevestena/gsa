@@ -42,6 +42,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Percurso de compra e cenário de falência.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F08-02](../../../artifacts/evidence/T-F08-02/README.md)).
+
 ### T-F08-03 — Implementar habilidades e reputação completa
 
 - [ ] Aceita

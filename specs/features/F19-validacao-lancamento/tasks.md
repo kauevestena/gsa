@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F19-02 — Validar primeira experiência completa
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave4-tutorial-playtest-gate`; em revisão (aguardando CI do PR #9); [evidências](../../../artifacts/evidence/T-F19-02/README.md) e [relatório do gate](../../../artifacts/evidence/T-F19-02/m2-gate-report.json). `M2PlaytestAndGateValidator` em `Gsa.Missions.Diagnostics` e comando CLI `run-m2-gate` (`Gsa.Tools.Campaign.M2GateTool`): validação ponta a ponta do loop técnico M2 (`technical_loop_status: "passed"`) vinculado às 15 tarefas do marco e à avaliação da coorte de 5 novatos segundo `specs/validacao.md` (`playtest_gate_status: "pending_human_playtest_cohort"` até a execução com `IsHumanCohortSession = true`).
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #9 (`ecfb666`, run `43678477743`); [resumo CI](../../../artifacts/evidence/M2-wave4-ci/summary.json), [evidências](../../../artifacts/evidence/T-F19-02/README.md) e [relatório do gate](../../../artifacts/evidence/T-F19-02/m2-gate-report.json). `M2PlaytestAndGateValidator` em `Gsa.Missions.Diagnostics` e comando CLI `run-m2-gate` (`Gsa.Tools.Campaign.M2GateTool`): validação ponta a ponta do loop técnico M2 (`technical_loop_status: "passed"`) vinculado às 15 tarefas do marco e à avaliação da coorte de 5 novatos segundo `specs/validacao.md` (`playtest_gate_status: "pending_human_playtest_cohort"` até a execução com `IsHumanCohortSession = true`).
 
 **Marco:** M2
 
