@@ -6,9 +6,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F03-01 — Implementar locomoção inicial e entradas
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F03-01/README.md). Perfis a pé (3 m/s) e carrinho (2 m/s, 200 unidades virtuais, 30 min autonomia), mapa de 9 ações remapeáveis com persistência JSON e cena de teste integrados; CI nativa do PR #3 pendente antes do merge.
+**Estado:** aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #3](https://github.com/kauevestena/gsa/pull/3) (SHA testado `6ca633eb54e63844b8261ccbc8932c0cdbd16680`, merge `684a3bf`, execução [43670010849](https://github.com/kauevestena/gsa/actions/runs/43670010849), jobs Linux `132677755968` e Windows `132677755785`); [evidências](../../../artifacts/evidence/T-F03-01/README.md) e [resumo CI](../../../artifacts/evidence/M1-mobility-camera-ci/summary.json). Perfis a pé (3 m/s) e carrinho (2 m/s, 200 unidades virtuais, 30 min autonomia), mapa de 9 ações remapeáveis com persistência JSON e cena de teste integrados.
 
 **Marco:** M1
 
@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F03-02 — Integrar galinha e estresse
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F03-02/README.md). Estabilização até ±45°, estresse [0,100], eventos de susto, milho com cooldown, repouso, replay calmo vs estressado e fuga segura sem ferimento implementados; CI nativa do PR #3 pendente antes do merge.
+**Estado:** aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #3](https://github.com/kauevestena/gsa/pull/3) (SHA testado `6ca633eb54e63844b8261ccbc8932c0cdbd16680`, merge `684a3bf`, execução [43670010849](https://github.com/kauevestena/gsa/actions/runs/43670010849), jobs Linux `132677755968` e Windows `132677755785`); [evidências](../../../artifacts/evidence/T-F03-02/README.md) e [resumo CI](../../../artifacts/evidence/M1-mobility-camera-ci/summary.json). Estabilização até ±45°, estresse [0,100], eventos de susto, milho com cooldown, repouso, replay calmo vs estressado e fuga segura sem ferimento implementados.
 
 **Marco:** M1
 

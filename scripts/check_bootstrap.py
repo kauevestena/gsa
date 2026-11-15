@@ -73,7 +73,8 @@ def main() -> int:
     report = {
         "tasks": ["T-F01-02", "T-F06-01", "T-F01-03", "T-F11-01", "T-F01-04",
                   "T-F02-01", "T-F02-02", "T-F04-01", "T-F05-01",
-                  "T-F03-01", "T-F04-02", "T-F03-02"],
+                  "T-F03-01", "T-F04-02", "T-F03-02",
+                  "T-F09-01", "T-F15-01", "T-F17-01"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),
@@ -165,6 +166,10 @@ def main() -> int:
                                            "game/world/tutorial-sky.json"])
         if json.loads(sky_result).get("valid") is not True:
             raise RuntimeError("Sky precomputation did not report valid output")
+        art_result = run("validate-art-kit", [dotnet, ROOT / "src/Gsa.Tools/bin/Debug/net10.0/gsa-tools.dll",
+                                              "validate-art-kit", "game/world/pilot-kit"])
+        if json.loads(art_result).get("valid") is not True:
+            raise RuntimeError("Pilot art kit validator did not report valid output")
         run("restore", [dotnet, "restore", "Gsa.sln", "--locked-mode"])
         run("build", [dotnet, "build", "Gsa.sln", "--no-restore"])
         run("import", [godot, "--headless", "--path", "game", "--editor", "--import"])
@@ -176,7 +181,8 @@ def main() -> int:
         world_smoke = run("world-smoke", [godot, "--headless", "--path", "game",
                                           "res://world/TutorialBlock.tscn", "--", "--smoke-test"],
                           marker="GSA_WORLD_SMOKE_OK")
-        for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK", "GSA_GIMBALINA_SMOKE_OK"):
+        for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK",
+                       "GSA_GIMBALINA_SMOKE_OK", "GSA_TRAFFIC_SMOKE_OK", "GSA_LIDAR_SMOKE_OK", "GSA_PILOT_KIT_SMOKE_OK"):
             if marker not in world_smoke:
                 raise RuntimeError(f"Missing world verification marker: {marker}")
 
@@ -218,7 +224,8 @@ def main() -> int:
                 world_output = run(f"export-world-smoke-{target}",
                                    prefix + [executable, "--headless", "--", "--bench-smoke"],
                                    marker="GSA_WORLD_SMOKE_OK", runtime_env=clean)
-                for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK", "GSA_GIMBALINA_SMOKE_OK"):
+                for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK",
+                               "GSA_GIMBALINA_SMOKE_OK", "GSA_TRAFFIC_SMOKE_OK", "GSA_LIDAR_SMOKE_OK", "GSA_PILOT_KIT_SMOKE_OK"):
                     if marker not in world_output:
                         raise RuntimeError(f"{target}: missing exported world marker {marker}")
                 if args.offline_smoke:

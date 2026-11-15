@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F15-01/README.md). Perfis L4/L5/L6 de `parametros.md` sem oferta na loja/MVP, materiais, chuva, vegetação multi-retorno, fixture analítico de georreferenciamento sem verdade e fila limitada a 0,5 s integrados com raycast Godot; CI nativa do PR #4 pendente antes do merge.
+
 **Marco:** M1
 
 **Dependências:** T-F02-01

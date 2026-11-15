@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F09-01/README.md). Grafo viário/calçadas com semáforos, faixas de pedestres, zona de exclusão no escritório, 50 carros + 30 pedestres em 60 Hz e remoção de impasse fora da câmera (>= 20 s) integrados; CI nativa do PR #4 pendente antes do merge.
+
 **Marco:** M1
 
 **Dependências:** T-F02-01

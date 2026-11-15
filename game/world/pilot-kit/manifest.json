@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "kit_id": "gsa-pilot-kit-v1",
+  "brand_policy": "fictional_only",
+  "studio_brand": "VilaSol Obras Urbanas",
+  "atlas": {
+    "path": "textures/pilot_atlas_256.png",
+    "width": 256,
+    "height": 256
+  },
+  "materials": [
+    {
+      "id": "concrete",
+      "normal_return": 0.9,
+      "transmission": 0.0,
+      "roughness": 0.9,
+      "transparent": false
+    },
+    {
+      "id": "glass",
+      "normal_return": 0.1,
+      "transmission": 0.7,
+      "roughness": 0.15,
+      "transparent": true
+    },
+    {
+      "id": "water",
+      "normal_return": 0.05,
+      "transmission": 0.0,
+      "roughness": 0.1,
+      "transparent": true
+    },
+    {
+      "id": "asphalt",
+      "normal_return": 0.8,
+      "transmission": 0.0,
+      "roughness": 0.85,
+      "transparent": false
+    },
+    {
+      "id": "metal",
+      "normal_return": 0.7,
+      "transmission": 0.0,
+      "roughness": 0.45,
+      "transparent": false
+    },
+    {
+      "id": "vegetation",
+      "normal_return": 0.6,
+      "transmission": 0.4,
+      "roughness": 0.9,
+      "transparent": false
+    }
+  ],
+  "modules": [
+    {
+      "id": "lot",
+      "semantic_class": "urban_lot",
+      "material": "concrete",
+      "category": "urban",
+      "triangles": 72,
+      "collider": true,
+      "gltf": "modules/lot.gltf"
+    },
+    {
+      "id": "sidewalk",
+      "semantic_class": "sidewalk_segment",
+      "material": "concrete",
+      "category": "urban",
+      "triangles": 72,
+      "collider": true,
+      "gltf": "modules/sidewalk.gltf"
+    },
+    {
+      "id": "corner",
+      "semantic_class": "sidewalk_corner",
+      "material": "concrete",
+      "category": "urban",
+      "triangles": 72,
+      "collider": true,
+      "gltf": "modules/corner.gltf"
+    },
+    {
+      "id": "intersection",
+      "semantic_class": "road_intersection",
+      "material": "asphalt",
+      "category": "urban",
+      "triangles": 72,
+      "collider": true,
+      "gltf": "modules/intersection.gltf"
+    },
+    {
+      "id": "facade",
+      "semantic_class": "building_facade",
+      "material": "concrete",
+      "category": "urban",
+      "triangles": 96,
+      "collider": true,
+      "gltf": "modules/facade.gltf"
+    },
+    {
+      "id": "pole",
+      "semantic_class": "utility_pole",
+      "material": "metal",
+      "category": "urban",
+      "triangles": 60,
+      "collider": true,
+      "gltf": "modules/pole.gltf"
+    },
+    {
+      "id": "tree",
+      "semantic_class": "street_tree",
+      "material": "vegetation",
+      "category": "urban",
+      "triangles": 72,
+      "collider": true,
+      "gltf": "modules/tree.gltf"
+    },
+    {
+      "id": "sign",
+      "semantic_class": "traffic_sign",
+      "material": "metal",
+      "category": "urban",
+      "triangles": 60,
+      "collider": true,
+      "gltf": "modules/sign.gltf"
+    },
+    {
+      "id": "manhole",
+      "semantic_class": "manhole_cover",
+      "material": "metal",
+      "category": "urban",
+      "triangles": 72,
+      "collider": true,
+      "gltf": "modules/manhole.gltf"
+    }
+  ],
+  "total_triangles": 648
+}
