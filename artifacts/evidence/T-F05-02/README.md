@@ -1,6 +1,6 @@
 # Evidência — T-F05-02 (Integrar céu e estado de solução)
 
-Estado: em revisão técnica delegada (aguardando CI nativa Linux/Windows do PR #6, `codex/m2-wave1-sensors-contracts-cq`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); ver `artifacts/evidence/M2-wave1-ci/summary.json`.
 
 ## Escopo implementado
 - `GnssProfileSelector`: mapeamento determinístico de `PlatformProfile` / upgrade de receptor para `GnssProfile` (`gnss_cellphone` / `gnss_navigation`) e `HeadingProfile` (`heading_level_0..2`).

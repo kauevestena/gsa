@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Gsa.Core.Geometry;
 using Gsa.Core.Sensors.Camera;
 using Gsa.Missions.Contracts;
@@ -16,6 +17,7 @@ public readonly record struct Bounds2DEnu
     public double Height => MaxNorth - MinNorth;
     public double Area => Width * Height;
 
+    [JsonConstructor]
     public Bounds2DEnu(double minEast, double minNorth, double maxEast, double maxNorth)
     {
         if (!double.IsFinite(minEast) || !double.IsFinite(minNorth) ||

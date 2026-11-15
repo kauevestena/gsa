@@ -1,6 +1,6 @@
 # Evidência — T-F06-02 (Implementar máquina de contratos)
 
-Estado: em revisão técnica delegada (aguardando CI nativa Linux/Windows do PR #6, `codex/m2-wave1-sensors-contracts-cq`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); ver `artifacts/evidence/M2-wave1-ci/summary.json`.
 
 ## Escopo implementado
 - `ContractDefinition.Parse`: carga tipada de JSON `schema_version = 1` validada pelo `ContractValidator`.

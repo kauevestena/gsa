@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F05-02 — Integrar céu e estado de solução
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F05-02/README.md). Integração `SkyVisibilityCache`, perfil GNSS/heading por `PlatformProfile`, amplificação multipath a `<= 15 m` de metal/vidro, bloqueio fora do grid/em `openness < 0.1` e montagem de `EstimatedBodyTrajectory` sem `TruthSample` nem atitude oculta.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); [resumo CI](../../../artifacts/evidence/M2-wave1-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F05-02/README.md). Integração `SkyVisibilityCache`, perfil GNSS/heading por `PlatformProfile`, amplificação multipath a `<= 15 m` de metal/vidro, bloqueio fora do grid/em `openness < 0.1` e montagem de `EstimatedBodyTrajectory` sem `TruthSample` nem atitude oculta.
 
 **Marco:** M2
 

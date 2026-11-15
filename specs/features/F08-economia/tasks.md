@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F08-01/README.md). `CareerLedger` em `Gsa.Missions.Economy`: saldo e dívida de multas em Coords inteiros sem saldo negativo, subsídio em contrato calmo (`< 50` Coords), abatimento limitado a `20%` da dívida, recuperação gratuita do kit inicial e replay idempotente por `TransactionId` após serialização JSON.
+
 **Marco:** M2
 
 **Dependências:** T-F06-04

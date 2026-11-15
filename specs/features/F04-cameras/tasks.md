@@ -46,9 +46,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F04-03 — Implementar scheduler e inventário
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F04-03/README.md). Agenda multissensor com orçamento de armazenamento virtual, lotes imutáveis, triangulação 2-raios (`>= 5°`), plano de suporte conhecido (`>= 5°`), diagnóstico `InsufficientGeometry` e modos `Arcade`/`Technical` implementados sem acesso a `TruthSample`.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); [resumo CI](../../../artifacts/evidence/M2-wave1-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F04-03/README.md). Agenda multissensor com orçamento de armazenamento virtual, lotes imutáveis, triangulação 2-raios (`>= 5°`), plano de suporte conhecido (`>= 5°`), diagnóstico `InsufficientGeometry` e modos `Arcade`/`Technical` implementados sem acesso a `TruthSample`.
 
 **Marco:** M2
 
