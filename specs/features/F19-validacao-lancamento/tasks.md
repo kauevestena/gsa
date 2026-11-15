@@ -6,9 +6,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F19-01 — Instrumentar e medir protótipo
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão (gate `pending_reference_hardware` aguardando máquina de referência Radeon Vega 7 não-headless e CI do PR #5); [evidências](../../../artifacts/evidence/T-F19-01/README.md) e [relatório de benchmark](../../../artifacts/evidence/T-F19-01/benchmark-report.json). Instrumentação de counters/timers/memória, cena M1 (quarteirão + 50 carros + 30 pedestres + câmera + LiDAR L4/L5/L6) nos presets `dry_day` e `rain_night`, três execuções de 5 minutos após 30 s de aquecimento e verificação em runtime Godot integrados.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #5 (`8294536`, run `43672603212`, gate `pending_reference_hardware` aguardando máquina de referência Radeon Vega 7 não-headless); [resumo CI](../../../artifacts/evidence/M1-wave4-ci/summary.json), [evidências](../../../artifacts/evidence/T-F19-01/README.md) e [relatório de benchmark](../../../artifacts/evidence/T-F19-01/benchmark-report.json). Instrumentação de counters/timers/memória, cena M1 (quarteirão + 50 carros + 30 pedestres + câmera + LiDAR L4/L5/L6) nos presets `dry_day` e `rain_night`, três execuções de 5 minutos após 30 s de aquecimento e verificação em runtime Godot integrados.
 
 **Marco:** M1
 

@@ -1,6 +1,6 @@
 # Evidência — T-F19-01 (Instrumentação e benchmark do protótipo M1)
 
-Estado: em revisão técnica delegada com gate de desempenho `pending_reference_hardware` aguardando máquina de referência Radeon Vega 7 não-headless e CI do PR #5 (`codex/m1-benchmark`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #5 (`8294536`, run `43672603212`), com gate de desempenho `pending_reference_hardware` aguardando máquina de referência Radeon Vega 7 não-headless; ver `artifacts/evidence/M1-wave4-ci/summary.json`.
 
 ## Escopo verificado
 - Instrumentação de domínio em `Gsa.Core.Diagnostics` (`BenchmarkModels`, `BenchmarkHardwareProbe`, `BenchmarkRunner`) e probe em runtime Godot (`EngineBenchmarkHarness` sob `_benchRoot`) com registro explícito de counters (`visible_triangles`, `draw_calls`, `active_vehicles=50`, `active_pedestrians=30`, `lidar_points_per_sec`, `sensor_queue_backlog_seconds`, `deadlock_removals`, `dropped_samples`, `silent_sample_drops=0`) e timers (`frame_cpu_ms`, `frame_gpu_ms`, `physics_step_ms`, `sensor_raycast_ms`, `thumbnail_capture_ms`, `block_assembly_ms`) e memória residente.

@@ -48,6 +48,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 - [ ] Aceita
 
+**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F04-03/README.md). Agenda multissensor com orçamento de armazenamento virtual, lotes imutáveis, triangulação 2-raios (`>= 5°`), plano de suporte conhecido (`>= 5°`), diagnóstico `InsufficientGeometry` e modos `Arcade`/`Technical` implementados sem acesso a `TruthSample`.
+
 **Marco:** M2
 
 **Dependências:** T-F04-02, T-F05-01

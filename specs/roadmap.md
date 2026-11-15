@@ -40,7 +40,7 @@ Estado de implementação: M0 integrado com aceite técnico delegado no [PR #1](
 
 ### M1 — Viabilidade técnica
 
-Primeiros incrementos em revisão: quarteirão/alturas, céu, câmera e GNSS. Ver [evidências](../artifacts/evidence/T-F02-01/README.md). O gate M1 ainda depende das tarefas restantes e da medição na referência.
+Implementação M1 concluída e aceita por revisão técnica delegada até o PR #5 (`T-F19-01`), com evidências em [CI Wave 4](../artifacts/evidence/M1-wave4-ci/summary.json) e [relatório de benchmark](../artifacts/evidence/T-F19-01/README.md). O gate final de desempenho segue marcado como `pending_reference_hardware` aguardando execução não-headless na GPU de referência Radeon Vega 7.
 
 **Gate de saída:** Bancada, orçamento de raios, 50 carros e relatório de hardware. Consultar o protocolo em [validação](validacao.md).
 
