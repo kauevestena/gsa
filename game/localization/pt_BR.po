@@ -244,3 +244,321 @@ msgstr "Proteção Cidade Calma: Desligada"
 
 msgid "camera.overlap.insufficient_geometry"
 msgstr "Geometria de suporte insuficiente para calcular sobreposição consecutiva confiável."
+
+msgid "proc.template.facades.title"
+msgstr "Fachadas comerciais do centro"
+
+msgid "proc.template.drainage.title"
+msgstr "Inventário de drenagem pluvial"
+
+msgid "proc.template.sidewalks.title"
+msgstr "Rede de calçadas acessíveis"
+
+msgid "proc.template.signs.title"
+msgstr "Sinalização viária de corredor urbano"
+
+msgid "proc.template.park.title"
+msgstr "Levantamento tranquilo no parque central"
+
+msgid "replay.incompatible_version"
+msgstr "Versão de schema do replay incompatível; arquivo original preservado."
+
+msgid "replay.incompatible_map_or_profile"
+msgstr "Versão do modelo, hash do mapa ou perfil de sensor do replay incompatível com o build atual."
+
+msgid "replay.invalid_contract_transition"
+msgstr "Transição de estado contratual inválida durante o replay científico."
+
+msgid "replay.processing_failed"
+msgstr "Não foi possível reexecutar a receita de escritório a partir dos lotes do replay."
+
+msgid "replay.metric_mismatch"
+msgstr "Métricas científicas reexecutadas divergiram além da tolerância permitida."
+
+msgid "collectible.egg.reward"
+msgstr "Bônus de ovo dourado encontrado"
+
+msgid "collectible.area_temporarily_blocked"
+msgstr "Área temporariamente bloqueada; colecionável permanece disponível após liberação do trecho."
+
+msgid "collectible.already_claimed"
+msgstr "Recompensa deste colecionável já foi resgatada neste save."
+
+msgid "collectible.region_locked_until_expansion"
+msgstr "Marco pertence a distrito ainda fechado; catalogado para desbloqueio futuro."
+
+msgid "collectible.landmark.too_far"
+msgstr "Aproxime-se a até 4 m do centro do marco geodésico para iniciar a ocupação."
+
+msgid "collectible.landmark.occupation_too_short"
+msgstr "Permaneça estacionado no marco por pelo menos 5 segundos para concluir a ocupação."
+
+msgid "collectible.landmark.zero_stone.title"
+msgstr "Marco 1: Marco Zero de São Datum"
+
+msgid "collectible.landmark.clock_tower.title"
+msgstr "Marco 2: Referência do Relógio do Comércio"
+
+msgid "collectible.landmark.port_pillar.title"
+msgstr "Marco 3: Pilar da Alfândega do Porto"
+
+msgid "collectible.landmark.port_lighthouse.title"
+msgstr "Marco 4: Marco do Quebra-Mar Portuário"
+
+msgid "collectible.landmark.waterfront_tide.title"
+msgstr "Marco 5: Referência do Marégrafo da Orla"
+
+msgid "collectible.landmark.waterfront_obelisk.title"
+msgstr "Marco 6: Obelisco Geodésico do Calçadão"
+
+msgid "collectible.landmark.hills_beacon.title"
+msgstr "Marco 7: Farol de Triangulação da Serra"
+
+msgid "collectible.landmark.hills_monolith.title"
+msgstr "Marco 8: Monólito de Controle do Viaduto"
+
+msgid "collectible.card.mercator.title"
+msgstr "Carta de Projeção: Mercator"
+
+msgid "collectible.card.mercator.app"
+msgstr "Navegação marítima e urbana conforme preservando ângulos locais."
+
+msgid "collectible.card.mercator.distortion"
+msgstr "Infla fortemente áreas em altas latitudes."
+
+msgid "collectible.card.robinson.title"
+msgstr "Carta de Projeção: Robinson"
+
+msgid "collectible.card.robinson.app"
+msgstr "Atlas mundiais equilibrados conciliando forma e área."
+
+msgid "collectible.card.robinson.distortion"
+msgstr "Não é estritamente conforme nem equivalente em área."
+
+msgid "collectible.card.gall_peters.title"
+msgstr "Carta de Projeção: Gall-Peters"
+
+msgid "collectible.card.gall_peters.app"
+msgstr "Comparações temáticas equivalentes em área entre continentes e latitudes."
+
+msgid "collectible.card.gall_peters.distortion"
+msgstr "Alonga formas norte-sul no equador e achata próximo aos polos."
+
+msgid "collectible.card.utm.title"
+msgstr "Carta de Projeção: UTM Transversa de Mercator"
+
+msgid "collectible.card.utm.app"
+msgstr "Engenharia regional e levantamentos em fusos de 6 graus."
+
+msgid "collectible.card.utm.distortion"
+msgstr "Fator de escala cresce ao afastar do meridiano central; evitar cruzar fusos."
+
+msgid "collectible.card.lambert.title"
+msgstr "Carta de Projeção: Cônica Conforme de Lambert"
+
+msgid "collectible.card.lambert.app"
+msgstr "Corredores leste-oeste de médias latitudes e cartas aeronáuticas."
+
+msgid "collectible.card.lambert.distortion"
+msgstr "Distorção de escala cresce ao norte e sul dos paralelos padrão."
+
+msgid "collectible.card.stereographic.title"
+msgstr "Carta de Projeção: Estereográfica"
+
+msgid "collectible.card.stereographic.app"
+msgstr "Cartografia polar e plotagem conforme de círculos no horizonte."
+
+msgid "collectible.card.stereographic.distortion"
+msgstr "Escala cresce radialmente a partir do ponto de tangência."
+
+msgid "geopedia.coverage.title"
+msgstr "Cobertura de Campo vs CQ Oficial"
+
+msgid "geopedia.coverage.example"
+msgstr "Setores verdes no mapa indicam cobertura provisória; células recortadas no escritório definem o CQ."
+
+msgid "geopedia.coverage.unit_effect"
+msgstr "Fração adimensional (0-100%) sobre superfície útil; bordas vazias não inflam cobertura."
+
+msgid "geopedia.coverage.model_limit"
+msgstr "O mapa de campo não substitui verificação de arrasto, privacidade e triangulação confirmada."
+
+msgid "geopedia.gnss_dgnss.title"
+msgstr "Visibilidade de Céu GNSS e Correção DGNSS"
+
+msgid "geopedia.gnss_dgnss.example"
+msgstr "Corredores urbanos estreitos elevam o DOP, enquanto alugar estação-base remove deriva correlacionada."
+
+msgid "geopedia.gnss_dgnss.unit_effect"
+msgstr "RMSE em metros com descorrelação de 0,02 m/km e janela contratada de operação da base."
+
+msgid "geopedia.gnss_dgnss.model_limit"
+msgstr "Grade sintética de oclusão de céu (células de 10 m) e DGNSS simplificado sem tomografia atmosférica."
+
+msgid "geopedia.overlap.title"
+msgstr "Sobreposição Entre Quadros Consecutivos"
+
+msgid "geopedia.overlap.example"
+msgstr "Velocidade elevada na motoneta afasta quadros consecutivos e reduz a sobreposição abaixo de 60%."
+
+msgid "geopedia.overlap.unit_effect"
+msgstr "Razão (0-1) da interseção de footprints no plano de apoio alvo."
+
+msgid "geopedia.overlap.model_limit"
+msgstr "Aproximação planar na distância nominal; falta de geometria falha explicitamente sem assumir 100%."
+
+msgid "geopedia.exposure_blur.title"
+msgstr "Exposição, Arrasto, Ofuscamento e Rolling Shutter"
+
+msgid "geopedia.exposure_blur.example"
+msgstr "Ruas noturnas exigem maior tempo de exposição, ampliando arrasto em movimento rápido ou contra o sol."
+
+msgid "geopedia.exposure_blur.unit_effect"
+msgstr "Deslocamento em pixels e saturação calculados pela exposição, tempo de leitura e velocidade."
+
+msgid "geopedia.exposure_blur.model_limit"
+msgstr "Modelo integrado por quadro sem traçado espectral fóton a fóton."
+
+msgid "geopedia.control_vs_check.title"
+msgstr "Pontos de Controle vs Checkpoints Independentes"
+
+msgid "geopedia.control_vs_check.example"
+msgstr "Nas calçadas, alvos de controle apoiam o ajuste enquanto checkpoints ocultos auditam o erro real."
+
+msgid "geopedia.control_vs_check.unit_effect"
+msgstr "RMSE (m) medido em checkpoints estritamente excluídos da estimação."
+
+msgid "geopedia.control_vs_check.model_limit"
+msgstr "Verdade isolada do estimador; visível apenas no overlay didático de replay."
+
+msgid "geopedia.privacy.title"
+msgstr "Mascaramento Obrigatório de Privacidade"
+
+msgid "geopedia.privacy.example"
+msgstr "Rostos de pedestres e vitrines bloqueiam a entrega até aplicação explícita das máscaras no escritório."
+
+msgid "geopedia.privacy.unit_effect"
+msgstr "Predicado binário obrigatório (privacy_redacted); aplica bloqueio RGB(32,32,32) em artefatos derivados."
+
+msgid "geopedia.privacy.model_limit"
+msgstr "Derivados mascarados preservam integralmente os arquivos brutos e seu SHA-256."
+
+msgid "geopedia.datum_projection.title"
+msgstr "Frame Local de São Datum e Projeções"
+
+msgid "geopedia.datum_projection.example"
+msgstr "Manter simulações internas em ENU double evita perda de precisão perto de 7.400.000 m Norte."
+
+msgid "geopedia.datum_projection.unit_effect"
+msgstr "Metros ENU dextro (E0=500000, N0=7400000, h0=100) separados das coordenadas locais da Godot."
+
+msgid "geopedia.datum_projection.model_limit"
+msgstr "Datum didático fictício sem vinculação EPSG real fora de exportações GeoJSON sintéticas."
+
+msgid "geopedia.heights.title"
+msgstr "Altitudes Elipsoidal (h) e Ortométrica (H)"
+
+msgid "geopedia.heights.example"
+msgstr "Subtrair a ondulação geoidal N diferencia altura geométrica GNSS h da altitude ortométrica H."
+
+msgid "geopedia.heights.unit_effect"
+msgstr "H = h - Ng em metros com ondulação sintética espacialmente variável Ng."
+
+msgid "geopedia.heights.model_limit"
+msgstr "Superfície geoidal inclinada didática sem harmônicos esféricos globais."
+
+msgid "geopedia.landmark_zero_stone.title"
+msgstr "Marco Histórico: Marco Zero de São Datum"
+
+msgid "geopedia.landmark_zero_stone.example"
+msgstr "Pilar de origem que amarra poligonais de controle pelas ruas e fachadas do Centro Velho."
+
+msgid "geopedia.landmark_zero_stone.unit_effect"
+msgstr "Registra referência histórica após ocupação estática de 5 segundos."
+
+msgid "geopedia.landmark_zero_stone.model_limit"
+msgstr "Coordenadas monumentais didáticas no setor de 500x500 m do Centro Velho."
+
+msgid "geopedia.landmark_clock_tower.title"
+msgstr "Marco Histórico: Referência do Relógio do Comércio"
+
+msgid "geopedia.landmark_clock_tower.example"
+msgstr "Chapa altimétrica utilizada desde levantamentos ferroviários para nivelar bueiros e vias."
+
+msgid "geopedia.landmark_clock_tower.unit_effect"
+msgstr "Conecta referências verticais de drenagem da Rua do Comércio."
+
+msgid "geopedia.landmark_clock_tower.model_limit"
+msgstr "Referência monumental estática no núcleo histórico."
+
+msgid "geopedia.card_mercator.title"
+msgstr "Carta de Projeção: Mercator Conforme"
+
+msgid "geopedia.card_mercator.example"
+msgstr "Mantém rumos verdadeiros em rotas náuticas, ampliando áreas próximas aos polos."
+
+msgid "geopedia.card_mercator.unit_effect"
+msgstr "Preservação angular local (conforme); fator de escala cresce com sec(phi)."
+
+msgid "geopedia.card_mercator.model_limit"
+msgstr "Carta conceitual pedagógica; a física urbana roda em ENU métrico local."
+
+msgid "geopedia.card_robinson.title"
+msgstr "Carta de Projeção: Compromisso de Robinson"
+
+msgid "geopedia.card_robinson.example"
+msgstr "Popular em mapas-múndi didáticos por equilibrar proporções globais."
+
+msgid "geopedia.card_robinson.unit_effect"
+msgstr "Compromisso visual entre deformação angular e de área em médias latitudes."
+
+msgid "geopedia.card_robinson.model_limit"
+msgstr "Inadequada para medições topográficas métricas de rua."
+
+msgid "geopedia.card_gall_peters.title"
+msgstr "Carta de Projeção: Gall-Peters Equivalente"
+
+msgid "geopedia.card_gall_peters.example"
+msgstr "Permite comparar áreas reais entre regiões sem viés polar."
+
+msgid "geopedia.card_gall_peters.unit_effect"
+msgstr "Preservação exata de áreas para qualquer polígono terrestre."
+
+msgid "geopedia.card_gall_peters.model_limit"
+msgstr "Forte distorção angular impede uso direto em navegação."
+
+msgid "geopedia.card_utm.title"
+msgstr "Carta de Projeção: Fusos UTM de Engenharia"
+
+msgid "geopedia.card_utm.example"
+msgstr "Faixas de 6 graus reduzem deformações lineares em cadastros municipais."
+
+msgid "geopedia.card_utm.unit_effect"
+msgstr "Fator de escala k0 = 0,9996 mantendo erro linear sob partes por mil."
+
+msgid "geopedia.card_utm.model_limit"
+msgstr "São Datum utiliza origem local própria em vez de zona UTM oficial."
+
+msgid "geopedia.card_lambert.title"
+msgstr "Carta de Projeção: Cônica Conforme de Lambert"
+
+msgid "geopedia.card_lambert.example"
+msgstr "Ajusta corredores leste-oeste e cartas aeronáuticas de médias latitudes."
+
+msgid "geopedia.card_lambert.unit_effect"
+msgstr "Escala verdadeira ao longo de dois paralelos padrão escolhidos."
+
+msgid "geopedia.card_lambert.model_limit"
+msgstr "Carta conceitual didática do álbum cartográfico."
+
+msgid "geopedia.card_stereographic.title"
+msgstr "Carta de Projeção: Estereográfica Conforme"
+
+msgid "geopedia.card_stereographic.example"
+msgstr "Projeta domos celestes hemisféricos usados no radar de visibilidade GNSS."
+
+msgid "geopedia.card_stereographic.unit_effect"
+msgstr "Mapeia azimute e elevação do céu em disco polar sem quebrar ângulos."
+
+msgid "geopedia.card_stereographic.model_limit"
+msgstr "Escala radial alonga próximo à borda do horizonte."

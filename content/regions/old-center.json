@@ -97,6 +97,27 @@
           7400100
         ]
       ]
+    },
+    {
+      "id": "central_park_calm",
+      "polygon_enu": [
+        [
+          500220,
+          7400220
+        ],
+        [
+          500360,
+          7400220
+        ],
+        [
+          500360,
+          7400360
+        ],
+        [
+          500220,
+          7400360
+        ]
+      ]
     }
   ],
   "surfaces": [
@@ -115,6 +136,10 @@
     {
       "id": "commerce_sign_planes",
       "area_id": "commerce_street_signs"
+    },
+    {
+      "id": "central_park_planes",
+      "area_id": "central_park_calm"
     }
   ],
   "features": [
@@ -1007,6 +1032,74 @@
       "tags": [
         "sign",
         "inventory_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "park_bench_01",
+      "area_id": "central_park_calm",
+      "surface_id": "central_park_planes",
+      "class": "park_feature",
+      "material": "wood",
+      "position_enu": [
+        500260,
+        7400260,
+        100.5
+      ],
+      "tags": [
+        "park",
+        "calm_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "park_bench_02",
+      "area_id": "central_park_calm",
+      "surface_id": "central_park_planes",
+      "class": "park_feature",
+      "material": "wood",
+      "position_enu": [
+        500285,
+        7400265,
+        100.5
+      ],
+      "tags": [
+        "park",
+        "calm_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "park_bench_03",
+      "area_id": "central_park_calm",
+      "surface_id": "central_park_planes",
+      "class": "park_feature",
+      "material": "wood",
+      "position_enu": [
+        500310,
+        7400290,
+        100.5
+      ],
+      "tags": [
+        "park",
+        "calm_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "park_bench_04",
+      "area_id": "central_park_calm",
+      "surface_id": "central_park_planes",
+      "class": "park_feature",
+      "material": "wood",
+      "position_enu": [
+        500325,
+        7400325,
+        100.5
+      ],
+      "tags": [
+        "park",
+        "calm_target"
       ],
       "dynamic": false
     }

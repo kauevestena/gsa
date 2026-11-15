@@ -66,7 +66,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F04-04 — Adicionar ambiente e sobreposição
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -82,11 +82,11 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Matriz de cenários dia/noite/seco/chuva.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-04](../../../artifacts/evidence/T-F04-04/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F04-04](../../../artifacts/evidence/T-F04-04/README.md).
 
 ### T-F04-05 — Integrar capacete e câmeras frente/trás
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -102,7 +102,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Relatório de cobertura por sensor.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-05](../../../artifacts/evidence/T-F04-05/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F04-05](../../../artifacts/evidence/T-F04-05/README.md).
 
 ### T-F04-06 — Adicionar câmera 360°
 

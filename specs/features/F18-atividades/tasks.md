@@ -22,6 +22,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Save de coleção e inspeção dos pontos de spawn.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F18-01](../../../artifacts/evidence/T-F18-01/README.md)).
+
 ### T-F18-02 — Adicionar álbum e cosméticos
 
 - [ ] Aceita

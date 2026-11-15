@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Relatórios comparados e arquivos de replay.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F12-03](../../../artifacts/evidence/T-F12-03/README.md)).
+
 ### T-F12-04 — Adicionar migração e compatibilidade
 
 - [ ] Aceita

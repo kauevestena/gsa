@@ -26,7 +26,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F09-02 — Implementar calendário, clima e aderência
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -42,11 +42,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Testes de relógio e comparativos visuais.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-02](../../../artifacts/evidence/T-F09-02/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F09-02](../../../artifacts/evidence/T-F09-02/README.md).
 
 ### T-F09-03 — Adicionar bêbados, blitz e cães
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -62,11 +62,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Cenários noturno/bar/fim de semana e blitz.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-03](../../../artifacts/evidence/T-F09-03/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F09-03](../../../artifacts/evidence/T-F09-03/README.md).
 
 ### T-F09-04 — Implementar contratos tranquilos e Cidade calma
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -82,7 +82,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Testes de eventos atrasados e missão tranquila.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-04](../../../artifacts/evidence/T-F09-04/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F09-04](../../../artifacts/evidence/T-F09-04/README.md).
 
 ### T-F09-05 — Integrar perigos e contramedidas urbanas
 
