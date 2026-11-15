@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F08-03 — Implementar habilidades e reputação completa
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -62,11 +62,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Testes de desbloqueio e inspeção da árvore.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F08-03](../../../artifacts/evidence/T-F08-03/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (`8591eb6`, merge `ba18ae3`, execução `43683993914`, jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../../../artifacts/evidence/M4-wave1-ci/summary.json) e [evidência T-F08-03](../../../artifacts/evidence/T-F08-03/README.md).
 
 ### T-F08-04 — Integrar serviços, seguro e frota avançada
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -82,4 +82,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Matriz de serviços e save de sinistro.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F08-04](../../../artifacts/evidence/T-F08-04/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (`8591eb6`, merge `ba18ae3`, execução `43683993914`, jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../../../artifacts/evidence/M4-wave1-ci/summary.json) e [evidência T-F08-04](../../../artifacts/evidence/T-F08-04/README.md).

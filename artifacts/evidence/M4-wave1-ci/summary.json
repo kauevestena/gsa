@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "wave": "M4-wave1",
+  "pr_number": 13,
+  "pr_url": "https://github.com/kauevestena/gsa/pull/13",
+  "branch": "codex/m4-wave1-world-car-360-rtk-economy-cosmetics",
+  "head_sha": "8591eb655b2a2bb593d752623a91f402f97aeb76",
+  "merge_commit_sha": "ba18ae339d025405275ac6363ab7ee1625a1cbff",
+  "merged_at": "2026-11-15T06:09:15Z",
+  "workflow_run_id": "43683993914",
+  "workflow_run_url": "https://github.com/kauevestena/gsa/actions/runs/43683993914",
+  "jobs": [
+    {
+      "name": "Foundation (Linux x64)",
+      "job_id": "132720474455",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Foundation (Windows x64)",
+      "job_id": "132720474804",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "accepted_tasks": [
+    "T-F02-04",
+    "T-F03-05",
+    "T-F04-06",
+    "T-F05-04",
+    "T-F08-03",
+    "T-F08-04",
+    "T-F18-02"
+  ],
+  "acceptance_policy": "delegated_ci_review"
+}
+

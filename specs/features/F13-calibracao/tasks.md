@@ -21,6 +21,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Troca incompatível é recusada; mudança não altera lote antigo.
 
 **Evidência:** Testes de montagem e inspeção de oficina.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-01](../../../artifacts/evidence/T-F13-01/README.md)).
 
 ### T-F13-02 — Integrar descalibração por impacto
 
@@ -39,6 +40,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Impacto produz assinatura de erro mensurável sem expor parâmetro verdadeiro ao jogador.
 
 **Evidência:** Replay antes/depois e testes analíticos.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-02](../../../artifacts/evidence/T-F13-02/README.md)).
 
 ### T-F13-03 — Criar minigames e solvers
 
@@ -57,6 +59,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Conjunto reservado passa limiares; degeneração/nonconvergência é diagnosticada.
 
 **Evidência:** Fixtures, resíduos e gravação dos quatro procedimentos.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-03](../../../artifacts/evidence/T-F13-03/README.md)).
 
 ### T-F13-04 — Integrar oficina às passadas LiDAR
 

@@ -1,3 +1,7 @@
+using Gsa.Core.Mobility;
+using Gsa.Core.Sensors.Calibration;
+using Gsa.Core.Sensors.Camera;
+
 namespace Gsa.Core.Traffic;
 
 public sealed record ErraticSpawnContext(
@@ -239,5 +243,240 @@ public sealed class CalmPolicyCoordinator
         foreach (var dog in _dogPursuits)
             dog.SuppressByCalmPolicy();
     }
+}
+
+public enum UrbanHazardKind
+{
+    ErraticVehicleCollision = 0,
+    PotholeImpact = 1,
+    DogChase = 2,
+    FireworksOrBomb = 3,
+    SabotageVandalism = 4,
+    RoadMudSplatter = 5,
+    HornStartle = 6,
+    FlanelinhaApproach = 7,
+}
+
+public sealed record UrbanHazardOutcome(
+    string HazardId,
+    UrbanHazardKind Kind,
+    bool SuppressedByCalmPolicy,
+    int TipPaidCoords,
+    int CosmeticDamageAdded,
+    double GimbalinaStressAfter,
+    double LensObstructionAfter,
+    bool RackInspectionRequired,
+    RackImpactEvent? ImpactEvent,
+    ImpactPerturbationSymptom? RackSymptom,
+    DogPursuitState? DogState,
+    string ReasonKey);
+
+/// <summary>Integrates T-F09-05 urban hazard table across vehicle suspension, modular rack, Gimbalina stress, lens contamination, and Calm City suppression.</summary>
+public sealed class UrbanHazardEncounterCoordinator
+{
+    public const int FlanelinhaTipCoords = 10;
+    public const int FlanelinhaRefusalCosmeticDamage = 5;
+    public const double DefaultSabotageSplatterObstruction = 0.45;
+    public const double DefaultMudSplatterObstruction = 0.35;
+
+    private readonly List<UrbanHazardOutcome> _history = [];
+
+    public CalmPolicyCoordinator CalmPolicy { get; }
+    public CarSuspensionSimulator Vehicle { get; }
+    public ModularSensorRack Rack { get; }
+    public GimbalinaStabilizer Gimbalina { get; }
+    public LensContaminationTracker Lens { get; }
+    public int TotalCosmeticDamagePoints { get; private set; }
+    public int TotalTipsPaidCoords { get; private set; }
+    public IReadOnlyList<UrbanHazardOutcome> HazardHistory => _history;
+
+    public UrbanHazardEncounterCoordinator(
+        CalmPolicyCoordinator calmPolicy,
+        CarSuspensionSimulator vehicle,
+        ModularSensorRack rack,
+        GimbalinaStabilizer gimbalina,
+        LensContaminationTracker lens)
+    {
+        ArgumentNullException.ThrowIfNull(calmPolicy);
+        ArgumentNullException.ThrowIfNull(vehicle);
+        ArgumentNullException.ThrowIfNull(rack);
+        ArgumentNullException.ThrowIfNull(gimbalina);
+        ArgumentNullException.ThrowIfNull(lens);
+
+        CalmPolicy = calmPolicy;
+        Vehicle = vehicle;
+        Rack = rack;
+        Gimbalina = gimbalina;
+        Lens = lens;
+    }
+
+    public static bool IsHostileHazardKind(UrbanHazardKind kind) => kind switch
+    {
+        UrbanHazardKind.ErraticVehicleCollision => true,
+        UrbanHazardKind.DogChase => true,
+        UrbanHazardKind.FireworksOrBomb => true,
+        UrbanHazardKind.SabotageVandalism => true,
+        UrbanHazardKind.FlanelinhaApproach => true,
+        UrbanHazardKind.PotholeImpact => false,
+        UrbanHazardKind.RoadMudSplatter => false,
+        UrbanHazardKind.HornStartle => false,
+        _ => throw new ArgumentOutOfRangeException(nameof(kind))
+    };
+
+    public UrbanHazardOutcome TriggerHazard(
+        string hazardId,
+        UrbanHazardKind kind,
+        ulong impactSeed = 101UL,
+        double deltaVMetresPerSecond = 0.0,
+        double splatterObstruction = 0.0,
+        double initialDogDistanceMetres = 20.0,
+        bool payFlanelinhaTip = false,
+        int defensiveDrivingRank = 0)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hazardId);
+        if (!double.IsFinite(deltaVMetresPerSecond) || deltaVMetresPerSecond < 0.0)
+            throw new ArgumentOutOfRangeException(nameof(deltaVMetresPerSecond));
+        if (!double.IsFinite(splatterObstruction) || splatterObstruction < 0.0 || splatterObstruction > 1.0)
+            throw new ArgumentOutOfRangeException(nameof(splatterObstruction));
+
+        var hostile = IsHostileHazardKind(kind);
+        if (hostile && CalmPolicy.IsProtectionActive)
+        {
+            CalmPolicy.TryQueueHostileEvent(hazardId);
+            DogPursuitState? suppressedDog = kind == UrbanHazardKind.DogChase
+                ? CalmPolicy.RegisterDogEncounter(hazardId, initialDogDistanceMetres).ExportState()
+                : null;
+
+            var suppressedOutcome = new UrbanHazardOutcome(
+                HazardId: hazardId,
+                Kind: kind,
+                SuppressedByCalmPolicy: true,
+                TipPaidCoords: 0,
+                CosmeticDamageAdded: 0,
+                GimbalinaStressAfter: Gimbalina.Stress,
+                LensObstructionAfter: Lens.ObstructionFraction,
+                RackInspectionRequired: Rack.MountedSlots.Values.Any(s => s.NeedsWorkshopInspection),
+                ImpactEvent: null,
+                RackSymptom: null,
+                DogState: suppressedDog,
+                ReasonKey: "hazard.suppressed_by_calm_policy");
+            _history.Add(suppressedOutcome);
+            return suppressedOutcome;
+        }
+
+        RackImpactEvent? impactEvent = null;
+        ImpactPerturbationSymptom? rackSymptom = null;
+        DogPursuitState? dogState = null;
+        var tipPaid = 0;
+        var cosmeticAdded = 0;
+        string reasonKey;
+
+        switch (kind)
+        {
+            case UrbanHazardKind.HornStartle:
+                Gimbalina.ApplyStartle(StartleEventKind.Horn);
+                reasonKey = "hazard.horn_startle";
+                break;
+
+            case UrbanHazardKind.PotholeImpact:
+                Gimbalina.ApplyStartle(StartleEventKind.Pothole);
+                var potholeDv = deltaVMetresPerSecond > 0.0 ? deltaVMetresPerSecond : 3.2;
+                impactEvent = Vehicle.ApplyCollisionImpact(potholeDv, "urban_pothole", defensiveDrivingRank);
+                rackSymptom = ImpactMisalignmentIntegrator.ApplyImpactToRack(Rack, impactEvent, impactSeed);
+                reasonKey = rackSymptom.InspectionRequired
+                    ? "hazard.pothole_rack_misaligned"
+                    : "hazard.pothole_absorbed";
+                break;
+
+            case UrbanHazardKind.ErraticVehicleCollision:
+                var collisionDv = deltaVMetresPerSecond > 0.0 ? deltaVMetresPerSecond : 4.0;
+                impactEvent = Vehicle.ApplyCollisionImpact(collisionDv, "erratic_vehicle_collision", defensiveDrivingRank);
+                rackSymptom = ImpactMisalignmentIntegrator.ApplyImpactToRack(Rack, impactEvent, impactSeed);
+                Gimbalina.ApplyStartle(StartleEventKind.Horn);
+                reasonKey = rackSymptom.InspectionRequired
+                    ? "hazard.erratic_collision_rack_misaligned"
+                    : "hazard.erratic_collision_minor";
+                break;
+
+            case UrbanHazardKind.DogChase:
+                Gimbalina.ApplyStartle(StartleEventKind.Dog);
+                var tracker = CalmPolicy.RegisterDogEncounter(hazardId, initialDogDistanceMetres);
+                dogState = tracker.ExportState();
+                reasonKey = "hazard.dog_chase_started";
+                break;
+
+            case UrbanHazardKind.FireworksOrBomb:
+                Gimbalina.ApplyStartle(StartleEventKind.Fireworks);
+                if (deltaVMetresPerSecond > 0.0)
+                {
+                    impactEvent = Vehicle.ApplyCollisionImpact(deltaVMetresPerSecond, "fireworks_or_blast", defensiveDrivingRank);
+                    rackSymptom = ImpactMisalignmentIntegrator.ApplyImpactToRack(Rack, impactEvent, impactSeed);
+                }
+                reasonKey = rackSymptom?.InspectionRequired == true
+                    ? "hazard.fireworks_and_blast_misaligned"
+                    : "hazard.fireworks_startle";
+                break;
+
+            case UrbanHazardKind.SabotageVandalism:
+                Lens.ApplySplatter(splatterObstruction > 0.0 ? splatterObstruction : DefaultSabotageSplatterObstruction);
+                reasonKey = "hazard.sabotage_lens_splatter";
+                break;
+
+            case UrbanHazardKind.RoadMudSplatter:
+                Lens.ApplySplatter(splatterObstruction > 0.0 ? splatterObstruction : DefaultMudSplatterObstruction);
+                reasonKey = "hazard.road_mud_splatter";
+                break;
+
+            case UrbanHazardKind.FlanelinhaApproach:
+                if (payFlanelinhaTip)
+                {
+                    tipPaid = FlanelinhaTipCoords;
+                    TotalTipsPaidCoords += tipPaid;
+                    reasonKey = "hazard.flanelinha_paid";
+                }
+                else
+                {
+                    cosmeticAdded = FlanelinhaRefusalCosmeticDamage;
+                    TotalCosmeticDamagePoints += cosmeticAdded;
+                    reasonKey = "hazard.flanelinha_refused_cosmetic_damage";
+                }
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
+        var outcome = new UrbanHazardOutcome(
+            HazardId: hazardId,
+            Kind: kind,
+            SuppressedByCalmPolicy: false,
+            TipPaidCoords: tipPaid,
+            CosmeticDamageAdded: cosmeticAdded,
+            GimbalinaStressAfter: Gimbalina.Stress,
+            LensObstructionAfter: Lens.ObstructionFraction,
+            RackInspectionRequired: rackSymptom?.InspectionRequired ?? Rack.MountedSlots.Values.Any(s => s.NeedsWorkshopInspection),
+            ImpactEvent: impactEvent,
+            RackSymptom: rackSymptom,
+            DogState: dogState,
+            ReasonKey: reasonKey);
+        _history.Add(outcome);
+        return outcome;
+    }
+
+    public bool FeedGimbalinaCorn() => Gimbalina.TryFeedCorn();
+
+    public DogPursuitState PacifyDogWithTreat(string dogId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(dogId);
+        var dog = CalmPolicy.DogPursuits.FirstOrDefault(d => string.Equals(d.DogId, dogId, StringComparison.Ordinal))
+            ?? throw new KeyNotFoundException($"Dog pursuit '{dogId}' not found.");
+        return dog.ApplyTreat();
+    }
+
+    public bool StepStoppedLensCleaning(double dtSeconds, double platformSpeedMetresPerSecond) =>
+        Lens.StepStoppedCleaning(dtSeconds, platformSpeedMetresPerSecond);
+
+    public GimbalinaStepResult StepRest(double dtSeconds, bool isResting = true) =>
+        Gimbalina.Step(dtSeconds, isResting: isResting);
 }
 

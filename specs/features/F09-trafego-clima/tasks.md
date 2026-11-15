@@ -101,3 +101,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Impacto/limpeza alteram sensores e CalmPolicy cobre todas as fontes hostis.
 
 **Evidência:** Tabela de perigos executada e logs de montagem.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-05](../../../artifacts/evidence/T-F09-05/README.md)).

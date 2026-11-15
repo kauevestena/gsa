@@ -8,6 +8,10 @@ using Xunit;
 
 namespace Gsa.Core.Tests;
 
+[CollectionDefinition("BenchmarkIsolation", DisableParallelization = true)]
+public sealed class BenchmarkIsolationCollection;
+
+[Collection("BenchmarkIsolation")]
 public sealed class BenchmarkTests
 {
     private static string FindRepoRoot()
