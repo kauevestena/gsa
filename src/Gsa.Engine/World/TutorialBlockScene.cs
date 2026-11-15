@@ -3,6 +3,7 @@ using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 using Gsa.Core.World;
 using Gsa.Engine.Art;
+using Gsa.Engine.Diagnostics;
 using Gsa.Engine.Mobility;
 using Gsa.Engine.Sensors;
 using Gsa.Engine.Traffic;
@@ -87,6 +88,7 @@ public partial class TutorialBlockScene : Node3D
             _trafficBench!.RunVerificationSuite();
             _lidarBench!.RunVerificationSuite(_manifest, _registry, GetWorld3D().DirectSpaceState);
             PilotKitBenchVerifier.RunVerificationSuite();
+            EngineBenchmarkHarness.RunVerificationSuite(this, _benchRoot!, _manifest!, _registry!, GetWorld3D().DirectSpaceState);
             SetPhysicsProcess(false);
             GD.Print($"GSA_WORLD_SMOKE_OK objects={_registry.Count} colliders={_registry.ColliderCount} " +
                      $"facades=20 geometry_sha256={GeometryHash}");

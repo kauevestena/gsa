@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 
@@ -114,35 +115,41 @@ public sealed record LidarProfile
             Math.Sin(elevationRadians)).Normalized();
     }
 
-    public IReadOnlyList<(double AzimuthRadians, double ElevationRadians, Vector3d DirectionLidar)> BuildScanPattern()
+    private static readonly ConcurrentDictionary<(int Grade, int TotalChannels, int AzimuthsPerScan), IReadOnlyList<(double AzimuthRadians, double ElevationRadians, Vector3d DirectionLidar)>> ScanPatternCache = new();
+
+    public IReadOnlyList<(double AzimuthRadians, double ElevationRadians, Vector3d DirectionLidar)> BuildScanPattern() =>
+        ScanPatternCache.GetOrAdd((Grade, TotalChannels, AzimuthsPerScan), static key => BuildUncachedScanPattern(key.Grade, key.TotalChannels, key.AzimuthsPerScan));
+
+    private static IReadOnlyList<(double AzimuthRadians, double ElevationRadians, Vector3d DirectionLidar)> BuildUncachedScanPattern(
+        int grade, int totalChannels, int azimuthsPerScan)
     {
-        var rays = new List<(double, double, Vector3d)>(PrimaryRaysPerScan);
-        if (Grade == 4 && TotalChannels == 1)
+        var rays = new List<(double, double, Vector3d)>(totalChannels * azimuthsPerScan);
+        if (grade == 4 && totalChannels == 1)
         {
             // Cross-section transverse profiler sweep spanning Y-Z plane with slight forward pitch (X forward, Y left, Z up).
-            for (var i = 0; i < AzimuthsPerScan; i++)
+            for (var i = 0; i < azimuthsPerScan; i++)
             {
-                var t = AzimuthsPerScan == 1 ? 0.5 : (double)i / (AzimuthsPerScan - 1);
+                var t = azimuthsPerScan == 1 ? 0.5 : (double)i / (azimuthsPerScan - 1);
                 var azimuth = (t - 0.5) * Math.PI;
                 var elevation = -0.15;
                 rays.Add((azimuth, elevation, DirectionFromAngles(azimuth, elevation)));
             }
-            return rays;
+            return Array.AsReadOnly(rays.ToArray());
         }
 
         const double minElev = -15.0 * Math.PI / 180.0;
         const double maxElev = 15.0 * Math.PI / 180.0;
-        for (var ch = 0; ch < TotalChannels; ch++)
+        for (var ch = 0; ch < totalChannels; ch++)
         {
-            var chFrac = TotalChannels == 1 ? 0.5 : (double)ch / (TotalChannels - 1);
+            var chFrac = totalChannels == 1 ? 0.5 : (double)ch / (totalChannels - 1);
             var elevation = minElev + chFrac * (maxElev - minElev);
-            for (var az = 0; az < AzimuthsPerScan; az++)
+            for (var az = 0; az < azimuthsPerScan; az++)
             {
-                var azimuth = 2.0 * Math.PI * az / AzimuthsPerScan;
+                var azimuth = 2.0 * Math.PI * az / azimuthsPerScan;
                 rays.Add((azimuth, elevation, DirectionFromAngles(azimuth, elevation)));
             }
         }
-        return rays;
+        return Array.AsReadOnly(rays.ToArray());
     }
 }
 

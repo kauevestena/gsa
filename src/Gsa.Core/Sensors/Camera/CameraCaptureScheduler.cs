@@ -32,6 +32,7 @@ public sealed class CameraCaptureScheduler
 
     public CameraSensorProfile Profile => _profile;
     public int SampleCount => _samples.Count;
+    public int TotalCapturedCount { get; private set; }
     public int PendingQueueCount => _pendingQueueCount;
     public int SaturatedDroppedCount => _saturatedDroppedCount;
     public int MaxPendingQueueSamples { get; }
@@ -135,6 +136,7 @@ public sealed class CameraCaptureScheduler
                 thumbnail: thumbnail);
 
             _samples.Add(sample);
+            TotalCapturedCount++;
             return true;
         }
         finally
@@ -152,4 +154,19 @@ public sealed class CameraCaptureScheduler
             samples: _samples,
             storageUnitsUsed: _samples.Count * _profile.StorageUnitsPerSample,
             saturatedDroppedCount: _saturatedDroppedCount);
+
+    /// <summary>Builds a detached batch manifest and releases in-memory buffered samples after offload.</summary>
+    public CameraCaptureBatchManifest FlushBatchManifest(string batchId)
+    {
+        var snapshot = _samples.ToArray();
+        var manifest = new CameraCaptureBatchManifest(
+            batchId: batchId,
+            sensorId: _sensorId,
+            profileId: _profile.Id,
+            samples: snapshot,
+            storageUnitsUsed: snapshot.Length * _profile.StorageUnitsPerSample,
+            saturatedDroppedCount: _saturatedDroppedCount);
+        _samples.Clear();
+        return manifest;
+    }
 }

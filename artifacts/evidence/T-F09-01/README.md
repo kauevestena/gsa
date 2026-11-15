@@ -1,6 +1,6 @@
 # Evidência — T-F09-01 (Tráfego regular de bancada)
 
-Estado: em revisão técnica delegada antes da CI do PR #4 (`codex/m1-traffic-lidar-art`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #4 (`4a11e48`, run `43671438816`); ver `artifacts/evidence/M1-wave3-ci/summary.json`.
 
 ## Escopo verificado
 - `RoadNetworkGraph.CreateTutorialBlockGraph()`: grafo direcionado de vias com duas faixas Leste/Oeste conectadas por três avenidas Norte/Sul, calçadas contínuas, faixas de pedestres sinalizadas e zona de exclusão de `6 m` protegendo `office_entry` (`[500232, 7400005, 101.5]`).
