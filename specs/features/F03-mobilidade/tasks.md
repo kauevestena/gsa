@@ -141,6 +141,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Replay seco/molhado na encosta.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-07](../../../artifacts/evidence/T-F03-07/README.md)).
+
 ### T-F03-08 — Adicionar van MMS
 
 - [ ] Aceita

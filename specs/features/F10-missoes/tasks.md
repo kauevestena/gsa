@@ -81,6 +81,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Playthrough do ato e certificados de rota.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-04](../../../artifacts/evidence/T-F10-04/README.md)).
+
 ### T-F10-05 — Implementar ato 3 e levantamento final
 
 - [ ] Aceita

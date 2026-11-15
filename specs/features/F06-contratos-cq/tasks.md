@@ -106,7 +106,7 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F06-06 — Adicionar CQ de nuvem e pavimento
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -121,4 +121,4 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 **Critério de aceite:** LOD/duplicação não alteram métricas; contraexemplos de oclusão reprovam.
 
 **Evidência:** Planos conhecidos e relatórios numéricos.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F06-06](../../../artifacts/evidence/T-F06-06/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #17](https://github.com/kauevestena/gsa/pull/17) (`b313e0b`, merge `88b1c23`, execução `43690357152`, jobs Linux `132739514446` e Windows `132739514694`); ver [resumo CI](../../../artifacts/evidence/M5-wave2-ci/summary.json) e [evidência T-F06-06](../../../artifacts/evidence/T-F06-06/README.md).

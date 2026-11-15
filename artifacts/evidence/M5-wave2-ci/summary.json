@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "milestone": "M5",
+  "wave": 2,
+  "status": "accepted_via_delegated_ci_review",
+  "pull_request": {
+    "number": 17,
+    "url": "https://github.com/kauevestena/gsa/pull/17",
+    "head_sha": "b313e0b91fca952501b474dca31a5917ad7c762d",
+    "merge_commit": "88b1c23b90ba27d95ace458f1920400af66bb4c8",
+    "merged_at": "2026-11-15T07:33:52Z"
+  },
+  "ci_run": {
+    "workflow_run_id": 43690357152,
+    "url": "https://github.com/kauevestena/gsa/actions/runs/43690357152",
+    "jobs": [
+      {
+        "name": "Foundation (Linux x64)",
+        "job_id": 132739514446,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Foundation (Windows x64)",
+        "job_id": 132739514694,
+        "conclusion": "SUCCESS"
+      }
+    ]
+  },
+  "accepted_tasks": [
+    "T-F06-06",
+    "T-F07-03",
+    "T-F07-05",
+    "T-F13-04",
+    "T-F16-03"
+  ]
+}
+

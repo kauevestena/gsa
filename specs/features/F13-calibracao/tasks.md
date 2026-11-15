@@ -63,7 +63,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F13-04 — Integrar oficina às passadas LiDAR
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -78,4 +78,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Calibração reduz discrepância observada sem acessar oracle; taxa é idempotente.
 
 **Evidência:** Relatório antes/depois e receita salva.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-04](../../../artifacts/evidence/T-F13-04/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #17](https://github.com/kauevestena/gsa/pull/17) (`b313e0b`, merge `88b1c23`, execução `43690357152`, jobs Linux `132739514446` e Windows `132739514694`); ver [resumo CI](../../../artifacts/evidence/M5-wave2-ci/summary.json) e [evidência T-F13-04](../../../artifacts/evidence/T-F13-04/README.md).
