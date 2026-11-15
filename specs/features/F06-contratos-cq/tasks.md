@@ -121,3 +121,4 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 **Critério de aceite:** LOD/duplicação não alteram métricas; contraexemplos de oclusão reprovam.
 
 **Evidência:** Planos conhecidos e relatórios numéricos.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F06-06](../../../artifacts/evidence/T-F06-06/README.md)).

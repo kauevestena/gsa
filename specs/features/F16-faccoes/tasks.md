@@ -59,6 +59,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Upload protege dados e modo calmo remove eventos pendentes sem cobrança indevida.
 
 **Evidência:** Matriz ataque/contramedida/save.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-03](../../../artifacts/evidence/T-F16-03/README.md)).
 
 ### T-F16-04 — Integrar facções à cidade completa
 

@@ -26,7 +26,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F15-02 — Integrar perfilador e georreferenciamento
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -41,11 +41,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Velocidade/oclusão afetam nuvem; não usar pose verdadeira no produto.
 
 **Evidência:** Percurso com planos e relatório de densidade.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-02](../../../artifacts/evidence/T-F15-02/README.md)).
+**Estado:** Aceita — PR #16 mergeado em main (13e3378fd3c2922be4af044de71e3c99c8d8b35f); ver [resumo CI](../../../artifacts/evidence/M5-wave1-ci/summary.json) e [evidência T-F15-02](../../../artifacts/evidence/T-F15-02/README.md).
 
 ### T-F15-03 — Implementar octree, chunks e LOD
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -60,7 +60,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Cache ≤256 MiB; alternar LOD não altera CQ nem perde amostra.
 
 **Evidência:** Teste de reload e perfil de memória/GPU.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-03](../../../artifacts/evidence/T-F15-03/README.md)).
+**Estado:** Aceita — PR #16 mergeado em main (13e3378fd3c2922be4af044de71e3c99c8d8b35f); ver [resumo CI](../../../artifacts/evidence/M5-wave1-ci/summary.json) e [evidência T-F15-03](../../../artifacts/evidence/T-F15-03/README.md).
 
 ### T-F15-04 — Adicionar sensores pareados e múltiplos retornos
 

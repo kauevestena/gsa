@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "wave": "M5-wave1",
+  "pr_number": 16,
+  "pr_url": "https://github.com/kauevestena/gsa/pull/16",
+  "branch": "codex/m5-wave1-kombi-dmi-kalman-ppk-lidar-octree",
+  "head_sha": "19ef117ab401c4fc0eebe17b2402a2c3c4e986d2",
+  "merge_commit_sha": "13e3378fd3c2922be4af044de71e3c99c8d8b35f",
+  "merged_at": "2026-11-15T07:12:27Z",
+  "workflow_run_id": "43688685548",
+  "workflow_run_url": "https://github.com/kauevestena/gsa/actions/runs/43688685548",
+  "jobs": [
+    {
+      "name": "Foundation (Linux x64)",
+      "job_id": "132734498865",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Foundation (Windows x64)",
+      "job_id": "132734498698",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "accepted_tasks": [
+    "T-F03-06",
+    "T-F14-02",
+    "T-F14-03",
+    "T-F14-04",
+    "T-F15-02",
+    "T-F15-03"
+  ],
+  "acceptance_policy": "delegated_ci_review"
+}
+
