@@ -1,6 +1,6 @@
 # Evidência — T-F06-03 (Implementar CQ de fotos e inventário)
 
-Estado: em revisão técnica delegada (aguardando CI nativa Linux/Windows do PR #6, `codex/m2-wave1-sensors-contracts-cq`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); ver `artifacts/evidence/M2-wave1-ci/summary.json`.
 
 ## Escopo implementado
 - `EvaluationReference` isolada em `Gsa.Missions.Quality` (verificado por reflexão contra qualquer acoplamento em `Gsa.Core`).

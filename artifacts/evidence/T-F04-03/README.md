@@ -1,6 +1,6 @@
 # Evidência — T-F04-03 (Implementar scheduler e inventário)
 
-Estado: em revisão técnica delegada (aguardando CI nativa Linux/Windows do PR #6, `codex/m2-wave1-sensors-contracts-cq`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); ver `artifacts/evidence/M2-wave1-ci/summary.json`.
 
 ## Escopo implementado
 - `SensorCaptureAgenda` + `ObservationBatch`: coordenação determinística de múltiplos sensores (`RateHz`, sequência por sensor e orçamento de armazenamento virtual parando em `VirtualStorageFull` sem estourar limites) e lotes imutáveis serializáveis com `schema_version = 1`.

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Gsa.Missions.Content;
 
 namespace Gsa.Missions.Contracts;
@@ -54,6 +55,9 @@ public sealed record ContractRewardSpec(
     int Reputation,
     IReadOnlyList<string> StoryUnlocks);
 
+[JsonPolymorphic]
+[JsonDerivedType(typeof(ThresholdRequirementSpec), "threshold")]
+[JsonDerivedType(typeof(PredicateRequirementSpec), "predicate")]
 public abstract record ContractRequirementSpec(string Kind, string Metric);
 
 public sealed record ThresholdRequirementSpec(
@@ -253,6 +257,19 @@ public sealed record ContractCommandResult(
     public bool Succeeded => Status == ContractCommandStatus.Executed || Status == ContractCommandStatus.IdempotentNoOp;
 }
 
+public sealed record ContractInstanceSnapshot(
+    int SchemaVersion,
+    ContractDefinition CatalogDefinition,
+    ContractState State,
+    ContractRequirementsSnapshot? Snapshot,
+    bool CanDeliverFull,
+    bool CanDeliverPartial,
+    IReadOnlyList<string> ApprovedPartialDeliverableIds,
+    IReadOnlyList<CustodiedBatchRecord> Batches,
+    IReadOnlyList<ContractDomainEvent> Events,
+    IReadOnlyList<string> DeliveredIdempotencyKeys,
+    long NextEventSequence);
+
 /// <summary>Deterministic state machine governing the lifecycle of a single contract instance.</summary>
 public sealed class ContractStateMachine
 {
@@ -283,6 +300,39 @@ public sealed class ContractStateMachine
     {
         ArgumentNullException.ThrowIfNull(definition);
         _catalogDefinition = definition;
+    }
+
+    public ContractInstanceSnapshot ExportSnapshot() =>
+        new(
+            1,
+            _catalogDefinition,
+            State,
+            Snapshot,
+            CanDeliverFull,
+            CanDeliverPartial,
+            _approvedPartialDeliverableIds.ToArray(),
+            _batches.ToArray(),
+            _eventLog.ToArray(),
+            _deliveredIdempotencyKeys.OrderBy(k => k, StringComparer.Ordinal).ToArray(),
+            _nextEventSeq);
+
+    public static ContractStateMachine FromSnapshot(ContractInstanceSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        var machine = new ContractStateMachine(snapshot.CatalogDefinition)
+        {
+            State = snapshot.State,
+            Snapshot = snapshot.Snapshot,
+            CanDeliverFull = snapshot.CanDeliverFull,
+            CanDeliverPartial = snapshot.CanDeliverPartial,
+            _nextEventSeq = snapshot.NextEventSequence,
+        };
+        machine._approvedPartialDeliverableIds.AddRange(snapshot.ApprovedPartialDeliverableIds);
+        machine._batches.AddRange(snapshot.Batches);
+        machine._eventLog.AddRange(snapshot.Events);
+        foreach (var key in snapshot.DeliveredIdempotencyKeys)
+            machine._deliveredIdempotencyKeys.Add(key);
+        return machine;
     }
 
     public static bool IsActive(ContractState state) => state is

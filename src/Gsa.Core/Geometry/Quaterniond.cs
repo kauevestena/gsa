@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Gsa.Core.Geometry;
 
 /// <summary>A normalized quaternion (x,y,z,w); products apply right to left.</summary>
@@ -8,6 +10,7 @@ public readonly record struct Quaterniond
     public double Z { get; }
     public double W { get; }
 
+    [JsonConstructor]
     public Quaterniond(double x, double y, double z, double w)
     {
         if (!double.IsFinite(x) || !double.IsFinite(y) || !double.IsFinite(z) || !double.IsFinite(w))

@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F06-02 — Implementar máquina de contratos
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F06-02/README.md). Parser `ContractDefinition`, ciclo completo de estados/comandos/eventos, snapshot imutável ao aceitar, expiração em todos os estados ativos, custódia separada (`PendingField` vs `ProtectedOffloaded`) e entrega idempotente.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); [resumo CI](../../../artifacts/evidence/M2-wave1-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F06-02/README.md). Parser `ContractDefinition`, ciclo completo de estados/comandos/eventos, snapshot imutável ao aceitar, expiração em todos os estados ativos, custódia separada (`PendingField` vs `ProtectedOffloaded`) e entrega idempotente.
 
 **Marco:** M2
 
@@ -46,9 +46,9 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F06-03 — Implementar CQ de fotos e inventário
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F06-03/README.md). `EvaluationReference` isolada em `Gsa.Missions.Quality`, cobertura por célula recortada `2×2 m`, deduplicação por ID, falha explícita para conjunto vazio ou `< 3` checkpoints, `privacy_redacted`/`format_valid`, `failure_reason_keys`, áreas de recoleta e entregáveis parciais.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #6 (`876ca1d`, run `43674076883`); [resumo CI](../../../artifacts/evidence/M2-wave1-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F06-03/README.md). `EvaluationReference` isolada em `Gsa.Missions.Quality`, cobertura por célula recortada `2×2 m`, deduplicação por ID, falha explícita para conjunto vazio ou `< 3` checkpoints, `privacy_redacted`/`format_valid`, `failure_reason_keys`, áreas de recoleta e entregáveis parciais.
 
 **Marco:** M2
 
@@ -68,6 +68,8 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 - [ ] Aceita
 
+**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F06-04/README.md). `DeliveryQuoteCalculator` (`PaymentQuote`, `DeliveryMode`) em `Gsa.Missions.Quality`: agregação de margens não binárias com precisão IEEE-754 em `MapFullStars`, bloqueio de privacidade/formato mesmo em parcial, fatores de qualidade, arredondamento único (`Floor`) e multa de atraso/expiração (`-1` reputação).
+
 **Marco:** M2
 
 **Dependências:** T-F06-03
@@ -85,6 +87,8 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 ### T-F06-05 — Integrar retrabalho e liquidação idempotente
 
 - [ ] Aceita
+
+**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F06-05/README.md). `ContractSettlementCoordinator` e `CareerProgressionState` em `Gsa.Missions.Contracts`: união deduplicada de lotes protegidos para CQ, ciclo `Retrabalho`, reputação por cliente/região clamped `>= 0` sem dupla contagem global, desbloqueios de história e liquidação idempotente `settlement:{ContractId}`.
 
 **Marco:** M2
 

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Gsa.Core.Geometry;
 
 /// <summary>An immutable, finite vector in double precision. Map vectors use ENU axes.</summary>
@@ -7,6 +9,7 @@ public readonly record struct Vector3d
     public double Y { get; }
     public double Z { get; }
 
+    [JsonConstructor]
     public Vector3d(double x, double y, double z)
     {
         if (!double.IsFinite(x) || !double.IsFinite(y) || !double.IsFinite(z))

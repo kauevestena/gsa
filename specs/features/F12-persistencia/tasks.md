@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F12-01/README.md). `BatchCustodyStore` em `Gsa.Missions.Persistence`: `SurveyBatchArtifact` canônico com SHA-256, escrita em estágio + checksum antes do commit no `CustodyManifest` autoritativo, reconciliação `RecoverAfterCrash` (`Buffered` vs `Protected`), `HandleVehicleLoss` e descarregamento idempotente.
+
 **Marco:** M2
 
 **Dependências:** T-F01-02, T-F04-03
@@ -25,6 +27,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 ### T-F12-02 — Implementar save e recuperação
 
 - [ ] Aceita
+
+**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F12-02/README.md). `SaveGameManager` e suporte polimórfico/snapshot em `ContractStateMachine` + `[JsonConstructor]` geométrico: save agregado em JSON com envelope `schema_version = 1` + SHA-256, rotação atômica `current.save.json` / `previous.save.json`, diagnósticos de corrupção/versão futura sem sobrescrever original, recuperação de geração anterior e autosave de perda de veículo.
 
 **Marco:** M2
 
