@@ -3,14 +3,13 @@
   "date": "2026-11-13",
   "source": "../spec_inicial.md",
   "source_sha256": "f727582d24cacc248b3dbea2292b141b908196da60f0a095ccc3191d4875b6b2",
-  "status": "m5_wave1_in_review",
+  "status": "m5_wave2_in_review",
   "active_tasks": [
-    "T-F03-06",
-    "T-F14-02",
-    "T-F14-03",
-    "T-F14-04",
-    "T-F15-02",
-    "T-F15-03"
+    "T-F06-06",
+    "T-F07-03",
+    "T-F07-05",
+    "T-F13-04",
+    "T-F16-03"
   ],
   "language": "pt-BR"
 }

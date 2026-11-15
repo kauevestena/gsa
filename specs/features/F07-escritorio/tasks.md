@@ -61,6 +61,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Dados ruins não são curados por oracle; cobertura é recalculada após filtro.
 
 **Evidência:** Fixtures e relatório antes/depois por operação.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F07-03](../../../artifacts/evidence/T-F07-03/README.md)).
 
 ### T-F07-04 — Implementar máscaras e conformidade
 
@@ -99,3 +100,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Recarregar/cancelar/retomar preserva origem e idempotência do serviço.
 
 **Evidência:** Testes de save em cada fase do job.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F07-05](../../../artifacts/evidence/T-F07-05/README.md)).

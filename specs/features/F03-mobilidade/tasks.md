@@ -106,7 +106,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F03-06 — Adicionar Kombi
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -121,7 +121,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Contrato de túnel cabe na autonomia com planejamento e descarga.
 
 **Evidência:** Percurso e orçamento de recursos.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-06](../../../artifacts/evidence/T-F03-06/README.md)).
+**Estado:** Aceita — PR #16 mergeado em main (13e3378fd3c2922be4af044de71e3c99c8d8b35f); ver [resumo CI](../../../artifacts/evidence/M5-wave1-ci/summary.json) e [evidência T-F03-06](../../../artifacts/evidence/T-F03-06/README.md).
 
 ### T-F03-07 — Adicionar picape 4x4
 

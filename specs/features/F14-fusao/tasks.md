@@ -25,7 +25,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F14-02 — Implementar DMI e ZUPT
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -40,11 +40,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Falso parado/derrapagem não zera trajetória indevidamente.
 
 **Evidência:** Fixtures parado/movimento/molhado.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F14-02](../../../artifacts/evidence/T-F14-02/README.md)).
+**Estado:** Aceita — PR #16 mergeado em main (13e3378fd3c2922be4af044de71e3c99c8d8b35f); ver [resumo CI](../../../artifacts/evidence/M5-wave1-ci/summary.json) e [evidência T-F14-02](../../../artifacts/evidence/T-F14-02/README.md).
 
 ### T-F14-03 — Integrar filtro de trajetória
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -59,11 +59,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** 100 seeds por perfil permitem comparar deriva; estados/covariâncias permanecem finitos.
 
 **Evidência:** Relatório de deriva e teste matricial independente.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F14-03](../../../artifacts/evidence/T-F14-03/README.md)).
+**Estado:** Aceita — PR #16 mergeado em main (13e3378fd3c2922be4af044de71e3c99c8d8b35f); ver [resumo CI](../../../artifacts/evidence/M5-wave1-ci/summary.json) e [evidência T-F14-03](../../../artifacts/evidence/T-F14-03/README.md).
 
 ### T-F14-04 — Adicionar PPK, controles e heading duplo
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -78,4 +78,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Logs ausentes não produzem solução PPK; checagem não participa do ajuste.
 
 **Evidência:** Datasets antes/depois, túnel/viaduto de bancada e revisão da fronteira de verdade.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F14-04](../../../artifacts/evidence/T-F14-04/README.md)).
+**Estado:** Aceita — PR #16 mergeado em main (13e3378fd3c2922be4af044de71e3c99c8d8b35f); ver [resumo CI](../../../artifacts/evidence/M5-wave1-ci/summary.json) e [evidência T-F14-04](../../../artifacts/evidence/T-F14-04/README.md).
