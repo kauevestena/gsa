@@ -36,7 +36,8 @@ public sealed class WorldManifestTests
 
         using var catalog = JsonDocument.Parse(File.ReadAllText(
             Path.Combine(RepositoryRoot, "content", "regions", "old-center.json")));
-        foreach (var target in catalog.RootElement.GetProperty("features").EnumerateArray())
+        foreach (var target in catalog.RootElement.GetProperty("features").EnumerateArray()
+                     .Where(item => item.GetProperty("class").GetString() == "building_facade"))
         {
             var id = target.GetProperty("id").GetString();
             var expected = target.GetProperty("position_enu").EnumerateArray().Select(n => n.GetDouble()).ToArray();

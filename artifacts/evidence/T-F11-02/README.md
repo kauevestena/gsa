@@ -1,6 +1,6 @@
 # Evidência — T-F11-02 (Implementar HUD, mapa e ajustes)
 
-Estado: implementado em `codex/m2-wave3-office-masks-hud-board`; em revisão (aguardando CI do PR #8).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #8 (`594ddf7`, run `43676281804`); ver `artifacts/evidence/M2-wave3-ci/summary.json`.
 
 ## Escopo implementado
 - `HudAndMapPresenter` (`HudSnapshotAggregator`, `RouteWaypointPlanner`, `MapOverlayView`, `UiPresentationSettings`, `VisualIndicator`) em `src/Gsa.Missions/Presentation/HudAndMapPresenter.cs`, `GameFacade.GetHudCapabilities` em `src/Gsa.Engine/GameFacade.cs` e chaves bilíngues em `game/localization/{en_US,pt_BR}.po`:

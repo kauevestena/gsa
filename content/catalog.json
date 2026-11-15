@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "clients": [
-    "city_hall"
+    "city_hall",
+    "university"
   ],
   "capabilities": [
     "camera",

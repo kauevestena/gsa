@@ -1,0 +1,441 @@
+{
+  "schema_version": 1,
+  "milestone": "M2",
+  "technical_loop_status": "passed",
+  "playtest_gate_status": "pending_human_playtest_cohort",
+  "overall_gate_status": "pending_human_playtest_cohort",
+  "tutorial_playthrough_summary": {
+    "schema_version": 1,
+    "mission_id": "HIST-01",
+    "contract_id": "contract_hist_01",
+    "minimum_platform_level": 0,
+    "required_capabilities": [
+      "camera",
+      "gnss_basic"
+    ],
+    "requires_future_sensors": false,
+    "controls_used_in_estimation": true,
+    "checkpoints_reserved_for_quality_evaluation_only": true,
+    "control_vs_checkpoint_reference": {
+      "control_target_ids": [
+        "control_old_center_01",
+        "control_old_center_02"
+      ],
+      "checkpoint_target_ids": [
+        "tutorial_checkpoint_01",
+        "tutorial_checkpoint_02"
+      ],
+      "controls_used_in_estimation": true,
+      "checkpoints_reserved_for_quality_evaluation_only": true
+    },
+    "initial_report_passed": false,
+    "initial_stars": 0,
+    "initial_failure_reasons": [
+      "cq.failure.all_required_features",
+      "cq.failure.area_coverage",
+      "cq.failure.privacy_redacted",
+      "cq.failure.valid_image_fraction"
+    ],
+    "final_report_passed": true,
+    "final_stars": 5,
+    "net_payout_coords": 400,
+    "final_ledger_coords": 630,
+    "idempotent_replay_confirmed": true,
+    "raw_batch_sha256_before_processing": "1dac0e546f71d036c6f15bd8935cccffb89ef396c6cb495f806bc32399e8034b",
+    "raw_batch_sha256_after_processing": "1dac0e546f71d036c6f15bd8935cccffb89ef396c6cb495f806bc32399e8034b",
+    "initial_privacy_compliant": false,
+    "final_privacy_compliant": true,
+    "save_round_trip_verified": true,
+    "unlocked_missions": [
+      "HIST-01",
+      "HIST-02"
+    ],
+    "unlocked_vehicles": [
+      "cart"
+    ],
+    "applied_story_event_count": 5,
+    "catalog_validation": {
+      "valid": true,
+      "errors": [],
+      "ordered_mission_ids": [
+        "HIST-01",
+        "HIST-02",
+        "HIST-03"
+      ],
+      "unlocked_vehicle_progression": [
+        "cart",
+        "bicycle",
+        "scooter"
+      ],
+      "requires_future_sensors": false
+    },
+    "phases": [
+      {
+        "phase_number": 1,
+        "phase_id": "collect",
+        "localization_key": "tutorial.step.collect",
+        "contract_state_after": "Coletando",
+        "passed": true,
+        "detail": "Collected initial cart batch \u0027batch_tut_01\u0027 across 20 facade slots (15 valid, 5 blurred/omitted, 1 sensitive region)."
+      },
+      {
+        "phase_number": 2,
+        "phase_id": "unload_and_process",
+        "localization_key": "tutorial.step.unload_and_process",
+        "contract_state_after": "Retrabalho",
+        "passed": true,
+        "detail": "Initial office revision 1 failed CQ (cq.failure.all_required_features, cq.failure.area_coverage, cq.failure.privacy_redacted, cq.failure.valid_image_fraction), entering Retrabalho with 53 corrective action card(s)."
+      },
+      {
+        "phase_number": 3,
+        "phase_id": "correct_rework",
+        "localization_key": "tutorial.step.correct_rework",
+        "contract_state_after": "ProntoEntregar",
+        "passed": true,
+        "detail": "Recollected 5 missing facades, applied RGB(32,32,32) mask on derived thumbnail without mutating raw SHA-256, and passed CQ (5 stars)."
+      },
+      {
+        "phase_number": 4,
+        "phase_id": "deliver_and_pay",
+        "localization_key": "tutorial.step.deliver_and_pay",
+        "contract_state_after": "Entregue",
+        "passed": true,
+        "detail": "Settled 400 Coords once (duplicate replay safe), balance 630 Coords, unlocked HIST-02, and verified save round-trip."
+      }
+    ]
+  },
+  "protocol_thresholds": {
+    "required_participants": 5,
+    "max_duration_minutes": 30,
+    "min_completed_within_two_interventions": 4,
+    "min_identified_cause_and_correction": 4,
+    "min_chose_another_contract": 3
+  },
+  "observed_counts": {
+    "total_participants": 5,
+    "eligible_participants": 5,
+    "qualified_completed_within_two_interventions": 5,
+    "qualified_identified_cause_and_correction": 5,
+    "qualified_chose_another_contract": 4,
+    "max_observed_duration_minutes": 27,
+    "contains_disqualified_participants": false
+  },
+  "sessions": [
+    {
+      "participant_id": "sim_novice_01",
+      "has_prior_geomatics_knowledge": false,
+      "session_duration_minutes": 18.5,
+      "completed_contract": true,
+      "interventions_count": 0,
+      "identified_rejection_cause": true,
+      "identified_corrective_action": true,
+      "chose_another_contract": true,
+      "discomfort_notes": "none",
+      "control_notes": "keyboard\u002Bmouse smooth",
+      "confusion_notes": "none",
+      "is_human_cohort_session": false,
+      "completed_within_two_interventions": true,
+      "identified_cause_and_correction": true
+    },
+    {
+      "participant_id": "sim_novice_02",
+      "has_prior_geomatics_knowledge": false,
+      "session_duration_minutes": 22,
+      "completed_contract": true,
+      "interventions_count": 1,
+      "identified_rejection_cause": true,
+      "identified_corrective_action": true,
+      "chose_another_contract": true,
+      "discomfort_notes": "none",
+      "control_notes": "asked for unload icon",
+      "confusion_notes": "privacy notice clear after card hint",
+      "is_human_cohort_session": false,
+      "completed_within_two_interventions": true,
+      "identified_cause_and_correction": true
+    },
+    {
+      "participant_id": "sim_novice_03",
+      "has_prior_geomatics_knowledge": false,
+      "session_duration_minutes": 24.5,
+      "completed_contract": true,
+      "interventions_count": 1,
+      "identified_rejection_cause": true,
+      "identified_corrective_action": true,
+      "chose_another_contract": true,
+      "discomfort_notes": "none",
+      "control_notes": "gamepad tested",
+      "confusion_notes": "checked provisional banner vs final CQ",
+      "is_human_cohort_session": false,
+      "completed_within_two_interventions": true,
+      "identified_cause_and_correction": true
+    },
+    {
+      "participant_id": "sim_novice_04",
+      "has_prior_geomatics_knowledge": false,
+      "session_duration_minutes": 27,
+      "completed_contract": true,
+      "interventions_count": 2,
+      "identified_rejection_cause": true,
+      "identified_corrective_action": true,
+      "chose_another_contract": true,
+      "discomfort_notes": "minor eye fatigue reading technical unit table",
+      "control_notes": "switched back to Arcade report",
+      "confusion_notes": "understood blur recollection target",
+      "is_human_cohort_session": false,
+      "completed_within_two_interventions": true,
+      "identified_cause_and_correction": true
+    },
+    {
+      "participant_id": "sim_novice_05",
+      "has_prior_geomatics_knowledge": false,
+      "session_duration_minutes": 21,
+      "completed_contract": true,
+      "interventions_count": 1,
+      "identified_rejection_cause": true,
+      "identified_corrective_action": true,
+      "chose_another_contract": false,
+      "discomfort_notes": "none",
+      "control_notes": "preferred board filter",
+      "confusion_notes": "stopped after HIST-01 payment settled",
+      "is_human_cohort_session": false,
+      "completed_within_two_interventions": true,
+      "identified_cause_and_correction": true
+    }
+  ],
+  "corrections_log": [
+    {
+      "id": "CORR-M2-01",
+      "cause": "Cancelling an active office processing job left ContractStateMachine stranded in Processando instead of returning to Coletando/Retrabalho.",
+      "corrective_task": "T-F07-01",
+      "component": "Gsa.Missions.Contracts.ContractStateMachine.CancelProcessing",
+      "verified_by_retest": true
+    },
+    {
+      "id": "CORR-M2-02",
+      "cause": "System.Text.Json deserialized readonly Vector3d, Quaterniond, and Bounds2DEnu structs as default zeros during save/batch restoration.",
+      "corrective_task": "T-F12-02",
+      "component": "Gsa.Core.Geometry \u0026 Gsa.Missions.Quality [JsonConstructor]",
+      "verified_by_retest": true
+    },
+    {
+      "id": "CORR-M2-03",
+      "cause": "Provisional HUD coverage needed explicit non-CQ warning indicator and report cards needed direct privacy/recollection actions before second playtest attempt.",
+      "corrective_task": "T-F11-03",
+      "component": "Gsa.Missions.Presentation.BoardOfficeAndReportPresenter",
+      "verified_by_retest": true
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "T-F04-03",
+      "title": "Implementar scheduler e invent\u00E1rio",
+      "requirements": [
+        "REQ-F04-02",
+        "REQ-F04-03"
+      ],
+      "acceptance_scenarios": [
+        "AC-F04-02",
+        "AC-F04-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F04-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F05-02",
+      "title": "Integrar c\u00E9u e estado de solu\u00E7\u00E3o",
+      "requirements": [
+        "REQ-F05-01",
+        "REQ-F05-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F05-01",
+        "AC-F05-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F05-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F06-02",
+      "title": "Implementar m\u00E1quina de contratos",
+      "requirements": [
+        "REQ-F06-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F06-03",
+        "AC-F06-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F06-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F06-03",
+      "title": "Implementar CQ de fotos e invent\u00E1rio",
+      "requirements": [
+        "REQ-F06-03",
+        "REQ-F06-05"
+      ],
+      "acceptance_scenarios": [
+        "AC-F06-01",
+        "AC-F06-05"
+      ],
+      "evidence_path": "artifacts/evidence/T-F06-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F06-04",
+      "title": "Implementar estrelas e valor de entrega",
+      "requirements": [
+        "REQ-F06-04",
+        "REQ-F06-05"
+      ],
+      "acceptance_scenarios": [
+        "AC-F06-01",
+        "AC-F06-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F06-04/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F06-05",
+      "title": "Integrar retrabalho e liquida\u00E7\u00E3o idempotente",
+      "requirements": [
+        "REQ-F06-02",
+        "REQ-F06-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F06-02",
+        "AC-F06-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F06-05/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F07-01",
+      "title": "Criar processamento b\u00E1sico por receita",
+      "requirements": [
+        "REQ-F07-01"
+      ],
+      "acceptance_scenarios": [
+        "AC-F07-01"
+      ],
+      "evidence_path": "artifacts/evidence/T-F07-01/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F07-04",
+      "title": "Implementar m\u00E1scaras e conformidade",
+      "requirements": [
+        "REQ-F07-03"
+      ],
+      "acceptance_scenarios": [
+        "AC-F07-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F07-04/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F08-01",
+      "title": "Implementar ledger e pagamentos",
+      "requirements": [
+        "REQ-F08-01"
+      ],
+      "acceptance_scenarios": [
+        "AC-F08-01"
+      ],
+      "evidence_path": "artifacts/evidence/T-F08-01/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F10-01",
+      "title": "Criar tutorial e cat\u00E1logo inicial de hist\u00F3ria",
+      "requirements": [
+        "REQ-F10-01",
+        "REQ-F10-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F10-01"
+      ],
+      "evidence_path": "artifacts/evidence/T-F10-01/README.md",
+      "accepted": false,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F11-02",
+      "title": "Implementar HUD, mapa e ajustes",
+      "requirements": [
+        "REQ-F11-02",
+        "REQ-F11-05"
+      ],
+      "acceptance_scenarios": [
+        "AC-F11-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F11-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F11-03",
+      "title": "Criar quadro, escrit\u00F3rio e relat\u00F3rio",
+      "requirements": [
+        "REQ-F11-02",
+        "REQ-F11-03"
+      ],
+      "acceptance_scenarios": [
+        "AC-F11-02",
+        "AC-F11-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F11-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F12-01",
+      "title": "Implementar lotes e descarregamento at\u00F4mico",
+      "requirements": [
+        "REQ-F12-01"
+      ],
+      "acceptance_scenarios": [
+        "AC-F12-01"
+      ],
+      "evidence_path": "artifacts/evidence/T-F12-01/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F12-02",
+      "title": "Implementar save e recupera\u00E7\u00E3o",
+      "requirements": [
+        "REQ-F12-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F12-01",
+        "AC-F12-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F12-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F19-02",
+      "title": "Validar primeira experi\u00EAncia completa",
+      "requirements": [
+        "REQ-F19-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F19-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F19-02/README.md",
+      "accepted": false,
+      "evidence_verified": true
+    }
+  ]
+}

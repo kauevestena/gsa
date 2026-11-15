@@ -109,3 +109,81 @@ msgstr "Capture remaining required features"
 
 msgid "cq.action.deliver_full"
 msgstr "Deliver full contract"
+
+msgid "mission.hist_01.title"
+msgstr "Commerce Street facades"
+
+msgid "mission.hist_01.summary"
+msgstr "Capture all 20 commerce street facades with the handcart, offload atomically, apply privacy masks, fix QC rework, and deliver."
+
+msgid "mission.hist_01.beat.proposal"
+msgstr "City Hall needs a clean inventory of all 20 Commerce Street facades."
+
+msgid "mission.hist_01.beat.preparation"
+msgstr "Mount the initial camera and basic GNSS on your handcart—no advanced sensors needed."
+
+msgid "mission.hist_01.beat.technical_discovery"
+msgstr "Use control targets to adjust your local trajectory; checkpoints are held back solely for final CQ verification."
+
+msgid "mission.hist_01.beat.setback_or_correction"
+msgstr "QC flagged blurred facades and an unmasked privacy region—recollect the missing frames and redact thumbnails in the office."
+
+msgid "mission.hist_01.beat.delivery_and_consequence"
+msgstr "Deliver the approved bundle once to settle payment and unlock Mission HIST-02."
+
+msgid "mission.hist_02.title"
+msgstr "Lost storm drains"
+
+msgid "mission.hist_02.summary"
+msgstr "Inventory 12 storm drains on the handcart before announced rain degrades image quality; unlocks the bicycle purchase."
+
+msgid "mission.hist_02.beat.proposal"
+msgstr "Locate and photograph 12 blocked storm drains before the afternoon shower rolls in."
+
+msgid "mission.hist_02.beat.preparation"
+msgstr "Rain will challenge shutter speed and lens clarity, not trigger an instant mission failure."
+
+msgid "mission.hist_02.beat.technical_discovery"
+msgstr "Heavy drops add motion blur and glare—slow down or shorten exposure to preserve usable images."
+
+msgid "mission.hist_02.beat.setback_or_correction"
+msgstr "Replace rain-blurred shots inside the office recipe before submitting to CQ."
+
+msgid "mission.hist_02.beat.delivery_and_consequence"
+msgstr "City Hall approved the drainage survey and unlocked bicycle purchases in the shop."
+
+msgid "mission.hist_03.title"
+msgstr "Accessible sidewalk"
+
+msgid "mission.hist_03.summary"
+msgstr "Measure 8 sidewalk width and curb segments by bicycle using supplied local control planes; unlocks the scooter."
+
+msgid "mission.hist_03.beat.proposal"
+msgstr "The university needs curb heights and sidewalk widths along eight segments."
+
+msgid "mission.hist_03.beat.preparation"
+msgstr "Deploy on the bicycle with the supplied local control targets and reference planes."
+
+msgid "mission.hist_03.beat.technical_discovery"
+msgstr "Local control planes tighten relative precision between camera passes even with basic GNSS."
+
+msgid "mission.hist_03.beat.setback_or_correction"
+msgstr "Keep independent checkpoints untouched until final CQ checks relative accuracy."
+
+msgid "mission.hist_03.beat.delivery_and_consequence"
+msgstr "University CQ passed and unlocked the motor scooter for faster routes."
+
+msgid "tutorial.step.collect"
+msgstr "Step 1: Collect field photos around Commerce Street"
+
+msgid "tutorial.step.unload_and_process"
+msgstr "Step 2: Offload batch and run office recipe"
+
+msgid "tutorial.step.correct_rework"
+msgstr "Step 3: Recollect missed facades and apply privacy redaction"
+
+msgid "tutorial.step.deliver_and_pay"
+msgstr "Step 4: Deliver approved product and confirm ledger payout"
+
+msgid "tutorial.control_vs_checkpoint.summary"
+msgstr "Control points help orient your survey; checkpoints remain isolated for independent quality evaluation."

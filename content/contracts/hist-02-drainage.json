@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "id": "contract_hist_02",
+  "title_key": "mission.hist_02.title",
+  "client_id": "city_hall",
+  "region_id": "old_center",
+  "area_id": "commerce_street_drainage",
+  "product": "feature_inventory",
+  "required_feature_ids": [
+    "manhole_01",
+    "manhole_02",
+    "manhole_03",
+    "manhole_04",
+    "manhole_05",
+    "manhole_06",
+    "manhole_07",
+    "manhole_08",
+    "manhole_09",
+    "manhole_10",
+    "manhole_11",
+    "manhole_12"
+  ],
+  "requirements": [
+    {
+      "kind": "threshold",
+      "metric": "feature_completeness",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.9,
+      "excellent": 1
+    },
+    {
+      "kind": "threshold",
+      "metric": "absolute_rmse",
+      "unit": "m",
+      "direction": "max",
+      "limit": 2,
+      "excellent": 0.5
+    },
+    {
+      "kind": "threshold",
+      "metric": "valid_image_fraction",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.8,
+      "excellent": 0.98
+    },
+    {
+      "kind": "predicate",
+      "metric": "privacy_redacted",
+      "expected": true
+    },
+    {
+      "kind": "predicate",
+      "metric": "format_valid",
+      "expected": true
+    }
+  ],
+  "required_capabilities": [
+    "camera",
+    "gnss_basic"
+  ],
+  "risk": "easy",
+  "calm": true,
+  "deadline": {
+    "due_after_s": 21600,
+    "expires_after_s": 27000,
+    "late_penalty_per_hour": 0.05,
+    "late_penalty_cap": 0.5
+  },
+  "reward": {
+    "base_coords": 400,
+    "base_xp": 100,
+    "reputation": 2,
+    "story_unlocks": [
+      "HIST-03"
+    ]
+  },
+  "partial_policy": {
+    "mode": "disabled"
+  },
+  "delivery_format": "gsa_bundle_v1",
+  "story_prerequisites": [
+    "HIST-01"
+  ]
+}
+

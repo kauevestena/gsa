@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** implementado em `codex/m2-wave4-tutorial-playtest-gate`; em revisão (aguardando CI do PR #9); [evidências](../../../artifacts/evidence/T-F10-01/README.md) e [relatório](../../../artifacts/evidence/T-F10-01/tutorial-execution-report.json). `StoryCampaignAndTutorial.cs` (`StoryCampaignCoordinator`, `TutorialMissionRunner`, `ControlVsCheckpointReference`) + `content/missions/HIST-{01,02,03}.json` + `content/contracts/hist-{02-drainage,03-sidewalks}.json` + chaves `.po` + `GameFacade.RunM2TutorialSmoke`: tutorial completo `HIST-01` (coleta sem sensores futuros, CQ com retrabalho, máscara RGB `(32,32,32)` em miniatura, 5 estrelas, liquidação idempotente, round-trip de save) e catálogo acíclico do Ato 1 desbloqueando `bicycle` e `scooter`.
+
 **Marco:** M2
 
 **Dependências:** T-F06-05, T-F07-04, T-F11-03, T-F12-02, T-F05-02, T-F03-02

@@ -77,7 +77,8 @@ def main() -> int:
                   "T-F09-01", "T-F15-01", "T-F17-01", "T-F19-01",
                   "T-F05-02", "T-F04-03", "T-F06-02", "T-F06-03",
                   "T-F06-04", "T-F08-01", "T-F12-01", "T-F06-05", "T-F12-02",
-                  "T-F07-01", "T-F07-04", "T-F11-02", "T-F11-03"],
+                  "T-F07-01", "T-F07-04", "T-F11-02", "T-F11-03",
+                  "T-F10-01", "T-F19-02"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),
@@ -183,6 +184,13 @@ def main() -> int:
         bench_summary = json.loads(bench_output)
         if bench_summary.get("valid") is not True or bench_summary.get("runs_executed") != 6:
             raise RuntimeError("M1 benchmark CLI smoke check did not produce 6 valid runs")
+
+        m2_output = run("run-m2-gate", [dotnet, ROOT / "src/Gsa.Tools/bin/Debug/net10.0/gsa-tools.dll",
+                                        "run-m2-gate", "content", "game/world/tutorial-block.json",
+                                        logs / "m2-tutorial-smoke.json", logs / "m2-gate-smoke.json"])
+        m2_summary = json.loads(m2_output)
+        if m2_summary.get("valid") is not True or m2_summary.get("final_stars") != 5:
+            raise RuntimeError("M2 gate CLI smoke check did not verify a 5-star HIST-01 tutorial pass")
         smoke = run("editor-smoke", [godot, "--headless", "--path", "game", "--", "--smoke-test"],
                     marker="GSA_BOOTSTRAP_SMOKE_OK")
         for marker in ("GSA_BRIDGE_SMOKE_OK", "GSA_LOCALIZATION_SMOKE_OK"):
@@ -193,7 +201,7 @@ def main() -> int:
                           marker="GSA_WORLD_SMOKE_OK")
         for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK",
                        "GSA_GIMBALINA_SMOKE_OK", "GSA_TRAFFIC_SMOKE_OK", "GSA_LIDAR_SMOKE_OK",
-                       "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK"):
+                       "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK"):
             if marker not in world_smoke:
                 raise RuntimeError(f"Missing world verification marker: {marker}")
 
@@ -237,7 +245,7 @@ def main() -> int:
                                    marker="GSA_WORLD_SMOKE_OK", runtime_env=clean)
                 for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK",
                                "GSA_GIMBALINA_SMOKE_OK", "GSA_TRAFFIC_SMOKE_OK", "GSA_LIDAR_SMOKE_OK",
-                               "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK"):
+                               "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK"):
                     if marker not in world_output:
                         raise RuntimeError(f"{target}: missing exported world marker {marker}")
                 if args.offline_smoke:

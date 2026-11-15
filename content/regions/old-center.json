@@ -34,12 +34,62 @@
           7400499
         ]
       ]
+    },
+    {
+      "id": "commerce_street_drainage",
+      "polygon_enu": [
+        [
+          500010,
+          7400010
+        ],
+        [
+          500230,
+          7400010
+        ],
+        [
+          500230,
+          7400050
+        ],
+        [
+          500010,
+          7400050
+        ]
+      ]
+    },
+    {
+      "id": "commerce_street_sidewalks",
+      "polygon_enu": [
+        [
+          500005,
+          7400005
+        ],
+        [
+          500235,
+          7400005
+        ],
+        [
+          500235,
+          7400055
+        ],
+        [
+          500005,
+          7400055
+        ]
+      ]
     }
   ],
   "surfaces": [
     {
       "id": "commerce_facade_planes",
       "area_id": "commerce_street_facades"
+    },
+    {
+      "id": "commerce_drainage_surface",
+      "area_id": "commerce_street_drainage"
+    },
+    {
+      "id": "commerce_sidewalk_surface",
+      "area_id": "commerce_street_sidewalks"
     }
   ],
   "features": [
@@ -380,6 +430,354 @@
       "tags": [
         "facade",
         "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_01",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500020,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_02",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500035,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_03",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500050,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_04",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500065,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_05",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500080,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_06",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500095,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_07",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500110,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_08",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500125,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_09",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500140,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_10",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500155,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_11",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500170,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "manhole_12",
+      "area_id": "commerce_street_drainage",
+      "surface_id": "commerce_drainage_surface",
+      "class": "manhole",
+      "material": "metal",
+      "position_enu": [
+        500185,
+        7400025,
+        100
+      ],
+      "tags": [
+        "drainage",
+        "manhole"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_01",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500025,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_02",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500050,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_03",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500075,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_04",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500100,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_05",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500125,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_06",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500150,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_07",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500175,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "sidewalk_seg_08",
+      "area_id": "commerce_street_sidewalks",
+      "surface_id": "commerce_sidewalk_surface",
+      "class": "sidewalk_segment",
+      "material": "concrete",
+      "position_enu": [
+        500200,
+        7400015,
+        100.1
+      ],
+      "tags": [
+        "sidewalk",
+        "accessibility",
+        "local_control"
       ],
       "dynamic": false
     }

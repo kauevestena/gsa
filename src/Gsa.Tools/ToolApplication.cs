@@ -13,11 +13,13 @@ public static class ToolApplication
             return Art.ArtKitTool.Run(args, output);
         if (args.Length > 0 && args[0] == "run-m1-benchmark")
             return Benchmark.BenchmarkTool.Run(args, output);
+        if (args.Length > 0 && args[0] == "run-m2-gate")
+            return Campaign.M2GateTool.Run(args, output);
 
         if (args.Length != 2 || args[0] != "validate-content")
         {
             Write(output, false, [new ContentDiagnostic("", "$command",
-                "Usage: gsa-tools validate-content <directory> | precompute-sky <scene-manifest> <output> | validate-art-kit <directory> | run-m1-benchmark <world-manifest> <pilot-kit-dir> <output-json>")]);
+                "Usage: gsa-tools validate-content <directory> | precompute-sky <scene-manifest> <output> | validate-art-kit <directory> | run-m1-benchmark <world-manifest> <pilot-kit-dir> <output-json> | run-m2-gate <content-dir> <world-manifest> <tutorial-output-json> <gate-output-json>")]);
             return 1;
         }
 

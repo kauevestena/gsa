@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F11-02 — Implementar HUD, mapa e ajustes
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave3-office-masks-hud-board`; em revisão (aguardando CI do PR #8); [evidências](../../../artifacts/evidence/T-F11-02/README.md). `HudAndMapPresenter` (`HudSnapshotAggregator`, `RouteWaypointPlanner`, `MapOverlayView`, `UiPresentationSettings`) em `Gsa.Missions.Presentation`: snapshots a `10 Hz` com cobertura provisória, indicadores multi-canal (cor + ícone + padrão + chave), ocultação de sensores indisponíveis (`LiDAR < Nível 4`, atenção antes de facções), mapa até `10` waypoints sem piloto automático, escala/acessibilidade, remapeamento e chaves bilíngues `.po` + `GameFacade`.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #8 (`594ddf7`, run `43676281804`); [resumo CI](../../../artifacts/evidence/M2-wave3-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F11-02/README.md). `HudAndMapPresenter` (`HudSnapshotAggregator`, `RouteWaypointPlanner`, `MapOverlayView`, `UiPresentationSettings`) em `Gsa.Missions.Presentation`: snapshots a `10 Hz` com cobertura provisória, indicadores multi-canal (cor + ícone + padrão + chave), ocultação de sensores indisponíveis (`LiDAR < Nível 4`, atenção antes de facções), mapa até `10` waypoints sem piloto automático, escala/acessibilidade, remapeamento e chaves bilíngues `.po` + `GameFacade`.
 
 **Marco:** M2
 
@@ -46,9 +46,9 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F11-03 — Criar quadro, escritório e relatório
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave3-office-masks-hud-board`; em revisão (aguardando CI do PR #8); [evidências](../../../artifacts/evidence/T-F11-03/README.md). `BoardOfficeAndReportPresenter` (`ContractBoardCardView`, `OfficeJobView`, `QualityReportView`) e `GameFacade.GetContractBoardCardSummary`: cartão pré-aceitação completo (requisitos, prazos, multas e parcial), status de fila/máscaras no escritório e comparação fiel de relatórios entre modos `Arcade` (estrelas/ações corretivas) e `Técnico` (valores/unidades/limites) com formatação localizada.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #8 (`594ddf7`, run `43676281804`); [resumo CI](../../../artifacts/evidence/M2-wave3-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F11-03/README.md). `BoardOfficeAndReportPresenter` (`ContractBoardCardView`, `OfficeJobView`, `QualityReportView`) e `GameFacade.GetContractBoardCardSummary`: cartão pré-aceitação completo (requisitos, prazos, multas e parcial), status de fila/máscaras no escritório e comparação fiel de relatórios entre modos `Arcade` (estrelas/ações corretivas) e `Técnico` (valores/unidades/limites) com formatação localizada.
 
 **Marco:** M2
 
