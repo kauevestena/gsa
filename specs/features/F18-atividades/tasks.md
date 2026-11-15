@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Replay de cada evento e teste do grafo.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F18-03](../../../artifacts/evidence/T-F18-03/README.md)).
+
 ### T-F18-04 — Entregar desafio, filtros e coleção completa
 
 - [ ] Aceita

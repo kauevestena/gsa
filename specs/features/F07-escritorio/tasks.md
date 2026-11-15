@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F07-03 — Integrar processamento avançado
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -61,7 +61,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Dados ruins não são curados por oracle; cobertura é recalculada após filtro.
 
 **Evidência:** Fixtures e relatório antes/depois por operação.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F07-03](../../../artifacts/evidence/T-F07-03/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #17](https://github.com/kauevestena/gsa/pull/17) (`b313e0b`, merge `88b1c23`, execução `43690357152`, jobs Linux `132739514446` e Windows `132739514694`); ver [resumo CI](../../../artifacts/evidence/M5-wave2-ci/summary.json) e [evidência T-F07-03](../../../artifacts/evidence/T-F07-03/README.md).
 
 ### T-F07-04 — Implementar máscaras e conformidade
 
@@ -85,7 +85,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F07-05 — Consolidar jobs e caches
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -100,4 +100,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Recarregar/cancelar/retomar preserva origem e idempotência do serviço.
 
 **Evidência:** Testes de save em cada fase do job.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F07-05](../../../artifacts/evidence/T-F07-05/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #17](https://github.com/kauevestena/gsa/pull/17) (`b313e0b`, merge `88b1c23`, execução `43690357152`, jobs Linux `132739514446` e Windows `132739514694`); ver [resumo CI](../../../artifacts/evidence/M5-wave2-ci/summary.json) e [evidência T-F07-05](../../../artifacts/evidence/T-F07-05/README.md).

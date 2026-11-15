@@ -106,6 +106,7 @@ public static class RackCatalog
             new("slot_cam_360", RackSlotKind.Panoramic360, 3, new Vector3d(0.0, 0.0, 1.95), CameraMountEstimate.ForwardFacing.CameraToBody, 45.0, 2200),
             new("slot_wheel_dmi", RackSlotKind.WheelDmi, 4, new Vector3d(-0.95, 0.75, 0.35), Quaterniond.Identity, 8.0, 400),
             new("slot_lidar_a", RackSlotKind.LidarProfilerOrScanner, 4, new Vector3d(0.10, 0.0, 2.15), Quaterniond.Identity, 90.0, 4500),
+            new("slot_lidar_b", RackSlotKind.LidarProfilerOrScanner, 5, new Vector3d(-0.15, 0.42, 2.08), Quaterniond.FromAxisAngle(Vector3d.UnitX, 0.12), 90.0, 4500),
             new("slot_gnss_secondary", RackSlotKind.GnssAntennaSecondary, 5, new Vector3d(-1.00, 0.0, 1.90), Quaterniond.Identity, 10.0, 500),
         };
         return Array.AsReadOnly(slots.ToArray());

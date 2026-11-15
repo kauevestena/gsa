@@ -10,5 +10,5 @@ Gerenciamento consolidado de receitas e fila única do escritório avançado (`A
 - [M5CloudCqOfficeLidarWorkshopAndSabotageTests.cs](../../../tests/Gsa.Missions.Tests/M5CloudCqOfficeLidarWorkshopAndSabotageTests.cs) (`T_F07_05_ConsolidatedOfficeJobsIdempotentReloadResumeCancelHashInvarianceAndCacheInvalidation`)
 
 ## Estado
-Implementada e em verificação para Onda 2 do marco M5.
+Aceita — PR #17 mergeado em main (88b1c23b90ba27d95ace458f1920400af66bb4c8) após aprovação nos jobs Linux (132739514446) e Windows (132739514694) da execução CI 43690357152; ver [resumo CI](../M5-wave2-ci/summary.json).
 

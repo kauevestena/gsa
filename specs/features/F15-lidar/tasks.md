@@ -80,6 +80,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Fixtures por material e replay em vegetação.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-04](../../../artifacts/evidence/T-F15-04/README.md)).
+
 ### T-F15-05 — Entregar perfil de engenharia e otimizar aquisição
 
 - [ ] Aceita

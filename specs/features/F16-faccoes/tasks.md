@@ -44,7 +44,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F16-03 — Adicionar sabotagem avançada e contramedidas
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M5
 
@@ -59,7 +59,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Upload protege dados e modo calmo remove eventos pendentes sem cobrança indevida.
 
 **Evidência:** Matriz ataque/contramedida/save.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-03](../../../artifacts/evidence/T-F16-03/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #17](https://github.com/kauevestena/gsa/pull/17) (`b313e0b`, merge `88b1c23`, execução `43690357152`, jobs Linux `132739514446` e Windows `132739514694`); ver [resumo CI](../../../artifacts/evidence/M5-wave2-ci/summary.json) e [evidência T-F16-03](../../../artifacts/evidence/T-F16-03/README.md).
 
 ### T-F16-04 — Integrar facções à cidade completa
 

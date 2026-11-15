@@ -102,6 +102,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Mapa semântico e inspeção de terreno.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-05](../../../artifacts/evidence/T-F02-05/README.md)).
+
 ### T-F02-06 — Integrar cidade e rede de marcos
 
 - [ ] Aceita
