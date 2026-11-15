@@ -81,3 +81,5 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Flags correspondem ao modelo de ruído e transições são preservadas no save.
 
 **Evidência:** Logs RTK e teste de indisponibilidade/retomada.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F05-04](../../../artifacts/evidence/T-F05-04/README.md)).

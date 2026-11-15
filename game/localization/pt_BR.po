@@ -562,3 +562,75 @@ msgstr "Mapeia azimute e elevação do céu em disco polar sem quebrar ângulos.
 
 msgid "geopedia.card_stereographic.model_limit"
 msgstr "Escala radial alonga próximo à borda do horizonte."
+
+msgid "hud.gnss.dgnss"
+msgstr "DGNSS"
+
+msgid "hud.gnss.rtk_float"
+msgstr "RTK Float"
+
+msgid "hud.gnss.rtk_fix"
+msgstr "RTK Fix"
+
+msgid "shop.platform.car.mechanic"
+msgstr "Carro Sedã: Nível 3, rack de teto 360° e suspensão viária"
+
+msgid "shop.platform.kombi.mechanic"
+msgstr "Kombi Utilitária: Nível 4, suporte para LiDAR e grande capacidade"
+
+msgid "shop.platform.pickup.mechanic"
+msgstr "Picape de Campo: Nível 5, suspensão reforçada e 8000 unidades de carga"
+
+msgid "shop.platform.van.mechanic"
+msgstr "Van Laboratório: Nível 6, câmera 360° 1024px e estação móvel"
+
+msgid "shop.error.reputation_prerequisite_missing"
+msgstr "Reputação global exigida ainda não foi atingida."
+
+msgid "shop.error.client_reputation_prerequisite_missing"
+msgstr "Reputação exigida com o cliente ainda não foi atingida."
+
+msgid "shop.error.platform_level_insufficient"
+msgstr "O nível da plataforma ativa não atende a este requisito."
+
+msgid "cosmetic.paint.geodetic_yellow"
+msgstr "Amarelo Geodésico"
+
+msgid "cosmetic.paint.cobalt_fleet"
+msgstr "Azul Cobalto"
+
+msgid "cosmetic.paint.terracotta_stripe"
+msgstr "Faixa Terracota"
+
+msgid "cosmetic.sticker.compass_rose"
+msgstr "Adesivo Rosa dos Ventos"
+
+msgid "cosmetic.sticker.gnss_badge"
+msgstr "Adesivo Insígnia GNSS"
+
+msgid "cosmetic.sticker.chicken_mascot"
+msgstr "Adesivo Gimbalina"
+
+msgid "cosmetic.horn.standard"
+msgstr "Buzina Padrão"
+
+msgid "cosmetic.horn.cackle"
+msgstr "Buzina de Cacarejo"
+
+msgid "cosmetic.horn.air_chime"
+msgstr "Buzina Harmônica"
+
+msgid "cosmetic.costume.surveyor_vest"
+msgstr "Colete de Agrimensura"
+
+msgid "cosmetic.costume.hard_hat"
+msgstr "Capacete de Campo"
+
+msgid "cosmetic.costume.rain_poncho"
+msgstr "Capa de Chuva Técnica"
+
+msgid "cosmetic.costume.night_reflective"
+msgstr "Kit Refletivo Noturno"
+
+msgid "cosmetic.costume.festive_cap"
+msgstr "Quepe Festivo"

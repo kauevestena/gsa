@@ -166,6 +166,24 @@ public sealed class HudSnapshotAggregator
             gnssStateKey = "hud.gnss.unavailable";
             formattedPdop = "--";
         }
+        else if (input.GnssObservation.Solution == GnssSolutionKind.RtkFix)
+        {
+            gnssIndicator = new VisualIndicator(StatusSeverity.Good, "semantic.good", "icon_satellite_rtk_fix", "pattern_solid", "hud.gnss.rtk_fix");
+            gnssStateKey = "hud.gnss.rtk_fix";
+            formattedPdop = PresentationNumberFormatter.Format(input.GnssObservation.Dop, locale, 2, false);
+        }
+        else if (input.GnssObservation.Solution == GnssSolutionKind.RtkFloat)
+        {
+            gnssIndicator = new VisualIndicator(StatusSeverity.Warning, "semantic.warning", "icon_satellite_rtk_float", "pattern_diagonal_hatch", "hud.gnss.rtk_float");
+            gnssStateKey = "hud.gnss.rtk_float";
+            formattedPdop = PresentationNumberFormatter.Format(input.GnssObservation.Dop, locale, 2, false);
+        }
+        else if (input.GnssObservation.Solution == GnssSolutionKind.Dgnss)
+        {
+            gnssIndicator = new VisualIndicator(StatusSeverity.Good, "semantic.good", "icon_satellite_dgnss", "pattern_solid", "hud.gnss.dgnss");
+            gnssStateKey = "hud.gnss.dgnss";
+            formattedPdop = PresentationNumberFormatter.Format(input.GnssObservation.Dop, locale, 2, false);
+        }
         else if (input.GnssObservation.Dop > 4.0)
         {
             gnssIndicator = new VisualIndicator(StatusSeverity.Warning, "semantic.warning", "icon_satellite_degraded", "pattern_diagonal_hatch", "hud.gnss.degraded");

@@ -562,3 +562,75 @@ msgstr "Maps sky azimuth and elevation cleanly to a circular polar diagram."
 
 msgid "geopedia.card_stereographic.model_limit"
 msgstr "Edge radial scale stretches near the horizon."
+
+msgid "hud.gnss.dgnss"
+msgstr "DGNSS"
+
+msgid "hud.gnss.rtk_float"
+msgstr "RTK Float"
+
+msgid "hud.gnss.rtk_fix"
+msgstr "RTK Fix"
+
+msgid "shop.platform.car.mechanic"
+msgstr "Sedan Car: Level 3, roof rack 360° camera, road-only suspension"
+
+msgid "shop.platform.kombi.mechanic"
+msgstr "Utility Kombi: Level 4, LiDAR rack slots and high cargo capacity"
+
+msgid "shop.platform.pickup.mechanic"
+msgstr "Survey Pickup: Level 5, heavy-duty suspension and 8000-unit storage"
+
+msgid "shop.platform.van.mechanic"
+msgstr "Mobile Lab Van: Level 6, 1024px 360° rig and mobile base workstation"
+
+msgid "shop.error.reputation_prerequisite_missing"
+msgstr "Required global reputation not yet reached."
+
+msgid "shop.error.client_reputation_prerequisite_missing"
+msgstr "Required client reputation not yet reached."
+
+msgid "shop.error.platform_level_insufficient"
+msgstr "Active platform level does not meet this upgrade requirement."
+
+msgid "cosmetic.paint.geodetic_yellow"
+msgstr "Geodetic Yellow"
+
+msgid "cosmetic.paint.cobalt_fleet"
+msgstr "Cobalt Fleet"
+
+msgid "cosmetic.paint.terracotta_stripe"
+msgstr "Terracotta Stripe"
+
+msgid "cosmetic.sticker.compass_rose"
+msgstr "Compass Rose Decal"
+
+msgid "cosmetic.sticker.gnss_badge"
+msgstr "GNSS Badge Decal"
+
+msgid "cosmetic.sticker.chicken_mascot"
+msgstr "Gimbalina Emblem"
+
+msgid "cosmetic.horn.standard"
+msgstr "Standard Horn"
+
+msgid "cosmetic.horn.cackle"
+msgstr "Gimbalina Cackle Horn"
+
+msgid "cosmetic.horn.air_chime"
+msgstr "Air Chime Horn"
+
+msgid "cosmetic.costume.surveyor_vest"
+msgstr "Surveyor High-Vis Vest"
+
+msgid "cosmetic.costume.hard_hat"
+msgstr "Field Hard Hat"
+
+msgid "cosmetic.costume.rain_poncho"
+msgstr "Storm Field Poncho"
+
+msgid "cosmetic.costume.night_reflective"
+msgstr "Night Reflective Kit"
+
+msgid "cosmetic.costume.festive_cap"
+msgstr "Festive Celebration Cap"

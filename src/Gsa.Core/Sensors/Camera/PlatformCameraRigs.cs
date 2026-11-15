@@ -83,6 +83,42 @@ public static class PlatformCameraRigBuilder
                 agenda.RegisterSensor("cam_scooter_rear", ScooterRearProfile, ScooterRearMount, initialTimeSeconds);
                 break;
 
+            case LocomotionMode.Car:
+            case LocomotionMode.Kombi:
+            case LocomotionMode.Pickup:
+                foreach (PanoramicFace face in Enum.GetValues<PanoramicFace>())
+                {
+                    agenda.RegisterSensor(
+                        $"cam_360_{face.ToString().ToLowerInvariant()}",
+                        Panoramic360RigSimulator.GetProfileForPlatform(mode, face),
+                        Panoramic360RigSimulator.GetFaceMount(mode, face),
+                        initialTimeSeconds);
+                }
+                break;
+
+            case LocomotionMode.Van:
+                foreach (PanoramicFace face in Enum.GetValues<PanoramicFace>())
+                {
+                    agenda.RegisterSensor(
+                        $"cam_360_{face.ToString().ToLowerInvariant()}",
+                        Panoramic360RigSimulator.GetProfileForPlatform(mode, face),
+                        Panoramic360RigSimulator.GetFaceMount(mode, face),
+                        initialTimeSeconds);
+                }
+                agenda.RegisterSensor(
+                    "cam_pavement_down",
+                    new CameraSensorProfile(
+                        "camera-pavement-1080p",
+                        4.0,
+                        40.0,
+                        CameraIntrinsics.FromHorizontalFieldOfView(1920, 1080, Math.PI / 2.0),
+                        1.0 / 500.0,
+                        1.0 / 60.0,
+                        0.010),
+                    new CameraMountEstimate(new Vector3d(-1.5, 0.0, 0.9), Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2.0)),
+                    initialTimeSeconds);
+                break;
+
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unsupported locomotion mode.");
         }

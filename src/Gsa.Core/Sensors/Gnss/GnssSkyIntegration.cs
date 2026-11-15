@@ -8,10 +8,21 @@ namespace Gsa.Core.Sensors.Gnss;
 /// <summary>Selects the active nominal GNSS and heading profiles from platform tier and upgrades.</summary>
 public static class GnssProfileSelector
 {
-    public static GnssProfile SelectGnssProfile(PlatformProfile platform, bool hasNavigationUpgrade = false)
+    public static GnssProfile SelectGnssProfile(PlatformProfile platform, bool hasNavigationUpgrade = false, bool hasRtkUpgrade = false)
     {
         ArgumentNullException.ThrowIfNull(platform);
+        if (platform.Level >= 3 || hasRtkUpgrade)
+            return GnssProfile.RtkFloat;
         return platform.Level >= 1 || hasNavigationUpgrade ? GnssProfile.Navigation : GnssProfile.Cellphone;
+    }
+
+    public static double ComputeDopForOpenness(double openness, int platformLevel)
+    {
+        var clamped = Math.Clamp(openness, 0.0, 1.0);
+        // Levels 5-6 (Pickup/Van) have 4-constellation multi-frequency diversity, reducing obstruction term by sqrt(4) = 2
+        return platformLevel >= 5
+            ? 1.0 + 4.0 * (1.0 - clamped) / Math.Sqrt(4.0)
+            : 1.0 + 4.0 * (1.0 - clamped);
     }
 
     public static HeadingProfile SelectHeadingProfile(PlatformProfile platform)

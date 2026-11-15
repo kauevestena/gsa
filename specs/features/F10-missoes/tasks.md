@@ -26,7 +26,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F10-02 — Completar MVP e gerador de cinco templates
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -42,7 +42,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Relatórios de geração e três missões gravadas.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-02](../../../artifacts/evidence/T-F10-02/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #12](https://github.com/kauevestena/gsa/pull/12) (`45fb52b`, merge `b2fa25f`, execução `43682314395`); ver [resumo CI](../../../artifacts/evidence/M3-wave3-ci/summary.json) e [evidência T-F10-02](../../../artifacts/evidence/T-F10-02/README.md).
 
 ### T-F10-03 — Concluir ato 1 e escrever campanha restante
 

@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "id": "port",
+  "bounds_enu": {
+    "min": [
+      500000,
+      7401000,
+      90
+    ],
+    "max": [
+      501000,
+      7402000,
+      150
+    ]
+  },
+  "areas": [
+    {
+      "id": "port_warehouses",
+      "polygon_enu": [
+        [
+          500040,
+          7401040
+        ],
+        [
+          500460,
+          7401040
+        ],
+        [
+          500460,
+          7401460
+        ],
+        [
+          500040,
+          7401460
+        ]
+      ]
+    },
+    {
+      "id": "port_viaduct_rails",
+      "polygon_enu": [
+        [
+          500500,
+          7401040
+        ],
+        [
+          500960,
+          7401040
+        ],
+        [
+          500960,
+          7401560
+        ],
+        [
+          500500,
+          7401560
+        ]
+      ]
+    },
+    {
+      "id": "port_tunnel_approach",
+      "polygon_enu": [
+        [
+          500600,
+          7401600
+        ],
+        [
+          500980,
+          7401600
+        ],
+        [
+          500980,
+          7401960
+        ],
+        [
+          500600,
+          7401960
+        ]
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "port_warehouse_planes",
+      "area_id": "port_warehouses"
+    },
+    {
+      "id": "port_viaduct_surface",
+      "area_id": "port_viaduct_rails"
+    },
+    {
+      "id": "port_tunnel_mouth_surface",
+      "area_id": "port_tunnel_approach"
+    }
+  ],
+  "features": [
+    {
+      "id": "port_warehouse_01",
+      "area_id": "port_warehouses",
+      "surface_id": "port_warehouse_planes",
+      "class": "warehouse_facade",
+      "material": "metal",
+      "position_enu": [
+        500160,
+        7401180,
+        104
+      ],
+      "tags": [
+        "warehouse",
+        "multipath_risk"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "port_warehouse_02",
+      "area_id": "port_warehouses",
+      "surface_id": "port_warehouse_planes",
+      "class": "warehouse_facade",
+      "material": "concrete",
+      "position_enu": [
+        500320,
+        7401280,
+        104
+      ],
+      "tags": [
+        "warehouse"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "port_rail_sign_01",
+      "area_id": "port_viaduct_rails",
+      "surface_id": "port_viaduct_surface",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500680,
+        7401320,
+        103
+      ],
+      "tags": [
+        "sign",
+        "rail_crossing"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "port_tunnel_mouth_01",
+      "area_id": "port_tunnel_approach",
+      "surface_id": "port_tunnel_mouth_surface",
+      "class": "tunnel_portal",
+      "material": "concrete",
+      "position_enu": [
+        500920,
+        7401820,
+        105
+      ],
+      "tags": [
+        "tunnel_mouth",
+        "gnss_denied"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "survey_control_port_viaduct",
+      "area_id": "port_viaduct_rails",
+      "surface_id": "port_viaduct_surface",
+      "class": "survey_control",
+      "material": "concrete",
+      "position_enu": [
+        500620,
+        7401200,
+        100.8
+      ],
+      "tags": [
+        "control",
+        "landmark"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "survey_control_port_tunnel",
+      "area_id": "port_tunnel_approach",
+      "surface_id": "port_tunnel_mouth_surface",
+      "class": "survey_control",
+      "material": "concrete",
+      "position_enu": [
+        500760,
+        7401740,
+        101.2
+      ],
+      "tags": [
+        "control",
+        "landmark"
+      ],
+      "dynamic": false
+    }
+  ]
+}
+

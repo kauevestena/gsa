@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "id": "waterfront",
+  "bounds_enu": {
+    "min": [
+      501000,
+      7400000,
+      90
+    ],
+    "max": [
+      502000,
+      7401000,
+      150
+    ]
+  },
+  "areas": [
+    {
+      "id": "waterfront_promenade",
+      "polygon_enu": [
+        [
+          501040,
+          7400040
+        ],
+        [
+          501480,
+          7400040
+        ],
+        [
+          501480,
+          7400480
+        ],
+        [
+          501040,
+          7400480
+        ]
+      ]
+    },
+    {
+      "id": "waterfront_glass_avenue",
+      "polygon_enu": [
+        [
+          501520,
+          7400120
+        ],
+        [
+          501960,
+          7400120
+        ],
+        [
+          501960,
+          7400920
+        ],
+        [
+          501520,
+          7400920
+        ]
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "waterfront_promenade_surface",
+      "area_id": "waterfront_promenade"
+    },
+    {
+      "id": "waterfront_glass_planes",
+      "area_id": "waterfront_glass_avenue"
+    }
+  ],
+  "features": [
+    {
+      "id": "waterfront_promenade_01",
+      "area_id": "waterfront_promenade",
+      "surface_id": "waterfront_promenade_surface",
+      "class": "promenade_curb",
+      "material": "concrete",
+      "position_enu": [
+        501180,
+        7400220,
+        98.5
+      ],
+      "tags": [
+        "promenade",
+        "water_adjacent"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "waterfront_glass_tower_01",
+      "area_id": "waterfront_glass_avenue",
+      "surface_id": "waterfront_glass_planes",
+      "class": "commercial_tower",
+      "material": "glass",
+      "position_enu": [
+        501680,
+        7400360,
+        112
+      ],
+      "tags": [
+        "glass_facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "waterfront_glass_tower_02",
+      "area_id": "waterfront_glass_avenue",
+      "surface_id": "waterfront_glass_planes",
+      "class": "commercial_tower",
+      "material": "glass",
+      "position_enu": [
+        501820,
+        7400640,
+        114
+      ],
+      "tags": [
+        "glass_facade",
+        "privacy_review"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "survey_control_waterfront_pier",
+      "area_id": "waterfront_promenade",
+      "surface_id": "waterfront_promenade_surface",
+      "class": "survey_control",
+      "material": "concrete",
+      "position_enu": [
+        501320,
+        7400310,
+        98.8
+      ],
+      "tags": [
+        "control",
+        "landmark"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "survey_control_waterfront_plaza",
+      "area_id": "waterfront_glass_avenue",
+      "surface_id": "waterfront_glass_planes",
+      "class": "survey_control",
+      "material": "concrete",
+      "position_enu": [
+        501610,
+        7400520,
+        100.2
+      ],
+      "tags": [
+        "control",
+        "landmark"
+      ],
+      "dynamic": false
+    }
+  ]
+}
+

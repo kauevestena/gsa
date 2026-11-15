@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F19-03 — Validar MVP com os dois públicos
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -62,7 +62,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Relatório de gate M3 e problemas resolvidos.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F19-03](../../../artifacts/evidence/T-F19-03/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #12](https://github.com/kauevestena/gsa/pull/12) (`45fb52b`, merge `b2fa25f`, execução `43682314395`); ver [resumo CI](../../../artifacts/evidence/M3-wave3-ci/summary.json) e [evidência T-F19-03](../../../artifacts/evidence/T-F19-03/README.md).
 
 ### T-F19-04 — Otimizar e medir cidade completa
 

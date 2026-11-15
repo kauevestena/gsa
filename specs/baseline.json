@@ -3,13 +3,15 @@
   "date": "2026-11-13",
   "source": "../spec_inicial.md",
   "source_sha256": "f727582d24cacc248b3dbea2292b141b908196da60f0a095ccc3191d4875b6b2",
-  "status": "m3_wave3_in_review",
+  "status": "m4_wave1_in_review",
   "active_tasks": [
-    "T-F11-04",
-    "T-F18-01",
-    "T-F12-03",
-    "T-F10-02",
-    "T-F19-03"
+    "T-F02-04",
+    "T-F03-05",
+    "T-F04-06",
+    "T-F05-04",
+    "T-F08-03",
+    "T-F08-04",
+    "T-F18-02"
   ],
   "language": "pt-BR"
 }

@@ -122,6 +122,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Panorâmica e inspeção por face.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-06](../../../artifacts/evidence/T-F04-06/README.md)).
+
 ### T-F04-07 — Implementar produto de pavimento
 
 - [ ] Aceita

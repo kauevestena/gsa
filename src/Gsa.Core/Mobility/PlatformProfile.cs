@@ -6,6 +6,10 @@ public enum LocomotionMode
     Handcart = 1,
     Bicycle = 2,
     Scooter = 3,
+    Car = 4,
+    Kombi = 5,
+    Pickup = 6,
+    Van = 7,
 }
 
 /// <summary>Physical and resource parameters for the initial walking, handcart, bicycle, and scooter modes.</summary>
@@ -134,12 +138,76 @@ public sealed record PlatformProfile
         physicalAutonomySeconds: 3000.0,
         priceCoords: 1200);
 
+    public static PlatformProfile Car { get; } = new(
+        level: 3,
+        id: "car",
+        mode: LocomotionMode.Car,
+        maxSpeedMetresPerSecond: 18.0,
+        accelerationMetresPerSecondSquared: 6.5,
+        decelerationMetresPerSecondSquared: 10.5,
+        turnRateRadiansPerSecond: 1.8,
+        collisionRadiusMetres: 1.15,
+        collisionHeightMetres: 1.55,
+        virtualStorageCapacityUnits: 1600,
+        hasFiniteAutonomy: true,
+        physicalAutonomySeconds: 3600.0,
+        priceCoords: 4500);
+
+    public static PlatformProfile Kombi { get; } = new(
+        level: 4,
+        id: "kombi",
+        mode: LocomotionMode.Kombi,
+        maxSpeedMetresPerSecond: 16.0,
+        accelerationMetresPerSecondSquared: 5.0,
+        decelerationMetresPerSecondSquared: 9.0,
+        turnRateRadiansPerSecond: 1.5,
+        collisionRadiusMetres: 1.30,
+        collisionHeightMetres: 2.05,
+        virtualStorageCapacityUnits: 4000,
+        hasFiniteAutonomy: true,
+        physicalAutonomySeconds: 3600.0,
+        priceCoords: 14000);
+
+    public static PlatformProfile Pickup { get; } = new(
+        level: 5,
+        id: "pickup",
+        mode: LocomotionMode.Pickup,
+        maxSpeedMetresPerSecond: 20.0,
+        accelerationMetresPerSecondSquared: 6.0,
+        decelerationMetresPerSecondSquared: 9.5,
+        turnRateRadiansPerSecond: 1.6,
+        collisionRadiusMetres: 1.35,
+        collisionHeightMetres: 1.90,
+        virtualStorageCapacityUnits: 8000,
+        hasFiniteAutonomy: true,
+        physicalAutonomySeconds: 4200.0,
+        priceCoords: 30000);
+
+    public static PlatformProfile Van { get; } = new(
+        level: 6,
+        id: "van",
+        mode: LocomotionMode.Van,
+        maxSpeedMetresPerSecond: 18.0,
+        accelerationMetresPerSecondSquared: 4.8,
+        decelerationMetresPerSecondSquared: 8.8,
+        turnRateRadiansPerSecond: 1.4,
+        collisionRadiusMetres: 1.40,
+        collisionHeightMetres: 2.35,
+        virtualStorageCapacityUnits: 16000,
+        hasFiniteAutonomy: true,
+        physicalAutonomySeconds: 5400.0,
+        priceCoords: 60000);
+
     public static PlatformProfile ForMode(LocomotionMode mode) => mode switch
     {
         LocomotionMode.OnFoot => OnFoot,
         LocomotionMode.Handcart => Handcart,
         LocomotionMode.Bicycle => Bicycle,
         LocomotionMode.Scooter => Scooter,
+        LocomotionMode.Car => Car,
+        LocomotionMode.Kombi => Kombi,
+        LocomotionMode.Pickup => Pickup,
+        LocomotionMode.Van => Van,
         _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown locomotion mode."),
     };
 

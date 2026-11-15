@@ -6,7 +6,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F18-01 — Adicionar ovos, marcos e cartas
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -22,7 +22,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Save de coleção e inspeção dos pontos de spawn.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F18-01](../../../artifacts/evidence/T-F18-01/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #12](https://github.com/kauevestena/gsa/pull/12) (`45fb52b`, merge `b2fa25f`, execução `43682314395`); ver [resumo CI](../../../artifacts/evidence/M3-wave3-ci/summary.json) e [evidência T-F18-01](../../../artifacts/evidence/T-F18-01/README.md).
 
 ### T-F18-02 — Adicionar álbum e cosméticos
 
@@ -41,6 +41,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Cosméticos não alteram parâmetros científicos; álbum respeita limite.
 
 **Evidência:** Comparação de CQ e catálogo visual.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F18-02](../../../artifacts/evidence/T-F18-02/README.md)).
 
 ### T-F18-03 — Adicionar eventos absurdos
 

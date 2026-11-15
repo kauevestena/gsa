@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Testes de desbloqueio e inspeção da árvore.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F08-03](../../../artifacts/evidence/T-F08-03/README.md)).
+
 ### T-F08-04 — Integrar serviços, seguro e frota avançada
 
 - [ ] Aceita
@@ -79,3 +81,5 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Cada custo é informado e persistido; seguro não restaura lotes perdidos.
 
 **Evidência:** Matriz de serviços e save de sinistro.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F08-04](../../../artifacts/evidence/T-F08-04/README.md)).

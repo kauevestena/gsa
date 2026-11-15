@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F12-03 — Implementar replay e ferramenta de relatório
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -62,7 +62,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Relatórios comparados e arquivos de replay.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F12-03](../../../artifacts/evidence/T-F12-03/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #12](https://github.com/kauevestena/gsa/pull/12) (`45fb52b`, merge `b2fa25f`, execução `43682314395`); ver [resumo CI](../../../artifacts/evidence/M3-wave3-ci/summary.json) e [evidência T-F12-03](../../../artifacts/evidence/T-F12-03/README.md).
 
 ### T-F12-04 — Adicionar migração e compatibilidade
 

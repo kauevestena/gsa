@@ -102,6 +102,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Percurso automotivo e log de impactos.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-05](../../../artifacts/evidence/T-F03-05/README.md)).
+
 ### T-F03-06 — Adicionar Kombi
 
 - [ ] Aceita
