@@ -121,6 +121,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Contrato de túnel cabe na autonomia com planejamento e descarga.
 
 **Evidência:** Percurso e orçamento de recursos.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-06](../../../artifacts/evidence/T-F03-06/README.md)).
 
 ### T-F03-07 — Adicionar picape 4x4
 

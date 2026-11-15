@@ -41,6 +41,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Velocidade/oclusão afetam nuvem; não usar pose verdadeira no produto.
 
 **Evidência:** Percurso com planos e relatório de densidade.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-02](../../../artifacts/evidence/T-F15-02/README.md)).
 
 ### T-F15-03 — Implementar octree, chunks e LOD
 
@@ -59,6 +60,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Cache ≤256 MiB; alternar LOD não altera CQ nem perde amostra.
 
 **Evidência:** Teste de reload e perfil de memória/GPU.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-03](../../../artifacts/evidence/T-F15-03/README.md)).
 
 ### T-F15-04 — Adicionar sensores pareados e múltiplos retornos
 

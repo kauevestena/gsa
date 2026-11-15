@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F10-03 — Concluir ato 1 e escrever campanha restante
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -61,7 +61,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Não há objetivo dependente de evento audiovisual ou de arma do jogador.
 
 **Evidência:** Grafo de objetivos e revisão de roteiro.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-03](../../../artifacts/evidence/T-F10-03/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #15](https://github.com/kauevestena/gsa/pull/15) (`d1fe70a`, merge `8a0ddd4`, execução `43687238085`, jobs `132730158427` Linux e `132730158568` Windows; 4 de 6 tarefas de F10 aceitas na main nos PRs #9, #12 e #15, restando T-F10-04 em M6 e T-F10-05 em M7); ver [resumo CI](../../../artifacts/evidence/M4-wave3-ci/summary.json) e [evidência T-F10-03](../../../artifacts/evidence/T-F10-03/README.md).
 
 ### T-F10-04 — Implementar ato 2 e templates avançados
 
@@ -101,7 +101,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F10-06 — Estabilizar roteiros para gravação
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -116,4 +116,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Roteiro inclui entradas, retrabalho, falha, variante calma e cutscenes, sem depender da gravação para testar.
 
 **Evidência:** Revisão narrativa/técnica e manifesto de falas.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-06](../../../artifacts/evidence/T-F10-06/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #15](https://github.com/kauevestena/gsa/pull/15) (`d1fe70a`, merge `8a0ddd4`, execução `43687238085`, jobs `132730158427` Linux e `132730158568` Windows; 4 de 6 tarefas de F10 aceitas na main nos PRs #9, #12 e #15, restando T-F10-04 em M6 e T-F10-05 em M7); ver [resumo CI](../../../artifacts/evidence/M4-wave3-ci/summary.json) e [evidência T-F10-06](../../../artifacts/evidence/T-F10-06/README.md).

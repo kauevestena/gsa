@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "wave": "M4-wave3",
+  "pr_number": 15,
+  "pr_url": "https://github.com/kauevestena/gsa/pull/15",
+  "branch": "codex/m4-wave3-factions-act1-scripts-and-closure",
+  "head_sha": "d1fe70a311606d002d9b5ee43f9f638aed2f9d43",
+  "merge_commit_sha": "8a0ddd42a460a33aa0882d889ec15bc4dfd5132e",
+  "merged_at": "2026-11-15T06:52:10Z",
+  "workflow_run_id": "43687238085",
+  "workflow_run_url": "https://github.com/kauevestena/gsa/actions/runs/43687238085",
+  "jobs": [
+    {
+      "name": "Foundation (Linux x64)",
+      "job_id": "132730158427",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Foundation (Windows x64)",
+      "job_id": "132730158568",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "accepted_tasks": [
+    "T-F16-01",
+    "T-F16-02",
+    "T-F10-03",
+    "T-F10-06"
+  ],
+  "milestone_closed": "M4",
+  "acceptance_policy": "delegated_ci_review"
+}
+
