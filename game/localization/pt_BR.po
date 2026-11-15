@@ -634,3 +634,75 @@ msgstr "Kit Refletivo Noturno"
 
 msgid "cosmetic.costume.festive_cap"
 msgstr "Quepe Festivo"
+
+msgid "mission.hist_04.title"
+msgstr "Placas da Avenida"
+
+msgid "mission.hist_04.summary"
+msgstr "Inventariar 12 placas da avenida de motoneta usando controle local; conclui o Ato 1 e libera carro, Porto e Orla."
+
+msgid "mission.hist_04.beat.proposal"
+msgstr "A Prefeitura encomendou o inventário completo de 12 placas da Avenida do Comércio com a motoneta."
+
+msgid "mission.hist_04.beat.preparation"
+msgstr "Saia de motoneta com câmera RGB inicial, GNSS básico e os alvos de controle da avenida."
+
+msgid "mission.hist_04.beat.technical_discovery"
+msgstr "Ângulos oblíquos reduzem o brilho retrorrefletivo das placas e mantêm o texto legível na captura."
+
+msgid "mission.hist_04.beat.setback_or_correction"
+msgstr "Valide cada placa contra checkpoints cegos e mascare pedestres ou veículos antes da entrega."
+
+msgid "mission.hist_04.beat.delivery_and_consequence"
+msgstr "Ato 1 concluído: a Prefeitura aprovou o lote, liberando o carro de pesquisa e os setores Porto e Orla."
+
+msgid "faction.marco_torto.name"
+msgstr "Sindicato do Marco Torto"
+
+msgid "faction.marco_torto.motivation"
+msgstr "Desloca marcos geodésicos à noite para distorcer divisas cadastrais."
+
+msgid "faction.cimento.name"
+msgstr "Cartel do Cimento"
+
+msgid "faction.cimento.motivation"
+msgstr "Bloqueia obras irregulares contra levantamentos oficiais."
+
+msgid "faction.mapa_velho.name"
+msgstr "Máfia do Mapa Velho"
+
+msgid "faction.mapa_velho.motivation"
+msgstr "Organiza bloqueios viários para defender plantas antigas de 1974."
+
+msgid "faction.terra_plana.name"
+msgstr "Sociedade da Terra Plana"
+
+msgid "faction.terra_plana.motivation"
+msgstr "Opera transmissores de spoofing GNSS e cola panfletos sobre as lentes."
+
+msgid "faction.mapafacil.name"
+msgstr "MapaFácil S/A"
+
+msgid "faction.mapafacil.motivation"
+msgstr "Concorrente que fura pneus e disputa contratos narrativos."
+
+msgid "faction.attention.warning"
+msgstr "Alerta de olheiro: atenção territorial da facção subindo."
+
+msgid "faction.attention.cooldown_active"
+msgstr "Ação territorial em recarga de 30 segundos."
+
+msgid "faction.bomb.warning"
+msgstr "PERIGO: Artefato no veículo estacionado armado (10s) — saia do território, ative Cidade Calma ou segure desarme parado por 5s."
+
+msgid "faction.bomb.disarmed"
+msgstr "Artefato no veículo estacionado desarmado com segurança."
+
+msgid "faction.bomb.detonated_session_failed"
+msgstr "Artefato no veículo detonou — sessão de campo encerrada sem feridos."
+
+msgid "faction.bomb.cancelled_by_calm"
+msgstr "A proteção Cidade Calma neutralizou a ameaça no veículo estacionado."
+
+msgid "faction.threat.suppressed_by_calm"
+msgstr "A proteção Cidade Calma suprimiu todas as ameaças de facção."

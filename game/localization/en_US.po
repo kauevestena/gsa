@@ -634,3 +634,75 @@ msgstr "Night Reflective Kit"
 
 msgid "cosmetic.costume.festive_cap"
 msgstr "Festive Celebration Cap"
+
+msgid "mission.hist_04.title"
+msgstr "Avenue Traffic Signs"
+
+msgid "mission.hist_04.summary"
+msgstr "Inventory 12 avenue traffic signs by scooter using local control targets; closes Act 1 and unlocks the car, Port, and Waterfront."
+
+msgid "mission.hist_04.beat.proposal"
+msgstr "City Hall commissioned a full 12-sign corridor inventory along Commerce Avenue using the motor scooter."
+
+msgid "mission.hist_04.beat.preparation"
+msgstr "Roll out on the motor scooter with the initial RGB camera, basic GNSS, and corridor control targets."
+
+msgid "mission.hist_04.beat.technical_discovery"
+msgstr "Oblique camera angles cut retroreflective sign glare so sign legends stay legible for extraction."
+
+msgid "mission.hist_04.beat.setback_or_correction"
+msgstr "Verify every sign segment against blind checkpoints and mask any pedestrian or plate before shipping."
+
+msgid "mission.hist_04.beat.delivery_and_consequence"
+msgstr "Act 1 closed cleanly: City Hall approved the survey, unlocking the survey car, Port, and Waterfront districts."
+
+msgid "faction.marco_torto.name"
+msgstr "Crooked Benchmark Syndicate"
+
+msgid "faction.marco_torto.motivation"
+msgstr "Shifts brass survey benchmarks at night to skew cadastral boundaries."
+
+msgid "faction.cimento.name"
+msgstr "Cement Cartel"
+
+msgid "faction.cimento.motivation"
+msgstr "Blocks irregular construction zones from official inspection corridors."
+
+msgid "faction.mapa_velho.name"
+msgstr "Old Map Mob"
+
+msgid "faction.mapa_velho.motivation"
+msgstr "Stages roadblocks to defend outdated 1974 paper parcel records."
+
+msgid "faction.terra_plana.name"
+msgstr "Flat Earth Society"
+
+msgid "faction.terra_plana.motivation"
+msgstr "Operates portable GNSS spoofers and slaps flyers onto optical lenses."
+
+msgid "faction.mapafacil.name"
+msgstr "EasyMap Inc."
+
+msgid "faction.mapafacil.motivation"
+msgstr "Rival contractor underbidding routes and planting corporate tire spikes."
+
+msgid "faction.attention.warning"
+msgstr "Territory spotter alert: hostile faction attention rising."
+
+msgid "faction.attention.cooldown_active"
+msgstr "Territory action on 30-second cooldown."
+
+msgid "faction.bomb.warning"
+msgstr "DANGER: Parked-vehicle explosive timer armed (10s) — leave territory, enable Calm City, or hold 5s stationary disarm."
+
+msgid "faction.bomb.disarmed"
+msgstr "Parked-vehicle explosive safely disarmed."
+
+msgid "faction.bomb.detonated_session_failed"
+msgstr "Parked-vehicle explosive triggered — field session aborted without injury."
+
+msgid "faction.bomb.cancelled_by_calm"
+msgstr "Calm City protection neutralized the parked-vehicle threat."
+
+msgid "faction.threat.suppressed_by_calm"
+msgstr "Calm City protection suppressed all faction threats."

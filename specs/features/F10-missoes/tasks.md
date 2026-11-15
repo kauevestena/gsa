@@ -61,6 +61,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Não há objetivo dependente de evento audiovisual ou de arma do jogador.
 
 **Evidência:** Grafo de objetivos e revisão de roteiro.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-03](../../../artifacts/evidence/T-F10-03/README.md)).
 
 ### T-F10-04 — Implementar ato 2 e templates avançados
 
@@ -115,3 +116,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Roteiro inclui entradas, retrabalho, falha, variante calma e cutscenes, sem depender da gravação para testar.
 
 **Evidência:** Revisão narrativa/técnica e manifesto de falas.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-06](../../../artifacts/evidence/T-F10-06/README.md)).

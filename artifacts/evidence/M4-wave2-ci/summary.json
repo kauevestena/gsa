@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "wave": "M4-wave2",
+  "pr_number": 14,
+  "pr_url": "https://github.com/kauevestena/gsa/pull/14",
+  "branch": "codex/m4-wave2-rack-calibration-imu-urban-hazards",
+  "head_sha": "dd961522960f09c6cea723c086f9fa6fdb8c2e92",
+  "merge_commit_sha": "ecc1b7c2b3c52202c734c91f124c5443131936c3",
+  "merged_at": "2026-11-15T06:32:53Z",
+  "workflow_run_id": "43685741329",
+  "workflow_run_url": "https://github.com/kauevestena/gsa/actions/runs/43685741329",
+  "jobs": [
+    {
+      "name": "Foundation (Linux x64)",
+      "job_id": "132725728029",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Foundation (Windows x64)",
+      "job_id": "132725728185",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "accepted_tasks": [
+    "T-F13-01",
+    "T-F13-02",
+    "T-F13-03",
+    "T-F14-01",
+    "T-F09-05"
+  ],
+  "acceptance_policy": "delegated_ci_review"
+}
+

@@ -273,7 +273,7 @@ public static class MvpCampaignRunner
             Missions: summaries);
     }
 
-    private static MissionExecutionSummary ExecuteInventoryContractMission(
+    internal static MissionExecutionSummary ExecuteInventoryContractMission(
         string missionId,
         string featureClass,
         string surfaceId,

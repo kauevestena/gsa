@@ -86,7 +86,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F09-05 — Integrar perigos e contramedidas urbanas
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -101,4 +101,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Impacto/limpeza alteram sensores e CalmPolicy cobre todas as fontes hostis.
 
 **Evidência:** Tabela de perigos executada e logs de montagem.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-05](../../../artifacts/evidence/T-F09-05/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #14](https://github.com/kauevestena/gsa/pull/14) (`dd96152`, merge `ecc1b7c`, execução `43685741329`); ver [resumo CI](../../../artifacts/evidence/M4-wave2-ci/summary.json) e [evidência T-F09-05](../../../artifacts/evidence/T-F09-05/README.md).
