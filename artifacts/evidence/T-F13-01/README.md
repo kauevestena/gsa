@@ -11,5 +11,5 @@ Modelagem de slots nomeados do rack modular de sensores (`RackSlotKind`, `RackCa
 - Executado `dotnet test Gsa.Domain.slnf --no-restore`: `203/203` em `Gsa.Core.Tests` e `405/405` no domínio completo (`18` Localization, `203` Core, `148` Missions, `36` Tools), e `python3 scripts/verify_architecture.py` (`valid: true`).
 
 ## Estado
-Implementada; em revisão delegada à CI (aguardando validação no PR da Onda 2 de M4).
+Aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #14](https://github.com/kauevestena/gsa/pull/14) (SHA testado `dd961522960f09c6cea723c086f9fa6fdb8c2e92`, merge `ecc1b7c2b3c52202c734c91f124c5443131936c3`, execução [43685741329](https://github.com/kauevestena/gsa/actions/runs/43685741329), jobs Linux `132725728029` e Windows `132725728185`); ver [resumo CI](../M4-wave2-ci/summary.json).
 

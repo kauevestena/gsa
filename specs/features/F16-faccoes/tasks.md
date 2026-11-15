@@ -21,6 +21,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Nomes/símbolos não remetem a organizações reais e áreas aparecem no planejamento.
 
 **Evidência:** Revisão narrativa e mapa de territórios.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-01](../../../artifacts/evidence/T-F16-01/README.md)).
 
 ### T-F16-02 — Implementar atenção e ameaças iniciais
 
@@ -39,6 +40,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Cooldowns e limiares persistem; protagonista não dispõe de ataque.
 
 **Evidência:** Cenários determinísticos por nível.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-02](../../../artifacts/evidence/T-F16-02/README.md)).
 
 ### T-F16-03 — Adicionar sabotagem avançada e contramedidas
 

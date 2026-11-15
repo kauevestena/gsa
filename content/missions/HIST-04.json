@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "id": "HIST-04",
+  "act": 1,
+  "title_key": "mission.hist_04.title",
+  "summary_key": "mission.hist_04.summary",
+  "minimum_platform_level": 2,
+  "minimum_platform_id": "scooter",
+  "vehicle_unlocks": [
+    "car"
+  ],
+  "weather_mode": "dry_day",
+  "control_mode": "local_control_planes_and_targets",
+  "objectives": [
+    {
+      "id": "avenue_signs",
+      "contract_id": "contract_hist_04"
+    }
+  ],
+  "events": [
+    {
+      "id": "hist_04_proposal",
+      "beat": "proposal",
+      "trigger": "mission_unlocked",
+      "dialogue_key": "mission.hist_04.beat.proposal",
+      "scene_cue_id": "cue_hist_04_city_hall_brief",
+      "audio_cue_id": "sfx_board_open",
+      "skippable": true,
+      "idempotent_effect": "unlock_objective:avenue_signs"
+    },
+    {
+      "id": "hist_04_preparation",
+      "beat": "preparation",
+      "trigger": "contract_accepted",
+      "dialogue_key": "mission.hist_04.beat.preparation",
+      "scene_cue_id": "cue_hist_04_scooter_deploy",
+      "audio_cue_id": "sfx_scooter_ignition",
+      "skippable": true,
+      "idempotent_effect": "equip_platform:scooter"
+    },
+    {
+      "id": "hist_04_technical_discovery",
+      "beat": "technical_discovery",
+      "trigger": "six_signs_captured",
+      "dialogue_key": "mission.hist_04.beat.technical_discovery",
+      "scene_cue_id": "cue_hist_04_sign_reflectivity",
+      "audio_cue_id": "sfx_hint_chime",
+      "skippable": true,
+      "idempotent_effect": "note_metallic_glare_angle"
+    },
+    {
+      "id": "hist_04_setback_or_correction",
+      "beat": "setback_or_correction",
+      "trigger": "checkpoint_audit",
+      "dialogue_key": "mission.hist_04.beat.setback_or_correction",
+      "scene_cue_id": "cue_hist_04_recollect_obscured_sign",
+      "audio_cue_id": "sfx_cq_warning",
+      "skippable": true,
+      "idempotent_effect": "enforce_privacy_and_relative_rmse"
+    },
+    {
+      "id": "hist_04_delivery_and_consequence",
+      "beat": "delivery_and_consequence",
+      "trigger": "contract_delivered",
+      "dialogue_key": "mission.hist_04.beat.delivery_and_consequence",
+      "scene_cue_id": "cue_hist_04_act1_closure_car_and_sectors",
+      "audio_cue_id": "sfx_vehicle_unlock",
+      "skippable": true,
+      "idempotent_effect": "unlock_vehicle:car"
+    }
+  ],
+  "preconditions": [
+    "HIST-03"
+  ],
+  "calm": true,
+  "calm_variant": null,
+  "dialogue_keys": [
+    "mission.hist_04.beat.proposal",
+    "mission.hist_04.beat.preparation",
+    "mission.hist_04.beat.technical_discovery",
+    "mission.hist_04.beat.setback_or_correction",
+    "mission.hist_04.beat.delivery_and_consequence"
+  ],
+  "unlocks": []
+}
+

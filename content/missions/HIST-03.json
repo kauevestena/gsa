@@ -66,7 +66,7 @@
       "scene_cue_id": "cue_hist_03_scooter_unlocked",
       "audio_cue_id": "sfx_vehicle_unlock",
       "skippable": true,
-      "idempotent_effect": "unlock_vehicle:scooter"
+      "idempotent_effect": "unlock_vehicle:scooter|unlock_mission:HIST-04"
     }
   ],
   "preconditions": [
@@ -81,6 +81,8 @@
     "mission.hist_03.beat.setback_or_correction",
     "mission.hist_03.beat.delivery_and_consequence"
   ],
-  "unlocks": []
+  "unlocks": [
+    "HIST-04"
+  ]
 }
 

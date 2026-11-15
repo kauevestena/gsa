@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "id": "contract_hist_04",
+  "title_key": "mission.hist_04.title",
+  "client_id": "city_hall",
+  "region_id": "old_center",
+  "area_id": "commerce_street_signs",
+  "product": "feature_inventory",
+  "required_feature_ids": [
+    "sign_01",
+    "sign_02",
+    "sign_03",
+    "sign_04",
+    "sign_05",
+    "sign_06",
+    "sign_07",
+    "sign_08",
+    "sign_09",
+    "sign_10",
+    "sign_11",
+    "sign_12"
+  ],
+  "requirements": [
+    {
+      "kind": "threshold",
+      "metric": "feature_completeness",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.92,
+      "excellent": 1
+    },
+    {
+      "kind": "threshold",
+      "metric": "relative_rmse",
+      "unit": "m",
+      "direction": "max",
+      "limit": 0.15,
+      "excellent": 0.05
+    },
+    {
+      "kind": "threshold",
+      "metric": "valid_image_fraction",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.85,
+      "excellent": 0.98
+    },
+    {
+      "kind": "predicate",
+      "metric": "privacy_redacted",
+      "expected": true
+    },
+    {
+      "kind": "predicate",
+      "metric": "format_valid",
+      "expected": true
+    }
+  ],
+  "required_capabilities": [
+    "camera",
+    "gnss_basic"
+  ],
+  "risk": "easy",
+  "calm": true,
+  "deadline": {
+    "due_after_s": 25200,
+    "expires_after_s": 32400,
+    "late_penalty_per_hour": 0.05,
+    "late_penalty_cap": 0.5
+  },
+  "reward": {
+    "base_coords": 900,
+    "base_xp": 180,
+    "reputation": 10,
+    "story_unlocks": []
+  },
+  "partial_policy": {
+    "mode": "disabled"
+  },
+  "delivery_format": "gsa_bundle_v1",
+  "story_prerequisites": [
+    "HIST-03"
+  ]
+}
+

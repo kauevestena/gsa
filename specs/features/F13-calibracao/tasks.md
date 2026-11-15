@@ -6,7 +6,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F13-01 — Implementar rack e revisões de montagem
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -21,11 +21,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Troca incompatível é recusada; mudança não altera lote antigo.
 
 **Evidência:** Testes de montagem e inspeção de oficina.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-01](../../../artifacts/evidence/T-F13-01/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #14](https://github.com/kauevestena/gsa/pull/14) (`dd96152`, merge `ecc1b7c`, execução `43685741329`); ver [resumo CI](../../../artifacts/evidence/M4-wave2-ci/summary.json) e [evidência T-F13-01](../../../artifacts/evidence/T-F13-01/README.md).
 
 ### T-F13-02 — Integrar descalibração por impacto
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -40,11 +40,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Impacto produz assinatura de erro mensurável sem expor parâmetro verdadeiro ao jogador.
 
 **Evidência:** Replay antes/depois e testes analíticos.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-02](../../../artifacts/evidence/T-F13-02/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #14](https://github.com/kauevestena/gsa/pull/14) (`dd96152`, merge `ecc1b7c`, execução `43685741329`); ver [resumo CI](../../../artifacts/evidence/M4-wave2-ci/summary.json) e [evidência T-F13-02](../../../artifacts/evidence/T-F13-02/README.md).
 
 ### T-F13-03 — Criar minigames e solvers
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -59,7 +59,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Conjunto reservado passa limiares; degeneração/nonconvergência é diagnosticada.
 
 **Evidência:** Fixtures, resíduos e gravação dos quatro procedimentos.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F13-03](../../../artifacts/evidence/T-F13-03/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #14](https://github.com/kauevestena/gsa/pull/14) (`dd96152`, merge `ecc1b7c`, execução `43685741329`); ver [resumo CI](../../../artifacts/evidence/M4-wave2-ci/summary.json) e [evidência T-F13-03](../../../artifacts/evidence/T-F13-03/README.md).
 
 ### T-F13-04 — Integrar oficina às passadas LiDAR
 

@@ -6,7 +6,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F14-01 — Implementar IMU e atitude
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -21,7 +21,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Ideal/ruidoso passam fixtures e não há acesso a TruthSample no estimador.
 
 **Evidência:** Testes de rotação, gravidade e bias.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F14-01](../../../artifacts/evidence/T-F14-01/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #14](https://github.com/kauevestena/gsa/pull/14) (`dd96152`, merge `ecc1b7c`, execução `43685741329`); ver [resumo CI](../../../artifacts/evidence/M4-wave2-ci/summary.json) e [evidência T-F14-01](../../../artifacts/evidence/T-F14-01/README.md).
 
 ### T-F14-02 — Implementar DMI e ZUPT
 
