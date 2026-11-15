@@ -8,8 +8,8 @@
       90
     ],
     "max": [
-      500500,
-      7400500,
+      501000,
+      7401000,
       150
     ]
   },
@@ -118,6 +118,27 @@
           7400360
         ]
       ]
+    },
+    {
+      "id": "old_center_ring_avenue",
+      "polygon_enu": [
+        [
+          500510,
+          7400010
+        ],
+        [
+          500990,
+          7400010
+        ],
+        [
+          500990,
+          7400990
+        ],
+        [
+          500510,
+          7400990
+        ]
+      ]
     }
   ],
   "surfaces": [
@@ -140,6 +161,10 @@
     {
       "id": "central_park_planes",
       "area_id": "central_park_calm"
+    },
+    {
+      "id": "old_center_ring_surface",
+      "area_id": "old_center_ring_avenue"
     }
   ],
   "features": [
@@ -1100,6 +1125,74 @@
       "tags": [
         "park",
         "calm_target"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "ring_sign_01",
+      "area_id": "old_center_ring_avenue",
+      "surface_id": "old_center_ring_surface",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500600,
+        7400120,
+        102
+      ],
+      "tags": [
+        "sign",
+        "ring_road"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "ring_sign_02",
+      "area_id": "old_center_ring_avenue",
+      "surface_id": "old_center_ring_surface",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500850,
+        7400420,
+        102
+      ],
+      "tags": [
+        "sign",
+        "ring_road"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "ring_sign_03",
+      "area_id": "old_center_ring_avenue",
+      "surface_id": "old_center_ring_surface",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500760,
+        7400720,
+        102
+      ],
+      "tags": [
+        "sign",
+        "ring_road"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "ring_sign_04",
+      "area_id": "old_center_ring_avenue",
+      "surface_id": "old_center_ring_surface",
+      "class": "traffic_sign",
+      "material": "metal",
+      "position_enu": [
+        500560,
+        7400880,
+        102
+      ],
+      "tags": [
+        "sign",
+        "ring_road"
       ],
       "dynamic": false
     }

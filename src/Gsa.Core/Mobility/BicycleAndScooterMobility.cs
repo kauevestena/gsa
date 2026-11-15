@@ -77,12 +77,12 @@ public sealed class MvpVehicleMobilityController
         switch (corridor.Kind)
         {
             case AccessCorridorKind.SidewalkPromenade:
-                if (mode == LocomotionMode.Scooter)
+                if (mode >= LocomotionMode.Scooter)
                     return new CorridorAccessEvaluation(false, mode, requiredWidth, corridor.ClearWidthMetres, "mobility.access.scooter_forbidden_on_sidewalk");
                 break;
 
             case AccessCorridorKind.NarrowAlleyOrCycleway:
-                if (mode == LocomotionMode.Scooter)
+                if (mode >= LocomotionMode.Scooter)
                     return new CorridorAccessEvaluation(false, mode, requiredWidth, corridor.ClearWidthMetres, "mobility.access.cycleway_forbidden_for_scooter");
                 break;
 

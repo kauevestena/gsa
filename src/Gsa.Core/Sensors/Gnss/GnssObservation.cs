@@ -3,7 +3,7 @@ using Gsa.Core.Randomness;
 
 namespace Gsa.Core.Sensors.Gnss;
 
-public enum GnssSolutionKind { Unavailable, Autonomous, Dgnss }
+public enum GnssSolutionKind { Unavailable, Autonomous, Dgnss, RtkFloat, RtkFix }
 
 /// <summary>Measurement-only output. Sigma describes independent noise, not total error.</summary>
 public sealed record GnssObservation

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "wave": "M3-wave3",
+  "pr_number": 12,
+  "pr_url": "https://github.com/kauevestena/gsa/pull/12",
+  "branch": "codex/m3-wave3-mvp-closure-and-gate",
+  "head_sha": "45fb52b6a9036d64dadaab7ee27345b609ad51a3",
+  "merge_commit_sha": "b2fa25f634d8cb6a83e7ad17ab691bec4caf96e5",
+  "merged_at": "2026-11-15T05:46:27Z",
+  "workflow_run_id": "43682314395",
+  "workflow_run_url": "https://github.com/kauevestena/gsa/actions/runs/43682314395",
+  "jobs": [
+    {
+      "name": "Foundation (Linux x64)",
+      "job_id": "132715376978",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "name": "Foundation (Windows x64)",
+      "job_id": "132715377182",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "accepted_tasks": [
+    "T-F11-04",
+    "T-F18-01",
+    "T-F12-03",
+    "T-F10-02",
+    "T-F19-03"
+  ],
+  "acceptance_policy": "delegated_ci_review"
+}
+

@@ -82,6 +82,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Manifest regional e percurso de acesso por nível.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-04](../../../artifacts/evidence/T-F02-04/README.md)).
+
 ### T-F02-05 — Produzir Serra e terrenos especiais
 
 - [ ] Aceita
