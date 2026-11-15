@@ -6,7 +6,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F16-01 — Criar territórios e identidades fictícias
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -21,11 +21,11 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Nomes/símbolos não remetem a organizações reais e áreas aparecem no planejamento.
 
 **Evidência:** Revisão narrativa e mapa de territórios.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-01](../../../artifacts/evidence/T-F16-01/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #15](https://github.com/kauevestena/gsa/pull/15) (`d1fe70a`, merge `8a0ddd4`, execução `43687238085`, jobs `132730158427` Linux e `132730158568` Windows; 2 de 4 tarefas de F16 aceitas na main, fechando M4 e restando T-F16-03 em M5 e T-F16-04 em M7); ver [resumo CI](../../../artifacts/evidence/M4-wave3-ci/summary.json) e [evidência T-F16-01](../../../artifacts/evidence/T-F16-01/README.md).
 
 ### T-F16-02 — Implementar atenção e ameaças iniciais
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -40,7 +40,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Cooldowns e limiares persistem; protagonista não dispõe de ataque.
 
 **Evidência:** Cenários determinísticos por nível.
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-02](../../../artifacts/evidence/T-F16-02/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #15](https://github.com/kauevestena/gsa/pull/15) (`d1fe70a`, merge `8a0ddd4`, execução `43687238085`, jobs `132730158427` Linux e `132730158568` Windows; 2 de 4 tarefas de F16 aceitas na main, fechando M4 e restando T-F16-03 em M5 e T-F16-04 em M7); ver [resumo CI](../../../artifacts/evidence/M4-wave3-ci/summary.json) e [evidência T-F16-02](../../../artifacts/evidence/T-F16-02/README.md).
 
 ### T-F16-03 — Adicionar sabotagem avançada e contramedidas
 
