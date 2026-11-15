@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão (gate `pending_reference_hardware` aguardando máquina de referência Radeon Vega 7 não-headless e CI do PR #5); [evidências](../../../artifacts/evidence/T-F19-01/README.md) e [relatório de benchmark](../../../artifacts/evidence/T-F19-01/benchmark-report.json). Instrumentação de counters/timers/memória, cena M1 (quarteirão + 50 carros + 30 pedestres + câmera + LiDAR L4/L5/L6) nos presets `dry_day` e `rain_night`, três execuções de 5 minutos após 30 s de aquecimento e verificação em runtime Godot integrados.
+
 **Marco:** M1
 
 **Dependências:** T-F03-02, T-F04-02, T-F15-01, T-F09-01, T-F17-01

@@ -3,11 +3,9 @@
   "date": "2026-11-13",
   "source": "../spec_inicial.md",
   "source_sha256": "f727582d24cacc248b3dbea2292b141b908196da60f0a095ccc3191d4875b6b2",
-  "status": "m1_wave3_in_review",
+  "status": "m1_wave4_in_review",
   "active_tasks": [
-    "T-F09-01",
-    "T-F15-01",
-    "T-F17-01"
+    "T-F19-01"
   ],
   "language": "pt-BR"
 }

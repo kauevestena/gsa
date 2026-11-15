@@ -1,6 +1,6 @@
 # Evidência — T-F17-01 (Kit piloto e pipeline de importação)
 
-Estado: em revisão técnica delegada antes da CI do PR #4 (`codex/m1-traffic-lidar-art`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #4 (`4a11e48`, run `43671438816`); ver `artifacts/evidence/M1-wave3-ci/summary.json`.
 
 ## Escopo verificado
 - Kit modular em `game/world/pilot-kit/` com todos os 9 módulos obrigatórios (`lot`, `sidewalk`, `corner`, `intersection`, `facade`, `pole`, `tree`, `sign`, `manhole`), materiais de teste declarados (`concrete`, `glass`, `water`), preset Blender glTF 2.0 (`blender-gltf-export-preset.json`) com `export_extras=true` e `export_yup=true`, e atlas `textures/pilot_atlas_256.png` (`256×256` px).

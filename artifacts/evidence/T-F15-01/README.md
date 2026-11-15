@@ -1,6 +1,6 @@
 # Evidência — T-F15-01 (Bancada LiDAR)
 
-Estado: em revisão técnica delegada antes da CI do PR #4 (`codex/m1-traffic-lidar-art`).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #4 (`4a11e48`, run `43671438816`); ver `artifacts/evidence/M1-wave3-ci/summary.json`.
 
 ## Escopo verificado
 - `LidarProfile`: perfis canônicos alinhados a `specs/parametros.md` — `L4` (`1000` raios/s, `50 m`, sigma `0,02 m`), `L5` (`8000` raios/s, `80 m`, sigma `0,01 m`) e `L6` (`16000` raios/s, `120 m`, sigma `0,005 m`), todos com `OfferedInMvpShop = false` e indisponíveis em plataformas de nível `< 4` (`OnFoot`, `Handcart`).

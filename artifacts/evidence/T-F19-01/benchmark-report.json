@@ -1,0 +1,468 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "M1-BENCH-V1",
+  "generated_at_utc": "2026-11-15T03:26:52.2889365\u002B00:00",
+  "toolchain": {
+    "build_configuration": "Release",
+    "dot_net_version": "10.0.15",
+    "godot_version": "4.7.2",
+    "git_commit": "eb0a2ba9e9d8b0a7a5f63e47a51f5f58c092e57d",
+    "headless_gpu_unavailable": true
+  },
+  "hardware": {
+    "os_description": "Ubuntu 24.04.2 LTS",
+    "architecture": "X64",
+    "cpu_model": "Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz",
+    "cpu_logical_cores": 12,
+    "cpu_physical_cores": 6,
+    "gpu_model": "headless_no_graphical_adapter",
+    "gpu_driver": "headless_no_driver",
+    "has_discrete_gpu": false,
+    "ram_total_gb": 62.5,
+    "ram_channels": "unknown",
+    "storage_type": "NVMe SSD",
+    "target_resolution": "1920x1080",
+    "renderer_backend": "Compatibility",
+    "vsync_enabled": false,
+    "reference_hardware_matched": false,
+    "reference_target_summary": "AMD Radeon Vega 7 (integrated GPU), 6-core CPU, 16 GiB dual-channel RAM, SSD, no discrete GPU, 1920x1080 Compatibility"
+  },
+  "thresholds": {
+    "min_mean_fps": 60,
+    "max_frame_time_p95_ms": 20,
+    "max_frame_time_p99_ms": 33.3,
+    "max_memory_resident_mb": 2048,
+    "max_point_cloud_cache_mb": 256,
+    "max_second_half_memory_growth_mb": 32,
+    "max_silent_sample_drops": 0
+  },
+  "block_assembly": {
+    "scene_id": "old_center_tutorial_block",
+    "assembly_ms": 5.6028,
+    "world_objects": 48,
+    "facade_count": 20,
+    "unload_zone_count": 1,
+    "art_kit_modules": 9,
+    "art_kit_total_triangles": 648,
+    "vehicle_multi_mesh_triangles": 90000,
+    "pedestrian_multi_mesh_triangles": 36000,
+    "total_scene_triangles": 127224
+  },
+  "lidar_rates": [
+    {
+      "profile_id": "lidar-bench",
+      "scan_rate_hz": 10,
+      "channels": 1,
+      "nominal_rays_per_second": 1000,
+      "measured_effective_rays_per_second": 67811.8,
+      "max_range_metres": 50,
+      "range_sigma_metres": 0.02,
+      "offered_in_mvp_shop": false
+    },
+    {
+      "profile_id": "lidar-l5",
+      "scan_rate_hz": 5,
+      "channels": 16,
+      "nominal_rays_per_second": 8000,
+      "measured_effective_rays_per_second": 148289,
+      "max_range_metres": 80,
+      "range_sigma_metres": 0.01,
+      "offered_in_mvp_shop": false
+    },
+    {
+      "profile_id": "lidar-l6",
+      "scan_rate_hz": 5,
+      "channels": 32,
+      "nominal_rays_per_second": 16000,
+      "measured_effective_rays_per_second": 187634,
+      "max_range_metres": 120,
+      "range_sigma_metres": 0.005,
+      "offered_in_mvp_shop": false
+    }
+  ],
+  "runs": [
+    {
+      "run_index": 1,
+      "preset": "dry_day",
+      "seed": 20261116,
+      "warmup_seconds": 30,
+      "duration_seconds": 300,
+      "measured_ticks": 18000,
+      "block_assembly_ms": 5.6028,
+      "counters": {
+        "visible_triangles": 127224,
+        "draw_calls": 12,
+        "active_vehicles": 50,
+        "active_pedestrians": 30,
+        "lidar_primary_rays_cast": 300000,
+        "lidar_returns_emitted": 93423,
+        "lidar_points_per_sec": 311.41,
+        "sensor_queue_backlog_seconds": 0,
+        "deadlock_removals": 3,
+        "camera_samples_captured": 600,
+        "dropped_samples": 0,
+        "silent_sample_drops": 0
+      },
+      "frame_cpu_ms": {
+        "mean_ms": 0.1028,
+        "p95_ms": 0.2198,
+        "p99_ms": 0.5319,
+        "max_ms": 2.8151
+      },
+      "frame_gpu_ms": {
+        "mean_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0,
+        "max_ms": 0
+      },
+      "physics_step_ms": {
+        "mean_ms": 0.0762,
+        "p95_ms": 0.1203,
+        "p99_ms": 0.1674,
+        "max_ms": 1.6793
+      },
+      "sensor_raycast_ms": {
+        "mean_ms": 0.0896,
+        "p95_ms": 0.1445,
+        "p99_ms": 0.3714,
+        "max_ms": 0.4799
+      },
+      "thumbnail_capture_ms": {
+        "mean_ms": 0.3467,
+        "p95_ms": 0.508,
+        "p99_ms": 0.668,
+        "max_ms": 2.6494
+      },
+      "mean_fps": 9727.63,
+      "memory_start_mb": 72.066,
+      "memory_midpoint_mb": 91.23,
+      "memory_end_mb": 85.562,
+      "peak_memory_mb": 91.23,
+      "second_half_memory_drift_mb": -5.668,
+      "continuous_memory_growth_detected": false,
+      "point_cloud_cache_mb": 0,
+      "thresholds_met": true,
+      "failed_thresholds": []
+    },
+    {
+      "run_index": 2,
+      "preset": "dry_day",
+      "seed": 20261117,
+      "warmup_seconds": 30,
+      "duration_seconds": 300,
+      "measured_ticks": 18000,
+      "block_assembly_ms": 5.6028,
+      "counters": {
+        "visible_triangles": 127224,
+        "draw_calls": 12,
+        "active_vehicles": 50,
+        "active_pedestrians": 30,
+        "lidar_primary_rays_cast": 300000,
+        "lidar_returns_emitted": 93196,
+        "lidar_points_per_sec": 310.65,
+        "sensor_queue_backlog_seconds": 0,
+        "deadlock_removals": 1,
+        "camera_samples_captured": 600,
+        "dropped_samples": 0,
+        "silent_sample_drops": 0
+      },
+      "frame_cpu_ms": {
+        "mean_ms": 0.1073,
+        "p95_ms": 0.2511,
+        "p99_ms": 0.5296,
+        "max_ms": 2.984
+      },
+      "frame_gpu_ms": {
+        "mean_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0,
+        "max_ms": 0
+      },
+      "physics_step_ms": {
+        "mean_ms": 0.0803,
+        "p95_ms": 0.1287,
+        "p99_ms": 0.1728,
+        "max_ms": 2.2424
+      },
+      "sensor_raycast_ms": {
+        "mean_ms": 0.0885,
+        "p95_ms": 0.1417,
+        "p99_ms": 0.1737,
+        "max_ms": 0.5655
+      },
+      "thumbnail_capture_ms": {
+        "mean_ms": 0.3633,
+        "p95_ms": 0.5258,
+        "p99_ms": 0.6827,
+        "max_ms": 2.7714
+      },
+      "mean_fps": 9319.66,
+      "memory_start_mb": 79.305,
+      "memory_midpoint_mb": 92.324,
+      "memory_end_mb": 87.82,
+      "peak_memory_mb": 92.324,
+      "second_half_memory_drift_mb": -4.504,
+      "continuous_memory_growth_detected": false,
+      "point_cloud_cache_mb": 0,
+      "thresholds_met": true,
+      "failed_thresholds": []
+    },
+    {
+      "run_index": 3,
+      "preset": "dry_day",
+      "seed": 20261118,
+      "warmup_seconds": 30,
+      "duration_seconds": 300,
+      "measured_ticks": 18000,
+      "block_assembly_ms": 5.6028,
+      "counters": {
+        "visible_triangles": 127224,
+        "draw_calls": 12,
+        "active_vehicles": 50,
+        "active_pedestrians": 30,
+        "lidar_primary_rays_cast": 300000,
+        "lidar_returns_emitted": 93203,
+        "lidar_points_per_sec": 310.68,
+        "sensor_queue_backlog_seconds": 0,
+        "deadlock_removals": 0,
+        "camera_samples_captured": 600,
+        "dropped_samples": 0,
+        "silent_sample_drops": 0
+      },
+      "frame_cpu_ms": {
+        "mean_ms": 0.0847,
+        "p95_ms": 0.157,
+        "p99_ms": 0.4197,
+        "max_ms": 1.7018
+      },
+      "frame_gpu_ms": {
+        "mean_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0,
+        "max_ms": 0
+      },
+      "physics_step_ms": {
+        "mean_ms": 0.0639,
+        "p95_ms": 0.0764,
+        "p99_ms": 0.158,
+        "max_ms": 1.5378
+      },
+      "sensor_raycast_ms": {
+        "mean_ms": 0.0683,
+        "p95_ms": 0.0796,
+        "p99_ms": 0.1161,
+        "max_ms": 0.1955
+      },
+      "thumbnail_capture_ms": {
+        "mean_ms": 0.2807,
+        "p95_ms": 0.3325,
+        "p99_ms": 0.3767,
+        "max_ms": 1.5605
+      },
+      "mean_fps": 11806.38,
+      "memory_start_mb": 79.688,
+      "memory_midpoint_mb": 92.402,
+      "memory_end_mb": 87.98,
+      "peak_memory_mb": 92.402,
+      "second_half_memory_drift_mb": -4.422,
+      "continuous_memory_growth_detected": false,
+      "point_cloud_cache_mb": 0,
+      "thresholds_met": true,
+      "failed_thresholds": []
+    },
+    {
+      "run_index": 1,
+      "preset": "rain_night",
+      "seed": 20261216,
+      "warmup_seconds": 30,
+      "duration_seconds": 300,
+      "measured_ticks": 18000,
+      "block_assembly_ms": 5.6028,
+      "counters": {
+        "visible_triangles": 129624,
+        "draw_calls": 14,
+        "active_vehicles": 50,
+        "active_pedestrians": 30,
+        "lidar_primary_rays_cast": 300000,
+        "lidar_returns_emitted": 97723,
+        "lidar_points_per_sec": 325.74,
+        "sensor_queue_backlog_seconds": 0,
+        "deadlock_removals": 3,
+        "camera_samples_captured": 600,
+        "dropped_samples": 0,
+        "silent_sample_drops": 0
+      },
+      "frame_cpu_ms": {
+        "mean_ms": 0.0831,
+        "p95_ms": 0.1479,
+        "p99_ms": 0.4129,
+        "max_ms": 1.6939
+      },
+      "frame_gpu_ms": {
+        "mean_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0,
+        "max_ms": 0
+      },
+      "physics_step_ms": {
+        "mean_ms": 0.0626,
+        "p95_ms": 0.0732,
+        "p99_ms": 0.1559,
+        "max_ms": 0.5127
+      },
+      "sensor_raycast_ms": {
+        "mean_ms": 0.067,
+        "p95_ms": 0.0763,
+        "p99_ms": 0.1149,
+        "max_ms": 0.1799
+      },
+      "thumbnail_capture_ms": {
+        "mean_ms": 0.2786,
+        "p95_ms": 0.319,
+        "p99_ms": 0.3781,
+        "max_ms": 1.5676
+      },
+      "mean_fps": 12033.69,
+      "memory_start_mb": 79.621,
+      "memory_midpoint_mb": 92.387,
+      "memory_end_mb": 88.016,
+      "peak_memory_mb": 92.387,
+      "second_half_memory_drift_mb": -4.371,
+      "continuous_memory_growth_detected": false,
+      "point_cloud_cache_mb": 0,
+      "thresholds_met": true,
+      "failed_thresholds": []
+    },
+    {
+      "run_index": 2,
+      "preset": "rain_night",
+      "seed": 20261217,
+      "warmup_seconds": 30,
+      "duration_seconds": 300,
+      "measured_ticks": 18000,
+      "block_assembly_ms": 5.6028,
+      "counters": {
+        "visible_triangles": 129624,
+        "draw_calls": 14,
+        "active_vehicles": 50,
+        "active_pedestrians": 30,
+        "lidar_primary_rays_cast": 300000,
+        "lidar_returns_emitted": 97554,
+        "lidar_points_per_sec": 325.18,
+        "sensor_queue_backlog_seconds": 0,
+        "deadlock_removals": 1,
+        "camera_samples_captured": 600,
+        "dropped_samples": 0,
+        "silent_sample_drops": 0
+      },
+      "frame_cpu_ms": {
+        "mean_ms": 0.0833,
+        "p95_ms": 0.1495,
+        "p99_ms": 0.4131,
+        "max_ms": 1.8373
+      },
+      "frame_gpu_ms": {
+        "mean_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0,
+        "max_ms": 0
+      },
+      "physics_step_ms": {
+        "mean_ms": 0.0628,
+        "p95_ms": 0.0732,
+        "p99_ms": 0.1554,
+        "max_ms": 0.3454
+      },
+      "sensor_raycast_ms": {
+        "mean_ms": 0.0668,
+        "p95_ms": 0.075,
+        "p99_ms": 0.1127,
+        "max_ms": 0.1995
+      },
+      "thumbnail_capture_ms": {
+        "mean_ms": 0.2794,
+        "p95_ms": 0.3163,
+        "p99_ms": 0.351,
+        "max_ms": 1.7138
+      },
+      "mean_fps": 12004.8,
+      "memory_start_mb": 80.047,
+      "memory_midpoint_mb": 92.75,
+      "memory_end_mb": 88.332,
+      "peak_memory_mb": 92.75,
+      "second_half_memory_drift_mb": -4.418,
+      "continuous_memory_growth_detected": false,
+      "point_cloud_cache_mb": 0,
+      "thresholds_met": true,
+      "failed_thresholds": []
+    },
+    {
+      "run_index": 3,
+      "preset": "rain_night",
+      "seed": 20261218,
+      "warmup_seconds": 30,
+      "duration_seconds": 300,
+      "measured_ticks": 18000,
+      "block_assembly_ms": 5.6028,
+      "counters": {
+        "visible_triangles": 129624,
+        "draw_calls": 14,
+        "active_vehicles": 50,
+        "active_pedestrians": 30,
+        "lidar_primary_rays_cast": 300000,
+        "lidar_returns_emitted": 97254,
+        "lidar_points_per_sec": 324.18,
+        "sensor_queue_backlog_seconds": 0,
+        "deadlock_removals": 0,
+        "camera_samples_captured": 600,
+        "dropped_samples": 0,
+        "silent_sample_drops": 0
+      },
+      "frame_cpu_ms": {
+        "mean_ms": 0.084,
+        "p95_ms": 0.1539,
+        "p99_ms": 0.4194,
+        "max_ms": 1.5997
+      },
+      "frame_gpu_ms": {
+        "mean_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0,
+        "max_ms": 0
+      },
+      "physics_step_ms": {
+        "mean_ms": 0.0632,
+        "p95_ms": 0.075,
+        "p99_ms": 0.1551,
+        "max_ms": 0.8255
+      },
+      "sensor_raycast_ms": {
+        "mean_ms": 0.0679,
+        "p95_ms": 0.0797,
+        "p99_ms": 0.118,
+        "max_ms": 0.246
+      },
+      "thumbnail_capture_ms": {
+        "mean_ms": 0.2822,
+        "p95_ms": 0.3283,
+        "p99_ms": 0.3672,
+        "max_ms": 1.4743
+      },
+      "mean_fps": 11904.76,
+      "memory_start_mb": 79.969,
+      "memory_midpoint_mb": 92.742,
+      "memory_end_mb": 88.32,
+      "peak_memory_mb": 92.742,
+      "second_half_memory_drift_mb": -4.422,
+      "continuous_memory_growth_detected": false,
+      "point_cloud_cache_mb": 0,
+      "thresholds_met": true,
+      "failed_thresholds": []
+    }
+  ],
+  "gate_status": "pending_reference_hardware",
+  "gate_reasons": [
+    "Host hardware (headless_no_graphical_adapter, Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz) does not match reference (AMD Radeon Vega 7 (integrated GPU), 6-core CPU, 16 GiB dual-channel RAM, SSD, no discrete GPU, 1920x1080 Compatibility).",
+    "Headless CPU/domain run has no graphical GPU viewport measurement (frame_gpu_ms requires non-headless reference run)."
+  ]
+}

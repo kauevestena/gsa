@@ -6,9 +6,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F09-01 — Implementar tráfego regular de bancada
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F09-01/README.md). Grafo viário/calçadas com semáforos, faixas de pedestres, zona de exclusão no escritório, 50 carros + 30 pedestres em 60 Hz e remoção de impasse fora da câmera (>= 20 s) integrados; CI nativa do PR #4 pendente antes do merge.
+**Estado:** aceita por revisão técnica delegada após CI nativa do PR #4 (`4a11e48`, [workflow run `43671438816`](https://github.com/kauevestena/gsa/actions/runs/43671438816), [resumo CI](../../../artifacts/evidence/M1-wave3-ci/summary.json)) e [evidências](../../../artifacts/evidence/T-F09-01/README.md). Grafo viário/calçadas com semáforos, faixas de pedestres, zona de exclusão no escritório, 50 carros + 30 pedestres em 60 Hz e remoção de impasse fora da câmera (>= 20 s) integrados e verificados em Linux e Windows headless.
 
 **Marco:** M1
 

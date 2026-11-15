@@ -6,9 +6,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F17-01 — Produzir kit piloto e pipeline de importação
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F17-01/README.md). Kit modular glTF 2.0 com os 9 módulos, 3 materiais de teste (`concrete`, `glass`, `water`), atlas 256×256, preset Blender e validador automático de orçamento e tags semânticas integrados; CI nativa do PR #4 pendente antes do merge.
+**Estado:** aceita por revisão técnica delegada após CI nativa do PR #4 (`4a11e48`, [workflow run `43671438816`](https://github.com/kauevestena/gsa/actions/runs/43671438816), [resumo CI](../../../artifacts/evidence/M1-wave3-ci/summary.json)) e [evidências](../../../artifacts/evidence/T-F17-01/README.md). Kit modular glTF 2.0 com os 9 módulos, 3 materiais de teste (`concrete`, `glass`, `water`), atlas 256×256, preset Blender e validador automático de orçamento e tags semânticas integrados e verificados em Linux e Windows headless.
 
 **Marco:** M1
 
