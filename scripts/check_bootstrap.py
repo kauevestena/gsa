@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build, test and export the M0 foundation; record only executed checks."""
+"""Build, test and export the game; record only executed checks."""
 from __future__ import annotations
 
 import argparse
@@ -71,7 +71,8 @@ def main() -> int:
         "PATH": str(dotnet.parent) + os.pathsep + env.get("PATH", ""),
     })
     report = {
-        "tasks": ["T-F01-02", "T-F06-01", "T-F01-03", "T-F11-01", "T-F01-04"],
+        "tasks": ["T-F01-02", "T-F06-01", "T-F01-03", "T-F11-01", "T-F01-04",
+                  "T-F02-01", "T-F02-02", "T-F04-01", "T-F05-01"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),
@@ -158,6 +159,11 @@ def main() -> int:
             if invalid.get("valid") is not False or not any(d.get("field") == "$.required_feature_ids[0]"
                                                             for d in invalid.get("diagnostics", [])):
                 raise RuntimeError("Invalid content must identify the missing feature field")
+        sky_result = run("precompute-sky", [dotnet, ROOT / "src/Gsa.Tools/bin/Debug/net10.0/gsa-tools.dll",
+                                           "precompute-sky", "game/world/tutorial-block.json",
+                                           "game/world/tutorial-sky.json"])
+        if json.loads(sky_result).get("valid") is not True:
+            raise RuntimeError("Sky precomputation did not report valid output")
         run("restore", [dotnet, "restore", "Gsa.sln", "--locked-mode"])
         run("build", [dotnet, "build", "Gsa.sln", "--no-restore"])
         run("import", [godot, "--headless", "--path", "game", "--editor", "--import"])
@@ -166,6 +172,11 @@ def main() -> int:
         for marker in ("GSA_BRIDGE_SMOKE_OK", "GSA_LOCALIZATION_SMOKE_OK"):
             if marker not in smoke:
                 raise RuntimeError(f"Missing integration marker: {marker}")
+        world_smoke = run("world-smoke", [godot, "--headless", "--path", "game",
+                                          "res://world/TutorialBlock.tscn", "--", "--smoke-test"],
+                          marker="GSA_WORLD_SMOKE_OK")
+        if "GSA_SKY_SMOKE_OK" not in world_smoke:
+            raise RuntimeError("Sky cache was not verified in the world scene")
 
         targets = ("linux", "windows") if args.exports == "all" else (
             (host,) if args.exports == "host" else ())
@@ -202,6 +213,11 @@ def main() -> int:
                 if any(marker not in output for marker in ("GSA_BRIDGE_SMOKE_OK", "GSA_LOCALIZATION_SMOKE_OK")):
                     raise RuntimeError(f"{target}: exported bridge/localization smoke did not complete")
                 report["native_smoke"][target] = "passed_headless"
+                world_output = run(f"export-world-smoke-{target}",
+                                   prefix + [executable, "--headless", "--", "--bench-smoke"],
+                                   marker="GSA_WORLD_SMOKE_OK", runtime_env=clean)
+                if "GSA_SKY_SMOKE_OK" not in world_output:
+                    raise RuntimeError(f"{target}: exported sky cache was not verified")
                 if args.offline_smoke:
                     report["network_isolation"] = "linux_network_namespace"
         current_locks = {str(p.relative_to(ROOT)): sha256(p) for p in lock_paths()}

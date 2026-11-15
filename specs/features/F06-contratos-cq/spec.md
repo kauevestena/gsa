@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M0–M5. Origem: Loop de jogo e estrutura; Núcleo de simulação MMS; Missões. Estado: schema/validação T-F06-01 em revisão; estados, CQ e liquidação dos marcos seguintes pendentes.
+Marcos: M0–M5. Origem: Loop de jogo e estrutura; Núcleo de simulação MMS; Missões. Estado: schema/validação T-F06-01 integrado com aceite técnico delegado; estados, CQ e liquidação dos marcos seguintes pendentes.
 
 ## Requisitos
 

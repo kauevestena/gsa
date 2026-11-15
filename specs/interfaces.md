@@ -19,6 +19,12 @@ Esta é a fronteira normativa entre os subsistemas. Tipos abaixo são contratos 
 
 O datum local não tem código EPSG nem correspondência territorial real. [Exportação](features/F20-exportacao/spec.md) define separadamente um posicionamento sintético WGS84 para GeoJSON.
 
+## Manifesto neutro e modelos iniciais de M1
+
+O [manifesto do quarteirão](../game/world/README.md) define caixas semânticas em ENU, IDs, superfícies, tags, limites e células. O mesmo JSON é fonte da geometria visual e dos colliders, sem uma cópia artística divergente. O hash canônico identifica a revisão geométrica para o cache de céu. O cache registra 32 direções do hemisfério por célula de 10 m, a 2 m da origem vertical; consulta fora do grid ou da altura compatível retorna ausência, nunca céu aberto fictício.
+
+Os contratos numéricos iniciais de [câmera](../src/Gsa.Core/Sensors/Camera/README.md) e [GNSS/heading](../src/Gsa.Core/Sensors/Gnss/README.md) detalham os DTOs puros e o estado explícito do RNG. A API de observação não devolve a verdade ou os erros realizados junto da medição. Esses incrementos não implementam estimativa/entrega de produto, base, RTK, triangulação ou comportamento de sensores condicionado à UI.
+
 ## API do domínio
 
 | Contrato | Conteúdo mínimo / operação |

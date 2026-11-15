@@ -10,6 +10,9 @@ msgstr ""
 msgid "bootstrap.title"
 msgstr "GSA"
 
+msgid "bootstrap.open_bench"
+msgstr "Explorar o quarteirão"
+
 msgid "bootstrap.status"
 msgstr "Fundação do projeto"
 

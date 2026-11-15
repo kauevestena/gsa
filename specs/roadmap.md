@@ -25,7 +25,7 @@ Os gates M2/M3 verificam diversão/aprendizado antes de investir no restante da 
 
 ### M0 — Fundação
 
-Estado de implementação: incrementos em revisão; 142 testes .NET e 10 Python passaram, com exports Windows/Linux e smoke Linux headless offline. Ver [evidências integradas](../artifacts/evidence/T-F01-02/README.md). Execução nativa Windows, inspeção gráfica e revisão humana pendentes; gate sem aceite. A continuação autorizada pelo usuário durante essas pendências está registrada em specs/README.md.
+Estado de implementação: M0 integrado com aceite técnico delegado no [PR #1](https://github.com/kauevestena/gsa/pull/1), após CI nativa Linux/Windows. Ver [registro](../artifacts/evidence/M0-ci/summary.json). Inspeção gráfica e isolamento de rede Windows continuam separados; não bloqueiam o desenvolvimento contínuo autorizado.
 
 **Gate de saída:** Projetos, ferramentas, schemas e localização disponíveis. Consultar o protocolo em [validação](validacao.md).
 
@@ -39,6 +39,8 @@ Estado de implementação: incrementos em revisão; 142 testes .NET e 10 Python 
 | T-F11-01 | Criar localização e glossário inicial | [Tarefas F11](features/F11-interface-localizacao/tasks.md) |
 
 ### M1 — Viabilidade técnica
+
+Primeiros incrementos em revisão: quarteirão/alturas, céu, câmera e GNSS. Ver [evidências](../artifacts/evidence/T-F02-01/README.md). O gate M1 ainda depende das tarefas restantes e da medição na referência.
 
 **Gate de saída:** Bancada, orçamento de raios, 50 carros e relatório de hardware. Consultar o protocolo em [validação](validacao.md).
 

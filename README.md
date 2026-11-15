@@ -2,7 +2,7 @@
 
 Jogo offline de levantamento móvel em São Datum, em implementação guiada pela [pasta specs](specs/README.md).
 
-A fundação **M0** contém Core C# independente, validadores de contratos/catálogos, ferramentas de conteúdo, fachada Godot e localização PT-BR/EN-US. A cena mínima permite trocar o idioma e demonstra números e plural; mundo, aquisição científica, CQ e campanha pertencem aos marcos seguintes.
+A fundação **M0** foi integrada no [PR #1](https://github.com/kauevestena/gsa/pull/1), após CI Linux/Windows. O início de **M1** acrescenta um quarteirão 3D semântico, vinte fachadas, modelo de alturas, visibilidade estática do céu e modelos puros de câmera/GNSS. A tela inicial permite trocar idioma e abrir o quarteirão; Escape retorna à tela inicial. Locomoção, aquisição integrada, CQ e campanha permanecem nos incrementos seguintes.
 
 ## Preparar e verificar
 
@@ -29,12 +29,20 @@ dotnet run --project src/Gsa.Tools -- validate-content content
 
 A CLI retorna JSON com arquivo, JSONPath e motivo: exit 0 para conteúdo válido, 2 para inválido e 1 para uso incorreto. Os [catálogos neutros](content/README.md) incluem os quatro produtos; o [schema de contrato](content/schemas/README.md) preserva o exemplo normativo. São fixtures de desenvolvimento, sem missões jogáveis.
 
+O pré-cálculo de céu usa a mesma [geometria neutra](game/world/README.md) que a cena e os colliders:
+
+```sh
+dotnet run --project src/Gsa.Tools -- precompute-sky game/world/tutorial-block.json game/world/tutorial-sky.json
+```
+
+O pipeline gera esse cache antes de importar/exportar a cena. O cache derivado fica fora do Git e só é aceito quando versão/hash correspondem ao manifesto. Há [documentação do modelo](src/Gsa.Tools/Sky/README.md), [câmera](src/Gsa.Core/Sensors/Camera/README.md) e [GNSS/heading](src/Gsa.Core/Sensors/Gnss/README.md).
+
 Consulte os [comandos manuais e versões](docs/toolchain.md) para abrir o editor. Distribua a pasta inteira de cada export, incluindo PCK e runtime .NET. Ferramentas, caches, executáveis e saves ficam fora do Git. A instalação e o restore usam rede; o jogo exportado usa runtime autocontido.
 
 ## Estado
 
-Os incrementos M0 estão em revisão: **142 testes .NET e 10 testes Python passaram**, build sem warnings/erros, CLI com exit 0/2 comprovado, exports Linux/Windows gerados e export Linux headless offline verificado. Ver [evidências da continuação](artifacts/evidence/T-F01-02/README.md), [toolchain](docs/toolchain.md) e [dependências](docs/dependencies.md).
+M0 tem aceite técnico delegado e CI nativa aprovada nos dois sistemas; ver [registro da CI](artifacts/evidence/M0-ci/summary.json) e [evidências históricas](artifacts/evidence/T-F01-02/README.md). Os incrementos iniciais M1 passam por testes puros, física headless da cena e verificação do export. [Toolchain](docs/toolchain.md) e [dependências](docs/dependencies.md) permanecem fixadas.
 
-Execução nativa Windows, verificação gráfica e revisão humana permanecem pendentes. Nenhuma caixa de aceite foi marcada; o gate M0 não é declarado aceito. O usuário autorizou continuar o desenvolvimento em M0 durante essas pendências, conforme `specs/README.md`. O próximo marco do roadmap é M1, a bancada de viabilidade.
+Inspeção gráfica, isolamento de rede Windows e benchmark na máquina de referência ainda não foram realizados. CI headless não os substitui. O usuário delegou revisão técnica e merges com CI verde; requisitos de playtest/produção humana permanecem explícitos. O gate M1 depende também de locomoção, sensores integrados, tráfego, LiDAR e medição de desempenho.
 
 O usuário autorizou publicar branches/PRs no repositório existente e mesclar após a CI passar. O desenvolvimento prossegue por incrementos; a licença do jogo continua pendente conforme EXT-02.

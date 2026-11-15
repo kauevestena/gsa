@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M0. Origem: Arquitetura técnica; Escolha de engine; Escopo, MVP e roadmap. Estado: incrementos de fundação em revisão, com execução nativa Windows, verificação gráfica e aceite humano pendentes.
+Marcos: M0. Origem: Arquitetura técnica; Escolha de engine; Escopo, MVP e roadmap. Estado: fundação integrada no PR #1 após CI nativa Linux/Windows, com aceite técnico delegado; inspeção gráfica e isolamento Windows separados.
 
 ## Requisitos
 

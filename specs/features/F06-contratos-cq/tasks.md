@@ -2,13 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F06-01 — Definir e validar dados de contrato
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F06-01/README.md). Schema, quatro produtos e 85 testes de Missions passaram; CQ e interface de M2 continuam pendentes.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #1 após CI Linux/Windows verde no SHA de773cd8227994cc9da18a36d352d02a9654c583. Critério local verificado; registros históricos e pendências de inspeção visual/isolamento Windows preservados em artifacts/evidence/M0-ci/summary.json.
 
 **Marco:** M0
 

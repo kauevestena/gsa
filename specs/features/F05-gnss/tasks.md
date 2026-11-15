@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F05-01/README.md). 37 testes de observações/replay/RNG/estatística passaram. Integração de plataforma e base/RTK permanecem pendentes.
+
 **Marco:** M1
 
 **Dependências:** T-F01-02

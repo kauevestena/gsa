@@ -1,5 +1,6 @@
 # Dependencies and tools downloaded locally
 /work/
+/game/world/tutorial-sky.json
 
 # Godot imports, .NET outputs and editor state
 **/.godot/

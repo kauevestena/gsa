@@ -2,13 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. O campo Estado registra o andamento de cada incremento iniciado. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O campo Estado registra o andamento de cada incremento iniciado. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F01-01 — Fixar ferramentas e bootstrap
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F01-01/README.md). Build, exports Windows/Linux e smoke Linux headless offline passaram; execução nativa Windows, verificação gráfica e revisão humana pendentes. A caixa permanece desmarcada.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #1 após CI Linux/Windows verde no SHA de773cd8227994cc9da18a36d352d02a9654c583. Critério local verificado; registros históricos e pendências de inspeção visual/isolamento Windows preservados em artifacts/evidence/M0-ci/summary.json.
 
 **Marco:** M0
 
@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F01-02 — Criar módulos e testes mínimos
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F01-02/README.md). Core independente e fachada C#/GDScript verificados, com 142 testes .NET na integração M0. Nenhum aceite de plataforma foi presumido.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #1 após CI Linux/Windows verde no SHA de773cd8227994cc9da18a36d352d02a9654c583. Critério local verificado; registros históricos e pendências de inspeção visual/isolamento Windows preservados em artifacts/evidence/M0-ci/summary.json.
 
 **Marco:** M0
 
@@ -46,9 +46,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F01-03 — Implementar validação de conteúdo
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F01-03/README.md). Conteúdo válido retorna 0; referência quebrada retorna 2 e identifica arquivo/campo. Casos negativos e quatro produtos cobertos por testes.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #1 após CI Linux/Windows verde no SHA de773cd8227994cc9da18a36d352d02a9654c583. Critério local verificado; registros históricos e pendências de inspeção visual/isolamento Windows preservados em artifacts/evidence/M0-ci/summary.json.
 
 **Marco:** M0
 
@@ -66,9 +66,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F01-04 — Automatizar builds e exports
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F01-04/README.md). Pipeline portátil passou em Linux, com exports dos dois sistemas e smoke Linux headless offline. Execução nativa Windows, inspeção gráfica e revisão humana pendentes.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #1 após CI Linux/Windows verde no SHA de773cd8227994cc9da18a36d352d02a9654c583. Critério local verificado; registros históricos e pendências de inspeção visual/isolamento Windows preservados em artifacts/evidence/M0-ci/summary.json.
 
 **Marco:** M0
 

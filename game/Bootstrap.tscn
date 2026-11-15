@@ -66,3 +66,7 @@ custom_minimum_size = Vector2(180, 44)
 [node name="English" type="Button" parent="Center/Panel/Languages"]
 layout_mode = 2
 custom_minimum_size = Vector2(180, 44)
+
+[node name="OpenBench" type="Button" parent="Center/Panel"]
+layout_mode = 2
+custom_minimum_size = Vector2(360, 44)

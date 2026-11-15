@@ -4,7 +4,7 @@
 
 Cada requisito liga uma seção de origem a tarefas e cenários de aceite. IDs das tarefas apontam para seus documentos. A coluna de cenários reúne os aceites das tarefas responsáveis, complementados pelos fixtures comuns de validacao.md.
 
-Os incrementos M0 estão em revisão: [toolchain](../artifacts/evidence/T-F01-01/README.md), [módulos e integração](../artifacts/evidence/T-F01-02/README.md), [validação de conteúdo](../artifacts/evidence/T-F01-03/README.md), [automação](../artifacts/evidence/T-F01-04/README.md), [schemas de contrato](../artifacts/evidence/T-F06-01/README.md) e [localização](../artifacts/evidence/T-F11-01/README.md). Nenhuma tarefa ou gate foi marcado como aceito. Cenários de CQ/interface de marcos posteriores não são declarados concluídos pelos fixtures de M0.
+M0 foi integrado após CI Linux/Windows com aceite técnico delegado; ver [registro](../artifacts/evidence/M0-ci/summary.json). Os primeiros incrementos M1 têm [evidências integradas](../artifacts/evidence/T-F02-01/README.md), [céu](../artifacts/evidence/T-F02-02/README.md), [câmera](../artifacts/evidence/T-F04-01/README.md) e [GNSS](../artifacts/evidence/T-F05-01/README.md). Os aceites de funcionalidades posteriores não são presumidos por estes fixtures.
 
 | Requisito | Origem no documento inicial | Tarefas | Cenários |
 | --- | --- | --- | --- |
