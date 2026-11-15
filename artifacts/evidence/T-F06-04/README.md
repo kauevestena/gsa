@@ -1,6 +1,6 @@
 # Evidência — T-F06-04 (Implementar estrelas e valor de entrega)
 
-Estado: implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #7 (`d5ba4ea`, run `43675243347`); ver `artifacts/evidence/M2-wave2-ci/summary.json`.
 
 ## Escopo implementado
 - `DeliveryQuoteCalculator` (`PaymentQuote`, `DeliveryMode`) em `src/Gsa.Missions/Quality/DeliveryQuoteCalculator.cs`:

@@ -1,6 +1,6 @@
 # Evidência — T-F08-01 (Implementar ledger e pagamentos)
 
-Estado: implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #7 (`d5ba4ea`, run `43675243347`); ver `artifacts/evidence/M2-wave2-ci/summary.json`.
 
 ## Escopo implementado
 - `CareerLedger` (`CareerLedgerState`, `LedgerEntry`, `LedgerOperationResult`) em `src/Gsa.Missions/Economy/LedgerAndWallet.cs`:

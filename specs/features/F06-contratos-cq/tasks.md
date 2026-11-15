@@ -66,9 +66,9 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F06-04 — Implementar estrelas e valor de entrega
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F06-04/README.md). `DeliveryQuoteCalculator` (`PaymentQuote`, `DeliveryMode`) em `Gsa.Missions.Quality`: agregação de margens não binárias com precisão IEEE-754 em `MapFullStars`, bloqueio de privacidade/formato mesmo em parcial, fatores de qualidade, arredondamento único (`Floor`) e multa de atraso/expiração (`-1` reputação).
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #7 (`d5ba4ea`, run `43675243347`); [resumo CI](../../../artifacts/evidence/M2-wave2-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F06-04/README.md). `DeliveryQuoteCalculator` (`PaymentQuote`, `DeliveryMode`) em `Gsa.Missions.Quality`: agregação de margens não binárias com precisão IEEE-754 em `MapFullStars`, bloqueio de privacidade/formato mesmo em parcial, fatores de qualidade, arredondamento único (`Floor`) e multa de atraso/expiração (`-1` reputação).
 
 **Marco:** M2
 
@@ -86,9 +86,9 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 ### T-F06-05 — Integrar retrabalho e liquidação idempotente
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7); [evidências](../../../artifacts/evidence/T-F06-05/README.md). `ContractSettlementCoordinator` e `CareerProgressionState` em `Gsa.Missions.Contracts`: união deduplicada de lotes protegidos para CQ, ciclo `Retrabalho`, reputação por cliente/região clamped `>= 0` sem dupla contagem global, desbloqueios de história e liquidação idempotente `settlement:{ContractId}`.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #7 (`d5ba4ea`, run `43675243347`); [resumo CI](../../../artifacts/evidence/M2-wave2-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F06-05/README.md). `ContractSettlementCoordinator` e `CareerProgressionState` em `Gsa.Missions.Contracts`: união deduplicada de lotes protegidos para CQ, ciclo `Retrabalho`, reputação por cliente/região clamped `>= 0` sem dupla contagem global, desbloqueios de história e liquidação idempotente `settlement:{ContractId}`.
 
 **Marco:** M2
 

@@ -1,6 +1,6 @@
 # Evidência — T-F12-02 (Implementar save e recuperação)
 
-Estado: implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #7 (`d5ba4ea`, run `43675243347`); ver `artifacts/evidence/M2-wave2-ci/summary.json`.
 
 ## Escopo implementado
 - `SaveGameManager` (`SaveGameState`, `SaveFileEnvelope`, `RestoredCareerRuntime`) em `src/Gsa.Missions/Persistence/SaveGameManager.cs`, além de `ContractInstanceSnapshot` (`ExportSnapshot`/`FromSnapshot` + `[JsonPolymorphic]`) e `[JsonConstructor]` em `Vector3d`/`Quaterniond`/`Bounds2DEnu`:
