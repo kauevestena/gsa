@@ -2,13 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O campo Estado registra o andamento de cada incremento iniciado. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F04-01 — Implementar projeção e fixtures
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F04-01/README.md). 34 testes analíticos passaram para projeção/extrínsecos/tempo. Captura e avaliação dos próximos incrementos permanecem pendentes.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #2 após CI Linux/Windows verde no SHA 0f7ba2c18f4d3441f757e862ba213364758f3d26. Critério local verificado; [evidências](../../../artifacts/evidence/T-F04-01/README.md) e registro de CI em `artifacts/evidence/M1-world-ci/summary.json`. 34 testes analíticos passaram para projeção/extrínsecos/tempo.
 
 **Marco:** M1
 
@@ -27,6 +27,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 ### T-F04-02 — Integrar observações e miniaturas
 
 - [ ] Aceita
+
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F04-02/README.md). Scheduler a 2 Hz no relógio físico, 5 raios com oclusão real na engine, arrasto de dois instantes, rolling shutter, máscaras de privacidade e miniatura 256×144 sem textura cheia persistida; CI nativa do PR #3 pendente antes do merge.
 
 **Marco:** M1
 
