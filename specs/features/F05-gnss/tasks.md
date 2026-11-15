@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F05-03 — Adicionar aluguel e DGNSS
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -62,7 +62,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Comparação com/sem base e registro de cobrança.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F05-03](../../../artifacts/evidence/T-F05-03/README.md)).
+**Estado:** aceita via revisão técnica delegada após aprovação na CI do [PR #10](https://github.com/kauevestena/gsa/pull/10) (SHA testado `bf2ddd590bcebe58739160b63dbb9c6a27933c74`, merge `d8d7dc0`, execução [43679717318](https://github.com/kauevestena/gsa/actions/runs/43679717318), jobs Linux `132707485195` e Windows `132707484916`); [evidências](../../../artifacts/evidence/T-F05-03/README.md) e [resumo CI](../../../artifacts/evidence/M3-wave1-ci/summary.json).
 
 ### T-F05-04 — Adicionar RTK e instalação de base
 

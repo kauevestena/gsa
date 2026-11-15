@@ -88,7 +88,8 @@ public sealed class LocomotionSimulator
     private readonly WorldBounds? _sceneBounds;
 
     public LocomotionMode Mode { get; private set; }
-    public PlatformProfile CurrentProfile => Mode == LocomotionMode.Handcart ? PlatformProfile.Handcart : PlatformProfile.OnFoot;
+    public LocomotionMode MountedVehicleMode { get; private set; } = LocomotionMode.Handcart;
+    public PlatformProfile CurrentProfile => PlatformProfile.ForMode(Mode);
     public Vector3d PositionEnu { get; private set; }
     public double HeadingRadians { get; private set; }
     public double ForwardSpeedMetresPerSecond { get; private set; }
@@ -109,11 +110,12 @@ public sealed class LocomotionSimulator
             throw new ArgumentOutOfRangeException(nameof(initialHeadingRadians), "Heading must be finite.");
         _sceneBounds = sceneBounds;
         Mode = initialMode;
+        MountedVehicleMode = initialMode == LocomotionMode.OnFoot ? LocomotionMode.Handcart : initialMode;
         PositionEnu = initialPositionEnu;
         HeadingRadians = NormalizeAngle(initialHeadingRadians);
         HandcartPositionEnu = initialPositionEnu;
         HandcartHeadingRadians = HeadingRadians;
-        RemainingAutonomySeconds = PlatformProfile.Handcart.PhysicalAutonomySeconds;
+        RemainingAutonomySeconds = PlatformProfile.ForMode(MountedVehicleMode).PhysicalAutonomySeconds;
     }
 
     public Quaterniond BodyToMap => Quaterniond.FromAxisAngle(Vector3d.UnitZ, HeadingRadians);
@@ -124,7 +126,7 @@ public sealed class LocomotionSimulator
             throw new ArgumentOutOfRangeException(nameof(pendingUnits), "Pending storage units must be positive.");
         if (GimbalinaFled)
             return CaptureStopReason.GimbalinaFled;
-        if (Mode == LocomotionMode.Handcart && RemainingAutonomySeconds <= 0)
+        if (CurrentProfile.HasFiniteAutonomy && RemainingAutonomySeconds <= 0)
             return CaptureStopReason.AutonomyExhausted;
         if (UsedVirtualStorageUnits + pendingUnits > CurrentProfile.VirtualStorageCapacityUnits)
             return CaptureStopReason.VirtualStorageFull;
@@ -142,13 +144,47 @@ public sealed class LocomotionSimulator
 
     public void MarkGimbalinaFled() => GimbalinaFled = true;
 
+    public void SwitchVehiclePlatform(LocomotionMode vehicleMode, bool refillAutonomy = true, bool clearStorage = false)
+    {
+        if (vehicleMode == LocomotionMode.OnFoot)
+            throw new ArgumentException("Vehicle platform mode cannot be OnFoot.", nameof(vehicleMode));
+
+        MountedVehicleMode = vehicleMode;
+        if (Mode != LocomotionMode.OnFoot)
+            Mode = vehicleMode;
+        if (refillAutonomy)
+            RemainingAutonomySeconds = PlatformProfile.ForMode(vehicleMode).PhysicalAutonomySeconds;
+        if (clearStorage)
+            UsedVirtualStorageUnits = 0;
+    }
+
     public void RefillHandcartResources(bool refillAutonomy = true, bool clearStorage = true)
     {
         if (refillAutonomy)
-            RemainingAutonomySeconds = PlatformProfile.Handcart.PhysicalAutonomySeconds;
+            RemainingAutonomySeconds = PlatformProfile.ForMode(MountedVehicleMode).PhysicalAutonomySeconds;
         if (clearStorage)
             UsedVirtualStorageUnits = 0;
         GimbalinaFled = false;
+    }
+
+    public void RepositionSafeAfterRecovery(
+        Vector3d safePositionEnu,
+        LocomotionMode? vehicleMode = null,
+        double headingRadians = 0.0,
+        bool refillAutonomy = true,
+        bool clearStorage = true)
+    {
+        if (vehicleMode is { } explicitMode && explicitMode != LocomotionMode.OnFoot)
+            MountedVehicleMode = explicitMode;
+
+        Mode = MountedVehicleMode;
+        PositionEnu = safePositionEnu;
+        HeadingRadians = NormalizeAngle(headingRadians);
+        ForwardSpeedMetresPerSecond = 0.0;
+        VelocityEnu = Vector3d.Zero;
+        HandcartPositionEnu = PositionEnu;
+        HandcartHeadingRadians = HeadingRadians;
+        RefillHandcartResources(refillAutonomy, clearStorage);
     }
 
     public LocomotionStepResult Step(
@@ -248,7 +284,7 @@ public sealed class LocomotionSimulator
         ForwardSpeedMetresPerSecond = Math.Clamp(postHorizontalSpeed / Math.Max(0.5, cosSlope), -maxReverse, maxForward);
         VelocityEnu = new Vector3d(postVx, postVy, deltaZ / dtSeconds);
 
-        if (Mode == LocomotionMode.Handcart)
+        if (Mode != LocomotionMode.OnFoot)
         {
             HandcartPositionEnu = PositionEnu;
             HandcartHeadingRadians = HeadingRadians;
@@ -293,7 +329,7 @@ public sealed class LocomotionSimulator
                 reasonKey = "mobility.mount.too_far";
                 return false;
             }
-            Mode = LocomotionMode.Handcart;
+            Mode = MountedVehicleMode;
             PositionEnu = HandcartPositionEnu;
             HeadingRadians = HandcartHeadingRadians;
             ForwardSpeedMetresPerSecond = 0.0;
@@ -366,7 +402,7 @@ public sealed class LocomotionSimulator
         var handcartDistance = Math.Sqrt(
             (HandcartPositionEnu.X - PositionEnu.X) * (HandcartPositionEnu.X - PositionEnu.X) +
             (HandcartPositionEnu.Y - PositionEnu.Y) * (HandcartPositionEnu.Y - PositionEnu.Y));
-        if (Mode == LocomotionMode.Handcart || handcartDistance <= MaxMountDistanceMetres)
+        if (Mode != LocomotionMode.OnFoot || handcartDistance <= MaxMountDistanceMetres)
         {
             var previousMode = Mode;
             if (TryToggleMount(obstacles, out var reason))

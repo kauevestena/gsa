@@ -79,7 +79,8 @@ def main() -> int:
                   "T-F06-04", "T-F08-01", "T-F12-01", "T-F06-05", "T-F12-02",
                   "T-F07-01", "T-F07-04", "T-F11-02", "T-F11-03",
                   "T-F10-01", "T-F19-02", "T-F02-03", "T-F08-02", "T-F05-03",
-                  "T-F07-02"],
+                  "T-F07-02", "T-F03-03", "T-F03-04", "T-F09-02", "T-F09-03",
+                  "T-F09-04", "T-F04-04", "T-F04-05"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),

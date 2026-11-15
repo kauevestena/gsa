@@ -217,3 +217,30 @@ msgstr "Arcade mode: automatic selection, triangulation confirmation, and maskin
 
 msgid "office.mode.technical.preview"
 msgstr "Technical mode: manual selection, feature confirmation, and masking review (0 Coords processing fee)."
+
+msgid "mobility.access.scooter_forbidden_on_sidewalk"
+msgstr "Scooters are restricted to streets and cannot drive along pedestrian sidewalks."
+
+msgid "mobility.access.cycleway_forbidden_for_scooter"
+msgstr "Narrow cycleways and alleys are restricted to foot, handcart, or bicycle traffic."
+
+msgid "mobility.access.handcart_forbidden_on_road_lane"
+msgstr "Handcarts belong on sidewalks and alleys and cannot enter fast road traffic lanes."
+
+msgid "mobility.recovery.safe_office_reposition"
+msgstr "Safely repositioned at the office after vehicle recovery; protected batches remain intact."
+
+msgid "hazard.dog.pacified_by_treat"
+msgstr "Dog calmed with a treat and ended the pursuit safely."
+
+msgid "hazard.dog.suppressed_by_calm"
+msgstr "Pursuit canceled cleanly because Calm protection is active."
+
+msgid "hud.calm_protection.active"
+msgstr "Calm Protection: Active"
+
+msgid "hud.calm_protection.inactive"
+msgstr "Calm Protection: Off"
+
+msgid "camera.overlap.insufficient_geometry"
+msgstr "Insufficient support-plane geometry to compute reliable consecutive overlap."

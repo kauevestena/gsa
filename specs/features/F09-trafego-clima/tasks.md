@@ -42,6 +42,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Testes de relógio e comparativos visuais.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-02](../../../artifacts/evidence/T-F09-02/README.md)).
+
 ### T-F09-03 — Adicionar bêbados, blitz e cães
 
 - [ ] Aceita
@@ -60,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Cenários noturno/bar/fim de semana e blitz.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-03](../../../artifacts/evidence/T-F09-03/README.md)).
+
 ### T-F09-04 — Implementar contratos tranquilos e Cidade calma
 
 - [ ] Aceita
@@ -77,6 +81,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Ativar modo cancela perigos pendentes sem custo/progressão inferior.
 
 **Evidência:** Testes de eventos atrasados e missão tranquila.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F09-04](../../../artifacts/evidence/T-F09-04/README.md)).
 
 ### T-F09-05 — Integrar perigos e contramedidas urbanas
 
