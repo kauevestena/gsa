@@ -2,6 +2,8 @@ using System.Text.Json;
 using Gsa.Tools;
 using Xunit;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace Gsa.Tools.Tests;
 
 public sealed class M2GateToolTests
