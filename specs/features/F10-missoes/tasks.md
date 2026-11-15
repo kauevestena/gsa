@@ -42,6 +42,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Relatórios de geração e três missões gravadas.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-02](../../../artifacts/evidence/T-F10-02/README.md)).
+
 ### T-F10-03 — Concluir ato 1 e escrever campanha restante
 
 - [ ] Aceita

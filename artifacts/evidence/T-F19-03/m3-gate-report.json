@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "milestone": "M3",
+  "technical_loop_status": "passed",
+  "playtest_gate_status": "pending_human_playtest_cohort",
+  "overall_gate_status": "pending_human_playtest_cohort",
+  "campaign_playthrough": {
+    "schema_version": 1,
+    "all_three_missions_passed": true,
+    "no_circular_dependencies": true,
+    "save_between_missions_verified": true,
+    "cutscene_skip_idempotent": true,
+    "rain_handled_without_instant_fail": true,
+    "controls_disjoint_from_checkpoints": true,
+    "final_balance_coords": 1277,
+    "unlocked_missions": [
+      "HIST-01",
+      "HIST-02",
+      "HIST-03"
+    ],
+    "unlocked_vehicles": [
+      "cart",
+      "bicycle",
+      "scooter"
+    ],
+    "missions": [
+      {
+        "mission_id": "HIST-01",
+        "contract_id": "contract_hist_01",
+        "platform_used": 1,
+        "final_stars": 5,
+        "payout_coords": 400,
+        "privacy_compliant": true,
+        "passed": true,
+        "unlocked_missions": [
+          "HIST-02"
+        ],
+        "unlocked_vehicles": [
+          "cart"
+        ],
+        "notes": "HIST-01 completed tutorial \u0026 5-star CQ rework."
+      },
+      {
+        "mission_id": "HIST-02",
+        "contract_id": "contract_hist_02",
+        "platform_used": 1,
+        "final_stars": 5,
+        "payout_coords": 400,
+        "privacy_compliant": true,
+        "passed": true,
+        "unlocked_missions": [
+          "HIST-03"
+        ],
+        "unlocked_vehicles": [
+          "bicycle"
+        ],
+        "notes": "Completed HIST-02 with Handcart (5 stars, 12 samples)."
+      },
+      {
+        "mission_id": "HIST-03",
+        "contract_id": "contract_hist_03",
+        "platform_used": 2,
+        "final_stars": 5,
+        "payout_coords": 700,
+        "privacy_compliant": true,
+        "passed": true,
+        "unlocked_missions": [],
+        "unlocked_vehicles": [
+          "scooter"
+        ],
+        "notes": "Completed HIST-03 with Bicycle (5 stars, 8 samples)."
+      }
+    ]
+  },
+  "procedural_validation": {
+    "schema_version": 1,
+    "templates_validated": 5,
+    "total_contracts_generated": 500,
+    "total_contracts_passed": 500,
+    "all_passed": true,
+    "map_sha256": "old-center-mvp-v1",
+    "profile_version": "mvp-profiles-v1",
+    "by_template": [
+      {
+        "template_id": "PROC-FACHADAS",
+        "seeds_tested": 100,
+        "seeds_passed": 100,
+        "all_compatible_with_fleet": true,
+        "all_witness_routes_feasible": true,
+        "all_schema_valid": true
+      },
+      {
+        "template_id": "PROC-DRENAGEM",
+        "seeds_tested": 100,
+        "seeds_passed": 100,
+        "all_compatible_with_fleet": true,
+        "all_witness_routes_feasible": true,
+        "all_schema_valid": true
+      },
+      {
+        "template_id": "PROC-CALCADAS",
+        "seeds_tested": 100,
+        "seeds_passed": 100,
+        "all_compatible_with_fleet": true,
+        "all_witness_routes_feasible": true,
+        "all_schema_valid": true
+      },
+      {
+        "template_id": "PROC-PLACAS",
+        "seeds_tested": 100,
+        "seeds_passed": 100,
+        "all_compatible_with_fleet": true,
+        "all_witness_routes_feasible": true,
+        "all_schema_valid": true
+      },
+      {
+        "template_id": "PROC-PARQUE",
+        "seeds_tested": 100,
+        "seeds_passed": 100,
+        "all_compatible_with_fleet": true,
+        "all_witness_routes_feasible": true,
+        "all_schema_valid": true
+      }
+    ]
+  },
+  "calm_contract_always_available_at_low_balance": true,
+  "replay_fps_invariance_verified": true,
+  "bilingual_audit_passed": true,
+  "collectibles_idempotent_verified": true,
+  "gamer_cohort": {
+    "cohort": 0,
+    "total_participants": 5,
+    "completed_and_corrected_count": 5,
+    "wished_to_continue_count": 4,
+    "students_linking_two_effects_count": 0,
+    "criteria_met": true,
+    "playtest_gate_status": "pending_human_playtest_cohort"
+  },
+  "student_cohort": {
+    "cohort": 1,
+    "total_participants": 5,
+    "completed_and_corrected_count": 5,
+    "wished_to_continue_count": 4,
+    "students_linking_two_effects_count": 4,
+    "criteria_met": true,
+    "playtest_gate_status": "pending_human_playtest_cohort"
+  },
+  "tasks": [
+    {
+      "task_id": "T-F02-03",
+      "title": "Montar Centro Velho do MVP",
+      "requirements": [
+        "REQ-F02-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F02-02",
+        "AC-F02-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F02-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F03-03",
+      "title": "Adicionar bicicleta e recursos",
+      "requirements": [
+        "REQ-F03-01",
+        "REQ-F03-02",
+        "REQ-F03-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F03-01",
+        "AC-F03-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F03-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F03-04",
+      "title": "Adicionar motoneta e recupera\u00E7\u00E3o",
+      "requirements": [
+        "REQ-F03-01",
+        "REQ-F03-03",
+        "REQ-F03-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F03-01",
+        "AC-F03-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F03-04/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F04-04",
+      "title": "Adicionar ambiente e sobreposi\u00E7\u00E3o",
+      "requirements": [
+        "REQ-F04-01",
+        "REQ-F04-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F04-03",
+        "AC-F04-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F04-04/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F04-05",
+      "title": "Integrar capacete e c\u00E2meras frente/tr\u00E1s",
+      "requirements": [
+        "REQ-F04-03",
+        "REQ-F04-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F04-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F04-05/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F05-03",
+      "title": "Adicionar aluguel e DGNSS",
+      "requirements": [
+        "REQ-F05-03"
+      ],
+      "acceptance_scenarios": [
+        "AC-F05-02",
+        "AC-F05-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F05-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F07-02",
+      "title": "Integrar Arcade e T\u00E9cnico simplificados",
+      "requirements": [
+        "REQ-F07-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F07-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F07-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F08-02",
+      "title": "Adicionar loja e progress\u00E3o inicial",
+      "requirements": [
+        "REQ-F08-02",
+        "REQ-F08-03",
+        "REQ-F08-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F08-02",
+        "AC-F08-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F08-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F09-02",
+      "title": "Implementar calend\u00E1rio, clima e ader\u00EAncia",
+      "requirements": [
+        "REQ-F09-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F09-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F09-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F09-03",
+      "title": "Adicionar b\u00EAbados, blitz e c\u00E3es",
+      "requirements": [
+        "REQ-F09-03",
+        "REQ-F09-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F09-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F09-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F09-04",
+      "title": "Implementar contratos tranquilos e Cidade calma",
+      "requirements": [
+        "REQ-F09-05"
+      ],
+      "acceptance_scenarios": [
+        "AC-F09-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F09-04/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F10-02",
+      "title": "Completar MVP e gerador de cinco templates",
+      "requirements": [
+        "REQ-F10-01",
+        "REQ-F10-02",
+        "REQ-F10-03"
+      ],
+      "acceptance_scenarios": [
+        "AC-F10-01",
+        "AC-F10-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F10-02/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F11-04",
+      "title": "Entregar Geop\u00E9dia e revis\u00E3o do MVP",
+      "requirements": [
+        "REQ-F11-01",
+        "REQ-F11-04"
+      ],
+      "acceptance_scenarios": [
+        "AC-F11-01",
+        "AC-F11-04"
+      ],
+      "evidence_path": "artifacts/evidence/T-F11-04/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F12-03",
+      "title": "Implementar replay e ferramenta de relat\u00F3rio",
+      "requirements": [
+        "REQ-F12-03"
+      ],
+      "acceptance_scenarios": [
+        "AC-F12-03"
+      ],
+      "evidence_path": "artifacts/evidence/T-F12-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F18-01",
+      "title": "Adicionar ovos, marcos e cartas",
+      "requirements": [
+        "REQ-F18-01"
+      ],
+      "acceptance_scenarios": [
+        "AC-F18-01"
+      ],
+      "evidence_path": "artifacts/evidence/T-F18-01/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    },
+    {
+      "task_id": "T-F19-03",
+      "title": "Validar MVP com os dois p\u00FAblicos",
+      "requirements": [
+        "REQ-F19-02"
+      ],
+      "acceptance_scenarios": [
+        "AC-F19-02"
+      ],
+      "evidence_path": "artifacts/evidence/T-F19-03/README.md",
+      "accepted": true,
+      "evidence_verified": true
+    }
+  ]
+}

@@ -244,3 +244,321 @@ msgstr "Calm Protection: Off"
 
 msgid "camera.overlap.insufficient_geometry"
 msgstr "Insufficient support-plane geometry to compute reliable consecutive overlap."
+
+msgid "proc.template.facades.title"
+msgstr "Commerce block building facades"
+
+msgid "proc.template.drainage.title"
+msgstr "Stormwater drainage inventory"
+
+msgid "proc.template.sidewalks.title"
+msgstr "Accessible sidewalk network"
+
+msgid "proc.template.signs.title"
+msgstr "Urban corridor traffic signage"
+
+msgid "proc.template.park.title"
+msgstr "Central park calm photo survey"
+
+msgid "replay.incompatible_version"
+msgstr "Incompatible replay schema version; original file preserved."
+
+msgid "replay.incompatible_map_or_profile"
+msgstr "Replay model version, map hash, or sensor profile does not match current build."
+
+msgid "replay.invalid_contract_transition"
+msgstr "Invalid contract state transition during scientific replay."
+
+msgid "replay.processing_failed"
+msgstr "Office recipe could not be re-executed from recorded replay custody."
+
+msgid "replay.metric_mismatch"
+msgstr "Replayed scientific quality metrics differed beyond tolerance."
+
+msgid "collectible.egg.reward"
+msgstr "Golden Easter egg bonus"
+
+msgid "collectible.area_temporarily_blocked"
+msgstr "Area temporarily blocked; collectible remains available once access clears."
+
+msgid "collectible.already_claimed"
+msgstr "Collectible reward was already claimed on this save."
+
+msgid "collectible.region_locked_until_expansion"
+msgstr "Survey landmark belongs to an unexpanded district; cataloged for future unlock."
+
+msgid "collectible.landmark.too_far"
+msgstr "Move within 4 m of the survey landmark center to start occupation."
+
+msgid "collectible.landmark.occupation_too_short"
+msgstr "Hold station at the survey landmark for at least 5 seconds to record occupation."
+
+msgid "collectible.landmark.zero_stone.title"
+msgstr "Landmark 1: São Datum Zero Stone"
+
+msgid "collectible.landmark.clock_tower.title"
+msgstr "Landmark 2: Old Commerce Clock Bench"
+
+msgid "collectible.landmark.port_pillar.title"
+msgstr "Landmark 3: Customs Wharf Pillar"
+
+msgid "collectible.landmark.port_lighthouse.title"
+msgstr "Landmark 4: Harbor Breakwater Mark"
+
+msgid "collectible.landmark.waterfront_tide.title"
+msgstr "Landmark 5: Waterfront Tide Gauge Reference"
+
+msgid "collectible.landmark.waterfront_obelisk.title"
+msgstr "Landmark 6: Promenade Geodetic Obelisk"
+
+msgid "collectible.landmark.hills_beacon.title"
+msgstr "Landmark 7: Serra Triangulation Beacon"
+
+msgid "collectible.landmark.hills_monolith.title"
+msgstr "Landmark 8: Viaduct Control Monolith"
+
+msgid "collectible.card.mercator.title"
+msgstr "Projection Card: Mercator"
+
+msgid "collectible.card.mercator.app"
+msgstr "Marine and urban conformal navigation keeping local angles true."
+
+msgid "collectible.card.mercator.distortion"
+msgstr "Area inflation increases rapidly toward high latitudes."
+
+msgid "collectible.card.robinson.title"
+msgstr "Projection Card: Robinson"
+
+msgid "collectible.card.robinson.app"
+msgstr "Balanced world thematic atlases trading small shape and area errors."
+
+msgid "collectible.card.robinson.distortion"
+msgstr "Neither strictly conformal nor equal-area."
+
+msgid "collectible.card.gall_peters.title"
+msgstr "Projection Card: Gall-Peters"
+
+msgid "collectible.card.gall_peters.app"
+msgstr "Equal-area thematic comparisons across continents and latitudes."
+
+msgid "collectible.card.gall_peters.distortion"
+msgstr "Stretches shapes north-south near the equator and squashes near poles."
+
+msgid "collectible.card.utm.title"
+msgstr "Projection Card: UTM Transverse Mercator"
+
+msgid "collectible.card.utm.app"
+msgstr "High-precision regional engineering and surveying within 6-degree zones."
+
+msgid "collectible.card.utm.distortion"
+msgstr "Scale factor grows away from central meridian; avoid spanning multiple zones."
+
+msgid "collectible.card.lambert.title"
+msgstr "Projection Card: Lambert Conformal Conic"
+
+msgid "collectible.card.lambert.app"
+msgstr "East-west mid-latitude corridors and aeronautical charts."
+
+msgid "collectible.card.lambert.distortion"
+msgstr "Scale distortion increases north and south of standard parallels."
+
+msgid "collectible.card.stereographic.title"
+msgstr "Projection Card: Stereographic"
+
+msgid "collectible.card.stereographic.app"
+msgstr "Polar mapping and true-circle local conformal horizon plots."
+
+msgid "collectible.card.stereographic.distortion"
+msgstr "Scale grows radially outward from the point of tangency."
+
+msgid "geopedia.coverage.title"
+msgstr "Coverage & Field vs Official QC"
+
+msgid "geopedia.coverage.example"
+msgstr "Green sectors on your tablet show tentative shots while clipped office cells grade contract approval."
+
+msgid "geopedia.coverage.unit_effect"
+msgstr "Dimensionless fraction (0-100%) on clipped useful surface; partial edges cannot fake 100% completion."
+
+msgid "geopedia.coverage.model_limit"
+msgstr "Field heatmaps ignore lens blur, unmasked privacy faces, and unconfirmed triangles until office processing."
+
+msgid "geopedia.gnss_dgnss.title"
+msgstr "GNSS Sky Visibility & DGNSS Corrections"
+
+msgid "geopedia.gnss_dgnss.example"
+msgstr "Deep urban alleys raise DOP, while renting a local base removes correlated drift during narrow canyon runs."
+
+msgid "geopedia.gnss_dgnss.unit_effect"
+msgstr "Metres RMSE with +0.02 m/km baseline decorrelation and strict base operating time windows."
+
+msgid "geopedia.gnss_dgnss.model_limit"
+msgstr "Synthetic sky-occlusion grid (10 m cells) and single-frequency DGNSS model without full atmospheric tomography."
+
+msgid "geopedia.overlap.title"
+msgstr "Consecutive Frame Overlap"
+
+msgid "geopedia.overlap.example"
+msgstr "Cruising fast on a scooter spaces consecutive footprints farther apart, dropping below 60% overlap."
+
+msgid "geopedia.overlap.unit_effect"
+msgstr "Ratio (0-1) of consecutive footprint intersection on the target support plane."
+
+msgid "geopedia.overlap.model_limit"
+msgstr "Planar nominal-distance approximation; missing plane geometry fails explicitly rather than assuming 100% overlap."
+
+msgid "geopedia.exposure_blur.title"
+msgstr "Exposure, Motion Blur, Glare & Rolling Shutter"
+
+msgid "geopedia.exposure_blur.example"
+msgstr "Dim dusk streets lengthen exposure, smearing signs when moving fast or facing low sunlight."
+
+msgid "geopedia.exposure_blur.unit_effect"
+msgstr "Pixel displacement and clipping flags driven by physical camera exposure, readout time, and speed."
+
+msgid "geopedia.exposure_blur.model_limit"
+msgstr "Single-frame integrated smear and glare model rather than full photon-by-photon sensor raytracing."
+
+msgid "geopedia.control_vs_check.title"
+msgstr "Control Targets vs Independent Checkpoints"
+
+msgid "geopedia.control_vs_check.example"
+msgstr "Sidewalk surveys let your estimator use control targets while hidden QC checkpoints score true accuracy."
+
+msgid "geopedia.control_vs_check.unit_effect"
+msgstr "RMSE (m) over independent checkpoints strictly excluded from adjustment."
+
+msgid "geopedia.control_vs_check.model_limit"
+msgstr "Fixed survey control uncertainty; zero oracle truth is exposed to estimators outside didactic replay."
+
+msgid "geopedia.privacy.title"
+msgstr "Mandatory Privacy Redaction"
+
+msgid "geopedia.privacy.example"
+msgstr "Pedestrian faces and storefront tags block delivery approval until explicitly masked in office processing."
+
+msgid "geopedia.privacy.unit_effect"
+msgstr "Binary delivery predicate (privacy_redacted); applies RGB(32,32,32) pixel redaction to derived artifacts only."
+
+msgid "geopedia.privacy.model_limit"
+msgstr "Derived thumbnails/products are masked without mutating raw SHA-256 survey archives."
+
+msgid "geopedia.datum_projection.title"
+msgstr "São Datum Local Frame & Map Projections"
+
+msgid "geopedia.datum_projection.example"
+msgstr "Keeping internal math in double ENU avoids float jitter around 7,400,000 m North."
+
+msgid "geopedia.datum_projection.unit_effect"
+msgstr "Right-handed ENU metres (E0=500000, N0=7400000, h0=100) decoupled cleanly from Godot scene coordinates."
+
+msgid "geopedia.datum_projection.model_limit"
+msgstr "Fictitious local engineering frame without real EPSG linkage outside synthetic GeoJSON export."
+
+msgid "geopedia.heights.title"
+msgstr "Ellipsoidal (h) vs Orthometric (H) Heights"
+
+msgid "geopedia.heights.example"
+msgstr "Subtracting didactic geoid undulation N cleanly distinguishes GNSS height h from orthometric elevation H."
+
+msgid "geopedia.heights.unit_effect"
+msgstr "H = h - Ng in metres with spatially varying synthetic undulation Ng."
+
+msgid "geopedia.heights.model_limit"
+msgstr "Linear inclined geoid plane for teaching rather than global spherical harmonics."
+
+msgid "geopedia.landmark_zero_stone.title"
+msgstr "Historic Mark: Zero Stone of São Datum"
+
+msgid "geopedia.landmark_zero_stone.example"
+msgstr "Origin pillar anchors local control traverses across Old Center sidewalks and facades."
+
+msgid "geopedia.landmark_zero_stone.unit_effect"
+msgstr "Provides local datum continuity after 5-second static occupation."
+
+msgid "geopedia.landmark_zero_stone.model_limit"
+msgstr "Didactic monument coordinates inside the 500x500 m Old Center sector."
+
+msgid "geopedia.landmark_clock_tower.title"
+msgstr "Historic Mark: Old Commerce Clock Bench"
+
+msgid "geopedia.landmark_clock_tower.example"
+msgstr "Elevation brass plate used since founding rail surveys to tie street gradients."
+
+msgid "geopedia.landmark_clock_tower.unit_effect"
+msgstr "References orthometric leveling checks in Commerce Street drainage."
+
+msgid "geopedia.landmark_clock_tower.model_limit"
+msgstr "Static local monument height reference."
+
+msgid "geopedia.card_mercator.title"
+msgstr "Map Card: Mercator Conformal"
+
+msgid "geopedia.card_mercator.example"
+msgstr "Preserves bearing lines on navigation plots while blowing up polar areas."
+
+msgid "geopedia.card_mercator.unit_effect"
+msgstr "Local angle preservation (conformal); scale sec(phi) grows rapidly with latitude."
+
+msgid "geopedia.card_mercator.model_limit"
+msgstr "Conceptual cartographic card; city physics runs on local metric ENU."
+
+msgid "geopedia.card_robinson.title"
+msgstr "Map Card: Robinson Compromise"
+
+msgid "geopedia.card_robinson.example"
+msgstr "Used in textbook wall maps for pleasing global proportions."
+
+msgid "geopedia.card_robinson.unit_effect"
+msgstr "Balanced shape and area tradeoffs across populated latitudes."
+
+msgid "geopedia.card_robinson.model_limit"
+msgstr "Not intended for local survey distance measurements."
+
+msgid "geopedia.card_gall_peters.title"
+msgstr "Map Card: Gall-Peters Equal-Area"
+
+msgid "geopedia.card_gall_peters.example"
+msgstr "Compare fair surface sizes across regions without area bias."
+
+msgid "geopedia.card_gall_peters.unit_effect"
+msgstr "Exact area preservation across every polygon on Earth."
+
+msgid "geopedia.card_gall_peters.model_limit"
+msgstr "Severe angular shear makes it unsuitable for street navigation."
+
+msgid "geopedia.card_utm.title"
+msgstr "Map Card: UTM Engineering Zones"
+
+msgid "geopedia.card_utm.example"
+msgstr "Standard 6-degree municipal survey strips minimize scale distortion."
+
+msgid "geopedia.card_utm.unit_effect"
+msgstr "Central scale factor 0.9996 keeping distortion within parts per thousand."
+
+msgid "geopedia.card_utm.model_limit"
+msgstr "São Datum uses a purely local engineering origin instead of an official EPSG UTM zone."
+
+msgid "geopedia.card_lambert.title"
+msgstr "Map Card: Lambert Conformal Conic"
+
+msgid "geopedia.card_lambert.example"
+msgstr "Fits east-west transit corridors and continental aviation sheets cleanly."
+
+msgid "geopedia.card_lambert.unit_effect"
+msgstr "True scale along two chosen standard parallels."
+
+msgid "geopedia.card_lambert.model_limit"
+msgstr "Conceptual cartographic reference card."
+
+msgid "geopedia.card_stereographic.title"
+msgstr "Map Card: Conformal Stereographic"
+
+msgid "geopedia.card_stereographic.example"
+msgstr "Projects hemispherical sky-visibility domes used in your GNSS obstruction plot."
+
+msgid "geopedia.card_stereographic.unit_effect"
+msgstr "Maps sky azimuth and elevation cleanly to a circular polar diagram."
+
+msgid "geopedia.card_stereographic.model_limit"
+msgstr "Edge radial scale stretches near the horizon."

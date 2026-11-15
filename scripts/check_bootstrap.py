@@ -80,7 +80,8 @@ def main() -> int:
                   "T-F07-01", "T-F07-04", "T-F11-02", "T-F11-03",
                   "T-F10-01", "T-F19-02", "T-F02-03", "T-F08-02", "T-F05-03",
                   "T-F07-02", "T-F03-03", "T-F03-04", "T-F09-02", "T-F09-03",
-                  "T-F09-04", "T-F04-04", "T-F04-05"],
+                  "T-F09-04", "T-F04-04", "T-F04-05",
+                  "T-F11-04", "T-F18-01", "T-F12-03", "T-F10-02", "T-F19-03"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),
@@ -193,6 +194,14 @@ def main() -> int:
         m2_summary = json.loads(m2_output)
         if m2_summary.get("valid") is not True or m2_summary.get("final_stars") != 5:
             raise RuntimeError("M2 gate CLI smoke check did not verify a 5-star HIST-01 tutorial pass")
+
+        m3_output = run("run-m3-gate", [dotnet, ROOT / "src/Gsa.Tools/bin/Debug/net10.0/gsa-tools.dll",
+                                        "run-m3-gate", "content", "game/world/tutorial-block.json",
+                                        "game/localization/en_US.po", "game/localization/pt_BR.po",
+                                        "content/localization/glossary.csv", logs / "m3-gate-smoke.json"])
+        m3_summary = json.loads(m3_output)
+        if m3_summary.get("valid") is not True or m3_summary.get("procedural_seeds_passed") != 500:
+            raise RuntimeError("M3 gate CLI smoke check did not verify MVP campaign and 500 procedural seeds")
         smoke = run("editor-smoke", [godot, "--headless", "--path", "game", "--", "--smoke-test"],
                     marker="GSA_BOOTSTRAP_SMOKE_OK")
         for marker in ("GSA_BRIDGE_SMOKE_OK", "GSA_LOCALIZATION_SMOKE_OK"):

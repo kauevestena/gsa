@@ -272,6 +272,40 @@ public sealed class CareerLedger
         return ExecutedResult(entry, "ledger.recovery.starter_kit_free");
     }
 
+    public LedgerOperationResult RecordActivityReward(
+        string transactionId,
+        string causingEventId,
+        double timestampSeconds,
+        int rewardCoords,
+        string category,
+        string descriptionKey)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(transactionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(causingEventId);
+        ValidateTime(timestampSeconds);
+        if (rewardCoords < 0)
+            throw new ArgumentOutOfRangeException(nameof(rewardCoords), "Activity reward cannot be negative.");
+        ArgumentException.ThrowIfNullOrWhiteSpace(category);
+        ArgumentException.ThrowIfNullOrWhiteSpace(descriptionKey);
+
+        if (_entriesByTxId.TryGetValue(transactionId, out var existing))
+            return IdempotentResult(existing);
+
+        BalanceCoords += rewardCoords;
+        var entry = AppendEntry(
+            transactionId,
+            causingEventId,
+            timestampSeconds,
+            LedgerEntryKind.ContractPayout,
+            deltaBalance: rewardCoords,
+            deltaDebt: 0,
+            debtAbated: 0,
+            feeCharged: 0,
+            category: category,
+            descriptionKey: descriptionKey);
+        return ExecutedResult(entry, descriptionKey);
+    }
+
     private LedgerEntry AppendEntry(
         string txId,
         string causingEventId,

@@ -15,11 +15,17 @@ public static class ToolApplication
             return Benchmark.BenchmarkTool.Run(args, output);
         if (args.Length > 0 && args[0] == "run-m2-gate")
             return Campaign.M2GateTool.Run(args, output);
+        if (args.Length > 0 && args[0] == "run-m3-gate")
+            return Campaign.M3GateTool.Run(args, output);
+        if (args.Length > 0 && args[0] == "replay-core")
+            return Replay.ReplayAndQualityCliTool.RunReplayCore(args, output);
+        if (args.Length > 0 && args[0] == "quality-report")
+            return Replay.ReplayAndQualityCliTool.RunQualityReport(args, output);
 
         if (args.Length != 2 || args[0] != "validate-content")
         {
             Write(output, false, [new ContentDiagnostic("", "$command",
-                "Usage: gsa-tools validate-content <directory> | precompute-sky <scene-manifest> <output> | validate-art-kit <directory> | run-m1-benchmark <world-manifest> <pilot-kit-dir> <output-json> | run-m2-gate <content-dir> <world-manifest> <tutorial-output-json> <gate-output-json>")]);
+                "Usage: gsa-tools validate-content <directory> | precompute-sky <scene-manifest> <output> | validate-art-kit <directory> | run-m1-benchmark <world-manifest> <pilot-kit-dir> <output-json> | run-m2-gate <content-dir> <world-manifest> <tutorial-output-json> <gate-output-json> | run-m3-gate <content-dir> <world-manifest> <en-us-po> <pt-br-po> <glossary-csv> <gate-output-json> | replay-core <replay-json> <output-report-json> | quality-report <report-a-json> <report-b-json> <output-comparison-json>")]);
             return 1;
         }
 

@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Relatório de gate M3 e problemas resolvidos.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F19-03](../../../artifacts/evidence/T-F19-03/README.md)).
+
 ### T-F19-04 — Otimizar e medir cidade completa
 
 - [ ] Aceita

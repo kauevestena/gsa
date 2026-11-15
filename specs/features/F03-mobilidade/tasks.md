@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F03-03 — Adicionar bicicleta e recursos
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -62,11 +62,11 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Percurso de ciclovia e teste de esgotamento.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-03](../../../artifacts/evidence/T-F03-03/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F03-03](../../../artifacts/evidence/T-F03-03/README.md).
 
 ### T-F03-04 — Adicionar motoneta e recuperação
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -82,7 +82,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Save antes/depois de acidente e percurso.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-04](../../../artifacts/evidence/T-F03-04/README.md)).
+**Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #11](https://github.com/kauevestena/gsa/pull/11) (`fe78e05`, merge `10697f3`, execução `43680847031`); ver [resumo CI](../../../artifacts/evidence/M3-wave2-ci/summary.json) e [evidência T-F03-04](../../../artifacts/evidence/T-F03-04/README.md).
 
 ### T-F03-05 — Implementar carro com suspensão
 

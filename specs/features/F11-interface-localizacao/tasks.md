@@ -82,6 +82,8 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 **Evidência:** Catálogo revisado e inspeção de telas longas.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F11-04](../../../artifacts/evidence/T-F11-04/README.md)).
+
 ### T-F11-05 — Completar UI técnica e Geopédia avançada
 
 - [ ] Aceita
