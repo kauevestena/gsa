@@ -1,6 +1,9 @@
 using Gsa.Core.Geodesy;
 using Gsa.Core.Geometry;
+using Gsa.Core.Mobility;
 using Gsa.Core.World;
+using Gsa.Engine.Mobility;
+using Gsa.Engine.Sensors;
 using Godot;
 using Dictionary = Godot.Collections.Dictionary;
 
@@ -15,7 +18,12 @@ public partial class TutorialBlockScene : Node3D
     private readonly SemanticRegistry _registry = new();
     private WorldSceneManifest _manifest = null!;
     private Node3D? _worldRoot;
+    private Node3D? _benchRoot;
     private SkyCacheAdapter? _skyCache;
+    private MobilityBenchAdapter? _mobilityBench;
+    private CameraBenchRig? _cameraBench;
+    private LocomotionSimulator? _liveLocomotion;
+    private ObstacleBoxEnu[] _liveObstacles = [];
     private bool _smoke;
     private bool _reloaded;
     private int _physicsFrames;
@@ -38,7 +46,8 @@ public partial class TutorialBlockScene : Node3D
                 _skyCache = new SkyCacheAdapter(_manifest, Godot.FileAccess.GetFileAsString(SkyCachePath));
             BuildWorld();
             BuildInspectionView();
-            SetPhysicsProcess(_smoke);
+            BuildBenchSystems();
+            SetPhysicsProcess(true);
         }
         catch (Exception error)
         {
@@ -48,6 +57,11 @@ public partial class TutorialBlockScene : Node3D
 
     public override void _PhysicsProcess(double delta)
     {
+        if (!_smoke)
+        {
+            StepInteractiveBench(delta);
+            return;
+        }
         // Query the direct space only inside the physics callback, after server registration.
         if (++_physicsFrames < 3)
             return;
@@ -64,6 +78,8 @@ public partial class TutorialBlockScene : Node3D
             }
             Require(Snapshot() == _originalSnapshot, "Reload changed semantic identities, metadata or transforms.");
             VerifySky();
+            _mobilityBench!.RunVerificationSuite(_manifest);
+            _cameraBench!.RunVerificationSuite(_manifest, _registry, GetWorld3D().DirectSpaceState);
             SetPhysicsProcess(false);
             GD.Print($"GSA_WORLD_SMOKE_OK objects={_registry.Count} colliders={_registry.ColliderCount} " +
                      $"facades=20 geometry_sha256={GeometryHash}");
@@ -157,6 +173,34 @@ public partial class TutorialBlockScene : Node3D
         };
         AddChild(camera);
         camera.LookAt(new Vector3(120, 2, -20), Vector3.Up);
+    }
+
+    private void BuildBenchSystems()
+    {
+        _benchRoot = new Node3D { Name = "BenchSystems" };
+        AddChild(_benchRoot);
+
+        _mobilityBench = new MobilityBenchAdapter(_coordinates);
+        _mobilityBench.ApplyInputMap(InputActionMap.CreateDefault());
+        var startEnu = new Vector3d(500120.0, 7400020.0, 100.0);
+        _mobilityBench.AttachAvatar(_benchRoot, startEnu);
+
+        _cameraBench = new CameraBenchRig(_coordinates);
+        _cameraBench.AttachRig(_benchRoot);
+
+        _liveObstacles = ObstacleBoxEnu.FromWorldObjects(_manifest.Objects).ToArray();
+        _liveLocomotion = new LocomotionSimulator(startEnu, Math.PI / 2.0, LocomotionMode.Handcart, _manifest.Bounds);
+    }
+
+    private void StepInteractiveBench(double delta)
+    {
+        if (_mobilityBench is null || _liveLocomotion is null || delta <= 0)
+            return;
+        var input = _mobilityBench.SampleLiveInput();
+        var result = _liveLocomotion.Step(delta, input, 0.0, 1.0, _liveObstacles);
+        if (input.InteractPressed)
+            _liveLocomotion.TryInteract(InteractiveTargetEnu.FromWorldObjects(_manifest.Objects), _liveObstacles);
+        _mobilityBench.SyncAvatarPose(result.PositionEnu, result.HeadingRadians);
     }
 
     private static StandardMaterial3D CreateMaterial(WorldBoxObject item)

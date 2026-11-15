@@ -2,11 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O campo Estado registra o andamento de cada incremento iniciado. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F03-01 — Implementar locomoção inicial e entradas
 
 - [ ] Aceita
+
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F03-01/README.md). Perfis a pé (3 m/s) e carrinho (2 m/s, 200 unidades virtuais, 30 min autonomia), mapa de 9 ações remapeáveis com persistência JSON e cena de teste integrados; CI nativa do PR #3 pendente antes do merge.
 
 **Marco:** M1
 
@@ -25,6 +27,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 ### T-F03-02 — Integrar galinha e estresse
 
 - [ ] Aceita
+
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F03-02/README.md). Estabilização até ±45°, estresse [0,100], eventos de susto, milho com cooldown, repouso, replay calmo vs estressado e fuga segura sem ferimento implementados; CI nativa do PR #3 pendente antes do merge.
 
 **Marco:** M1
 

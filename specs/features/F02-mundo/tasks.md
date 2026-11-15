@@ -2,13 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O campo Estado registra o andamento de cada incremento iniciado. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F02-01 — Criar graybox semântico e coordenadas
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F02-01/README.md). Quarteirão de 48 objetos/47 colliders, IDs, alturas e raycast passaram no projeto/export Linux. CI do PR, inspeção visual e futuros incrementos de streaming separados.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #2 após CI Linux/Windows verde no SHA 0f7ba2c18f4d3441f757e862ba213364758f3d26. Critério local verificado; [evidências](../../../artifacts/evidence/T-F02-01/README.md) e registro de CI em `artifacts/evidence/M1-world-ci/summary.json`. Quarteirão de 48 objetos/47 colliders, IDs, alturas e raycast passaram no projeto/export Linux e Windows CI. Inspeção visual e futuros incrementos de streaming continuam separados.
 
 **Marco:** M1
 
@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F02-02 — Pré-calcular visibilidade de céu
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F02-02/README.md). CLI, 22 testes puros de céu, importador e cache do export Linux passaram; CI nativa do PR pendente antes do merge.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #2 após CI Linux/Windows verde no SHA 0f7ba2c18f4d3441f757e862ba213364758f3d26. Critério local verificado; [evidências](../../../artifacts/evidence/T-F02-02/README.md) e registro de CI em `artifacts/evidence/M1-world-ci/summary.json`. CLI, 22 testes puros de céu, importador e cache do export Linux e Windows CI passaram.
 
 **Marco:** M1
 

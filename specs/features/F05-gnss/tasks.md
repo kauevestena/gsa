@@ -2,13 +2,13 @@
 
 [Especificação](spec.md) · [Plano](plan.md) · [Fluxo SDD](../../README.md)
 
-Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evidência e revisão humana; não marcar por conclusão da documentação.
+Estado inicial de todas as tarefas: pendente. O campo Estado registra o andamento de cada incremento iniciado. O aceite de código segue a revisão delegada registrada em specs/README.md; não marcar por conclusão da documentação.
 
 ### T-F05-01 — Implementar observações GNSS e heading
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F05-01/README.md). 37 testes de observações/replay/RNG/estatística passaram. Integração de plataforma e base/RTK permanecem pendentes.
+**Estado:** aceita tecnicamente pela revisão delegada; integrada no PR #2 após CI Linux/Windows verde no SHA 0f7ba2c18f4d3441f757e862ba213364758f3d26. Critério local verificado; [evidências](../../../artifacts/evidence/T-F05-01/README.md) e registro de CI em `artifacts/evidence/M1-world-ci/summary.json`. 37 testes de observações/replay/RNG/estatística passaram. Integração de plataforma e base/RTK permanecem pendentes.
 
 **Marco:** M1
 

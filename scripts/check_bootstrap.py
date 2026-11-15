@@ -72,7 +72,8 @@ def main() -> int:
     })
     report = {
         "tasks": ["T-F01-02", "T-F06-01", "T-F01-03", "T-F11-01", "T-F01-04",
-                  "T-F02-01", "T-F02-02", "T-F04-01", "T-F05-01"],
+                  "T-F02-01", "T-F02-02", "T-F04-01", "T-F05-01",
+                  "T-F03-01", "T-F04-02", "T-F03-02"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),
@@ -175,8 +176,9 @@ def main() -> int:
         world_smoke = run("world-smoke", [godot, "--headless", "--path", "game",
                                           "res://world/TutorialBlock.tscn", "--", "--smoke-test"],
                           marker="GSA_WORLD_SMOKE_OK")
-        if "GSA_SKY_SMOKE_OK" not in world_smoke:
-            raise RuntimeError("Sky cache was not verified in the world scene")
+        for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK", "GSA_GIMBALINA_SMOKE_OK"):
+            if marker not in world_smoke:
+                raise RuntimeError(f"Missing world verification marker: {marker}")
 
         targets = ("linux", "windows") if args.exports == "all" else (
             (host,) if args.exports == "host" else ())
@@ -216,8 +218,9 @@ def main() -> int:
                 world_output = run(f"export-world-smoke-{target}",
                                    prefix + [executable, "--headless", "--", "--bench-smoke"],
                                    marker="GSA_WORLD_SMOKE_OK", runtime_env=clean)
-                if "GSA_SKY_SMOKE_OK" not in world_output:
-                    raise RuntimeError(f"{target}: exported sky cache was not verified")
+                for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK", "GSA_GIMBALINA_SMOKE_OK"):
+                    if marker not in world_output:
+                        raise RuntimeError(f"{target}: missing exported world marker {marker}")
                 if args.offline_smoke:
                     report["network_isolation"] = "linux_network_namespace"
         current_locks = {str(p.relative_to(ROOT)): sha256(p) for p in lock_paths()}
