@@ -64,7 +64,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F15-04 — Adicionar sensores pareados e múltiplos retornos
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M6
 
@@ -80,7 +80,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Fixtures por material e replay em vegetação.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-04](../../../artifacts/evidence/T-F15-04/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #18](https://github.com/kauevestena/gsa/pull/18) (`61214b8`, merge `11bb19b`, execução `43692103902`, jobs Linux `132744736874` e Windows `132744737031`); ver [resumo CI](../../../artifacts/evidence/M6-ci/summary.json) e [evidência T-F15-04](../../../artifacts/evidence/T-F15-04/README.md).
 
 ### T-F15-05 — Entregar perfil de engenharia e otimizar aquisição
 
@@ -99,3 +99,5 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Alvos de engenharia são atingíveis com rota planejada e CQ invariável sob LOD.
 
 **Evidência:** Benchmark comparado e contrato de referência.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-05](../../../artifacts/evidence/T-F15-05/README.md)).

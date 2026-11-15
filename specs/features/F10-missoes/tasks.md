@@ -65,7 +65,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F10-04 — Implementar ato 2 e templates avançados
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M6
 
@@ -81,7 +81,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Playthrough do ato e certificados de rota.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-04](../../../artifacts/evidence/T-F10-04/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #18](https://github.com/kauevestena/gsa/pull/18) (`61214b8`, merge `11bb19b`, execução `43692103902`, jobs Linux `132744736874` e Windows `132744737031`); ver [resumo CI](../../../artifacts/evidence/M6-ci/summary.json) e [evidência T-F10-04](../../../artifacts/evidence/T-F10-04/README.md).
 
 ### T-F10-05 — Implementar ato 3 e levantamento final
 

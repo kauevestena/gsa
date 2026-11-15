@@ -141,3 +141,5 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Lacunas permanecem explícitas e altura é comparada aos checkpoints no CQ.
 
 **Evidência:** Fixture de perfil e contrato de engenharia.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-07](../../../artifacts/evidence/T-F04-07/README.md)).

@@ -12,5 +12,5 @@
 - Especificação em [F15-lidar/tasks.md](../../../specs/features/F15-lidar/tasks.md).
 
 ## Estado
-Implementada e em verificação para o marco M6.
+Aceita — PR #18 (commit `61214b8`, merge `11bb19b`, execução CI `43692103902`: Linux `132744736874` SUCCESS, Windows `132744737031` SUCCESS). Ver [resumo M6 CI](../M6-ci/summary.json).
 

@@ -77,7 +77,7 @@ public static class FactionCatalog
             SignatureAction: FactionSignatureActionKind.BenchmarkDisplacement,
             Emblem: new FactionEmblemPalette("#B85D19", "#F4D35E", "emblem.marco_torto.bent_pin", IsStrictlyFictional: true, UsesRealWorldSymbols: false),
             NarrativeClueKeys: ["clue.marco_torto.fresh_mortar", "clue.marco_torto.shifted_brass_cap"],
-            PrimaryRegionIds: ["old_center", "waterfront"]),
+            PrimaryRegionIds: ["old_center", "waterfront", "serra"]),
         new(
             Id: FactionId.CartelDoCimento,
             Code: "cartel_do_cimento",
@@ -86,7 +86,7 @@ public static class FactionCatalog
             SignatureAction: FactionSignatureActionKind.IrregularWorkBlockade,
             Emblem: new FactionEmblemPalette("#4A5759", "#EDAFB8", "emblem.cimento.mixer_cone", IsStrictlyFictional: true, UsesRealWorldSymbols: false),
             NarrativeClueKeys: ["clue.cimento.wet_curb_stamp", "clue.cimento.unlisted_mixer_cone"],
-            PrimaryRegionIds: ["port", "hills"]),
+            PrimaryRegionIds: ["port", "hills", "serra"]),
         new(
             Id: FactionId.MafiaDoMapaVelho,
             Code: "mafia_do_mapa_velho",
@@ -95,7 +95,7 @@ public static class FactionCatalog
             SignatureAction: FactionSignatureActionKind.CadastralRoadblock,
             Emblem: new FactionEmblemPalette("#5E503F", "#EAE0D5", "emblem.mapa_velho.sepia_scroll", IsStrictlyFictional: true, UsesRealWorldSymbols: false),
             NarrativeClueKeys: ["clue.mapa_velho.1974_blueprint_scrap", "clue.mapa_velho.padlocked_sauna_barrier"],
-            PrimaryRegionIds: ["old_center", "port"]),
+            PrimaryRegionIds: ["old_center", "port", "serra"]),
         new(
             Id: FactionId.SociedadeDaTerraPlana,
             Code: "sociedade_terra_plana",
@@ -104,7 +104,7 @@ public static class FactionCatalog
             SignatureAction: FactionSignatureActionKind.GnssSpoofingAndPosterOnLens,
             Emblem: new FactionEmblemPalette("#2B2D42", "#8D99AE", "emblem.terra_plana.flat_disc", IsStrictlyFictional: true, UsesRealWorldSymbols: false),
             NarrativeClueKeys: ["clue.terra_plana.leaflet_on_lens", "clue.terra_plana.portable_beacon_hum"],
-            PrimaryRegionIds: ["waterfront", "hills"]),
+            PrimaryRegionIds: ["waterfront", "hills", "serra"]),
         new(
             Id: FactionId.MapaFacilSa,
             Code: "mapafacil_sa",
@@ -113,7 +113,7 @@ public static class FactionCatalog
             SignatureAction: FactionSignatureActionKind.TirePunctureAndRivalBid,
             Emblem: new FactionEmblemPalette("#1D3557", "#A8DADC", "emblem.mapafacil.fast_pin", IsStrictlyFictional: true, UsesRealWorldSymbols: false),
             NarrativeClueKeys: ["clue.mapafacil.corporate_tire_strip", "clue.mapafacil.underbid_memo"],
-            PrimaryRegionIds: ["old_center", "port", "waterfront"]),
+            PrimaryRegionIds: ["old_center", "port", "waterfront", "serra"]),
     ];
 
     public static IReadOnlyList<TerritoryZoneDefinition> DefaultTerritoryZones { get; } =
@@ -126,6 +126,11 @@ public static class FactionCatalog
         new("zone_waterfront_marco", "waterfront", FactionId.SindicatoDoMarcoTorto, new TerritoryBoundsEnu(501520, 7400120, 501960, 7400920), ["marco_orla_maregrafo"], new Vector3d(0.0, 0.0, 0.0)),
         new("zone_hills_cimento", "hills", FactionId.CartelDoCimento, new TerritoryBoundsEnu(501050, 7401050, 501500, 7401500), ["marco_serra_oeste"], new Vector3d(0.0, 0.0, 0.0)),
         new("zone_hills_terra_plana", "hills", FactionId.SociedadeDaTerraPlana, new TerritoryBoundsEnu(501520, 7401050, 501960, 7401900), [], new Vector3d(-22.0, 16.0, 6.0)),
+        new("zone_serra_cimento", "serra", FactionId.CartelDoCimento, new TerritoryBoundsEnu(501050, 7401050, 501480, 7401480), ["survey_control_serra_foothill"], new Vector3d(0.0, 0.0, 0.0)),
+        new("zone_serra_terra_plana", "serra", FactionId.SociedadeDaTerraPlana, new TerritoryBoundsEnu(501520, 7401050, 501960, 7401520), [], new Vector3d(-22.0, 16.0, 6.0)),
+        new("zone_serra_divisas_marco", "serra", FactionId.SindicatoDoMarcoTorto, new TerritoryBoundsEnu(501280, 7401540, 501940, 7401940), ["survey_control_serra_summit", "serra_divisa_marco_01", "serra_divisa_marco_02", "serra_divisa_marco_03", "serra_divisa_marco_04", "serra_divisa_marco_05", "serra_divisa_marco_06"], new Vector3d(0.0, 0.0, 0.0)),
+        new("zone_serra_tunnel_mafia", "serra", FactionId.MafiaDoMapaVelho, new TerritoryBoundsEnu(501020, 7401680, 501260, 7401960), [], new Vector3d(0.0, 0.0, 0.0)),
+        new("zone_serra_ridge_mapafacil", "serra", FactionId.MapaFacilSa, new TerritoryBoundsEnu(501020, 7401490, 501270, 7401670), [], new Vector3d(0.0, 0.0, 0.0)),
     ];
 
     public static FactionDefinition GetFaction(FactionId id) =>

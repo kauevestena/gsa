@@ -125,7 +125,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F03-07 — Adicionar picape 4x4
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M6
 
@@ -141,7 +141,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Replay seco/molhado na encosta.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-07](../../../artifacts/evidence/T-F03-07/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #18](https://github.com/kauevestena/gsa/pull/18) (`61214b8`, merge `11bb19b`, execução `43692103902`, jobs Linux `132744736874` e Windows `132744737031`); ver [resumo CI](../../../artifacts/evidence/M6-ci/summary.json) e [evidência T-F03-07](../../../artifacts/evidence/T-F03-07/README.md).
 
 ### T-F03-08 — Adicionar van MMS
 
@@ -160,3 +160,5 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Configuração completa respeita slots, peso de jogo e recursos sem remover plataformas anteriores.
 
 **Evidência:** Inspeção da frota e percurso instrumentado.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-08](../../../artifacts/evidence/T-F03-08/README.md)).
