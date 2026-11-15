@@ -61,3 +61,51 @@ msgstr "Camera"
 
 msgid "sensor.gnss"
 msgstr "GNSS"
+
+msgid "sensor.lidar"
+msgstr "LiDAR"
+
+msgid "hud.coverage.provisional"
+msgstr "Provisional field coverage (not official QC)"
+
+msgid "hud.gnss.autonomous"
+msgstr "GNSS Lock (Autonomous)"
+
+msgid "hud.gnss.degraded"
+msgstr "GNSS Degraded (High DOP)"
+
+msgid "hud.gnss.unavailable"
+msgstr "GNSS Outage"
+
+msgid "map.error.waypoint_limit_reached"
+msgstr "Maximum of 10 route waypoints reached."
+
+msgid "board.badge.calm"
+msgstr "Calm Street"
+
+msgid "office.mode.arcade"
+msgstr "Arcade Mode (Automated)"
+
+msgid "office.mode.technical"
+msgstr "Technical Mode (Manual Parameters)"
+
+msgid "cq.overall.approved"
+msgstr "CQ Approved for Delivery"
+
+msgid "cq.overall.partial_available"
+msgstr "Partial Delivery Available / Rework"
+
+msgid "cq.overall.rework_required"
+msgstr "Rework Required"
+
+msgid "cq.action.apply_privacy_masks"
+msgstr "Apply pending privacy masks in the office"
+
+msgid "cq.action.recollect_uncovered_area"
+msgstr "Recollect uncovered cells shown on map"
+
+msgid "cq.action.recollect_missing_features"
+msgstr "Capture remaining required features"
+
+msgid "cq.action.deliver_full"
+msgstr "Deliver full contract"

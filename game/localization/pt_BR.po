@@ -61,3 +61,51 @@ msgstr "Câmera"
 
 msgid "sensor.gnss"
 msgstr "GNSS"
+
+msgid "sensor.lidar"
+msgstr "LiDAR"
+
+msgid "hud.coverage.provisional"
+msgstr "Cobertura provisória em campo (não é CQ oficial)"
+
+msgid "hud.gnss.autonomous"
+msgstr "GNSS Fixado (Autônomo)"
+
+msgid "hud.gnss.degraded"
+msgstr "GNSS Degradado (DOP Alto)"
+
+msgid "hud.gnss.unavailable"
+msgstr "Sem Sinal GNSS"
+
+msgid "map.error.waypoint_limit_reached"
+msgstr "Limite máximo de 10 pontos de rota atingido."
+
+msgid "board.badge.calm"
+msgstr "Via Calma"
+
+msgid "office.mode.arcade"
+msgstr "Modo Arcade (Automático)"
+
+msgid "office.mode.technical"
+msgstr "Modo Técnico (Parâmetros Manuais)"
+
+msgid "cq.overall.approved"
+msgstr "CQ Aprovado para Entrega"
+
+msgid "cq.overall.partial_available"
+msgstr "Entrega Parcial Disponível / Retrabalho"
+
+msgid "cq.overall.rework_required"
+msgstr "Retrabalho Necessário"
+
+msgid "cq.action.apply_privacy_masks"
+msgstr "Aplicar máscaras de privacidade pendentes no escritório"
+
+msgid "cq.action.recollect_uncovered_area"
+msgstr "Recoletar células descobertas indicadas no mapa"
+
+msgid "cq.action.recollect_missing_features"
+msgstr "Capturar feições obrigatórias restantes"
+
+msgid "cq.action.deliver_full"
+msgstr "Entregar contrato completo"

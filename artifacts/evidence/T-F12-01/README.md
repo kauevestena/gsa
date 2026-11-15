@@ -1,6 +1,6 @@
 # Evidência — T-F12-01 (Implementar lotes e descarregamento atômico)
 
-Estado: implementado em `codex/m2-wave2-stars-economy-persistence-settlement`; em revisão (aguardando CI do PR #7).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #7 (`d5ba4ea`, run `43675243347`); ver `artifacts/evidence/M2-wave2-ci/summary.json`.
 
 ## Escopo implementado
 - `BatchCustodyStore` (`SurveyBatchArtifact`, `CustodyManifest`, `CustodyStoreSnapshot`) em `src/Gsa.Missions/Persistence/BatchCustodyStore.cs`:

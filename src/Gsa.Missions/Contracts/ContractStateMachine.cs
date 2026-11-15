@@ -516,6 +516,23 @@ public sealed class ContractStateMachine
         return new ContractCommandResult(ContractCommandStatus.Executed, State, [ev]);
     }
 
+    public ContractCommandResult CancelProcessing(double nowSeconds, string? reasonKey = null)
+    {
+        ValidateTime(nowSeconds);
+        if (CheckExpired(nowSeconds) is { } expired)
+            return expired;
+
+        if (State != ContractState.Processando)
+            return Reject(ContractCommandStatus.RejectedInvalidState, "contract.error.not_processing");
+
+        var prev = State;
+        State = _eventLog.Any(e => string.Equals(e.EventType, "QualityRejectedRework", StringComparison.Ordinal))
+            ? ContractState.Retrabalho
+            : ContractState.Coletando;
+        var ev = Emit(nowSeconds, "ProcessingCancelled", prev, State, reasonKey: reasonKey ?? "contract.processing.cancelled");
+        return new ContractCommandResult(ContractCommandStatus.Executed, State, [ev]);
+    }
+
     public ContractCommandResult RecordQualityEvaluation(
         double nowSeconds,
         bool fullPassed,
