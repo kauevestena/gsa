@@ -1,6 +1,6 @@
 # Evidência — T-F04-02 (Observações de câmera e miniaturas)
 
-Estado: em revisão técnica delegada antes da CI do PR #3 (`codex/m1-mobility-camera`).
+Estado: aceita após aprovação na CI do PR #3 (`6ca633eb54e63844b8261ccbc8932c0cdbd16680`, execução `43670010849`, merge `684a3bf`); ver `artifacts/evidence/M1-mobility-camera-ci/summary.json`.
 
 ## Escopo verificado
 - `CameraSensorProfile.Initial`: `1280×720`, `2 Hz` (intervalo de 30 ticks em física 60 Hz), FOV horizontal `90°`, exposição dia `1/500 s`, noite `1/60 s`, readout `10 ms`, miniatura `256×144`.

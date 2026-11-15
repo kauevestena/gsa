@@ -8,6 +8,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F17-01/README.md). Kit modular glTF 2.0 com os 9 módulos, 3 materiais de teste (`concrete`, `glass`, `water`), atlas 256×256, preset Blender e validador automático de orçamento e tags semânticas integrados; CI nativa do PR #4 pendente antes do merge.
+
 **Marco:** M1
 
 **Dependências:** T-F02-01

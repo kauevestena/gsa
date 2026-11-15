@@ -1,6 +1,6 @@
 # Evidência — T-F03-01 (Locomoção inicial e entradas)
 
-Estado: em revisão técnica delegada antes da CI do PR #3 (`codex/m1-mobility-camera`).
+Estado: aceita após aprovação na CI do PR #3 (`6ca633eb54e63844b8261ccbc8932c0cdbd16680`, execução `43670010849`, merge `684a3bf`); ver `artifacts/evidence/M1-mobility-camera-ci/summary.json`.
 
 ## Escopo verificado
 - `PlatformProfile`: modo a pé (`OnFoot`, velocidade máxima `3.0 m/s`) e carrinho nível 0 (`Handcart`, velocidade máxima `2.0 m/s`, armazenamento virtual `200` unidades, autonomia física `1800 s`, preço `0` Coords, `SupportsLidarSlots = false`).

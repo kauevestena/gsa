@@ -2,8 +2,10 @@ using Gsa.Core.Geodesy;
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 using Gsa.Core.World;
+using Gsa.Engine.Art;
 using Gsa.Engine.Mobility;
 using Gsa.Engine.Sensors;
+using Gsa.Engine.Traffic;
 using Godot;
 using Dictionary = Godot.Collections.Dictionary;
 
@@ -22,6 +24,8 @@ public partial class TutorialBlockScene : Node3D
     private SkyCacheAdapter? _skyCache;
     private MobilityBenchAdapter? _mobilityBench;
     private CameraBenchRig? _cameraBench;
+    private TrafficBenchAdapter? _trafficBench;
+    private LidarBenchRig? _lidarBench;
     private LocomotionSimulator? _liveLocomotion;
     private ObstacleBoxEnu[] _liveObstacles = [];
     private bool _smoke;
@@ -80,6 +84,9 @@ public partial class TutorialBlockScene : Node3D
             VerifySky();
             _mobilityBench!.RunVerificationSuite(_manifest);
             _cameraBench!.RunVerificationSuite(_manifest, _registry, GetWorld3D().DirectSpaceState);
+            _trafficBench!.RunVerificationSuite();
+            _lidarBench!.RunVerificationSuite(_manifest, _registry, GetWorld3D().DirectSpaceState);
+            PilotKitBenchVerifier.RunVerificationSuite();
             SetPhysicsProcess(false);
             GD.Print($"GSA_WORLD_SMOKE_OK objects={_registry.Count} colliders={_registry.ColliderCount} " +
                      $"facades=20 geometry_sha256={GeometryHash}");
@@ -188,6 +195,11 @@ public partial class TutorialBlockScene : Node3D
         _cameraBench = new CameraBenchRig(_coordinates);
         _cameraBench.AttachRig(_benchRoot);
 
+        _trafficBench = new TrafficBenchAdapter(_coordinates);
+        _trafficBench.AttachBenchMeshes(_benchRoot);
+
+        _lidarBench = new LidarBenchRig(_coordinates);
+
         _liveObstacles = ObstacleBoxEnu.FromWorldObjects(_manifest.Objects).ToArray();
         _liveLocomotion = new LocomotionSimulator(startEnu, Math.PI / 2.0, LocomotionMode.Handcart, _manifest.Bounds);
     }
@@ -201,6 +213,7 @@ public partial class TutorialBlockScene : Node3D
         if (input.InteractPressed)
             _liveLocomotion.TryInteract(InteractiveTargetEnu.FromWorldObjects(_manifest.Objects), _liveObstacles);
         _mobilityBench.SyncAvatarPose(result.PositionEnu, result.HeadingRadians);
+        _trafficBench?.StepAndSync(delta, result.PositionEnu);
     }
 
     private static StandardMaterial3D CreateMaterial(WorldBoxObject item)

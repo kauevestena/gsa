@@ -26,9 +26,9 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F04-02 — Integrar observações e miniaturas
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em revisão; [evidências](../../../artifacts/evidence/T-F04-02/README.md). Scheduler a 2 Hz no relógio físico, 5 raios com oclusão real na engine, arrasto de dois instantes, rolling shutter, máscaras de privacidade e miniatura 256×144 sem textura cheia persistida; CI nativa do PR #3 pendente antes do merge.
+**Estado:** aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #3](https://github.com/kauevestena/gsa/pull/3) (SHA testado `6ca633eb54e63844b8261ccbc8932c0cdbd16680`, merge `684a3bf`, execução [43670010849](https://github.com/kauevestena/gsa/actions/runs/43670010849), jobs Linux `132677755968` e Windows `132677755785`); [evidências](../../../artifacts/evidence/T-F04-02/README.md) e [resumo CI](../../../artifacts/evidence/M1-mobility-camera-ci/summary.json). Scheduler a 2 Hz no relógio físico, 5 raios com oclusão real na engine, arrasto de dois instantes, rolling shutter, máscaras de privacidade e miniatura 256×144 sem textura cheia persistida.
 
 **Marco:** M1
 

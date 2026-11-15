@@ -1,6 +1,6 @@
 # Evidência — T-F03-02 (Galinha Gimbalina e estresse)
 
-Estado: em revisão técnica delegada antes da CI do PR #3 (`codex/m1-mobility-camera`).
+Estado: aceita após aprovação na CI do PR #3 (`6ca633eb54e63844b8261ccbc8932c0cdbd16680`, execução `43670010849`, merge `684a3bf`); ver `artifacts/evidence/M1-mobility-camera-ci/summary.json`.
 
 ## Escopo verificado
 - `GimbalinaStabilizer`: medidor de estresse em `[0, 100]`, invariante `Injured = false`, eventos de susto (`Horn +10`, `Pothole +15`, `Dog +20`, `Fireworks +25`), repouso `-5/s` e milho `-30` com cooldown de `10 s`.

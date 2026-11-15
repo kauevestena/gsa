@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "preset_name": "GSA_Blender_glTF2_LowPoly",
+  "exporter": "io_scene_gltf2",
+  "export_format": "GLTF_EMBEDDED",
+  "export_yup": true,
+  "export_apply": true,
+  "export_extras": true,
+  "export_colors": true,
+  "export_materials": "EXPORT",
+  "export_texcoords": true,
+  "export_normals": true,
+  "required_custom_properties": [
+    "semantic_id",
+    "semantic_class",
+    "semantic_material",
+    "surface_ids",
+    "semantic_tags",
+    "collider"
+  ],
+  "budgets": {
+    "urban_triangles": [
+      50,
+      500
+    ],
+    "vehicle_triangles": [
+      1500,
+      4000
+    ],
+    "character_triangles": [
+      1000,
+      2500
+    ],
+    "texture_px": [
+      128,
+      512
+    ]
+  }
+}
