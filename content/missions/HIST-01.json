@@ -2,17 +2,81 @@
   "schema_version": 1,
   "id": "HIST-01",
   "act": 1,
+  "title_key": "mission.hist_01.title",
+  "summary_key": "mission.hist_01.summary",
+  "minimum_platform_level": 0,
+  "minimum_platform_id": "cart",
+  "vehicle_unlocks": [],
+  "weather_mode": "dry_day",
+  "control_mode": "tutorial_control_vs_checkpoint",
   "objectives": [
     {
       "id": "facades",
       "contract_id": "contract_hist_01"
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "id": "hist_01_proposal",
+      "beat": "proposal",
+      "trigger": "board_opened",
+      "dialogue_key": "mission.hist_01.beat.proposal",
+      "scene_cue_id": "cue_hist_01_board",
+      "audio_cue_id": "sfx_board_open",
+      "skippable": true,
+      "idempotent_effect": "unlock_objective:facades"
+    },
+    {
+      "id": "hist_01_preparation",
+      "beat": "preparation",
+      "trigger": "contract_accepted",
+      "dialogue_key": "mission.hist_01.beat.preparation",
+      "scene_cue_id": "cue_hist_01_cart_ready",
+      "audio_cue_id": "sfx_camera_mount",
+      "skippable": true,
+      "idempotent_effect": "highlight_controls_and_cart"
+    },
+    {
+      "id": "hist_01_technical_discovery",
+      "beat": "technical_discovery",
+      "trigger": "control_point_observed",
+      "dialogue_key": "mission.hist_01.beat.technical_discovery",
+      "scene_cue_id": "cue_hist_01_control_vs_checkpoint",
+      "audio_cue_id": "sfx_hint_chime",
+      "skippable": true,
+      "idempotent_effect": "explain_control_vs_checkpoint"
+    },
+    {
+      "id": "hist_01_setback_or_correction",
+      "beat": "setback_or_correction",
+      "trigger": "qc_rework_required",
+      "dialogue_key": "mission.hist_01.beat.setback_or_correction",
+      "scene_cue_id": "cue_hist_01_cq_rework",
+      "audio_cue_id": "sfx_cq_warning",
+      "skippable": true,
+      "idempotent_effect": "guide_recollect_and_privacy_mask"
+    },
+    {
+      "id": "hist_01_delivery_and_consequence",
+      "beat": "delivery_and_consequence",
+      "trigger": "contract_delivered",
+      "dialogue_key": "mission.hist_01.beat.delivery_and_consequence",
+      "scene_cue_id": "cue_hist_01_paid",
+      "audio_cue_id": "sfx_contract_paid",
+      "skippable": true,
+      "idempotent_effect": "unlock_mission:HIST-02"
+    }
+  ],
   "preconditions": [],
   "calm": true,
   "calm_variant": null,
-  "dialogue_keys": [],
+  "dialogue_keys": [
+    "mission.hist_01.beat.proposal",
+    "mission.hist_01.beat.preparation",
+    "mission.hist_01.beat.technical_discovery",
+    "mission.hist_01.beat.setback_or_correction",
+    "mission.hist_01.beat.delivery_and_consequence"
+  ],
   "unlocks": [
     "HIST-02"
   ]

@@ -60,7 +60,7 @@ Implementação M1 concluída e aceita por revisão técnica delegada até o PR 
 
 ### M2 — Primeira experiência
 
-**Gate de saída:** Um contrato completo e playtest do loop aceito. Consultar o protocolo em [validação](validacao.md).
+**Gate de saída:** Um contrato completo e playtest do loop aceito. Consultar o protocolo em [validação](validacao.md). Loop técnico completo verificado e vinculado às 15 tarefas de M2 no [relatório do gate M2](../artifacts/evidence/T-F19-02/m2-gate-report.json) (`technical_loop_status: "passed"`); fechamento final de playtest permanece em `pending_human_playtest_cohort` até execução com a coorte presencial de 5 novatos sem geomática prévia (`<= 30 min`).
 
 | Tarefa | Incremento | Documento |
 | --- | --- | --- |

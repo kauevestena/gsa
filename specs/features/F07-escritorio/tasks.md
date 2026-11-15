@@ -6,9 +6,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F07-01 — Criar processamento básico por receita
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave3-office-masks-hud-board`; em revisão (aguardando CI do PR #8); [evidências](../../../artifacts/evidence/T-F07-01/README.md). `OfficeProcessingQueue` (`ProcessingRecipe`, `ProcessedProduct`, `ProcessingJob`) em `Gsa.Missions.Office` + `CancelProcessing` em `ContractStateMachine`: fila única, prévia de tempo/custo, débito idempotente de taxa, avanço de calendário com expiração, cancelamento sem corromper brutos e produtos versionados (`Revision` + SHA-256 de receita).
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #8 (`594ddf7`, run `43676281804`); [resumo CI](../../../artifacts/evidence/M2-wave3-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F07-01/README.md). `OfficeProcessingQueue` (`ProcessingRecipe`, `ProcessedProduct`, `ProcessingJob`) em `Gsa.Missions.Office` + `CancelProcessing` em `ContractStateMachine`: fila única, prévia de tempo/custo, débito idempotente de taxa, avanço de calendário com expiração, cancelamento sem corromper brutos e produtos versionados (`Revision` + SHA-256 de receita).
 
 **Marco:** M2
 
@@ -62,9 +62,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F07-04 — Implementar máscaras e conformidade
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** implementado em `codex/m2-wave3-office-masks-hud-board`; em revisão (aguardando CI do PR #8); [evidências](../../../artifacts/evidence/T-F07-04/README.md). `PrivacyMaskingService` (`SyntheticSensitiveRegion`, `PrivacyComplianceManifest`) em `Gsa.Missions.Office`: detecção sintética de rostos/placas, confirmação/aplicação em Arcade ou Técnico, redação irreversível dos pixels da miniatura derivada sem alterar captura bruta e bloqueio de entrega (inclusive parcial) com região pendente.
+**Estado:** aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #8 (`594ddf7`, run `43676281804`); [resumo CI](../../../artifacts/evidence/M2-wave3-ci/summary.json) e [evidências](../../../artifacts/evidence/T-F07-04/README.md). `PrivacyMaskingService` (`SyntheticSensitiveRegion`, `PrivacyComplianceManifest`) em `Gsa.Missions.Office`: detecção sintética de rostos/placas, confirmação/aplicação em Arcade ou Técnico, redação irreversível dos pixels da miniatura derivada sem alterar captura bruta e bloqueio de entrega (inclusive parcial) com região pendente.
 
 **Marco:** M2
 

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "mission_id": "HIST-01",
+  "contract_id": "contract_hist_01",
+  "minimum_platform_level": 0,
+  "required_capabilities": [
+    "camera",
+    "gnss_basic"
+  ],
+  "requires_future_sensors": false,
+  "controls_used_in_estimation": true,
+  "checkpoints_reserved_for_quality_evaluation_only": true,
+  "control_vs_checkpoint_reference": {
+    "control_target_ids": [
+      "control_old_center_01",
+      "control_old_center_02"
+    ],
+    "checkpoint_target_ids": [
+      "tutorial_checkpoint_01",
+      "tutorial_checkpoint_02"
+    ],
+    "controls_used_in_estimation": true,
+    "checkpoints_reserved_for_quality_evaluation_only": true
+  },
+  "initial_report_passed": false,
+  "initial_stars": 0,
+  "initial_failure_reasons": [
+    "cq.failure.all_required_features",
+    "cq.failure.area_coverage",
+    "cq.failure.privacy_redacted",
+    "cq.failure.valid_image_fraction"
+  ],
+  "final_report_passed": true,
+  "final_stars": 5,
+  "net_payout_coords": 400,
+  "final_ledger_coords": 630,
+  "idempotent_replay_confirmed": true,
+  "raw_batch_sha256_before_processing": "1dac0e546f71d036c6f15bd8935cccffb89ef396c6cb495f806bc32399e8034b",
+  "raw_batch_sha256_after_processing": "1dac0e546f71d036c6f15bd8935cccffb89ef396c6cb495f806bc32399e8034b",
+  "initial_privacy_compliant": false,
+  "final_privacy_compliant": true,
+  "save_round_trip_verified": true,
+  "unlocked_missions": [
+    "HIST-01",
+    "HIST-02"
+  ],
+  "unlocked_vehicles": [
+    "cart"
+  ],
+  "applied_story_event_count": 5,
+  "catalog_validation": {
+    "valid": true,
+    "errors": [],
+    "ordered_mission_ids": [
+      "HIST-01",
+      "HIST-02",
+      "HIST-03"
+    ],
+    "unlocked_vehicle_progression": [
+      "cart",
+      "bicycle",
+      "scooter"
+    ],
+    "requires_future_sensors": false
+  },
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_id": "collect",
+      "localization_key": "tutorial.step.collect",
+      "contract_state_after": "Coletando",
+      "passed": true,
+      "detail": "Collected initial cart batch \u0027batch_tut_01\u0027 across 20 facade slots (15 valid, 5 blurred/omitted, 1 sensitive region)."
+    },
+    {
+      "phase_number": 2,
+      "phase_id": "unload_and_process",
+      "localization_key": "tutorial.step.unload_and_process",
+      "contract_state_after": "Retrabalho",
+      "passed": true,
+      "detail": "Initial office revision 1 failed CQ (cq.failure.all_required_features, cq.failure.area_coverage, cq.failure.privacy_redacted, cq.failure.valid_image_fraction), entering Retrabalho with 53 corrective action card(s)."
+    },
+    {
+      "phase_number": 3,
+      "phase_id": "correct_rework",
+      "localization_key": "tutorial.step.correct_rework",
+      "contract_state_after": "ProntoEntregar",
+      "passed": true,
+      "detail": "Recollected 5 missing facades, applied RGB(32,32,32) mask on derived thumbnail without mutating raw SHA-256, and passed CQ (5 stars)."
+    },
+    {
+      "phase_number": 4,
+      "phase_id": "deliver_and_pay",
+      "localization_key": "tutorial.step.deliver_and_pay",
+      "contract_state_after": "Entregue",
+      "passed": true,
+      "detail": "Settled 400 Coords once (duplicate replay safe), balance 630 Coords, unlocked HIST-02, and verified save round-trip."
+    }
+  ]
+}

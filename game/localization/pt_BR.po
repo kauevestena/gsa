@@ -109,3 +109,81 @@ msgstr "Capturar feições obrigatórias restantes"
 
 msgid "cq.action.deliver_full"
 msgstr "Entregar contrato completo"
+
+msgid "mission.hist_01.title"
+msgstr "Fachadas da Rua do Comércio"
+
+msgid "mission.hist_01.summary"
+msgstr "Capturar todas as 20 fachadas da Rua do Comércio com o carrinho, descarregar em segurança, aplicar máscaras de privacidade, corrigir no CQ e entregar."
+
+msgid "mission.hist_01.beat.proposal"
+msgstr "A prefeitura precisa de um levantamento limpo das 20 fachadas da Rua do Comércio."
+
+msgid "mission.hist_01.beat.preparation"
+msgstr "Monte a câmera inicial e o GNSS básico no carrinho — nenhum sensor avançado é necessário."
+
+msgid "mission.hist_01.beat.technical_discovery"
+msgstr "Use os alvos de controle para ajustar o levantamento; os pontos de checagem ficam reservados apenas para a verificação final do CQ."
+
+msgid "mission.hist_01.beat.setback_or_correction"
+msgstr "O CQ apontou fachadas borradas e uma região sem máscara de privacidade — recolete os trechos faltantes e aplique a redação no escritório."
+
+msgid "mission.hist_01.beat.delivery_and_consequence"
+msgstr "Entregue o pacote aprovado uma vez para receber o pagamento e desbloquear a missão HIST-02."
+
+msgid "mission.hist_02.title"
+msgstr "Bueiros Perdidos"
+
+msgid "mission.hist_02.summary"
+msgstr "Inventariar 12 bocas de lobo com o carrinho antes que a chuva anunciada degrade a qualidade das imagens; libera a compra da bicicleta."
+
+msgid "mission.hist_02.beat.proposal"
+msgstr "Localize e fotografe 12 bocas de lobo antes que a chuva da tarde piore a visibilidade."
+
+msgid "mission.hist_02.beat.preparation"
+msgstr "A chuva anunciada dificulta a exposição e a lente, sem causar falha instantânea fora do prazo."
+
+msgid "mission.hist_02.beat.technical_discovery"
+msgstr "Gotas e velocidade aumentam o arrasto — reduza o ritmo ou ajuste a captura para manter imagens válidas."
+
+msgid "mission.hist_02.beat.setback_or_correction"
+msgstr "Substitua as fotos borradas pela chuva na receita do escritório antes de enviar ao CQ."
+
+msgid "mission.hist_02.beat.delivery_and_consequence"
+msgstr "A prefeitura aprovou o levantamento de drenagem e liberou a bicicleta na loja."
+
+msgid "mission.hist_03.title"
+msgstr "Calçada Acessível"
+
+msgid "mission.hist_03.summary"
+msgstr "Medir 8 segmentos de largura e degrau de calçada de bicicleta usando planos de controle locais fornecidos; libera a motoneta."
+
+msgid "mission.hist_03.beat.proposal"
+msgstr "A universidade contratou o levantamento de altura de guia e largura de oito trechos de calçada."
+
+msgid "mission.hist_03.beat.preparation"
+msgstr "Saia de bicicleta com os alvos e planos locais de controle fornecidos pelo contrato."
+
+msgid "mission.hist_03.beat.technical_discovery"
+msgstr "Os planos de controle locais melhoram a precisão relativa entre passadas mesmo com GNSS básico."
+
+msgid "mission.hist_03.beat.setback_or_correction"
+msgstr "Mantenha os pontos de checagem isolados até a auditoria final do CQ relativa."
+
+msgid "mission.hist_03.beat.delivery_and_consequence"
+msgstr "O CQ da universidade aprovou a entrega e liberou a motoneta para rotas mais rápidas."
+
+msgid "tutorial.step.collect"
+msgstr "Passo 1: Coletar fotos em campo pela Rua do Comércio"
+
+msgid "tutorial.step.unload_and_process"
+msgstr "Passo 2: Descarregar lote e executar receita no escritório"
+
+msgid "tutorial.step.correct_rework"
+msgstr "Passo 3: Recoletar fachadas pendentes e aplicar máscara de privacidade"
+
+msgid "tutorial.step.deliver_and_pay"
+msgstr "Passo 4: Entregar produto aprovado e confirmar pagamento no livro-caixa"
+
+msgid "tutorial.control_vs_checkpoint.summary"
+msgstr "Pontos de controle orientam o levantamento; pontos de checagem permanecem isolados para avaliação independente de qualidade."

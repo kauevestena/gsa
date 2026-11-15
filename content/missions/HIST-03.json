@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "id": "HIST-03",
+  "act": 1,
+  "title_key": "mission.hist_03.title",
+  "summary_key": "mission.hist_03.summary",
+  "minimum_platform_level": 1,
+  "minimum_platform_id": "bicycle",
+  "vehicle_unlocks": [
+    "scooter"
+  ],
+  "weather_mode": "dry_day",
+  "control_mode": "local_control_planes_and_targets",
+  "objectives": [
+    {
+      "id": "sidewalks",
+      "contract_id": "contract_hist_03"
+    }
+  ],
+  "events": [
+    {
+      "id": "hist_03_proposal",
+      "beat": "proposal",
+      "trigger": "mission_unlocked",
+      "dialogue_key": "mission.hist_03.beat.proposal",
+      "scene_cue_id": "cue_hist_03_university_brief",
+      "audio_cue_id": "sfx_board_open",
+      "skippable": true,
+      "idempotent_effect": "unlock_objective:sidewalks"
+    },
+    {
+      "id": "hist_03_preparation",
+      "beat": "preparation",
+      "trigger": "contract_accepted",
+      "dialogue_key": "mission.hist_03.beat.preparation",
+      "scene_cue_id": "cue_hist_03_bicycle_deploy",
+      "audio_cue_id": "sfx_bicycle_bell",
+      "skippable": true,
+      "idempotent_effect": "provide_local_control_targets"
+    },
+    {
+      "id": "hist_03_technical_discovery",
+      "beat": "technical_discovery",
+      "trigger": "local_controls_measured",
+      "dialogue_key": "mission.hist_03.beat.technical_discovery",
+      "scene_cue_id": "cue_hist_03_relative_precision",
+      "audio_cue_id": "sfx_hint_chime",
+      "skippable": true,
+      "idempotent_effect": "apply_local_control_planes"
+    },
+    {
+      "id": "hist_03_setback_or_correction",
+      "beat": "setback_or_correction",
+      "trigger": "checkpoint_audit",
+      "dialogue_key": "mission.hist_03.beat.setback_or_correction",
+      "scene_cue_id": "cue_hist_03_verify_checkpoints",
+      "audio_cue_id": "sfx_cq_warning",
+      "skippable": true,
+      "idempotent_effect": "verify_control_vs_checkpoint_separation"
+    },
+    {
+      "id": "hist_03_delivery_and_consequence",
+      "beat": "delivery_and_consequence",
+      "trigger": "contract_delivered",
+      "dialogue_key": "mission.hist_03.beat.delivery_and_consequence",
+      "scene_cue_id": "cue_hist_03_scooter_unlocked",
+      "audio_cue_id": "sfx_vehicle_unlock",
+      "skippable": true,
+      "idempotent_effect": "unlock_vehicle:scooter"
+    }
+  ],
+  "preconditions": [
+    "HIST-02"
+  ],
+  "calm": true,
+  "calm_variant": null,
+  "dialogue_keys": [
+    "mission.hist_03.beat.proposal",
+    "mission.hist_03.beat.preparation",
+    "mission.hist_03.beat.technical_discovery",
+    "mission.hist_03.beat.setback_or_correction",
+    "mission.hist_03.beat.delivery_and_consequence"
+  ],
+  "unlocks": []
+}
+

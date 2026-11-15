@@ -1,6 +1,6 @@
 # Evidência — T-F11-03 (Criar quadro, escritório e relatório)
 
-Estado: implementado em `codex/m2-wave3-office-masks-hud-board`; em revisão (aguardando CI do PR #8).
+Estado: aceita por revisão técnica delegada após CI nativa Linux/Windows do PR #8 (`594ddf7`, run `43676281804`); ver `artifacts/evidence/M2-wave3-ci/summary.json`.
 
 ## Escopo implementado
 - `BoardOfficeAndReportPresenter` (`ContractBoardCardView`, `OfficeJobView`, `QualityReportView`) em `src/Gsa.Missions/Presentation/BoardOfficeAndReportPresenter.cs` e `GameFacade.GetContractBoardCardSummary` em `src/Gsa.Engine/GameFacade.cs`:

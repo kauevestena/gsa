@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "id": "contract_hist_03",
+  "title_key": "mission.hist_03.title",
+  "client_id": "university",
+  "region_id": "old_center",
+  "area_id": "commerce_street_sidewalks",
+  "product": "feature_inventory",
+  "required_feature_ids": [
+    "sidewalk_seg_01",
+    "sidewalk_seg_02",
+    "sidewalk_seg_03",
+    "sidewalk_seg_04",
+    "sidewalk_seg_05",
+    "sidewalk_seg_06",
+    "sidewalk_seg_07",
+    "sidewalk_seg_08"
+  ],
+  "requirements": [
+    {
+      "kind": "threshold",
+      "metric": "feature_completeness",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.9,
+      "excellent": 1
+    },
+    {
+      "kind": "threshold",
+      "metric": "relative_rmse",
+      "unit": "m",
+      "direction": "max",
+      "limit": 0.2,
+      "excellent": 0.05
+    },
+    {
+      "kind": "threshold",
+      "metric": "valid_image_fraction",
+      "unit": "ratio",
+      "direction": "min",
+      "limit": 0.8,
+      "excellent": 0.98
+    },
+    {
+      "kind": "predicate",
+      "metric": "privacy_redacted",
+      "expected": true
+    },
+    {
+      "kind": "predicate",
+      "metric": "format_valid",
+      "expected": true
+    }
+  ],
+  "required_capabilities": [
+    "camera",
+    "gnss_basic"
+  ],
+  "risk": "easy",
+  "calm": true,
+  "deadline": {
+    "due_after_s": 21600,
+    "expires_after_s": 27000,
+    "late_penalty_per_hour": 0.05,
+    "late_penalty_cap": 0.5
+  },
+  "reward": {
+    "base_coords": 700,
+    "base_xp": 125,
+    "reputation": 2,
+    "story_unlocks": []
+  },
+  "partial_policy": {
+    "mode": "disabled"
+  },
+  "delivery_format": "gsa_bundle_v1",
+  "story_prerequisites": [
+    "HIST-02"
+  ]
+}
+

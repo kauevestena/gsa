@@ -2,18 +2,86 @@
   "schema_version": 1,
   "id": "HIST-02",
   "act": 1,
+  "title_key": "mission.hist_02.title",
+  "summary_key": "mission.hist_02.summary",
+  "minimum_platform_level": 0,
+  "minimum_platform_id": "cart",
+  "vehicle_unlocks": [
+    "bicycle"
+  ],
+  "weather_mode": "announced_rain_quality_obstacle",
+  "control_mode": "gnss_plus_checkpoints",
   "objectives": [
     {
-      "id": "facades_followup",
-      "contract_id": "contract_hist_01"
+      "id": "drainage",
+      "contract_id": "contract_hist_02"
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "id": "hist_02_proposal",
+      "beat": "proposal",
+      "trigger": "mission_unlocked",
+      "dialogue_key": "mission.hist_02.beat.proposal",
+      "scene_cue_id": "cue_hist_02_board",
+      "audio_cue_id": "sfx_board_open",
+      "skippable": true,
+      "idempotent_effect": "unlock_objective:drainage"
+    },
+    {
+      "id": "hist_02_preparation",
+      "beat": "preparation",
+      "trigger": "contract_accepted",
+      "dialogue_key": "mission.hist_02.beat.preparation",
+      "scene_cue_id": "cue_hist_02_weather_forecast",
+      "audio_cue_id": "sfx_weather_brief",
+      "skippable": true,
+      "idempotent_effect": "arm_announced_rain_alert"
+    },
+    {
+      "id": "hist_02_technical_discovery",
+      "beat": "technical_discovery",
+      "trigger": "rain_started",
+      "dialogue_key": "mission.hist_02.beat.technical_discovery",
+      "scene_cue_id": "cue_hist_02_rain_blur_effect",
+      "audio_cue_id": "sfx_rain_ambient",
+      "skippable": true,
+      "idempotent_effect": "flag_rain_quality_obstacle"
+    },
+    {
+      "id": "hist_02_setback_or_correction",
+      "beat": "setback_or_correction",
+      "trigger": "exposure_adjusted_or_recollected",
+      "dialogue_key": "mission.hist_02.beat.setback_or_correction",
+      "scene_cue_id": "cue_hist_02_mitigate_rain",
+      "audio_cue_id": "sfx_camera_adjust",
+      "skippable": true,
+      "idempotent_effect": "mitigate_rain_quality_drop"
+    },
+    {
+      "id": "hist_02_delivery_and_consequence",
+      "beat": "delivery_and_consequence",
+      "trigger": "contract_delivered",
+      "dialogue_key": "mission.hist_02.beat.delivery_and_consequence",
+      "scene_cue_id": "cue_hist_02_bicycle_unlocked",
+      "audio_cue_id": "sfx_vehicle_unlock",
+      "skippable": true,
+      "idempotent_effect": "unlock_vehicle:bicycle|unlock_mission:HIST-03"
+    }
+  ],
   "preconditions": [
     "HIST-01"
   ],
   "calm": true,
   "calm_variant": null,
-  "dialogue_keys": [],
-  "unlocks": []
+  "dialogue_keys": [
+    "mission.hist_02.beat.proposal",
+    "mission.hist_02.beat.preparation",
+    "mission.hist_02.beat.technical_discovery",
+    "mission.hist_02.beat.setback_or_correction",
+    "mission.hist_02.beat.delivery_and_consequence"
+  ],
+  "unlocks": [
+    "HIST-03"
+  ]
 }

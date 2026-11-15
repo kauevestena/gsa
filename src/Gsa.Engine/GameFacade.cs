@@ -1,4 +1,5 @@
 using Gsa.Core.Geometry;
+using Gsa.Missions.Campaign;
 using Gsa.Missions.Content;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Presentation;
@@ -105,6 +106,26 @@ public partial class GameFacade : Node
         {
             return InvalidInput(exception.Message);
         }
+    }
+
+    public Dictionary RunM2TutorialSmoke(string contentDirectory, string worldManifestPath)
+    {
+        if (string.IsNullOrWhiteSpace(contentDirectory) || string.IsNullOrWhiteSpace(worldManifestPath))
+        {
+            return InvalidInput("Content directory and world manifest path are required.");
+        }
+
+        var report = TutorialMissionRunner.RunHist01Playthrough(contentDirectory, worldManifestPath);
+        return new Dictionary
+        {
+            ["status"] = report.FinalReportPassed ? "ok" : "failed",
+            ["mission_id"] = report.MissionId,
+            ["contract_id"] = report.ContractId,
+            ["stars"] = report.FinalStars,
+            ["final_coords"] = report.FinalLedgerCoords,
+            ["unlocked_missions"] = string.Join(",", report.UnlockedMissions),
+            ["unlocked_vehicles"] = string.Join(",", report.UnlockedVehicles),
+        };
     }
 
     private static Dictionary InvalidInput(string reason) => new()

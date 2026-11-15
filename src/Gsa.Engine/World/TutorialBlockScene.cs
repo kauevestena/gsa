@@ -7,6 +7,7 @@ using Gsa.Engine.Diagnostics;
 using Gsa.Engine.Mobility;
 using Gsa.Engine.Sensors;
 using Gsa.Engine.Traffic;
+using Gsa.Missions.Campaign;
 using Godot;
 using Dictionary = Godot.Collections.Dictionary;
 
@@ -89,6 +90,10 @@ public partial class TutorialBlockScene : Node3D
             _lidarBench!.RunVerificationSuite(_manifest, _registry, GetWorld3D().DirectSpaceState);
             PilotKitBenchVerifier.RunVerificationSuite();
             EngineBenchmarkHarness.RunVerificationSuite(this, _benchRoot!, _manifest!, _registry!, GetWorld3D().DirectSpaceState);
+            var m2Report = TutorialMissionRunner.RunDefaultHist01InMemoryPlaythrough(_manifest!);
+            if (!m2Report.FinalReportPassed || m2Report.FinalStars != 5)
+                throw new System.InvalidOperationException("M2 tutorial loop smoke verification failed.");
+            GD.Print($"GSA_M2_LOOP_SMOKE_OK mission={m2Report.MissionId} contract={m2Report.ContractId} stars={m2Report.FinalStars}");
             SetPhysicsProcess(false);
             GD.Print($"GSA_WORLD_SMOKE_OK objects={_registry.Count} colliders={_registry.ColliderCount} " +
                      $"facades=20 geometry_sha256={GeometryHash}");

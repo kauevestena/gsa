@@ -1,0 +1,19 @@
+{
+  "milestone": "M2-wave3",
+  "pull_request": "https://github.com/kauevestena/gsa/pull/8",
+  "tested_head_sha": "594ddf792c14f8f5de5a4895f4a80f27e672c164",
+  "merge_sha": "c47ba70c7cf90b30745db862539a767c59f649b3",
+  "workflow_run": "https://github.com/kauevestena/gsa/actions/runs/43676281804",
+  "workflow_event": "pull_request",
+  "conclusion": "success",
+  "jobs": [
+    {"id": 132697039658, "name": "Foundation (Linux x64)", "conclusion": "success"},
+    {"id": 132697039396, "name": "Foundation (Windows x64)", "conclusion": "success"}
+  ],
+  "tasks": ["T-F07-01", "T-F07-04", "T-F11-02", "T-F11-03"],
+  "acceptance": "technical_review_delegated_by_repository_owner",
+  "native_windows_smoke": "passed_headless_in_ci",
+  "windows_network_isolation": "not_tested",
+  "graphical_inspection": "not_tested"
+}
+
