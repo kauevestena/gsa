@@ -82,6 +82,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Matriz de cenários dia/noite/seco/chuva.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-04](../../../artifacts/evidence/T-F04-04/README.md)).
+
 ### T-F04-05 — Integrar capacete e câmeras frente/trás
 
 - [ ] Aceita
@@ -99,6 +101,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Câmeras não duplicam IDs e respeitam tempo/armazenamento.
 
 **Evidência:** Relatório de cobertura por sensor.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-05](../../../artifacts/evidence/T-F04-05/README.md)).
 
 ### T-F04-06 — Adicionar câmera 360°
 

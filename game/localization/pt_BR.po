@@ -217,3 +217,30 @@ msgstr "Modo Arcade: seleção, confirmação e mascaramento assistidos (taxa de
 
 msgid "office.mode.technical.preview"
 msgstr "Modo Técnico: seleção, confirmação de feições e revisão de máscaras manuais (taxa de 0 Coords)."
+
+msgid "mobility.access.scooter_forbidden_on_sidewalk"
+msgstr "Motonetas são restritas às vias urbanas e não circulam em calçadões de pedestres."
+
+msgid "mobility.access.cycleway_forbidden_for_scooter"
+msgstr "Ciclovias e becos estreitos são restritos a pedestres, carrinho ou bicicleta."
+
+msgid "mobility.access.handcart_forbidden_on_road_lane"
+msgstr "Carrinhos devem permanecer nas calçadas e becos, fora das faixas rápidas de carros."
+
+msgid "mobility.recovery.safe_office_reposition"
+msgstr "Reposicionamento seguro no escritório concluído; os lotes já protegidos foram preservados."
+
+msgid "hazard.dog.pacified_by_treat"
+msgstr "Cão acalmado com petisco encerrou a perseguição em segurança."
+
+msgid "hazard.dog.suppressed_by_calm"
+msgstr "Perseguição cancelada com segurança porque a proteção Cidade calma está ativa."
+
+msgid "hud.calm_protection.active"
+msgstr "Proteção Cidade Calma: Ativa"
+
+msgid "hud.calm_protection.inactive"
+msgstr "Proteção Cidade Calma: Desligada"
+
+msgid "camera.overlap.insufficient_geometry"
+msgstr "Geometria de suporte insuficiente para calcular sobreposição consecutiva confiável."

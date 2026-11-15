@@ -26,7 +26,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F07-02 — Integrar Arcade e Técnico simplificados
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M3
 
@@ -42,7 +42,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Comparação de produtos e roteiro de UI.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F07-02](../../../artifacts/evidence/T-F07-02/README.md)).
+**Estado:** aceita via revisão técnica delegada após aprovação na CI do [PR #10](https://github.com/kauevestena/gsa/pull/10) (SHA testado `bf2ddd590bcebe58739160b63dbb9c6a27933c74`, merge `d8d7dc0`, execução [43679717318](https://github.com/kauevestena/gsa/actions/runs/43679717318), jobs Linux `132707485195` e Windows `132707484916`); [evidências](../../../artifacts/evidence/T-F07-02/README.md) e [resumo CI](../../../artifacts/evidence/M3-wave1-ci/summary.json).
 
 ### T-F07-03 — Integrar processamento avançado
 

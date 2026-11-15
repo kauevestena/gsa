@@ -62,6 +62,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Percurso de ciclovia e teste de esgotamento.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-03](../../../artifacts/evidence/T-F03-03/README.md)).
+
 ### T-F03-04 — Adicionar motoneta e recuperação
 
 - [ ] Aceita
@@ -79,6 +81,8 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Câmeras podem ser montadas frente/trás; acidente preserva lotes protegidos.
 
 **Evidência:** Save antes/depois de acidente e percurso.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F03-04](../../../artifacts/evidence/T-F03-04/README.md)).
 
 ### T-F03-05 — Implementar carro com suspensão
 

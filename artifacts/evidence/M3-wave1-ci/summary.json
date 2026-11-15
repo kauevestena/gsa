@@ -1,0 +1,26 @@
+{
+  "wave": "M3-wave1",
+  "pr_number": 10,
+  "pr_url": "https://github.com/kauevestena/gsa/pull/10",
+  "tested_head_sha": "bf2ddd590bcebe58739160b63dbb9c6a27933c74",
+  "merge_sha": "d8d7dc0462cbd29a0bef747cbe31dfad93fd0acc",
+  "workflow_run_id": 43679717318,
+  "workflow_url": "https://github.com/kauevestena/gsa/actions/runs/43679717318",
+  "jobs": {
+    "linux_x64": {
+      "job_id": 132707485195,
+      "conclusion": "SUCCESS"
+    },
+    "windows_x64": {
+      "job_id": 132707484916,
+      "conclusion": "SUCCESS"
+    }
+  },
+  "accepted_tasks": [
+    "T-F02-03",
+    "T-F08-02",
+    "T-F05-03",
+    "T-F07-02"
+  ]
+}
+
