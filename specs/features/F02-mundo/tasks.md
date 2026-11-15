@@ -86,7 +86,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F02-05 — Produzir Serra e terrenos especiais
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M6
 
@@ -102,7 +102,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Mapa semântico e inspeção de terreno.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-05](../../../artifacts/evidence/T-F02-05/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #18](https://github.com/kauevestena/gsa/pull/18) (`61214b8`, merge `11bb19b`, execução `43692103902`, jobs Linux `132744736874` e Windows `132744737031`); ver [resumo CI](../../../artifacts/evidence/M6-ci/summary.json) e [evidência T-F02-05](../../../artifacts/evidence/T-F02-05/README.md).
 
 ### T-F02-06 — Integrar cidade e rede de marcos
 
@@ -121,3 +121,5 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 **Critério de aceite:** Área total aproximada de 4 km²; viagem completa sem quebra de save/captura.
 
 **Evidência:** Relatório de área e replay de travessia.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-06](../../../artifacts/evidence/T-F02-06/README.md)).

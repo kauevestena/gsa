@@ -46,7 +46,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F18-03 — Adicionar eventos absurdos
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M6
 
@@ -62,7 +62,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Replay de cada evento e teste do grafo.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F18-03](../../../artifacts/evidence/T-F18-03/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #18](https://github.com/kauevestena/gsa/pull/18) (`61214b8`, merge `11bb19b`, execução `43692103902`, jobs Linux `132744736874` e Windows `132744737031`); ver [resumo CI](../../../artifacts/evidence/M6-ci/summary.json) e [evidência T-F18-03](../../../artifacts/evidence/T-F18-03/README.md).
 
 ### T-F18-04 — Entregar desafio, filtros e coleção completa
 

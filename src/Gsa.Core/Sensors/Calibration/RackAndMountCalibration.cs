@@ -17,6 +17,7 @@ public enum RackSlotKind
     OnboardComputer = 7,
     StorageBay = 8,
     PowerPack = 9,
+    PavementCamera = 10,
 }
 
 public sealed record RackSlotDefinition(
@@ -108,6 +109,8 @@ public static class RackCatalog
             new("slot_lidar_a", RackSlotKind.LidarProfilerOrScanner, 4, new Vector3d(0.10, 0.0, 2.15), Quaterniond.Identity, 90.0, 4500),
             new("slot_lidar_b", RackSlotKind.LidarProfilerOrScanner, 5, new Vector3d(-0.15, 0.42, 2.08), Quaterniond.FromAxisAngle(Vector3d.UnitX, 0.12), 90.0, 4500),
             new("slot_gnss_secondary", RackSlotKind.GnssAntennaSecondary, 5, new Vector3d(-1.00, 0.0, 1.90), Quaterniond.Identity, 10.0, 500),
+            new("slot_pavement_cam_a", RackSlotKind.PavementCamera, 6, new Vector3d(-1.50, -0.35, 0.90), Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2.0), 35.0, 1600),
+            new("slot_pavement_cam_b", RackSlotKind.PavementCamera, 6, new Vector3d(-1.50, 0.35, 0.90), Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2.0), 35.0, 1600),
         };
         return Array.AsReadOnly(slots.ToArray());
     }

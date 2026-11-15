@@ -78,3 +78,5 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Sem impasse obrigatório de combate e sem escalada em áreas protegidas.
 
 **Evidência:** Playthrough de território em ambos os modos.
+
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-04](../../../artifacts/evidence/T-F16-04/README.md)).
