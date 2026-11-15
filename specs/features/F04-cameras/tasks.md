@@ -106,7 +106,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F04-06 — Adicionar câmera 360°
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -122,7 +122,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Panorâmica e inspeção por face.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F04-06](../../../artifacts/evidence/T-F04-06/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (`8591eb6`, merge `ba18ae3`, execução `43683993914`, jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../../../artifacts/evidence/M4-wave1-ci/summary.json) e [evidência T-F04-06](../../../artifacts/evidence/T-F04-06/README.md).
 
 ### T-F04-07 — Implementar produto de pavimento
 

@@ -12,5 +12,5 @@ Implementação do conjunto panorâmico 360° em cubemap de 6 faces (`Front`, `R
 - `dotnet test Gsa.Domain.slnf --no-restore`: `Gsa.Core.Tests` validou resolução por plataforma, agendamento das 6 faces (+ câmera de pavimento nos veículos superiores), prevenção de contagem dupla em costuras e descarte de alvos ocluídos.
 
 ## Estado
-Implementada; em revisão delegada à CI.
+Aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (SHA testado `8591eb655b2a2bb593d752623a91f402f97aeb76`, merge `ba18ae339d025405275ac6363ab7ee1625a1cbff`, execução [43683993914](https://github.com/kauevestena/gsa/actions/runs/43683993914), jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../M4-wave1-ci/summary.json).
 

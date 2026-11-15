@@ -26,7 +26,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F18-02 — Adicionar álbum e cosméticos
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -42,7 +42,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Comparação de CQ e catálogo visual.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F18-02](../../../artifacts/evidence/T-F18-02/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (`8591eb6`, merge `ba18ae3`, execução `43683993914`, jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../../../artifacts/evidence/M4-wave1-ci/summary.json) e [evidência T-F18-02](../../../artifacts/evidence/T-F18-02/README.md).
 
 ### T-F18-03 — Adicionar eventos absurdos
 

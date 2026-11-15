@@ -66,7 +66,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F02-04 — Expandir Centro, Porto e Orla
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M4
 
@@ -82,7 +82,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Manifest regional e percurso de acesso por nível.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-04](../../../artifacts/evidence/T-F02-04/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (`8591eb6`, merge `ba18ae3`, execução `43683993914`, jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../../../artifacts/evidence/M4-wave1-ci/summary.json) e [evidência T-F02-04](../../../artifacts/evidence/T-F02-04/README.md).
 
 ### T-F02-05 — Produzir Serra e terrenos especiais
 

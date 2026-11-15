@@ -15,5 +15,5 @@ Expansão espacial do Centro Antigo para `1 km²` com conexão ao anel viário e
 - A validação de conteúdo regional via `Gsa.Tools.Tests` / `scripts/verify.py --exports host` e `python3 specs/validate.py` confirmam integridade dos novos manifests JSON.
 
 ## Estado
-Implementada; em revisão delegada à CI.
+Aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #13](https://github.com/kauevestena/gsa/pull/13) (SHA testado `8591eb655b2a2bb593d752623a91f402f97aeb76`, merge `ba18ae339d025405275ac6363ab7ee1625a1cbff`, execução [43683993914](https://github.com/kauevestena/gsa/actions/runs/43683993914), jobs Linux `132720474455` e Windows `132720474804`); ver [resumo CI](../M4-wave1-ci/summary.json).
 

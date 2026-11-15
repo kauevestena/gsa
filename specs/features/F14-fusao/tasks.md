@@ -21,6 +21,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Ideal/ruidoso passam fixtures e não há acesso a TruthSample no estimador.
 
 **Evidência:** Testes de rotação, gravidade e bias.
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F14-01](../../../artifacts/evidence/T-F14-01/README.md)).
 
 ### T-F14-02 — Implementar DMI e ZUPT
 
