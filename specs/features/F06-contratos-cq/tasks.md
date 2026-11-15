@@ -28,6 +28,8 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 - [ ] Aceita
 
+**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F06-02/README.md). Parser `ContractDefinition`, ciclo completo de estados/comandos/eventos, snapshot imutável ao aceitar, expiração em todos os estados ativos, custódia separada (`PendingField` vs `ProtectedOffloaded`) e entrega idempotente.
+
 **Marco:** M2
 
 **Dependências:** T-F06-01
@@ -45,6 +47,8 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 ### T-F06-03 — Implementar CQ de fotos e inventário
 
 - [ ] Aceita
+
+**Estado:** em revisão (aguardando CI do PR #6, `codex/m2-wave1-sensors-contracts-cq`); [evidências](../../../artifacts/evidence/T-F06-03/README.md). `EvaluationReference` isolada em `Gsa.Missions.Quality`, cobertura por célula recortada `2×2 m`, deduplicação por ID, falha explícita para conjunto vazio ou `< 3` checkpoints, `privacy_redacted`/`format_valid`, `failure_reason_keys`, áreas de recoleta e entregáveis parciais.
 
 **Marco:** M2
 
