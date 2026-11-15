@@ -39,7 +39,7 @@ public sealed class SkyToolTests
         Assert.False(result.RootElement.GetProperty("valid").GetBoolean());
         var diagnostic = Assert.Single(result.RootElement.GetProperty("diagnostics").EnumerateArray());
         Assert.Equal("$.objects[0].size_enu", diagnostic.GetProperty("field").GetString());
-        Assert.Equal(fixture.Input, diagnostic.GetProperty("path").GetString());
+        Assert.Equal(Path.GetFullPath(fixture.Input), diagnostic.GetProperty("path").GetString());
     }
 
     [Fact]
