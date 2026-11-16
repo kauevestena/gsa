@@ -6,7 +6,7 @@ namespace Gsa.Engine.Visuals;
 public static class GsaRetroTextures
 {
     private static readonly Dictionary<string, ImageTexture> TextureCache = new(StringComparer.Ordinal);
-    private static readonly Dictionary<string, StandardMaterial3D> MaterialCache = new(StringComparer.Ordinal);
+    private static readonly Dictionary<string, Material> MaterialCache = new(StringComparer.Ordinal);
 
     public static ImageTexture GetTexture(string kind)
     {
@@ -46,7 +46,7 @@ public static class GsaRetroTextures
         return tex;
     }
 
-    public static StandardMaterial3D CreateWorldMaterial(
+    public static Material CreateWorldMaterial(
         string key,
         string textureKind,
         Color tint,
@@ -62,6 +62,18 @@ public static class GsaRetroTextures
         if (MaterialCache.TryGetValue(key, out var cached))
             return cached;
 
+        if (!transparent && !unshaded && !triplanar && !vertexColorAlbedo && vertexShaded)
+        {
+            var scale2 = uvScale.HasValue ? new Vector2(uvScale.Value.X, uvScale.Value.Y) : Vector2.One;
+            var shaderMat = GsaRetroShaders.CreateTexturedMaterial(
+                GetTexture(textureKind),
+                tint,
+                scale2,
+                nightWindowGlow ? GetTexture("facade_night_windows") : null);
+            MaterialCache[key] = shaderMat;
+            return shaderMat;
+        }
+
         var mat = new StandardMaterial3D
         {
             AlbedoTexture = GetTexture(textureKind),
@@ -70,6 +82,9 @@ public static class GsaRetroTextures
             TextureFilter = BaseMaterial3D.TextureFilterEnum.NearestWithMipmaps,
             Uv1Triplanar = triplanar,
             Uv1WorldTriplanar = triplanar,
+            DiffuseMode = BaseMaterial3D.DiffuseModeEnum.Lambert,
+            DisableReceiveShadows = true,
+            DisableSpecularOcclusion = true,
             SpecularMode = roughness < 0.35f
                 ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
                 : BaseMaterial3D.SpecularModeEnum.Disabled,
@@ -98,24 +113,36 @@ public static class GsaRetroTextures
 
     public static void SetNightWindowEmissionEnergy(float energy)
     {
-        foreach (var (key, mat) in MaterialCache)
+        GsaRetroShaders.SetNightWindowEmissionEnergy(energy);
+        foreach (var (key, item) in MaterialCache)
         {
-            if (mat.EmissionEnabled && (key.StartsWith("bldg_", StringComparison.Ordinal) || key.StartsWith("menu_bldg_", StringComparison.Ordinal)))
+            if (item is StandardMaterial3D mat && mat.EmissionEnabled &&
+                (key.StartsWith("bldg_", StringComparison.Ordinal) || key.StartsWith("menu_bldg_", StringComparison.Ordinal)))
+            {
                 mat.EmissionEnergyMultiplier = energy;
+            }
         }
     }
 
     public static void SetWetAsphaltState(bool isRaining)
     {
-        foreach (var (key, mat) in MaterialCache)
+        var tint = isRaining ? new Color(0.68f, 0.72f, 0.78f) : Colors.White;
+        foreach (var (key, item) in MaterialCache)
         {
             if (key.Contains("asphalt", StringComparison.Ordinal) || key.Contains("road", StringComparison.Ordinal))
             {
-                mat.Roughness = isRaining ? 0.28f : 0.88f;
-                mat.SpecularMode = isRaining
-                    ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
-                    : BaseMaterial3D.SpecularModeEnum.Disabled;
-                mat.AlbedoColor = isRaining ? new Color(0.68f, 0.72f, 0.78f) : Colors.White;
+                if (item is ShaderMaterial sm)
+                {
+                    sm.SetShaderParameter("albedo_color", tint);
+                }
+                else if (item is StandardMaterial3D mat)
+                {
+                    mat.Roughness = isRaining ? 0.28f : 0.88f;
+                    mat.SpecularMode = isRaining
+                        ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
+                        : BaseMaterial3D.SpecularModeEnum.Disabled;
+                    mat.AlbedoColor = tint;
+                }
             }
         }
     }

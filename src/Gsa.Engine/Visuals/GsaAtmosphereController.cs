@@ -54,9 +54,10 @@ public sealed class GsaAtmosphereController
         {
             BackgroundMode = Godot.Environment.BGMode.Sky,
             Sky = sky,
-            AmbientLightSource = Godot.Environment.AmbientSource.Sky,
-            AmbientLightSkyContribution = 0.65f,
-            AmbientLightEnergy = 0.75f,
+            AmbientLightSource = Godot.Environment.AmbientSource.Color,
+            AmbientLightColor = new Color(0.50f, 0.56f, 0.62f),
+            AmbientLightEnergy = 0.72f,
+            ReflectedLightSource = Godot.Environment.ReflectionSource.Disabled,
             FogEnabled = true,
             FogMode = Godot.Environment.FogModeEnum.Depth,
             FogLightColor = new Color(0.62f, 0.68f, 0.74f),
@@ -69,19 +70,13 @@ public sealed class GsaAtmosphereController
         _worldEnv = new WorldEnvironment { Name = "Environment", Environment = _env };
         _root.AddChild(_worldEnv);
 
-        if (!string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
-            RenderingServer.DirectionalShadowAtlasSetSize(1024, false);
-
         _sun = new DirectionalLight3D
         {
             Name = "Sun",
             RotationDegrees = new Vector3(-42f, -35f, 0f),
             LightColor = new Color(1.0f, 0.94f, 0.82f),
             LightEnergy = 1.25f,
-            ShadowEnabled = true,
-            DirectionalShadowMode = DirectionalLight3D.ShadowMode.Orthogonal,
-            DirectionalShadowMaxDistance = 72f,
-            ShadowBias = 0.08f,
+            ShadowEnabled = false,
         };
         _root.AddChild(_sun);
 
@@ -184,8 +179,8 @@ public sealed class GsaAtmosphereController
                 skyHorizon = new Color(0.12f, 0.16f, 0.25f);
                 sunColor = new Color(0.45f, 0.56f, 0.78f);
                 fogColor = new Color(0.09f, 0.12f, 0.18f);
-                sunEnergy = 0.24f;
-                ambientEnergy = 0.42f;
+                sunEnergy = 0.34f;
+                ambientEnergy = 0.58f;
                 sunPitchDeg = -55f;
             }
             else if (hour < 8.5)
@@ -255,10 +250,17 @@ public sealed class GsaAtmosphereController
                 _env.FogLightColor = fogColor;
             }
 
+            var rotRad = new Vector3(Mathf.DegToRad(sunPitchDeg), Mathf.DegToRad(-35f + (float)((hour - 6.0) * 6.0)), 0f);
+            var sunDir = Basis.FromEuler(rotRad).Z;
+            _env.AmbientLightColor = skyHorizon.Lerp(skyTop, 0.40f);
             _env.AmbientLightEnergy = ambientEnergy;
             _sun.LightColor = sunColor;
             _sun.LightEnergy = sunEnergy;
             _sun.RotationDegrees = new Vector3(sunPitchDeg, -35f + (float)((hour - 6.0) * 6.0), 0f);
+            GsaRetroShaders.UpdateAtmosphere(
+                sunDir, sunColor, sunEnergy,
+                _env.AmbientLightColor, ambientEnergy,
+                fogColor, _env.FogDepthBegin, _env.FogDepthEnd);
         }
 
         if (!_atmosphereInitialized || isRaining != _lastRaining)
@@ -270,7 +272,7 @@ public sealed class GsaAtmosphereController
         if (!_atmosphereInitialized || isNight != _lastNight)
         {
             _lastNight = isNight;
-            GsaRetroTextures.SetNightWindowEmissionEnergy(isNight ? 0.55f : 0.0f);
+            GsaRetroTextures.SetNightWindowEmissionEnergy(isNight ? 0.95f : 0.0f);
             var lampEnergy = isNight ? 2.4f : 0.0f;
             foreach (var (bulbMat, light) in _streetlamps)
             {

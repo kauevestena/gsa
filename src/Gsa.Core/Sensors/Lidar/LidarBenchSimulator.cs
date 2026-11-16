@@ -83,6 +83,8 @@ public sealed class LidarBenchSimulator
 
     private readonly LidarProfile _profile;
     private readonly GaussianRandom _rng;
+    private readonly List<(double MeasuredRange, double Intensity)> _acceptedScratch = new(LidarMaterialProperties.MaxReturnsPerPulse);
+    private readonly HashSet<string> _seenTargetsScratch = new(StringComparer.Ordinal);
     private int _pendingScans;
     private long _nextScanSequence;
 
@@ -161,31 +163,9 @@ public sealed class LidarBenchSimulator
 
             foreach (var (az, el, dirLidar) in pattern)
             {
-                TotalPrimaryRaysCast++;
-                var dirMap = trueLidarToMap.Rotation.Rotate(dirLidar).Normalized();
-
-                if (isRaining && !zeroNoise && _rng.NextUniformOpenUnit() < LidarMaterialProperties.RainSpuriousRate)
-                {
-                    var spuriousRange = Math.Max(0.5, _rng.NextUniformOpenUnit() * effectiveRange * 0.95);
-                    var localPt = dirLidar * spuriousRange;
-                    returns.Add(new LidarMeasuredReturn(
-                        az, el, spuriousRange, 0.15, 1, 1, true, localPt, estLidarToMap.Transform(localPt)));
-                    spuriousInScan++;
-                    TotalSpuriousRainReturns++;
-                    TotalReturnsEmitted++;
-                    continue;
-                }
-
-                var pulseHits = TraceMultiReturnPulse(
-                    trueLidarToMap.Translation, dirMap, effectiveRange, rayCaster, zeroNoise);
-                for (var idx = 0; idx < pulseHits.Count; idx++)
-                {
-                    var (range, intensity) = pulseHits[idx];
-                    var localPt = dirLidar * range;
-                    returns.Add(new LidarMeasuredReturn(
-                        az, el, range, intensity, idx + 1, pulseHits.Count, false, localPt, estLidarToMap.Transform(localPt)));
-                    TotalReturnsEmitted++;
-                }
+                EmitPulseReturns(
+                    az, el, dirLidar, trueLidarToMap, estLidarToMap,
+                    effectiveRange, isRaining, zeroNoise, rayCaster, returns, ref spuriousInScan);
             }
 
             _nextScanSequence++;
@@ -209,6 +189,99 @@ public sealed class LidarBenchSimulator
         }
     }
 
+    public bool TrySimulateScanSlice(
+        double timestampSeconds,
+        RigidTransform trueLidarToMap,
+        EstimatedBodyTrajectory trajectory,
+        LidarMountEstimate mountEstimate,
+        bool isRaining,
+        Func<Vector3d, Vector3d, double, LidarRayHit?> rayCaster,
+        int sliceIndex,
+        int sliceCount,
+        List<LidarMeasuredReturn> sliceReturnsOut,
+        int channelStep = 1)
+    {
+        ArgumentNullException.ThrowIfNull(trajectory);
+        ArgumentNullException.ThrowIfNull(mountEstimate);
+        ArgumentNullException.ThrowIfNull(rayCaster);
+        ArgumentNullException.ThrowIfNull(sliceReturnsOut);
+
+        sliceReturnsOut.Clear();
+        if (sliceCount <= 0 || sliceIndex < 0 || sliceIndex >= sliceCount)
+            throw new ArgumentOutOfRangeException(nameof(sliceIndex));
+        if (channelStep <= 0)
+            throw new ArgumentOutOfRangeException(nameof(channelStep));
+
+        var sampleTime = timestampSeconds + mountEstimate.TimeOffsetSeconds;
+        if (!trajectory.TrySample(sampleTime, out var estPose) || estPose is null)
+            return false;
+
+        var estLidarToMap = ComposeLidarToMap(new RigidTransform(estPose.BodyToMap, estPose.PositionEnu), mountEstimate);
+        var effectiveRange = LidarMaterialProperties.GetEffectiveRangeMetres(_profile.MaxRangeMetres, isRaining);
+        var pattern = _profile.BuildScanPattern();
+        var totalAz = _profile.AzimuthsPerScan;
+        var azStart = (sliceIndex * totalAz) / sliceCount;
+        var azEnd = ((sliceIndex + 1) * totalAz) / sliceCount;
+        var totalCh = _profile.TotalChannels;
+        var spuriousInSlice = 0;
+
+        for (var ch = 0; ch < totalCh; ch += channelStep)
+        {
+            var rowBase = ch * totalAz;
+            for (var azIdx = azStart; azIdx < azEnd; azIdx++)
+            {
+                var (az, el, dirLidar) = pattern[rowBase + azIdx];
+                EmitPulseReturns(
+                    az, el, dirLidar, trueLidarToMap, estLidarToMap,
+                    effectiveRange, isRaining, zeroNoise: false, rayCaster, sliceReturnsOut, ref spuriousInSlice);
+            }
+        }
+
+        if (sliceIndex == sliceCount - 1)
+            _nextScanSequence++;
+        return true;
+    }
+
+    private void EmitPulseReturns(
+        double az,
+        double el,
+        Vector3d dirLidar,
+        RigidTransform trueLidarToMap,
+        RigidTransform estLidarToMap,
+        double effectiveRange,
+        bool isRaining,
+        bool zeroNoise,
+        Func<Vector3d, Vector3d, double, LidarRayHit?> rayCaster,
+        List<LidarMeasuredReturn> returnsOut,
+        ref int spuriousCount)
+    {
+        TotalPrimaryRaysCast++;
+        var dirMap = trueLidarToMap.Rotation.Rotate(dirLidar).Normalized();
+
+        if (isRaining && !zeroNoise && _rng.NextUniformOpenUnit() < LidarMaterialProperties.RainSpuriousRate)
+        {
+            var spuriousRange = Math.Max(0.5, _rng.NextUniformOpenUnit() * effectiveRange * 0.95);
+            var localPt = dirLidar * spuriousRange;
+            returnsOut.Add(new LidarMeasuredReturn(
+                az, el, spuriousRange, 0.15, 1, 1, true, localPt, estLidarToMap.Transform(localPt)));
+            spuriousCount++;
+            TotalSpuriousRainReturns++;
+            TotalReturnsEmitted++;
+            return;
+        }
+
+        var pulseHits = TraceMultiReturnPulse(
+            trueLidarToMap.Translation, dirMap, effectiveRange, rayCaster, zeroNoise);
+        for (var idx = 0; idx < pulseHits.Count; idx++)
+        {
+            var (range, intensity) = pulseHits[idx];
+            var localPt = dirLidar * range;
+            returnsOut.Add(new LidarMeasuredReturn(
+                az, el, range, intensity, idx + 1, pulseHits.Count, false, localPt, estLidarToMap.Transform(localPt)));
+            TotalReturnsEmitted++;
+        }
+    }
+
     private List<(double MeasuredRange, double Intensity)> TraceMultiReturnPulse(
         Vector3d originMap,
         Vector3d dirMap,
@@ -216,10 +289,12 @@ public sealed class LidarBenchSimulator
         Func<Vector3d, Vector3d, double, LidarRayHit?> rayCaster,
         bool zeroNoise)
     {
-        var accepted = new List<(double, double)>(LidarMaterialProperties.MaxReturnsPerPulse);
+        var accepted = _acceptedScratch;
+        accepted.Clear();
         var residualEnergy = 1.0;
         var currentStartDist = 0.0;
-        var seenTargets = new HashSet<string>(StringComparer.Ordinal);
+        var seenTargets = _seenTargetsScratch;
+        seenTargets.Clear();
 
         for (var bounce = 0; bounce < LidarMaterialProperties.MaxReturnsPerPulse; bounce++)
         {

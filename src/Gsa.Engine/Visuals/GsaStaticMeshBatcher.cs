@@ -15,10 +15,10 @@ public sealed class GsaStaticMeshBatcher
         public bool HasVertexColors;
     }
 
-    private readonly Dictionary<StandardMaterial3D, Bucket> _buckets = new();
-    private readonly List<StandardMaterial3D> _order = [];
+    private readonly Dictionary<Material, Bucket> _buckets = new();
+    private readonly List<Material> _order = [];
 
-    private Bucket GetBucket(StandardMaterial3D material)
+    private Bucket GetBucket(Material material)
     {
         if (!_buckets.TryGetValue(material, out var bucket))
         {
@@ -30,7 +30,7 @@ public sealed class GsaStaticMeshBatcher
     }
 
     public void AddBox(
-        StandardMaterial3D material,
+        Material material,
         Vector3 center,
         Vector3 size,
         Vector3? rotDeg = null,
@@ -109,7 +109,7 @@ public sealed class GsaStaticMeshBatcher
     }
 
     public void AddBoxNormalizedUv(
-        StandardMaterial3D material,
+        Material material,
         Vector3 center,
         Vector3 size)
     {
@@ -154,7 +154,7 @@ public sealed class GsaStaticMeshBatcher
     }
 
     public void AddCylinder(
-        StandardMaterial3D material,
+        Material material,
         Vector3 center,
         float topRadius,
         float bottomRadius,

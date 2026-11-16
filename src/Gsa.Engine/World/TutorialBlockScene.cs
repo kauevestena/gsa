@@ -299,13 +299,13 @@ public partial class TutorialBlockScene : Node3D
         _ => new BoxMesh { Size = size },
     };
 
-    private static StandardMaterial3D CreateMaterial(WorldBoxObject item)
+    private static Material CreateMaterial(WorldBoxObject item)
     {
         if (item.ObjectClass == "ground")
         {
             return GsaRetroTextures.CreateWorldMaterial(
                 "world_ground_asphalt_uv", "asphalt", new Color(0.88f, 0.90f, 0.92f),
-                Vector3.One, roughness: 0.9f, triplanar: false, vertexShaded: false);
+                Vector3.One, roughness: 0.9f, triplanar: false);
         }
         if (item.ObjectClass == "building_shell")
         {
@@ -323,7 +323,7 @@ public partial class TutorialBlockScene : Node3D
         {
             return GsaRetroTextures.CreateWorldMaterial(
                 "bldg_target_facade_uv", "facade_commercial", new Color(1.0f, 0.95f, 0.84f),
-                Vector3.One, roughness: 0.82f, triplanar: false);
+                Vector3.One, roughness: 0.82f, triplanar: false, nightWindowGlow: true);
         }
         if (item.Material == "glass")
         {
@@ -335,7 +335,7 @@ public partial class TutorialBlockScene : Node3D
         {
             return GsaRetroTextures.CreateWorldMaterial(
                 "world_water_mat_uv", "water", new Color(0.35f, 0.72f, 0.95f, 0.78f),
-                Vector3.One, roughness: 0.12f, triplanar: false, transparent: true, vertexShaded: false);
+                Vector3.One, roughness: 0.12f, triplanar: false, transparent: true);
         }
         if (item.ObjectClass == "office_entry")
             return GsaMeshBuilder.SolidMat(new Color(0.14f, 0.62f, 0.45f), emit: true, emissionEnergy: 0.35f);

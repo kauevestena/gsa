@@ -36,7 +36,7 @@ public sealed class GsaCityVisualBuilder
         var groundBatch = new GsaStaticMeshBatcher();
         var horizonAsphaltMat = GsaRetroTextures.CreateWorldMaterial(
             "horizon_asphalt_uv", "asphalt", new Color(0.85f, 0.87f, 0.90f),
-            triplanar: false, vertexShaded: false);
+            triplanar: false);
         groundBatch.AddBox(horizonAsphaltMat, coords.ToGodot(new Vector3d(500120, 7400030, 99.45)),
             new Vector3(1100f, 0.2f, 1100f), uvScale: 0.12f);
         groundBatch.BuildSeparatedNodes(visualRoot, "HorizonDeck", GeometryInstance3D.ShadowCastingSetting.Off);
@@ -64,7 +64,7 @@ public sealed class GsaCityVisualBuilder
         var stripeYellow = GsaMeshBuilder.SolidMat(new Color(0.92f, 0.74f, 0.14f), roughness: 0.75f);
         var stripeWhite = GsaMeshBuilder.SolidMat(new Color(0.86f, 0.88f, 0.86f), roughness: 0.75f);
 
-        void AddRoadBox(Vector3d posEnu, Vector3d sizeEnu, StandardMaterial3D mat, float uvScale = 0.24f) =>
+        void AddRoadBox(Vector3d posEnu, Vector3d sizeEnu, Material mat, float uvScale = 0.24f) =>
             roadBatch.AddBox(mat, coords.ToGodot(posEnu), new Vector3((float)sizeEnu.X, (float)sizeEnu.Z, (float)sizeEnu.Y), uvScale: uvScale);
 
         // South Commerce Promenade (Y = 7399997..7400005) where Elias walks & shoots facades
@@ -215,7 +215,7 @@ public sealed class GsaCityVisualBuilder
 
         // 6. Streetlamps (batched poles/arms + shared bulb material) & batched Street Trees
         var poleMat = GsaMeshBuilder.SolidMat(new Color(0.24f, 0.27f, 0.30f));
-        var sharedBulbMat = GsaMeshBuilder.SolidMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f, uncached: true);
+        var sharedBulbMat = GsaMeshBuilder.SolidStandardMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f);
         atmosphere.RegisterStreetlamp(sharedBulbMat, null);
         var bulbBatch = new GsaStaticMeshBatcher();
 
@@ -372,8 +372,8 @@ public sealed class GsaCityVisualBuilder
         double xEnd,
         double yCenter,
         double zHeight,
-        StandardMaterial3D yellowMat,
-        StandardMaterial3D whiteMat)
+        Material yellowMat,
+        Material whiteMat)
     {
         var len = (float)(xEnd - xStart);
         var midX = (xStart + xEnd) * 0.5;

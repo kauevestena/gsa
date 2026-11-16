@@ -90,7 +90,8 @@ public partial class SaoDatumCityScene : Node3D
     private MultiMeshInstance3D _lidarCloudMesh = null!;
     private int _lidarPointWriteIndex;
     private int _lidarPointVisibleCount;
-    private double _lidarScanTimer;
+    private int _lidarSliceIndex;
+    private readonly List<LidarMeasuredReturn> _lidarSliceScratch = new(320);
     private bool _lidarEnabled = true;
 
     // Career, Contracts, Economy, Collectibles & Save State
@@ -116,7 +117,8 @@ public partial class SaoDatumCityScene : Node3D
     private CameraVisibilityCandidate[] _liveCandidates = [];
     private readonly List<ObstacleBoxEnu> _cityBlockObstacles = [];
     private readonly List<ObstacleBoxEnu> _nearbyObstacles = new(32);
-    private Vector3d _nearbyObstacleAnchor = new(double.NaN, double.NaN, double.NaN);
+    private Vector3d _nearbyObstacleAnchor;
+    private bool _hasNearbyObstacleAnchor;
     private PhysicsRayQueryParameters3D? _lidarRayQuery;
     private long _tick;
     private double _hudElapsed;
@@ -242,7 +244,7 @@ public partial class SaoDatumCityScene : Node3D
             Position = _coordinates.ToGodot(new Vector3d(501000, 7401000, 99.45)),
             Mesh = GsaMeshBuilder.CreateWorldUvBoxMesh(new Vector3(2400f, 0.25f, 2400f), 0.12f),
             MaterialOverride = GsaRetroTextures.CreateWorldMaterial(
-                "city_base_asphalt_uv", "asphalt", new Color(0.84f, 0.86f, 0.90f), triplanar: false, vertexShaded: false),
+                "city_base_asphalt_uv", "asphalt", new Color(0.84f, 0.86f, 0.90f), triplanar: false),
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         };
         visualBase.AddChild(cityGround);
@@ -267,7 +269,7 @@ public partial class SaoDatumCityScene : Node3D
 
         // Waterfront Ocean Bay (East side E > 501850) & Promenade boardwalk
         var oceanMat = GsaRetroTextures.CreateWorldMaterial(
-            "city_ocean_water_uv", "water", new Color(0.75f, 0.90f, 1.0f), roughness: 0.14f, triplanar: false, vertexShaded: false);
+            "city_ocean_water_uv", "water", new Color(0.75f, 0.90f, 1.0f), roughness: 0.14f, triplanar: false);
         visualBase.AddChild(new MeshInstance3D
         {
             Name = "OceanBay",
@@ -345,7 +347,7 @@ public partial class SaoDatumCityScene : Node3D
                 "commercial_tower" => ("bldg_tower_glass_uv", "glass_tower", Colors.White, false),
                 "warehouse_facade" => ("bldg_warehouse_uv", "warehouse", Colors.White, false),
                 "building_shell" => ("bldg_city_comm_uv", "facade_commercial", Colors.White, true),
-                "building_facade" => ("bldg_city_facade_uv", "facade_commercial", new Color(1.0f, 0.94f, 0.82f), false),
+                "building_facade" => ("bldg_city_facade_uv", "facade_commercial", new Color(1.0f, 0.94f, 0.82f), true),
                 _ => ("", "", Colors.White, false),
             };
             var textured = matKey.Item1.Length > 0;
@@ -421,19 +423,17 @@ public partial class SaoDatumCityScene : Node3D
 
     private void BuildLidarPointCloudOverlay()
     {
+        var pointMesh = BuildLidarPointMarkerMesh();
+        pointMesh.SurfaceSetMaterial(0, new StandardMaterial3D
+        {
+            VertexColorUseAsAlbedo = true,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+        });
         var mm = new MultiMesh
         {
             TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
             UseColors = true,
-            Mesh = new BoxMesh
-            {
-                Size = new Vector3(0.18f, 0.18f, 0.18f),
-                Material = new StandardMaterial3D
-                {
-                    VertexColorUseAsAlbedo = true,
-                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-                },
-            },
+            Mesh = pointMesh,
             InstanceCount = MaxLidarDisplayPoints,
             VisibleInstanceCount = 0,
         };
@@ -493,7 +493,7 @@ public partial class SaoDatumCityScene : Node3D
             _cityBlockObstacles.AddRange(_manifestObstacles);
             foreach (var list in _sectorObstacles.Values)
                 _cityBlockObstacles.AddRange(list);
-            _nearbyObstacleAnchor = new Vector3d(double.NaN, double.NaN, double.NaN);
+            _hasNearbyObstacleAnchor = false;
         }
     }
 
@@ -739,9 +739,7 @@ public partial class SaoDatumCityScene : Node3D
         // Rotate collectibles & check proximity pickup / benchmark occupation
         StepCollectiblesAndBenchmarks(delta, activePos, activeMode);
 
-        // Live LiDAR sweep on L4+ platforms!
-        if (_tick is 2 or 12 or 24)
-            _lidarScanTimer = 1.0;
+        // Live LiDAR continuous rotating sweep on L4+ platforms!
         StepLiveLidar(delta, activePos, activeHeading, activeMode, weather.IsRaining);
 
         // Camera capture tick
@@ -771,7 +769,7 @@ public partial class SaoDatumCityScene : Node3D
 
     private IReadOnlyList<ObstacleBoxEnu> GetNearbyObstacles(Vector3d pos)
     {
-        if (double.IsNaN(_nearbyObstacleAnchor.X) ||
+        if (!_hasNearbyObstacleAnchor ||
             Math.Abs(pos.X - _nearbyObstacleAnchor.X) > 20.0 ||
             Math.Abs(pos.Y - _nearbyObstacleAnchor.Y) > 20.0)
         {
@@ -787,6 +785,7 @@ public partial class SaoDatumCityScene : Node3D
                 }
             }
             _nearbyObstacleAnchor = pos;
+            _hasNearbyObstacleAnchor = true;
         }
         return _nearbyObstacles;
     }
@@ -1009,6 +1008,35 @@ public partial class SaoDatumCityScene : Node3D
         }
     }
 
+    private static ArrayMesh BuildLidarPointMarkerMesh()
+    {
+        const float r = 0.12f;
+        var v0 = new Vector3(0f, r, 0f);
+        var v1 = new Vector3(0f, -r * 0.7f, r);
+        var v2 = new Vector3(r * 0.866f, -r * 0.7f, -r * 0.5f);
+        var v3 = new Vector3(-r * 0.866f, -r * 0.7f, -r * 0.5f);
+
+        var arrays = new Godot.Collections.Array();
+        arrays.Resize((int)Mesh.ArrayType.Max);
+        arrays[(int)Mesh.ArrayType.Vertex] = new[]
+        {
+            v0, v2, v1,
+            v0, v3, v2,
+            v0, v1, v3,
+            v1, v2, v3,
+        };
+        arrays[(int)Mesh.ArrayType.Color] = new[]
+        {
+            Colors.White, Colors.White, Colors.White,
+            Colors.White, Colors.White, Colors.White,
+            Colors.White, Colors.White, Colors.White,
+            Colors.White, Colors.White, Colors.White,
+        };
+        var mesh = new ArrayMesh();
+        mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+        return mesh;
+    }
+
     private void StepLiveLidar(double dt, Vector3d pos, double heading, LocomotionMode mode, bool isRaining)
     {
         if (!_lidarEnabled || mode < LocomotionMode.Kombi)
@@ -1016,13 +1044,15 @@ public partial class SaoDatumCityScene : Node3D
 
         var profile = mode == LocomotionMode.Van ? LidarProfile.L6 : (mode == LocomotionMode.Pickup ? LidarProfile.L5 : LidarProfile.L4);
         if (_lidarSim.Profile.Id != profile.Id)
+        {
             _lidarSim = new LidarBenchSimulator(profile);
+            _lidarSliceIndex = 0;
+        }
 
-        _lidarScanTimer += dt;
-        var scanInterval = Math.Max(0.10, 1.0 / profile.ScanRateHz);
-        if (_lidarScanTimer < scanInterval)
-            return;
-        _lidarScanTimer = 0.0;
+        // Distribute one 360-degree revolution cleanly across physics ticks matching ScanRateHz (eliminates burst CPU spikes)
+        var sliceCount = Math.Max(1, (int)Math.Round(60.0 / profile.ScanRateHz));
+        var sliceIdx = _lidarSliceIndex % sliceCount;
+        _lidarSliceIndex++;
 
         var lidarOrigin = pos + new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0);
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
@@ -1051,14 +1081,16 @@ public partial class SaoDatumCityScene : Node3D
             return new LidarRayHit(dist, new Vector3d(hitNormG.X, -hitNormG.Z, hitNormG.Y), mat, id);
         }
 
-        if (_lidarSim.TrySimulateScan(_calendar.CalendarTimeSeconds, lidarToMap, traj, LidarMountEstimate.Zero,
-            isRaining, CastRay, out var obs, out _, autoDrain: true) && obs is not null)
+        var channelStep = profile.Grade >= 6 ? 4 : (profile.Grade == 5 ? 2 : 1);
+        if (_lidarSim.TrySimulateScanSlice(_calendar.CalendarTimeSeconds, lidarToMap, traj, LidarMountEstimate.Zero,
+            isRaining, CastRay, sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
             var mm = _lidarCloudMesh.Multimesh;
-            var stepStride = Math.Max(1, obs.Returns.Count / 420);
-            for (var i = 0; i < obs.Returns.Count; i += stepStride)
+            var maxPointsPerSlice = Math.Max(1, 480 / sliceCount);
+            var stepStride = Math.Max(1, _lidarSliceScratch.Count / maxPointsPerSlice);
+            for (var i = 0; i < _lidarSliceScratch.Count; i += stepStride)
             {
-                var ret = obs.Returns[i];
+                var ret = _lidarSliceScratch[i];
                 var gp = _coordinates.ToGodot(ret.GeoreferencedPointEnu);
                 var hNorm = Math.Clamp((gp.Y - 0.0f) / 18f, 0f, 1f);
                 var color = ret.IsSpuriousRain

@@ -58,13 +58,7 @@ public sealed class TrafficBenchAdapter
         for (var v = 0; v < 4; v++)
         {
             var mesh = GsaMeshBuilder.BuildTrafficCarMesh(v);
-            mesh.SurfaceSetMaterial(0, new StandardMaterial3D
-            {
-                VertexColorUseAsAlbedo = true,
-                Roughness = 0.52f,
-                ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
-                SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled,
-            });
+            mesh.SurfaceSetMaterial(0, GsaMeshBuilder.SolidMat(Colors.White));
             var mm = new MultiMesh
             {
                 TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
@@ -78,13 +72,7 @@ public sealed class TrafficBenchAdapter
         }
 
         var pedMesh = GsaMeshBuilder.BuildTrafficPedestrianMesh();
-        pedMesh.SurfaceSetMaterial(0, new StandardMaterial3D
-        {
-            VertexColorUseAsAlbedo = true,
-            Roughness = 0.85f,
-            ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
-            SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled,
-        });
+        pedMesh.SurfaceSetMaterial(0, GsaMeshBuilder.SolidMat(Colors.White));
         var pedMm = new MultiMesh
         {
             TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,

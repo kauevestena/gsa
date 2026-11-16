@@ -22,6 +22,7 @@ public sealed class PlayerVisualRig
     public Node3D? ShadowBlob { get; set; }
     public SpotLight3D? HeadlightL { get; set; }
     public SpotLight3D? HeadlightR { get; set; }
+    public Node3D? HeadlightBeam { get; set; }
     public StandardMaterial3D? HeadlightMat { get; set; }
     public StandardMaterial3D? TaillightMat { get; set; }
     public bool IsGimbalinaDashboardMascot { get; set; }
@@ -110,6 +111,7 @@ public sealed class PlayerVisualRig
 
         if (HeadlightL is not null) HeadlightL.Visible = isNight;
         if (HeadlightR is not null) HeadlightR.Visible = isNight;
+        if (HeadlightBeam is not null) HeadlightBeam.Visible = isNight;
         if (HeadlightMat is not null)
             HeadlightMat.EmissionEnergyMultiplier = isNight ? 2.4f : 0.25f;
         if (TaillightMat is not null)
@@ -120,7 +122,7 @@ public sealed class PlayerVisualRig
 /// <summary>Builds low-poly PS2/GTA III-era 3D vehicles, Elias + Gimbalina rigs, traffic silhouettes, and street props.</summary>
 public static class GsaMeshBuilder
 {
-    private static readonly Dictionary<(uint ColorRgba, byte RoughnessByte, bool Emit, short EnergyCentis), StandardMaterial3D> SolidMaterialCache = new();
+    private static readonly Dictionary<(uint ColorRgba, byte RoughnessByte, bool Emit, short EnergyCentis), Material> SolidMaterialCache = new();
     private static readonly QuadMesh UnitQuadMesh = new() { Size = Vector2.One };
     private static readonly CylinderMesh TreeTrunkMesh = new() { TopRadius = 0.18f, BottomRadius = 0.28f, Height = 2.6f, RadialSegments = 6 };
     private static readonly SphereMesh TreeCanopyLowerMesh = new() { Radius = 1.65f, Height = 2.3f, RadialSegments = 7, Rings = 4 };
@@ -169,7 +171,7 @@ public static class GsaMeshBuilder
             shadowMm.SetInstanceTransform(i, new Transform3D(shadowRot.Scaled(new Vector3(3.0f * s, 1f, 3.0f * s)), pos + new Vector3(0f, 0.03f, 0f)));
         }
 
-        void AddLayer(string suffix, MultiMesh mm, StandardMaterial3D? matOverride, float visEnd)
+        void AddLayer(string suffix, MultiMesh mm, Material? matOverride, float visEnd)
         {
             var mmi = new MultiMeshInstance3D
             {
@@ -545,7 +547,7 @@ public static class GsaMeshBuilder
         }
     }
 
-    private static Node3D BuildWheelNode(string name, float radius, float width, StandardMaterial3D tireMat, Vector3 pos)
+    private static Node3D BuildWheelNode(string name, float radius, float width, Material tireMat, Vector3 pos)
     {
         var wheel = new Node3D { Name = name, Position = pos };
         var tire = new MeshInstance3D
@@ -643,8 +645,8 @@ public static class GsaMeshBuilder
 
     private static void AttachVehicleLights(Node3D parent, PlayerVisualRig rig, float zFront, float zRear, float halfWidth, float height)
     {
-        var headMat = SolidMat(new Color(1.0f, 0.96f, 0.80f), emit: true, emissionEnergy: 0.25f, uncached: true);
-        var tailMat = SolidMat(new Color(0.95f, 0.14f, 0.12f), emit: true, emissionEnergy: 0.10f, uncached: true);
+        var headMat = SolidStandardMat(new Color(1.0f, 0.96f, 0.80f), emit: true, emissionEnergy: 0.25f);
+        var tailMat = SolidStandardMat(new Color(0.95f, 0.14f, 0.12f), emit: true, emissionEnergy: 0.10f);
         rig.HeadlightMat = headMat;
         rig.TaillightMat = tailMat;
 
@@ -684,6 +686,44 @@ public static class GsaMeshBuilder
         parent.AddChild(spotR);
         rig.HeadlightL = spotL;
         rig.HeadlightR = spotR;
+
+        // Lightweight GTA III projected ground headlight beam cones (smooth vertex-alpha fade)
+        var beamMat = new StandardMaterial3D
+        {
+            VertexColorUseAsAlbedo = true,
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+        };
+        var st = new SurfaceTool();
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        var nearCol = new Color(1.0f, 0.95f, 0.74f, 0.24f);
+        var farCol = new Color(1.0f, 0.92f, 0.68f, 0.0f);
+        void AddCone(float xCenter)
+        {
+            var p0 = new Vector3(xCenter - 0.14f, 0.07f, zFront);
+            var p1 = new Vector3(xCenter + 0.14f, 0.07f, zFront);
+            var p2 = new Vector3(xCenter + 2.8f, 0.07f, zFront - 18.0f);
+            var p3 = new Vector3(xCenter - 2.8f, 0.07f, zFront - 18.0f);
+            st.SetColor(nearCol); st.SetNormal(Vector3.Up); st.AddVertex(p0);
+            st.SetColor(nearCol); st.SetNormal(Vector3.Up); st.AddVertex(p1);
+            st.SetColor(farCol);  st.SetNormal(Vector3.Up); st.AddVertex(p3);
+            st.SetColor(nearCol); st.SetNormal(Vector3.Up); st.AddVertex(p1);
+            st.SetColor(farCol);  st.SetNormal(Vector3.Up); st.AddVertex(p2);
+            st.SetColor(farCol);  st.SetNormal(Vector3.Up); st.AddVertex(p3);
+        }
+        AddCone(-halfWidth);
+        AddCone(halfWidth);
+        var beamMesh = new MeshInstance3D
+        {
+            Name = "HeadlightBeamCone",
+            Mesh = st.Commit(),
+            MaterialOverride = beamMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            Visible = false,
+        };
+        parent.AddChild(beamMesh);
+        rig.HeadlightBeam = beamMesh;
     }
 
     /// <summary>Builds sculpted GTA III low-poly traffic meshes (+X forward!) for MultiMeshInstance3D.</summary>
@@ -861,7 +901,7 @@ public static class GsaMeshBuilder
     {
         var root = new Node3D { Name = name };
         var poleMat = SolidMat(new Color(0.24f, 0.27f, 0.30f));
-        var bulbMat = SolidMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f, uncached: true);
+        var bulbMat = SolidStandardMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f);
 
         root.AddChild(Box("Pole", new Vector3(0.14f, 5.2f, 0.14f), new Vector3(0f, 2.6f, 0f), poleMat));
         root.AddChild(Box("Arm", new Vector3(1.1f, 0.10f, 0.10f), new Vector3(0.50f, 5.15f, 0f), poleMat));
@@ -889,9 +929,9 @@ public static class GsaMeshBuilder
         var root = new Node3D { Name = name };
         var poleMat = SolidMat(new Color(0.20f, 0.22f, 0.24f));
         var housingMat = SolidMat(new Color(0.11f, 0.12f, 0.13f));
-        var redMat = SolidMat(new Color(0.95f, 0.15f, 0.12f), emit: true, emissionEnergy: 0.1f, uncached: true);
-        var amberMat = SolidMat(new Color(0.98f, 0.72f, 0.10f), emit: true, emissionEnergy: 0.1f, uncached: true);
-        var greenMat = SolidMat(new Color(0.16f, 0.92f, 0.42f), emit: true, emissionEnergy: 1.8f, uncached: true);
+        var redMat = SolidStandardMat(new Color(0.95f, 0.15f, 0.12f), emit: true, emissionEnergy: 0.1f);
+        var amberMat = SolidStandardMat(new Color(0.98f, 0.72f, 0.10f), emit: true, emissionEnergy: 0.1f);
+        var greenMat = SolidStandardMat(new Color(0.16f, 0.92f, 0.42f), emit: true, emissionEnergy: 1.8f);
 
         root.AddChild(Box("Post", new Vector3(0.16f, 4.8f, 0.16f), new Vector3(0f, 2.4f, 0f), poleMat));
         root.AddChild(Box("Cantilever", new Vector3(2.4f, 0.12f, 0.12f), new Vector3(1.1f, 4.7f, 0f), poleMat));
@@ -934,7 +974,7 @@ public static class GsaMeshBuilder
         return ring;
     }
 
-    public static MeshInstance3D Box(string name, Vector3 size, Vector3 pos, StandardMaterial3D mat, Vector3? rotDeg = null)
+    public static MeshInstance3D Box(string name, Vector3 size, Vector3 pos, Material mat, Vector3? rotDeg = null)
     {
         var node = new MeshInstance3D
         {
@@ -948,7 +988,34 @@ public static class GsaMeshBuilder
         return node;
     }
 
-    public static StandardMaterial3D SolidMat(
+    public static StandardMaterial3D SolidStandardMat(
+        Color color,
+        float roughness = 0.78f,
+        bool emit = false,
+        float emissionEnergy = 1.2f)
+    {
+        var mat = new StandardMaterial3D
+        {
+            AlbedoColor = color,
+            Roughness = roughness,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
+            DiffuseMode = BaseMaterial3D.DiffuseModeEnum.Lambert,
+            DisableReceiveShadows = true,
+            DisableSpecularOcclusion = true,
+            SpecularMode = roughness < 0.35f
+                ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
+                : BaseMaterial3D.SpecularModeEnum.Disabled,
+        };
+        if (emit)
+        {
+            mat.EmissionEnabled = true;
+            mat.Emission = color;
+            mat.EmissionEnergyMultiplier = emissionEnergy;
+        }
+        return mat;
+    }
+
+    public static Material SolidMat(
         Color color,
         float roughness = 0.78f,
         bool emit = false,
@@ -964,23 +1031,11 @@ public static class GsaMeshBuilder
         if (!uncached && SolidMaterialCache.TryGetValue(key, out var cached))
             return cached;
 
-        var mat = new StandardMaterial3D
-        {
-            AlbedoColor = color,
-            Roughness = roughness,
-            ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
-            SpecularMode = roughness < 0.35f
-                ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
-                : BaseMaterial3D.SpecularModeEnum.Disabled,
-        };
-        if (emit)
-        {
-            mat.EmissionEnabled = true;
-            mat.Emission = color;
-            mat.EmissionEnergyMultiplier = emissionEnergy;
-        }
-        if (!uncached)
-            SolidMaterialCache[key] = mat;
+        if (uncached)
+            return SolidStandardMat(color, roughness, emit, emissionEnergy);
+
+        var mat = GsaRetroShaders.CreateSolidMaterial(color, emit, emissionEnergy);
+        SolidMaterialCache[key] = mat;
         return mat;
     }
 

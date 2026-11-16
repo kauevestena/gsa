@@ -103,8 +103,10 @@ public partial class Bootstrap : Control
                     RadianceSize = Sky.RadianceSizeEnum.Size32,
                     ProcessMode = Sky.ProcessModeEnum.Incremental,
                 },
-                AmbientLightSource = Godot.Environment.AmbientSource.Sky,
+                AmbientLightSource = Godot.Environment.AmbientSource.Color,
+                AmbientLightColor = new Color(0.56f, 0.38f, 0.36f),
                 AmbientLightEnergy = 0.75f,
+                ReflectedLightSource = Godot.Environment.ReflectionSource.Disabled,
                 FogEnabled = true,
                 FogMode = Godot.Environment.FogModeEnum.Depth,
                 FogLightColor = new Color(0.62f, 0.44f, 0.38f),
@@ -118,10 +120,16 @@ public partial class Bootstrap : Control
             LightColor = new Color(1.0f, 0.74f, 0.48f),
             LightEnergy = 1.3f,
         });
+        var menuSunDir = Basis.FromEuler(new Vector3(Mathf.DegToRad(-22f), Mathf.DegToRad(-35f), 0f)).Z;
+        GsaRetroShaders.UpdateAtmosphere(
+            menuSunDir,
+            new Color(1.0f, 0.78f, 0.56f), 1.45f,
+            new Color(0.68f, 0.54f, 0.52f), 1.05f,
+            new Color(0.62f, 0.44f, 0.38f), 40f, 190f);
 
         // Batched asphalt street & glowing city towers (world UVs, zero triplanar shader cost)
         var dioramaBatch = new GsaStaticMeshBatcher();
-        var groundMat = GsaRetroTextures.CreateWorldMaterial("menu_asphalt_uv", "asphalt", new Color(0.85f, 0.88f, 0.92f), triplanar: false, vertexShaded: false);
+        var groundMat = GsaRetroTextures.CreateWorldMaterial("menu_asphalt_uv", "asphalt", new Color(0.85f, 0.88f, 0.92f), triplanar: false);
         dioramaBatch.AddBox(groundMat, new Vector3(0f, -0.1f, 0f), new Vector3(260f, 0.2f, 260f), uvScale: 0.14f);
 
         GsaRetroTextures.SetNightWindowEmissionEnergy(0.55f);

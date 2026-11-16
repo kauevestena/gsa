@@ -57,17 +57,17 @@ public sealed class GsaCityLandmarksBuilder
         var treeList = new List<(Vector3 Position, float Scale)>(64);
 
         var roadAsphaltMat = GsaRetroTextures.CreateWorldMaterial(
-            "city_road_asphalt_uv", "asphalt", new Color(0.78f, 0.80f, 0.85f), triplanar: false, vertexShaded: false);
+            "city_road_asphalt_uv", "asphalt", new Color(0.78f, 0.80f, 0.85f), triplanar: false);
         var crosswalkMat = GsaRetroTextures.CreateWorldMaterial("city_crosswalk_uv", "crosswalk", Colors.White, triplanar: false);
         var sidewalkMat = GsaRetroTextures.CreateWorldMaterial("city_sidewalk_uv", "sidewalk", Colors.White, triplanar: false);
         var concMat = GsaMeshBuilder.SolidMat(new Color(0.54f, 0.56f, 0.55f));
         var bridgeSteelMat = GsaMeshBuilder.SolidMat(new Color(0.15f, 0.42f, 0.34f), roughness: 0.55f);
         var craneRedMat = GsaMeshBuilder.SolidMat(new Color(0.78f, 0.18f, 0.14f));
         var waterMat = GsaRetroTextures.CreateWorldMaterial(
-            "city_ocean_water_uv", "water", new Color(0.75f, 0.90f, 1.0f), roughness: 0.14f, triplanar: false, vertexShaded: false);
+            "city_ocean_water_uv", "water", new Color(0.75f, 0.90f, 1.0f), roughness: 0.14f, triplanar: false);
         var yellowLine = GsaMeshBuilder.SolidMat(new Color(0.92f, 0.74f, 0.14f));
         var lampPoleMat = GsaMeshBuilder.SolidMat(new Color(0.24f, 0.27f, 0.30f));
-        var sharedLampBulbMat = GsaMeshBuilder.SolidMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f, uncached: true);
+        var sharedLampBulbMat = GsaMeshBuilder.SolidStandardMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f);
         atmosphere.RegisterStreetlamp(sharedLampBulbMat, null);
 
         // 1. Paved Avenue Grid with Crosswalks & Intersection Pads (batched into single meshes)
@@ -161,8 +161,8 @@ public sealed class GsaCityLandmarksBuilder
         GsaStaticMeshBatcher structureBatch,
         GsaStaticMeshBatcher roadBatch,
         GodotCoordinateAdapter coords,
-        StandardMaterial3D concMat,
-        StandardMaterial3D sidewalkMat)
+        Material concMat,
+        Material sidewalkMat)
     {
         var hallPos = coords.ToGodot(new Vector3d(500462, 7400505, 100.0));
         var marble = GsaMeshBuilder.SolidMat(new Color(0.84f, 0.82f, 0.78f));
@@ -184,12 +184,12 @@ public sealed class GsaCityLandmarksBuilder
         GsaStaticMeshBatcher roadBatch,
         GsaStaticMeshBatcher structureBatch,
         GsaStaticMeshBatcher lampBulbBatch,
-        StandardMaterial3D poleMat,
+        Material poleMat,
         StandardMaterial3D bulbMat,
         GodotCoordinateAdapter coords,
-        StandardMaterial3D concMat,
-        StandardMaterial3D sidewalkMat,
-        StandardMaterial3D waterMat)
+        Material concMat,
+        Material sidewalkMat,
+        Material waterMat)
     {
         var parkPos = coords.ToGodot(new Vector3d(500350, 7400380, 100.0));
         roadBatch.AddBox(sidewalkMat, parkPos + new Vector3(0f, 0.08f, 0f), new Vector3(4.5f, 0.14f, 124f), uvScale: 0.24f);
@@ -219,9 +219,9 @@ public sealed class GsaCityLandmarksBuilder
     private static void BuildViaductOverpass(
         GsaStaticMeshBatcher structureBatch,
         GodotCoordinateAdapter coords,
-        StandardMaterial3D concMat,
-        StandardMaterial3D asphaltMat,
-        StandardMaterial3D yellowMat)
+        Material concMat,
+        Material asphaltMat,
+        Material yellowMat)
     {
         structureBatch.AddBox(concMat, coords.ToGodot(new Vector3d(500680, 7400479, 106.1)), new Vector3(50f, 0.8f, 14f));
         structureBatch.AddBox(asphaltMat, coords.ToGodot(new Vector3d(500680, 7400479, 106.52)), new Vector3(50f, 0.06f, 12.2f), uvScale: 0.14f);
@@ -239,9 +239,9 @@ public sealed class GsaCityLandmarksBuilder
         GsaStaticMeshBatcher roadBatch,
         GsaStaticMeshBatcher structureBatch,
         GodotCoordinateAdapter coords,
-        StandardMaterial3D craneMat,
-        StandardMaterial3D concMat,
-        StandardMaterial3D waterMat)
+        Material craneMat,
+        Material concMat,
+        Material waterMat)
     {
         roadBatch.AddBox(waterMat, coords.ToGodot(new Vector3d(500480, 7401930, 97.6)), new Vector3(950f, 0.4f, 260f), uvScale: 0.08f);
         structureBatch.AddBox(concMat, coords.ToGodot(new Vector3d(500480, 7401800, 99.1)), new Vector3(920f, 2.2f, 12f));
@@ -299,12 +299,12 @@ public sealed class GsaCityLandmarksBuilder
     private static void BuildWaterfrontDistrictLandmarks(
         GsaStaticMeshBatcher structureBatch,
         GsaStaticMeshBatcher lampBulbBatch,
-        StandardMaterial3D poleMat,
+        Material poleMat,
         StandardMaterial3D bulbMat,
         List<(Vector3 Position, float Scale)> treeList,
         GodotCoordinateAdapter coords,
-        StandardMaterial3D steelMat,
-        StandardMaterial3D sidewalkMat)
+        Material steelMat,
+        Material sidewalkMat)
     {
         var woodMat = GsaMeshBuilder.SolidMat(new Color(0.52f, 0.36f, 0.22f));
         var bridgeDeckMat = GsaRetroTextures.CreateWorldMaterial("bridge_asphalt_uv", "asphalt", new Color(0.84f, 0.86f, 0.90f), triplanar: false);
@@ -361,9 +361,9 @@ public sealed class GsaCityLandmarksBuilder
         GsaStaticMeshBatcher structureBatch,
         List<(Vector3 Position, float Scale)> treeList,
         GodotCoordinateAdapter coords,
-        StandardMaterial3D asphaltMat,
-        StandardMaterial3D concMat,
-        StandardMaterial3D towerRedMat)
+        Material asphaltMat,
+        Material concMat,
+        Material towerRedMat)
     {
         var serra = new Node3D { Name = "SerraMountain" };
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
