@@ -841,3 +841,132 @@ msgstr "Expirado"
 
 msgid "training.state.Abandonado"
 msgstr "Abandonado"
+
+msgid "notebook.open"
+msgstr "Caderno de levantamento [R]"
+
+msgid "notebook.title"
+msgstr "Caderno de levantamento"
+
+msgid "notebook.close"
+msgstr "Fechar [R]"
+
+msgid "notebook.shortcut"
+msgstr "R: mapa, fotos, qualidade e guia"
+
+msgid "notebook.tab.map"
+msgstr "Mapa"
+
+msgid "notebook.tab.targets"
+msgstr "Alvos"
+
+msgid "notebook.tab.photos"
+msgstr "Fotos"
+
+msgid "notebook.tab.quality"
+msgstr "Qualidade"
+
+msgid "notebook.tab.guide"
+msgstr "Guia"
+
+msgid "training.done.notebook"
+msgstr "Caderno de levantamento alternado."
+
+msgid "notebook.map_legend"
+msgstr "Norte para cima · escala de 20 m. Seta branca: você e sua direção. O: escritório. D: descarga. Círculo roxo: posição da foto selecionada. Números: alvos do contrato (? pendentes / ✓ triangulados). Mapa da geometria conhecida da cena, não do levantamento reconstruído."
+
+msgid "notebook.field_progress"
+msgstr "O progresso de campo inclui fotos protegidas E pendentes. Ele não substitui o último relatório processado no escritório."
+
+msgid "notebook.target_row"
+msgstr "Fachada {0} · {1}/{2} observações utilizáveis\nMaior paralaxe: {3}° · mínimo: ≥ {4}°\n{5}"
+
+msgid "notebook.geometry.resolved"
+msgstr "Resolvida pela interseção dos raios de imagem. Você pode descarregar esta coleta."
+
+msgid "notebook.geometry.single"
+msgstr "Apenas uma vista. Desloque-se lateralmente, mantenha esta fachada no enquadramento e fotografe novamente."
+
+msgid "notebook.geometry.parallax"
+msgstr "As vistas são parecidas demais. Aumente a base lateral mantendo a fachada visível."
+
+msgid "notebook.geometry.quality"
+msgstr "As observações reprovaram na qualidade da imagem. Pare, aponte e faça uma foto nítida."
+
+msgid "notebook.geometry.behind"
+msgstr "A interseção ficou atrás de uma câmera. Faça um novo par a partir de posições distintas."
+
+msgid "notebook.geometry.grazing"
+msgstr "A vista está muito rasante ao plano de apoio. Mude o ângulo da câmera."
+
+msgid "notebook.geometry.unconfirmed"
+msgstr "A observação precisa de confirmação da classe ou do alvo."
+
+msgid "notebook.geometry.unseen"
+msgstr "Ainda não observada. Encontre o número amarelo e aponte para a fachada antes de fotografar."
+
+msgid "notebook.synthetic"
+msgstr "Miniatura sintética da observação (256 × 144). Não é uma captura de tela ou fotografia real. Selecionar uma foto não altera a observação bruta."
+
+msgid "notebook.protected"
+msgstr "protegida"
+
+msgid "notebook.field"
+msgstr "em campo"
+
+msgid "notebook.no_photos"
+msgstr "Nenhuma foto ainda. Aceite o serviço, pare e pressione C."
+
+msgid "notebook.photo_row"
+msgstr "Instante: {0} s · {1}\nArrastamento: {2} px (limite {3} px)\nSaturação: {4}% (limite {5}%)\nObservados: {6}\n{7}"
+
+msgid "notebook.photo.accepted"
+msgstr "Qualidade da imagem aceita. A geometria ainda exige várias vistas."
+
+msgid "notebook.photo.blur"
+msgstr "Arrastamento excessivo: pare antes de fotografar."
+
+msgid "notebook.photo.clipping"
+msgstr "Pixels saturados em excesso: mude o enquadramento."
+
+msgid "notebook.photo.lens"
+msgstr "A lente está obstruída: limpe-a antes de fotografar."
+
+msgid "notebook.photo.empty"
+msgstr "Nenhuma feição visível utilizável: aponte para um alvo e verifique a oclusão."
+
+msgid "notebook.processed_only"
+msgstr "Somente a última revisão do escritório. Novas fotos e descargas não atualizam estes valores antes de um novo processamento."
+
+msgid "notebook.unprocessed"
+msgstr "Fotos ainda não incluídas no processamento: {0}"
+
+msgid "notebook.no_report"
+msgstr "Ainda não há relatório. Descarregue as fotos e processe no escritório."
+
+msgid "notebook.metric_row"
+msgstr "{0}: {1} · exigido {2} {3} · {4}"
+
+msgid "notebook.guide"
+msgstr "1. Paralaxe: uma imagem fornece um raio, não profundidade. Duas posições de câmera devem produzir raios com paralaxe de pelo menos 5°. Girar parado não basta.\n\n2. Qualidade: arrastamento ≤ 3 px, saturação ≤ 20%, obstrução da lente ≤ 20% e feições visíveis são exigidos. Pare para uma foto nítida.\n\n3. Custódia: fotos em campo não estão prontas para entrega. Descarregue a até 5 m de D e processe a até 8 m de O.\n\n4. Controle de qualidade: as três fachadas devem ser reconstruídas; privacidade e formato precisam passar. A recoleta muda o progresso de campo; o relatório só muda após processar.\n\n5. Este treino usa poses ideais e miniaturas sintéticas. A aprovação não mede a acurácia GNSS no mundo real."
+
+msgid "cq.metric.feature_completeness"
+msgstr "Completude de feições"
+
+msgid "cq.metric.privacy_redacted"
+msgstr "Máscaras de privacidade aplicadas"
+
+msgid "cq.metric.format_valid"
+msgstr "Formato de entrega válido"
+
+msgid "cq.status.passed"
+msgstr "aprovado"
+
+msgid "cq.status.failed"
+msgstr "reprovado"
+
+msgid "cq.status.insufficient"
+msgstr "dados insuficientes"
+
+msgid "notebook.unit.ratio"
+msgstr "fração"
