@@ -67,6 +67,11 @@ public sealed class CarSuspensionSimulator
     public int UsedStorageUnits => _usedStorageUnits;
     public IReadOnlyList<RackImpactEvent> ImpactLog => _impactLog;
 
+    public void ApplyExternalPositionAdjustment(Vector3d positionEnu)
+    {
+        _positionEnu = positionEnu;
+    }
+
     public CarSuspensionSimulator(
         Vector3d initialPositionEnu,
         double initialHeadingRadians = 0.0,

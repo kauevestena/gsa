@@ -970,3 +970,309 @@ msgstr "insufficient data"
 
 msgid "notebook.unit.ratio"
 msgstr "fraction"
+
+msgid "bootstrap.play_career"
+msgstr "Career Mode — São Datum City"
+
+msgid "bootstrap.play_sandbox"
+msgstr "Free Roam Sandbox (All 4 Regions & 7 Vehicles)"
+
+msgid "bootstrap.quit"
+msgstr "Quit"
+
+msgid "hud.weather.dry"
+msgstr "DRY"
+
+msgid "hud.weather.rain"
+msgstr "RAIN"
+
+msgid "hud.prompt.controls"
+msgstr "WASD Drive · E Interact · C Photo · V Camera · F Dismount · G Corn · H Horn · X Radio · R Notebook"
+
+msgid "city.prompt.controls"
+msgstr "WASD Drive · C Photo · L LiDAR · B Vehicle · F Dismount · V Cam · Tab Tablet · X Radio · T Time · P Rain"
+
+msgid "platform.on_foot.name"
+msgstr "On Foot"
+
+msgid "platform.handcart.name"
+msgstr "L0 · Handcart & Gimbalina"
+
+msgid "platform.bicycle.name"
+msgstr "L1 · Cargo Bicycle"
+
+msgid "platform.scooter.name"
+msgstr "L2 · Delivery Scooter"
+
+msgid "platform.car.name"
+msgstr "L3 · Popular Car"
+
+msgid "platform.kombi.name"
+msgstr "L4 · Company Kombi (LiDAR)"
+
+msgid "platform.pickup.name"
+msgstr "L5 · 4x4 Pickup"
+
+msgid "platform.van.name"
+msgstr "L6 · Engineering MMS Van"
+
+msgid "district.old_center.commerce"
+msgstr "OLD CENTER — COMMERCE ST"
+
+msgid "district.old_center"
+msgstr "OLD CENTER — SÃO DATUM"
+
+msgid "district.port"
+msgstr "PORT & INDUSTRIAL DISTRICT"
+
+msgid "district.waterfront"
+msgstr "WATERFRONT & SOUTH ZONE"
+
+msgid "district.serra"
+msgstr "SERRA & HIGHLANDS"
+
+msgid "vehicle.handcart.banner"
+msgstr "HANDCART · LEVEL 0"
+
+msgid "vehicle.on_foot.banner"
+msgstr "ON FOOT · SURVEYOR"
+
+msgid "radio.station.off"
+msgstr "Radio Off"
+
+msgid "radio.station.geodesia"
+msgstr "Geodesy FM"
+
+msgid "radio.station.multicaminho"
+msgstr "Multipath Radio"
+
+msgid "radio.station.onda"
+msgstr "Carrier Wave"
+
+msgid "radio.geodesia.line1"
+msgstr "Geodesy FM: 'Keep your baseline wide and your chicken calm!'"
+
+msgid "radio.geodesia.line2"
+msgstr "Geodesy FM: 'Orthometric height H = h - N, never confuse your datum!'"
+
+msgid "radio.geodesia.line3"
+msgstr "Geodesy FM: 'Traffic flowing smoothly on Commerce Avenue!'"
+
+msgid "radio.multi.line1"
+msgstr "Caller on Multipath Radio: 'My GPS put me inside the bay—must be the flat Earth!'"
+
+msgid "radio.multi.line2"
+msgstr "Host: 'No sir, that's urban canyon multipath bouncing off glass towers.'"
+
+msgid "radio.multi.line3"
+msgstr "Multipath Radio: 'Keep your RTK base within 2 km and your lens spotless!'"
+
+msgid "radio.onda.line1"
+msgstr "Carrier Wave: 'Night shift crews, watch out for erratic drivers near the bars.'"
+
+msgid "radio.onda.line2"
+msgstr "Carrier Wave: 'Double-check your boresight calibration after hitting potholes.'"
+
+msgid "radio.onda.line3"
+msgstr "Carrier Wave: 'São Datum Municipal Master Plan needs clean point clouds!'"
+
+msgid "city.btn.tablet"
+msgstr "Tablet [Tab]"
+
+msgid "city.btn.vehicle"
+msgstr "Switch Vehicle [B]"
+
+msgid "city.btn.lidar"
+msgstr "LiDAR [L]"
+
+msgid "city.btn.radio"
+msgstr "Radio [X]"
+
+msgid "city.btn.capture"
+msgstr "Capture [C]"
+
+msgid "city.btn.view"
+msgstr "Camera [V]"
+
+msgid "city.btn.save"
+msgstr "Save [F5]"
+
+msgid "city.tablet.title"
+msgstr "São Datum Survey Tablet"
+
+msgid "city.tab.contracts"
+msgstr "Contracts"
+
+msgid "city.tab.office"
+msgstr "Office & CQ"
+
+msgid "city.tab.fleet"
+msgstr "Fleet & Shop"
+
+msgid "city.tab.geopedia"
+msgstr "Geopédia & Album"
+
+msgid "city.tab.settings"
+msgstr "World & Settings"
+
+msgid "city.contracts.refresh"
+msgstr "Generate new contract offers"
+
+msgid "city.contracts.accept"
+msgstr "Accept"
+
+msgid "city.office.no_contract"
+msgstr "No active contract. Accept one from the Contracts tab."
+
+msgid "city.office.active"
+msgstr "Active contract"
+
+msgid "city.office.mode_toggle"
+msgstr "Toggle Arcade / Technical"
+
+msgid "city.office.mask_privacy"
+msgstr "Apply Privacy Masks"
+
+msgid "city.office.calibrate_rack"
+msgstr "Calibrate Rack"
+
+msgid "city.office.process_deliver"
+msgstr "Process & Deliver"
+
+msgid "city.office.masks_applied"
+msgstr "Privacy masks applied to all sensitive detections."
+
+msgid "city.office.rack_calibrated"
+msgstr "Sensor rack boresight & lever-arm calibrated."
+
+msgid "city.rack.misaligned"
+msgstr "Rack misaligned by collision! Calibrate in Office tab."
+
+msgid "city.rack.ok"
+msgstr "Calibrated"
+
+msgid "city.fleet.active"
+msgstr "Active"
+
+msgid "city.fleet.drive"
+msgstr "Drive"
+
+msgid "city.fleet.buy"
+msgstr "Buy"
+
+msgid "city.fleet.insufficient_funds"
+msgstr "Insufficient Coords for this platform."
+
+msgid "city.settings.toggle_rain"
+msgstr "Toggle Rain [P]"
+
+msgid "city.settings.advance_time"
+msgstr "Advance Time +2h [T]"
+
+msgid "city.settings.dither"
+msgstr "PS2 Retro Dither [F10]"
+
+msgid "city.sandbox.welcome"
+msgstr "Free Roam Sandbox: all 4 districts & 7 survey platforms unlocked! Press B to swap vehicles."
+
+msgid "city.career.welcome"
+msgstr "Welcome to São Datum! Press Tab to accept a contract and start mapping."
+
+msgid "city.sandbox.title"
+msgstr "Free Roam Sandbox · São Datum"
+
+msgid "city.freeroam.title"
+msgstr "São Datum · Career"
+
+msgid "city.benchmark.occupied"
+msgstr "Geodetic benchmark occupied!"
+
+msgid "mission.hist_05.title"
+msgstr "Bus Corridor 360°"
+
+msgid "mission.hist_05.summary"
+msgstr "Map the Waterfront & Port transit corridor (360° off-peak window 10:00–16:00) to unlock the Kombi."
+
+msgid "mission.hist_06.title"
+msgstr "The Harbor Tunnel"
+
+msgid "mission.hist_06.summary"
+msgstr "Scan 200 m inside the Port Tunnel with Kombi LiDAR, DMI, and ZUPT stops without GNSS."
+
+msgid "mission.hist_07.title"
+msgstr "Viaduct Vertical Check"
+
+msgid "mission.hist_07.summary"
+msgstr "Survey the Old Center viaduct span verifying geoid separation (h vs H) to unlock 4x4 Pickup & Serra."
+
+msgid "mission.hist_08.title"
+msgstr "Night of Rain"
+
+msgid "mission.hist_08.summary"
+msgstr "Run dual-LiDAR rain-filtered sweeps along Waterfront and Serra during heavy rain."
+
+msgid "mission.hist_09.title"
+msgstr "Grilleiros in the Rearview"
+
+msgid "mission.hist_09.summary"
+msgstr "Detect displaced boundary monuments across Serra while handling rival territory attention."
+
+msgid "mission.hist_10.title"
+msgstr "Ghost Construction"
+
+msgid "mission.hist_10.summary"
+msgstr "Map the clandestine perimeter under faction pressure to unlock the Engineering MMS Van."
+
+msgid "mission.hist_11.title"
+msgstr "The Great Survey"
+
+msgid "mission.hist_11.summary"
+msgstr "Survey arterial corridors across all 4 regions of São Datum using the Engineering MMS Van."
+
+msgid "city.story.header"
+msgstr "Story Campaign (Acts 1–3)"
+
+msgid "city.story.start"
+msgstr "Start Story"
+
+msgid "city.story.completed"
+msgstr "Completed"
+
+msgid "city.story.locked"
+msgstr "Locked"
+
+msgid "city.mission_passed"
+msgstr "MISSION PASSED!"
+
+msgid "city.hazard.pothole"
+msgstr "Pothole jolt! Check Gimbalina & rack calibration."
+
+msgid "city.hazard.blitz"
+msgstr "Police Blitz! Speeding fine: -20 C$"
+
+msgid "city.event.trio"
+msgstr "Trio Elétrico parade on avenue — detour advised!"
+
+msgid "city.event.marathon"
+msgstr "Street Marathon active — expect road closures!"
+
+msgid "city.event.pigeons"
+msgstr "Pigeon flock overhead — minor camera clutter!"
+
+msgid "city.challenge.start"
+msgstr "Chicken Challenge started! Keep Gimbalina steady over 200 m!"
+
+msgid "city.challenge.passed"
+msgstr "CHICKEN CHALLENGE PASSED! +100 C$"
+
+msgid "city.countermeasure.disguise_on"
+msgstr "Pizza Delivery Disguise: ON (-50% Faction Attention)"
+
+msgid "city.countermeasure.disguise_off"
+msgstr "Pizza Delivery Disguise: OFF"
+
+msgid "city.settings.daguerreotype"
+msgstr "Daguerreotype Sepia Filter"
+
+msgid "city.board_vehicle"
+msgstr "Press F near parked vehicle to board!"

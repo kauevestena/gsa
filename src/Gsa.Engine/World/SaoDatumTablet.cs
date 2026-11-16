@@ -1,0 +1,716 @@
+using Gsa.Core.Geometry;
+using Gsa.Core.Mobility;
+using Gsa.Core.Traffic;
+using Gsa.Core.World;
+using Gsa.Engine.UI;
+using Gsa.Missions.Activities;
+using Gsa.Missions.Campaign;
+using Gsa.Missions.Contracts;
+using Gsa.Missions.Economy;
+using Gsa.Missions.Gameplay;
+using Gsa.Missions.Office;
+using Gsa.Missions.Persistence;
+using Gsa.Missions.Presentation;
+using Gsa.Missions.Quality;
+using Godot;
+
+namespace Gsa.Engine.World;
+
+public partial class SaoDatumCityScene
+{
+    private PanelContainer _tabletPanel = null!;
+    private TabContainer _tabletTabs = null!;
+    private VBoxContainer _contractsTab = null!;
+    private Label _officeStatusLabel = null!;
+    private VBoxContainer _fleetTab = null!;
+    private Label _geopediaLabel = null!;
+    private CityFullMapControl _cityMap = null!;
+    private Button _calmToggleBtn = null!;
+    private Button _ditherToggleBtn = null!;
+    private Button _daguerreotypeBtn = null!;
+    private ulong _contractSeed = 101;
+    private readonly List<ContractDefinition> _offeredContracts = [];
+
+    private void BuildHudAndTablet()
+    {
+        _gtaHud = new GsaGtaHud(this);
+        _gtaHud.ConfigureRadar(_fullManifest, 125f);
+
+        _gtaHud.AddQuickButton(Text("city.btn.tablet"), ToggleTablet);
+        _gtaHud.AddQuickButton(Text("city.btn.capture"), () => _captureRequested = true);
+        _gtaHud.AddQuickButton(Text("city.btn.vehicle"), CycleOwnedPlatform);
+        _gtaHud.AddQuickButton(Text("city.btn.lidar"), () => _lidarEnabled = !_lidarEnabled);
+        _gtaHud.AddQuickButton(Text("city.btn.view"), () => _chaseCamera.CycleMode());
+        _gtaHud.AddQuickButton(Text("city.btn.radio"), () => _audio.CycleRadioStation());
+        _gtaHud.AddQuickButton(Text("city.btn.save"), SaveCareer);
+
+        GenerateContractOffers();
+        BuildTabletOverlay(_gtaHud.Layer);
+    }
+
+    private void BuildTabletOverlay(CanvasLayer canvas)
+    {
+        _tabletPanel = new PanelContainer
+        {
+            Name = "CityTablet",
+            AnchorLeft = 0.10f,
+            AnchorTop = 0.06f,
+            AnchorRight = 0.90f,
+            AnchorBottom = 0.88f,
+            Visible = false,
+        };
+        _tabletPanel.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+        {
+            BgColor = new Color(0.04f, 0.06f, 0.08f, 0.96f),
+            BorderColor = new Color(0.32f, 0.45f, 0.52f, 0.95f),
+            BorderWidthBottom = 2,
+            BorderWidthLeft = 2,
+            BorderWidthRight = 2,
+            BorderWidthTop = 2,
+            CornerRadiusBottomLeft = 6,
+            CornerRadiusBottomRight = 6,
+            CornerRadiusTopLeft = 6,
+            CornerRadiusTopRight = 6,
+            ContentMarginLeft = 12,
+            ContentMarginRight = 12,
+            ContentMarginTop = 10,
+            ContentMarginBottom = 10,
+        });
+        canvas.AddChild(_tabletPanel);
+
+        var rootBox = new VBoxContainer();
+        _tabletPanel.AddChild(rootBox);
+
+        var header = new HBoxContainer();
+        rootBox.AddChild(header);
+        var title = new Label
+        {
+            Text = Text("city.tablet.title"),
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+        };
+        title.AddThemeFontSizeOverride("font_size", 18);
+        header.AddChild(title);
+        var closeBtn = new Button { Text = Text("notebook.close"), FocusMode = Control.FocusModeEnum.None };
+        closeBtn.Pressed += () => _tabletPanel.Hide();
+        header.AddChild(closeBtn);
+
+        _tabletTabs = new TabContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        rootBox.AddChild(_tabletTabs);
+
+        VBoxContainer AddTab(string key)
+        {
+            var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
+            _tabletTabs.AddChild(scroll);
+            _tabletTabs.SetTabTitle(_tabletTabs.GetTabCount() - 1, Text(key));
+            var box = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+            box.AddThemeConstantOverride("separation", 8);
+            scroll.AddChild(box);
+            return box;
+        }
+
+        // 1. Contracts Tab
+        _contractsTab = AddTab("city.tab.contracts");
+        // 2. Office & Calibration Tab
+        var officeTab = AddTab("city.tab.office");
+        _officeStatusLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        officeTab.AddChild(_officeStatusLabel);
+
+        var officeBtns = new HBoxContainer();
+        officeBtns.AddThemeConstantOverride("separation", 8);
+        officeTab.AddChild(officeBtns);
+
+        Button AddOfficeBtn(string key, Action action)
+        {
+            var b = new Button { Text = Text(key), FocusMode = Control.FocusModeEnum.None };
+            b.Pressed += () => { action(); RefreshTabletContents(); };
+            officeBtns.AddChild(b);
+            return b;
+        }
+        AddOfficeBtn("city.office.mode_toggle", () =>
+        {
+            _officeMode = _officeMode == ProcessingMode.Arcade ? ProcessingMode.Technical : ProcessingMode.Arcade;
+            _feedbackText = Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical");
+        });
+        AddOfficeBtn("city.office.mask_privacy", () =>
+        {
+            _privacyMasksApplied = true;
+            _audio.PlayOffloadChime();
+            _feedbackText = Text("city.office.masks_applied");
+        });
+        AddOfficeBtn("city.office.calibrate_rack", () =>
+        {
+            _rackMisaligned = false;
+            _audio.PlayOffloadChime();
+            _feedbackText = Text("city.office.rack_calibrated");
+        });
+        AddOfficeBtn("Disguise (-50%)", () =>
+        {
+            _disguiseActive = !_disguiseActive;
+            _audio.PlayOffloadChime();
+            _feedbackText = Text(_disguiseActive ? "city.countermeasure.disguise_on" : "city.countermeasure.disguise_off");
+        });
+        AddOfficeBtn("city.office.process_deliver", ProcessAndDeliverCityContract);
+
+        // 3. Fleet & Skills Tab
+        _fleetTab = AddTab("city.tab.fleet");
+
+        // 4. Full City Map Tab
+        var mapTab = AddTab("notebook.tab.map");
+        _cityMap = new CityFullMapControl { CustomMinimumSize = new Vector2(0, 340), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        mapTab.AddChild(_cityMap);
+
+        // 5. Geopédia & Collectibles Tab
+        var geoTab = AddTab("city.tab.geopedia");
+        _geopediaLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
+        geoTab.AddChild(_geopediaLabel);
+
+        // 6. Settings & Sandbox Controls Tab
+        var setTab = AddTab("city.tab.settings");
+        _calmToggleBtn = new Button { FocusMode = Control.FocusModeEnum.None };
+        _calmToggleBtn.Pressed += () =>
+        {
+            _calmPolicy.SetCalmCityEnabled(!_calmPolicy.CalmCityEnabled);
+            RefreshTabletContents();
+        };
+        setTab.AddChild(_calmToggleBtn);
+
+        _ditherToggleBtn = new Button { FocusMode = Control.FocusModeEnum.None };
+        _ditherToggleBtn.Pressed += () =>
+        {
+            _atmosphere.SetRetroDitherEnabled(!_atmosphere.RetroDitherEnabled);
+            RefreshTabletContents();
+        };
+        setTab.AddChild(_ditherToggleBtn);
+
+        _daguerreotypeBtn = new Button { FocusMode = Control.FocusModeEnum.None };
+        _daguerreotypeBtn.Pressed += () =>
+        {
+            _atmosphere.SetDaguerreotypeEnabled(!_atmosphere.DaguerreotypeEnabled);
+            RefreshTabletContents();
+        };
+        setTab.AddChild(_daguerreotypeBtn);
+
+        var rainBtn = new Button { Text = Text("city.settings.toggle_rain"), FocusMode = Control.FocusModeEnum.None };
+        rainBtn.Pressed += () => _calendar.SetWeather(!_calendar.IsRaining, 0.75);
+        setTab.AddChild(rainBtn);
+
+        var timeBtn = new Button { Text = Text("city.settings.advance_time"), FocusMode = Control.FocusModeEnum.None };
+        timeBtn.Pressed += () => _calendar.AdvanceCalendarSeconds(7200.0);
+        setTab.AddChild(timeBtn);
+
+        RefreshTabletContents();
+    }
+
+    private void ToggleTablet()
+    {
+        _tabletPanel.Visible = !_tabletPanel.Visible;
+        if (_tabletPanel.Visible)
+            RefreshTabletContents();
+    }
+
+    private void GenerateContractOffers()
+    {
+        _offeredContracts.Clear();
+        foreach (var template in MvpProceduralContractGenerator.Templates)
+        {
+            var offer = MvpProceduralContractGenerator.GenerateFromTemplate(template.TemplateId, _contractSeed++);
+            _offeredContracts.Add(offer.Contract);
+        }
+    }
+
+    private void StartStoryMission(CampaignMissionFullSpec spec)
+    {
+        _activeStorySpec = spec;
+        string[] featureIds = spec.MissionId switch
+        {
+            "HIST-01" => ["facade_18", "facade_19", "facade_20"],
+            "HIST-02" => ["manhole_01", "manhole_02", "manhole_03", "manhole_04"],
+            "HIST-03" => ["sidewalk_seg_01", "sidewalk_seg_02", "sidewalk_seg_03"],
+            "HIST-04" => ["sign_01", "sign_02", "sign_03", "sign_04"],
+            "HIST-05" => ["control_old_center_02", "survey_control_waterfront_plaza"],
+            "HIST-06" => ["survey_control_port_tunnel"],
+            "HIST-07" => ["survey_control_port_viaduct", "control_old_center_01"],
+            "HIST-08" => ["survey_control_waterfront_pier", "survey_control_serra_foothill"],
+            "HIST-09" => ["survey_control_serra_foothill", "survey_control_serra_summit"],
+            "HIST-10" => ["survey_control_port_viaduct", "survey_control_serra_summit"],
+            _ => ["control_old_center_01", "survey_control_port_viaduct", "survey_control_waterfront_pier", "survey_control_serra_summit"],
+        };
+        var calm = _calmPolicy.CalmCityEnabled && spec.HasHostileOrDynamicHazards;
+        var def = new ContractDefinition(
+            SchemaVersion: 1,
+            Id: spec.MissionId,
+            TitleKey: spec.TitleKey,
+            ClientId: "city_hall",
+            RegionId: spec.RegionIds[0],
+            AreaId: spec.RegionIds[0],
+            Product: spec.ProductType,
+            RequiredFeatureIds: featureIds,
+            Requirements: [new PredicateRequirementSpec("format_valid", true)],
+            RequiredCapabilities: ["camera"],
+            Risk: calm ? "easy" : "moderate",
+            Calm: calm,
+            Deadline: new ContractDeadlineSpec(21600, 27000, 0.05, 0.5),
+            Reward: new ContractRewardSpec(spec.RewardCoords, 120 + spec.Act * 60, spec.ReputationDelta, spec.UnlockedPlatforms.ToArray()),
+            PartialPolicy: new ContractPartialPolicySpec("disabled", []),
+            DeliveryFormat: "gsa_bundle_v1",
+            StoryPrerequisites: spec.Preconditions.ToArray());
+
+        AcceptCityContract(def);
+        var summaryKey = $"mission.{spec.MissionId.ToLowerInvariant().Replace('-', '_')}.summary";
+        _gtaHud.ShowCutsceneLetterbox(
+            $"{spec.MissionId} · {Text(spec.TitleKey)}",
+            Text(summaryKey),
+            () => _gtaHud.HideCutsceneLetterbox());
+    }
+
+    private void AcceptCityContract(ContractDefinition def)
+    {
+        if (!def.Id.StartsWith("HIST-", StringComparison.Ordinal))
+            _activeStorySpec = null;
+        _activeContract = def;
+        _activeMachine = new ContractStateMachine(def);
+        _activeMachine.Accept(_calendar.CalendarTimeSeconds);
+        _fieldSamples.Clear();
+        _observedTargetIds.Clear();
+        _coverageSpots.Clear();
+        _privacyMasksApplied = _officeMode == ProcessingMode.Arcade;
+        _audio.PlayOffloadChime();
+        _feedbackText = $"{Text(def.TitleKey)} — {def.RequiredFeatureIds.Count} targets";
+        _tabletPanel.Hide();
+    }
+
+    private void ProcessAndDeliverCityContract()
+    {
+        if (_activeContract is null || _activeMachine is null)
+        {
+            _feedbackText = Text("city.office.no_contract");
+            return;
+        }
+        if (_rackMisaligned)
+        {
+            _feedbackText = Text("city.rack.misaligned");
+            _audio.PlayAlert(critical: true);
+            return;
+        }
+
+        // Complete if all required features observed (or LiDAR density in port/serra)
+        var missing = _activeContract.RequiredFeatureIds.Where(id => !_observedTargetIds.Contains(id)).ToArray();
+        var ratio = _activeContract.RequiredFeatureIds.Count > 0
+            ? (double)(_activeContract.RequiredFeatureIds.Count - missing.Length) / _activeContract.RequiredFeatureIds.Count
+            : 1.0;
+
+        if (_fieldSamples.Count == 0 && CurrentActiveMode() < LocomotionMode.Kombi)
+        {
+            _feedbackText = Text("training.blocked");
+            _audio.PlayAlert();
+            return;
+        }
+
+        if (ratio >= 0.85 || (_lidarPointVisibleCount >= 200 && CurrentActiveMode() >= LocomotionMode.Kombi))
+        {
+            var reward = _activeContract.Reward.BaseCoords;
+            var xp = _activeContract.Reward.BaseXp;
+            var quote = new PaymentQuote(
+                _activeContract.Id, true, false, false, 5, 1.0, 1.0, 0.0, 0.0,
+                reward, reward, reward, xp, _activeContract.Reward.Reputation,
+                _activeContract.RequiredFeatureIds, _activeContract.Reward.StoryUnlocks);
+            _ledger.RecordContractSettlement("settle_" + _activeContract.Id + "_" + _tick, _activeContract.Id, _calendar.CalendarTimeSeconds, quote, _activeContract.Calm);
+            _progression.ApplySettlement(_activeContract, quote);
+            _geopedia.UnlockForMilestone("M2");
+
+            if (_activeStorySpec is not null)
+                CutsceneSkipAndStateCoordinator.ExecuteFull(_activeStorySpec.Cutscene, _campaignState);
+
+            _audio.PlayMissionPassedFanfare();
+            _gtaHud.TriggerCelebrationBanner(
+                Text("city.mission_passed"),
+                $"{Text(_activeContract.TitleKey)}  +{reward} C$  +{xp} XP");
+            _feedbackText = $"{Text("training.done.deliver")} (+{reward} C$, +{xp} XP)";
+            _activeContract = null;
+            _activeMachine = null;
+            _activeStorySpec = null;
+            GenerateContractOffers();
+            if (!_isSandbox) SaveCareer();
+        }
+        else
+        {
+            _audio.PlayAlert();
+            _feedbackText = $"{Text("training.qc_rework")} ({missing.Length} missing)";
+        }
+    }
+
+    private void RefreshTabletContents()
+    {
+        // Contracts tab: Story Campaign (HIST-01..HIST-11) + Procedural Contracts
+        foreach (var c in _contractsTab.GetChildren())
+            c.QueueFree();
+
+        var storyHeader = new Label { Text = "★ " + Text("city.story.header") };
+        storyHeader.AddThemeFontSizeOverride("font_size", 15);
+        storyHeader.AddThemeColorOverride("font_color", new Color(0.98f, 0.80f, 0.24f));
+        _contractsTab.AddChild(storyHeader);
+
+        foreach (var spec in FullCampaignCatalog.AllMissions)
+        {
+            var done = _campaignState.ObjectiveStates.ContainsKey(spec.MissionId);
+            var prereqsMet = _isSandbox || spec.Preconditions.All(p => _campaignState.ObjectiveStates.ContainsKey(p));
+            var row = new HBoxContainer();
+            var info = new Label
+            {
+                Text = $"[{spec.MissionId}] Act {spec.Act} · {Text(spec.TitleKey)} ({string.Join("/", spec.RegionIds)}) · {spec.RewardCoords} C$",
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+                AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            };
+            var btn = new Button
+            {
+                Text = done ? Text("city.story.completed") : (prereqsMet ? Text("city.story.start") : Text("city.story.locked")),
+                Disabled = done || !prereqsMet,
+                FocusMode = Control.FocusModeEnum.None,
+            };
+            var capturedSpec = spec;
+            btn.Pressed += () => StartStoryMission(capturedSpec);
+            row.AddChild(info);
+            row.AddChild(btn);
+            _contractsTab.AddChild(row);
+        }
+
+        var refreshBtn = new Button { Text = Text("city.contracts.refresh"), FocusMode = Control.FocusModeEnum.None };
+        refreshBtn.Pressed += () => { GenerateContractOffers(); RefreshTabletContents(); };
+        _contractsTab.AddChild(refreshBtn);
+
+        foreach (var def in _offeredContracts)
+        {
+            var card = BoardOfficeAndReportPresenter.BuildContractBoardCard(def, TranslationServer.GetLocale().ToString());
+            var row = new HBoxContainer();
+            var info = new Label
+            {
+                Text = $"{Text(card.TitleKey)} · {card.RegionId} · {def.RequiredFeatureIds.Count} pts · {card.BaseCoords} C$ · {(card.IsCalm ? Text("board.badge.calm") : card.Risk)}",
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+                AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            };
+            var accept = new Button { Text = Text("city.contracts.accept"), FocusMode = Control.FocusModeEnum.None };
+            var capturedDef = def;
+            accept.Pressed += () => AcceptCityContract(capturedDef);
+            row.AddChild(info);
+            row.AddChild(accept);
+            _contractsTab.AddChild(row);
+        }
+
+        // Office status
+        var contractName = _activeContract is null ? Text("city.office.no_contract") : Text(_activeContract.TitleKey);
+        var targetCount = _activeContract?.RequiredFeatureIds.Count ?? 0;
+        var foundCount = _activeContract?.RequiredFeatureIds.Count(id => _observedTargetIds.Contains(id)) ?? 0;
+        _officeStatusLabel.Text =
+            $"{Text("city.office.active")}: {contractName}\n" +
+            $"{Text("training.targets")}: {foundCount}/{targetCount} · Samples: {_fieldSamples.Count} · LiDAR pts: {_lidarPointVisibleCount}\n" +
+            $"Mode: {Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical")}\n" +
+            $"Rack Calibration: {(_rackMisaligned ? Text("city.rack.misaligned") : Text("city.rack.ok"))}";
+
+        // Fleet & Skills tab
+        foreach (var c in _fleetTab.GetChildren())
+            c.QueueFree();
+        foreach (var entry in FleetShopCatalog.Platforms)
+        {
+            var mode = entry.Profile.Mode;
+            var owned = _fleet.OwnedPlatforms.Contains(mode);
+            var isCurrent = _locomotion.MountedVehicleMode == mode;
+            var row = new HBoxContainer();
+            var lbl = new Label
+            {
+                Text = $"L{entry.Profile.Level} · {Text($"platform.{mode.ToString().ToLowerInvariant()}.name")} ({entry.Profile.MaxSpeedMetresPerSecond:F0} m/s · {entry.Profile.PriceCoords} C$)",
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            };
+            var actionBtn = new Button
+            {
+                Text = isCurrent ? Text("city.fleet.active") : (owned ? Text("city.fleet.drive") : Text("city.fleet.buy")),
+                Disabled = isCurrent,
+                FocusMode = Control.FocusModeEnum.None,
+            };
+            actionBtn.Pressed += () =>
+            {
+                if (owned)
+                {
+                    SwitchPlatform(mode);
+                }
+                else if (_ledger.BalanceCoords >= entry.Profile.PriceCoords)
+                {
+                    var unlockedAll = new HashSet<string>(["HIST-01", "HIST-02", "HIST-03", "HIST-04", "HIST-05", "HIST-07", "HIST-10"]);
+                    var repProg = CareerProgressionState.FromSnapshot(new CareerProgressionSnapshot(1, 50000,
+                        new Dictionary<string, int> { ["city_hall"] = 100 },
+                        new Dictionary<string, int> { ["old_center"] = 100 },
+                        unlockedAll.ToArray(), []));
+                    if (_fleet.TryPurchasePlatform($"buy_{mode}_{_tick}", _calendar.CalendarTimeSeconds, mode, _ledger, repProg, unlockedAll, out _, out _))
+                        SwitchPlatform(mode);
+                }
+                else
+                {
+                    _audio.PlayAlert();
+                    _feedbackText = Text("city.fleet.insufficient_funds");
+                }
+                RefreshTabletContents();
+            };
+            row.AddChild(lbl);
+            row.AddChild(actionBtn);
+            _fleetTab.AddChild(row);
+        }
+
+        // Map tab
+        var activeTargetEnu = (_activeContract?.RequiredFeatureIds ?? [])
+            .Select(id => _fullManifest.Objects.FirstOrDefault(o => o.Id == id)?.PositionEnu)
+            .Where(p => p.HasValue)
+            .Select(p => p!.Value)
+            .ToArray();
+        _cityMap.UpdateMap(
+            CurrentPositionEnu(),
+            CurrentHeadingRadians(),
+            _geodeticNetwork.Benchmarks.Values.ToArray(),
+            activeTargetEnu);
+
+        // Geopédia & Collectibles tab
+        var lines = new List<string>
+        {
+            $"Eggs: {_collectibles.CollectedEggIds.Count}/{MvpCollectiblesCoordinator.MaxDailyEggs} · Benchmarks: {_collectibles.OccupiedLandmarkIds.Count}/8 · Cards: {_collectibles.CollectedCardIds.Count}/{MvpCollectiblesCoordinator.AllSixProjectionCards.Count}",
+            "",
+        };
+        var dict = BuildTranslationLookup();
+        foreach (var entry in GeopediaCatalogCoordinator.MvpEntries)
+        {
+            var article = _geopedia.RenderEntry(entry.Id, TranslationServer.GetLocale().ToString(), dict);
+            var tag = article.Unlocked ? "✓" : "○";
+            lines.Add($"{tag} {article.Title} — {article.GameExample}");
+        }
+        _geopediaLabel.Text = string.Join("\n", lines);
+
+        // Settings buttons
+        _calmToggleBtn.Text = Text(_calmPolicy.CalmCityEnabled ? "hud.calm_protection.active" : "hud.calm_protection.inactive");
+        _ditherToggleBtn.Text = Text("city.settings.dither") + ": " + (_atmosphere.RetroDitherEnabled ? "ON" : "OFF");
+        _daguerreotypeBtn.Text = Text("city.settings.daguerreotype") + ": " + (_atmosphere.DaguerreotypeEnabled ? "ON" : "OFF");
+    }
+
+    private Dictionary<string, string> BuildTranslationLookup()
+    {
+        var d = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var entry in GeopediaCatalogCoordinator.MvpEntries)
+        {
+            d[entry.TitleKey] = Text(entry.TitleKey);
+            d[entry.ExampleKey] = Text(entry.ExampleKey);
+            d[entry.UnitAndEffectKey] = Text(entry.UnitAndEffectKey);
+            d[entry.ModelLimitKey] = Text(entry.ModelLimitKey);
+        }
+        return d;
+    }
+
+    private void RefreshCityHud(
+        double dt,
+        Vector3d pos,
+        double heading,
+        LocomotionMode mode,
+        WeatherAndTimeSnapshot weather,
+        double stress,
+        TerritoryEscalationOutcome attn)
+    {
+        var hours = (int)weather.HourOfDay;
+        var mins = (int)((weather.HourOfDay - hours) * 60.0);
+        var clockText = $"{hours:00}:{mins:00}";
+        var weatherText = weather.IsRaining ? Text("hud.weather.rain") : Text("hud.weather.dry");
+
+        var skyOpenness = 0.85;
+        if (_skyCache is not null && _skyCache.TryGetOpenness(_coordinates.ToGodot(pos + Vector3d.UnitZ * 2.0), out var o))
+            skyOpenness = o;
+
+        var gnssText = mode >= LocomotionMode.Car
+            ? Text("hud.gnss.rtk_fix")
+            : (skyOpenness >= 0.45 ? Text("hud.gnss.autonomous") : Text("hud.gnss.degraded"));
+        var gnssColor = mode >= LocomotionMode.Car
+            ? new Color(0.24f, 0.94f, 0.86f)
+            : (skyOpenness >= 0.45 ? new Color(0.32f, 0.92f, 0.56f) : new Color(0.96f, 0.78f, 0.24f));
+
+        var blips = new List<RadarBlip>();
+        foreach (var bm in _geodeticNetwork.Benchmarks.Values)
+            blips.Add(new RadarBlip(bm.BenchmarkId, bm.PhysicalPositionEnu, new Color(0.35f, 0.92f, 0.48f), "▲", ClampToRim: false));
+
+        if (_fullManifest.Objects.FirstOrDefault(o => o.Id == "office_entry") is { } off)
+            blips.Add(new RadarBlip("office_entry", off.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
+        if (_fullManifest.Objects.FirstOrDefault(o => o.Id == "unload_point") is { } unl)
+            blips.Add(new RadarBlip("unload_point", unl.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
+
+        if (_activeContract is not null)
+        {
+            foreach (var fid in _activeContract.RequiredFeatureIds.Take(8))
+            {
+                Vector3d? tPos = _fullManifest.Objects.FirstOrDefault(o => o.Id == fid)?.PositionEnu;
+                if (tPos is null && _geodeticNetwork.Benchmarks.TryGetValue(fid, out var bmNode))
+                    tPos = bmNode.PhysicalPositionEnu;
+                if (tPos is null) continue;
+                var done = _observedTargetIds.Contains(fid);
+                blips.Add(new RadarBlip(fid, tPos.Value, done ? new Color(0.3f, 0.9f, 0.5f) : new Color(1.0f, 0.82f, 0.22f), "★", ClampToRim: true));
+            }
+        }
+
+        var promptText = Text("city.prompt.controls");
+        if (mode == LocomotionMode.OnFoot && _worldParkedVehicles.Any(v => TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2))
+            promptText = Text("city.board_vehicle");
+
+        var objTitle = _activeContract is not null ? Text(_activeContract.TitleKey)
+            : (_isSandbox ? Text("city.sandbox.title") : Text("city.freeroam.title"));
+        var objDetails = _activeContract is not null
+            ? $"{_observedTargetIds.Count}/{_activeContract.RequiredFeatureIds.Count} targets · Samples: {_fieldSamples.Count}"
+            : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
+
+        var radioTitle = _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
+        var radioSub = !string.IsNullOrEmpty(_audio.CurrentRadioSubtitleKey) ? Text(_audio.CurrentRadioSubtitleKey) : "";
+        var platformKey = $"platform.{mode.ToString().ToLowerInvariant()}.name";
+
+        var autonomyFrac = _carSim is not null
+            ? _carSim.RemainingAutonomySeconds / _carSim.Profile.PhysicalAutonomySeconds
+            : (_locomotion.CurrentProfile.HasFiniteAutonomy
+                ? _locomotion.RemainingAutonomySeconds / _locomotion.CurrentProfile.PhysicalAutonomySeconds
+                : 1.0);
+
+        _gtaHud.Update(
+            dt,
+            new GtaHudState(
+                ClockText: clockText,
+                WeatherText: weatherText,
+                RadioTitleText: radioTitle,
+                RadioSubtitleText: radioSub,
+                BalanceCoords: _ledger.BalanceCoords,
+                Xp: _progression.TotalXp,
+                PlatformTitleText: Text(platformKey),
+                GnssText: gnssText,
+                GnssColor: gnssColor,
+                ShowLidar: mode >= LocomotionMode.Kombi,
+                LidarActive: mode >= LocomotionMode.Kombi && _lidarEnabled,
+                AutonomyFraction: autonomyFrac,
+                StorageUsed: _fieldSamples.Count + (_lidarPointVisibleCount / 400),
+                StorageCapacity: _locomotion.CurrentProfile.VirtualStorageCapacityUnits,
+                ShowGimbalinaStress: mode <= LocomotionMode.Bicycle,
+                GimbalinaStressFraction: stress / 100.0,
+                ShowVehicleCondition: mode >= LocomotionMode.Car,
+                VehicleDamageFraction: _carSim is not null ? _carSim.ConditionDamage / 100.0 : 0.0,
+                ShowAttentionStars: !_calmPolicy.CalmCityEnabled,
+                AttentionStars: (int)attn.ThreatLevel,
+                ObjectiveTitle: objTitle,
+                ObjectiveDetails: objDetails,
+                FeedbackText: _feedbackText,
+                ContextPromptText: promptText,
+                SurveyViewfinderActive: _chaseCamera.Mode == GsaCameraMode.SurveyView,
+                DistrictPopup: _pendingDistrictPopup,
+                VehiclePopup: _pendingVehiclePopup),
+            pos,
+            heading,
+            blips,
+            _coverageSpots);
+
+        _pendingDistrictPopup = null;
+        _pendingVehiclePopup = null;
+    }
+
+    private void SaveCareer()
+    {
+        var state = new SaveGameState(
+            1, SaveTrigger.Manual, _tick,
+            new SaveClockState(_calendar.CalendarTimeSeconds, _calendar.CalendarTimeSeconds),
+            new SaveRngState(1, 1, _fieldSamples.Count),
+            _ledger.ExportState(),
+            _progression.ExportSnapshot(),
+            new SaveEquipmentMountState(
+                _fleet.ActivePlatform.Id,
+                _fleet.OwnedPlatforms.Select(p => p.ToString()).ToArray(),
+                new Dictionary<string, string>()),
+            new BatchCustodyStore().ExportSnapshot(),
+            []);
+        var res = _saveManager.Save(state, SaveTrigger.Manual);
+        _feedbackText = Text(res.Succeeded ? "training.done.save" : "training.load_failed");
+    }
+
+    private void TryLoadCareer()
+    {
+        var res = _saveManager.LoadCurrent();
+        if (!res.Succeeded || res.State is null)
+        {
+            _feedbackText = Text("city.career.welcome");
+            return;
+        }
+        var runtime = SaveGameManager.RestoreRuntime(res.State);
+        _ledger = runtime.Ledger;
+        _progression = runtime.Progression;
+        _calendar = new WorldCalendarAndWeatherController(res.State.Clocks.SimulationTimeSeconds);
+        _feedbackText = Text("training.done.load");
+    }
+}
+
+/// <summary>Full 4 km² North-Up city map control displayed inside the São Datum Tablet.</summary>
+public sealed partial class CityFullMapControl : Control
+{
+    private Vector3d _player;
+    private double _heading;
+    private IReadOnlyList<GeodeticBenchmarkNode> _benchmarks = [];
+    private IReadOnlyList<Vector3d> _waypoints = [];
+
+    public void UpdateMap(
+        Vector3d player,
+        double heading,
+        IReadOnlyList<GeodeticBenchmarkNode> benchmarks,
+        IReadOnlyList<Vector3d> waypoints)
+    {
+        _player = player;
+        _heading = heading;
+        _benchmarks = benchmarks;
+        _waypoints = waypoints;
+        QueueRedraw();
+    }
+
+    public override void _Draw()
+    {
+        var pad = 16f;
+        var span = MathF.Max(80f, MathF.Min(Size.X - pad * 2f, Size.Y - pad * 2f));
+        var origin = new Vector2((Size.X - span) * 0.5f, pad);
+        DrawRect(new Rect2(origin, Vector2.One * span), new Color(0.06f, 0.09f, 0.12f));
+
+        var half = span * 0.5f;
+        // 4 regions: Old Center (SW), Port (NW), Waterfront (SE), Serra (NE)
+        DrawRect(new Rect2(origin + new Vector2(0, half), new Vector2(half, half)), new Color(0.14f, 0.18f, 0.22f));
+        DrawRect(new Rect2(origin, new Vector2(half, half)), new Color(0.18f, 0.17f, 0.14f));
+        DrawRect(new Rect2(origin + new Vector2(half, half), new Vector2(half, half)), new Color(0.10f, 0.22f, 0.30f));
+        DrawRect(new Rect2(origin + new Vector2(half, 0), new Vector2(half, half)), new Color(0.12f, 0.24f, 0.14f));
+
+        Vector2 MapPt(Vector3d enu)
+        {
+            var nx = Math.Clamp((float)((enu.X - 500000.0) / 2000.0), 0f, 1f);
+            var ny = Math.Clamp((float)(1.0 - (enu.Y - 7400000.0) / 2000.0), 0f, 1f);
+            return origin + new Vector2(nx * span, ny * span);
+        }
+
+        // Harbor Basin (Port North), Waterfront Bay (East), Central Park & Arterial Avenue Grid
+        DrawRect(new Rect2(MapPt(new Vector3d(500000, 7402000, 100)), new Vector2(half, span * 0.09f)), new Color(0.06f, 0.22f, 0.42f));
+        DrawRect(new Rect2(MapPt(new Vector3d(501800, 7401000, 100)), new Vector2(span * 0.10f, half)), new Color(0.06f, 0.24f, 0.44f));
+        DrawRect(new Rect2(MapPt(new Vector3d(500285, 7400445, 100)), new Vector2(span * 0.065f, span * 0.065f)), new Color(0.16f, 0.42f, 0.20f));
+
+        var roadCol = new Color(0.30f, 0.34f, 0.38f);
+        for (var n = 7400000.0; n <= 7401800.0; n += 120.0)
+            DrawLine(MapPt(new Vector3d(500000, n, 100)), MapPt(new Vector3d(501850, n, 100)), roadCol, 1.4f);
+        for (var e = 500000.0; e <= 501800.0; e += 120.0)
+            DrawLine(MapPt(new Vector3d(e, 7400000, 100)), MapPt(new Vector3d(e, 7401850, 100)), roadCol, 1.4f);
+
+        var font = ThemeDB.FallbackFont;
+        DrawString(font, origin + new Vector2(10, 22), "PORTO", fontSize: 12);
+        DrawString(font, origin + new Vector2(half + 10, 22), "SERRA", fontSize: 12);
+        DrawString(font, origin + new Vector2(10, half + 22), "CENTRO VELHO", fontSize: 12);
+        DrawString(font, origin + new Vector2(half + 10, half + 22), "ORLA", fontSize: 12);
+
+        foreach (var bm in _benchmarks)
+            DrawCircle(MapPt(bm.PhysicalPositionEnu), 4f, new Color(0.32f, 0.92f, 0.48f));
+        foreach (var wp in _waypoints)
+        {
+            var pt = MapPt(wp);
+            DrawCircle(pt, 6f, Colors.Black);
+            DrawCircle(pt, 4.5f, new Color(1.0f, 0.78f, 0.16f));
+        }
+
+        var here = MapPt(_player);
+        var fwd = new Vector2((float)Math.Cos(_heading), -(float)Math.Sin(_heading));
+        var side = new Vector2(-fwd.Y, fwd.X);
+        DrawColoredPolygon([here + fwd * 8f, here - fwd * 5f + side * 4f, here - fwd * 5f - side * 4f], Colors.Yellow);
+    }
+}

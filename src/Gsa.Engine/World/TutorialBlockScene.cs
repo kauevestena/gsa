@@ -1,12 +1,16 @@
 using Gsa.Core.Geodesy;
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
+using Gsa.Core.Traffic;
 using Gsa.Core.World;
 using Gsa.Engine.Art;
+using Gsa.Engine.Audio;
 using Gsa.Engine.Diagnostics;
+using Gsa.Engine.Localization;
 using Gsa.Engine.Mobility;
 using Gsa.Engine.Sensors;
 using Gsa.Engine.Traffic;
+using Gsa.Engine.Visuals;
 using Gsa.Missions.Campaign;
 using Gsa.Missions.Gameplay;
 using Godot;
@@ -14,7 +18,7 @@ using Dictionary = Godot.Collections.Dictionary;
 
 namespace Gsa.Engine.World;
 
-/// <summary>Renders and collides against one neutral, versioned definition of the tutorial block.</summary>
+/// <summary>Renders and collides against one neutral, versioned definition of the tutorial block with GTA III presentation.</summary>
 public partial class TutorialBlockScene : Node3D
 {
     private const string ManifestPath = "res://world/tutorial-block.json";
@@ -23,6 +27,7 @@ public partial class TutorialBlockScene : Node3D
     private readonly SemanticRegistry _registry = new();
     private WorldSceneManifest _manifest = null!;
     private Node3D? _worldRoot;
+    private Node3D? _visualCityRoot;
     private Node3D? _benchRoot;
     private SkyCacheAdapter? _skyCache;
     private MobilityBenchAdapter? _mobilityBench;
@@ -30,7 +35,15 @@ public partial class TutorialBlockScene : Node3D
     private TrafficBenchAdapter? _trafficBench;
     private LidarBenchRig? _lidarBench;
     private LocomotionSimulator? _liveLocomotion;
+    private GimbalinaStabilizer _gimbalina = new();
+    private WorldCalendarAndWeatherController _calendarWeather = new();
+    private GsaAtmosphereController? _atmosphere;
+    private GsaCityVisualBuilder? _cityVisuals;
+    private GsaThirdPersonCamera? _chaseCamera;
+    private GsaProceduralAudio? _audio;
     private ObstacleBoxEnu[] _liveObstacles = [];
+    private double _lastSpeedMps;
+    private int _renderFrames;
     private bool _smoke;
     private bool _reloaded;
     private int _physicsFrames;
@@ -46,6 +59,7 @@ public partial class TutorialBlockScene : Node3D
     public override void _Ready()
     {
         _smoke = OS.GetCmdlineUserArgs().Any(arg => arg is "--smoke-test" or "--bench-smoke");
+        LocalizationService.EnsureCatalogsLoaded();
         try
         {
             _manifest = WorldSceneManifest.Parse(Godot.FileAccess.GetFileAsString(ManifestPath));
@@ -94,7 +108,7 @@ public partial class TutorialBlockScene : Node3D
             EngineBenchmarkHarness.RunVerificationSuite(this, _benchRoot!, _manifest!, _registry!, GetWorld3D().DirectSpaceState);
             var m2Report = TutorialMissionRunner.RunDefaultHist01InMemoryPlaythrough(_manifest!);
             if (!m2Report.FinalReportPassed || m2Report.FinalStars != 5)
-                throw new System.InvalidOperationException("M2 tutorial loop smoke verification failed.");
+                throw new InvalidOperationException("M2 tutorial loop smoke verification failed.");
             GD.Print($"GSA_M2_LOOP_SMOKE_OK mission={m2Report.MissionId} contract={m2Report.ContractId} stars={m2Report.FinalStars}");
             VerifyPlayableTraining();
             FullCityEnginePrecisionVerifier.Run(_manifest);
@@ -111,6 +125,11 @@ public partial class TutorialBlockScene : Node3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (_chaseCamera is not null && _chaseCamera.HandleInput(@event))
+        {
+            GetViewport().SetInputAsHandled();
+            return;
+        }
         if (TrainingInput(@event))
         {
             GetViewport().SetInputAsHandled();
@@ -166,37 +185,24 @@ public partial class TutorialBlockScene : Node3D
 
     private void BuildInspectionView()
     {
-        AddChild(new WorldEnvironment
-        {
-            Name = "Environment",
-            Environment = new Godot.Environment
-            {
-                BackgroundMode = Godot.Environment.BGMode.Color,
-                BackgroundColor = new Color(0.09f, 0.14f, 0.19f),
-                AmbientLightSource = Godot.Environment.AmbientSource.Color,
-                AmbientLightColor = new Color(0.85f, 0.9f, 1f),
-                AmbientLightEnergy = 0.65f,
-            },
-        });
-        AddChild(new DirectionalLight3D
-        {
-            Name = "Sun",
-            RotationDegrees = new Vector3(-50, -25, 0),
-            LightColor = new Color(1f, 0.94f, 0.82f),
-            LightEnergy = 1.1f,
-            ShadowEnabled = true,
-        });
+        _atmosphere = new GsaAtmosphereController(this, enableRetroDither: false);
+        _visualCityRoot = new Node3D { Name = "CityVisuals" };
+        AddChild(_visualCityRoot);
+        _cityVisuals = new GsaCityVisualBuilder();
+        _cityVisuals.BuildTutorialBlockVisuals(_visualCityRoot, _manifest, _coordinates, _atmosphere);
+
         var camera = new Camera3D
         {
             Name = "InspectionCamera",
-            Position = new Vector3(120, 75, 125),
-            Fov = 55,
+            Position = new Vector3(108, 4.5f, 6.5f),
+            Fov = 58f,
             Near = 0.1f,
-            Far = 600,
+            Far = 550f,
             Current = true,
         };
         AddChild(camera);
-        camera.LookAt(new Vector3(120, 2, -20), Vector3.Up);
+        camera.LookAt(new Vector3(108, 1.4f, -4f), Vector3.Up);
+        _chaseCamera = new GsaThirdPersonCamera(camera);
     }
 
     private void BuildBenchSystems()
@@ -207,7 +213,7 @@ public partial class TutorialBlockScene : Node3D
         _mobilityBench = new MobilityBenchAdapter(_coordinates);
         _mobilityBench.ApplyInputMap(InputActionMap.CreateDefault());
         var startEnu = new Vector3d(500120.0, 7400020.0, 100.0);
-        _mobilityBench.AttachAvatar(_benchRoot, startEnu);
+        _mobilityBench.AttachAvatar(_benchRoot, startEnu, LocomotionMode.Handcart);
 
         _cameraBench = new CameraBenchRig(_coordinates);
         _cameraBench.AttachRig(_benchRoot);
@@ -216,6 +222,7 @@ public partial class TutorialBlockScene : Node3D
         _trafficBench.AttachBenchMeshes(_benchRoot);
 
         _lidarBench = new LidarBenchRig(_coordinates);
+        _audio = new GsaProceduralAudio(this);
 
         _liveObstacles = ObstacleBoxEnu.FromWorldObjects(_manifest.Objects).ToArray();
         _liveLocomotion = new LocomotionSimulator(startEnu, Math.PI / 2.0, LocomotionMode.Handcart, _manifest.Bounds);
@@ -225,39 +232,108 @@ public partial class TutorialBlockScene : Node3D
     {
         if (_mobilityBench is null || _liveLocomotion is null || delta <= 0)
             return;
-        var input = _mobilityBench.SampleLiveInput();
+        GsaScreenshotHelper.TryCaptureOnFrame(this, ++_renderFrames, targetFrame: 18);
+
+        var weather = _calendarWeather.StepPhysical(delta);
+        var input = _mobilityBench.SampleLiveInput(_liveLocomotion.ForwardSpeedMetresPerSecond);
         var previousHeading = _liveLocomotion.HeadingRadians;
-        var result = _liveLocomotion.Step(delta, input, 0.0, 1.0, _liveObstacles);
+        var result = _liveLocomotion.Step(delta, input, 0.0, weather.SurfaceGripMultiplier, _liveObstacles);
         if (input.InteractPressed)
             _liveLocomotion.TryInteract(InteractiveTargetEnu.FromWorldObjects(_manifest.Objects), _liveObstacles);
-        _mobilityBench.SyncAvatarPose(result.PositionEnu, result.HeadingRadians);
+
+        if (result.Collided && result.ImpactDeltaVMetresPerSecond > 1.2)
+        {
+            _gimbalina.ApplyStartle(StartleEventKind.Pothole);
+            _audio?.PlayAlert();
+        }
+        var gimbalinaStep = _gimbalina.Step(delta, isResting: Math.Abs(result.ForwardSpeedMetresPerSecond) < 0.1);
+        var accelPitch = Math.Clamp((_lastSpeedMps - result.ForwardSpeedMetresPerSecond) * 0.04, -0.14, 0.14);
+        var turnRoll = Math.Clamp(input.Steer * Math.Abs(result.ForwardSpeedMetresPerSecond) * 0.03, -0.14, 0.14);
+        _lastSpeedMps = result.ForwardSpeedMetresPerSecond;
+
+        _mobilityBench.SetVisualPlatformMode(_liveLocomotion.Mode);
+        _mobilityBench.SyncAvatarPose(
+            result.PositionEnu,
+            result.HeadingRadians,
+            dtSeconds: delta,
+            forwardSpeedMps: result.ForwardSpeedMetresPerSecond,
+            steerInput: input.Steer,
+            bodyPitchRadians: accelPitch,
+            bodyRollRadians: turnRoll,
+            gimbalinaStress: gimbalinaStep.Stress,
+            gimbalinaResidualPitchRad: gimbalinaStep.ResidualPitchRadians,
+            gimbalinaResidualRollRad: gimbalinaStep.ResidualRollRadians,
+            isNight: weather.IsNight,
+            isBraking: input.Brake > 0.1);
+
+        if (_liveLocomotion.Mode == LocomotionMode.OnFoot)
+            _mobilityBench.SyncParkedVehicle(_benchRoot!, _liveLocomotion.MountedVehicleMode, _liveLocomotion.HandcartPositionEnu, _liveLocomotion.HandcartHeadingRadians);
+        else
+            _mobilityBench.SyncParkedVehicle(_benchRoot!, null, Vector3d.Zero, 0.0);
+
         _trafficBench?.StepAndSync(delta, result.PositionEnu);
+        _cityVisuals?.UpdateAnimatedProps(delta, _trafficBench?.Simulator);
+
+        var focusGodot = _coordinates.ToGodot(result.PositionEnu);
+        _atmosphere?.Update(weather, focusGodot, delta);
+        _audio?.Step(delta, gimbalinaStep.Stress, _liveLocomotion.Mode <= LocomotionMode.Bicycle, weather.IsRaining);
+
         var angleDelta = Math.Atan2(Math.Sin(result.HeadingRadians - previousHeading), Math.Cos(result.HeadingRadians - previousHeading));
         StepTraining(delta, angleDelta / delta);
     }
 
     private static StandardMaterial3D CreateMaterial(WorldBoxObject item)
     {
+        if (item.ObjectClass == "ground")
+        {
+            return GsaRetroTextures.CreateWorldMaterial(
+                "world_ground_asphalt", "asphalt", new Color(0.88f, 0.90f, 0.92f),
+                new Vector3(0.12f, 0.12f, 0.12f), roughness: 0.9f, triplanar: true);
+        }
+        if (item.ObjectClass == "building_shell")
+        {
+            var idx = Math.Abs(item.Id.GetHashCode()) % 3;
+            var (key, tex) = idx switch
+            {
+                0 => ("bldg_shell_comm", "facade_commercial"),
+                1 => ("bldg_shell_res", "facade_residential"),
+                _ => ("bldg_shell_conc", "facade_concrete"),
+            };
+            return GsaRetroTextures.CreateWorldMaterial(
+                key, tex, Colors.White, new Vector3(0.095f, 0.095f, 0.095f), roughness: 0.85f, triplanar: true, nightWindowGlow: true);
+        }
+        if (item.ObjectClass == "building_facade")
+        {
+            return GsaRetroTextures.CreateWorldMaterial(
+                "bldg_target_facade", "facade_commercial", new Color(1.0f, 0.95f, 0.84f),
+                new Vector3(0.12f, 0.18f, 0.12f), roughness: 0.82f, triplanar: true);
+        }
+        if (item.Material == "glass")
+        {
+            return GsaRetroTextures.CreateWorldMaterial(
+                "world_glass_mat", "glass_tower", new Color(0.55f, 0.88f, 0.98f, 0.52f),
+                new Vector3(0.10f, 0.10f, 0.10f), roughness: 0.16f, triplanar: true, transparent: true);
+        }
+        if (item.Material == "water")
+        {
+            return GsaRetroTextures.CreateWorldMaterial(
+                "world_water_mat", "water", new Color(0.35f, 0.72f, 0.95f, 0.78f),
+                new Vector3(0.08f, 0.08f, 0.08f), roughness: 0.12f, triplanar: true, transparent: true);
+        }
+        if (item.ObjectClass == "office_entry")
+            return GsaMeshBuilder.SolidMat(new Color(0.14f, 0.62f, 0.45f), emit: true, emissionEnergy: 0.35f);
+        if (item.ObjectClass == "survey_control")
+            return GsaMeshBuilder.SolidMat(new Color(0.96f, 0.77f, 0.23f), emit: true, emissionEnergy: 0.45f);
+
         var color = item.Material switch
         {
             "asphalt" => new Color(0.19f, 0.22f, 0.24f),
             "concrete" => new Color(0.62f, 0.64f, 0.61f),
-            "glass" => new Color(0.23f, 0.71f, 0.82f, 0.48f),
-            "water" => new Color(0.08f, 0.42f, 0.67f, 0.7f),
             "metal" => new Color(0.63f, 0.68f, 0.71f),
             "vegetation" => new Color(0.22f, 0.45f, 0.23f),
             _ => throw new InvalidOperationException($"Unknown material: {item.Material}"),
         };
-        if (item.ObjectClass == "building_facade")
-            color = new Color(0.76f, 0.66f, 0.49f);
-        else if (item.ObjectClass == "survey_control")
-            color = new Color(0.96f, 0.77f, 0.23f);
-        else if (item.ObjectClass == "office_entry")
-            color = new Color(0.2f, 0.55f, 0.39f);
-        var material = new StandardMaterial3D { AlbedoColor = color, Roughness = 0.9f };
-        if (color.A < 1)
-            material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
-        return material;
+        return new StandardMaterial3D { AlbedoColor = color, Roughness = 0.88f };
     }
 
     private void VerifyWorld()

@@ -1,11 +1,12 @@
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 using Gsa.Core.World;
+using Gsa.Engine.Visuals;
 using Godot;
 
 namespace Gsa.Engine.Mobility;
 
-/// <summary>Bridges core locomotion and remappable InputActionMap with Godot InputMap and scene physics.</summary>
+/// <summary>Bridges core locomotion and remappable InputActionMap with Godot InputMap, 3D platform rigs, and physics.</summary>
 public sealed class MobilityBenchAdapter
 {
     public const string ActionPrefix = "gsa_";
@@ -13,6 +14,10 @@ public sealed class MobilityBenchAdapter
 
     private readonly GodotCoordinateAdapter _coordinates;
     private CharacterBody3D? _avatarBody;
+    private PlayerVisualRig? _activeRig;
+    private LocomotionMode _visualMode = LocomotionMode.Handcart;
+    private Node3D? _parkedVehicleNode;
+    private LocomotionMode? _parkedVehicleMode;
     private InputActionMap _actionMap = InputActionMap.CreateDefault();
 
     public MobilityBenchAdapter(GodotCoordinateAdapter coordinates)
@@ -23,7 +28,7 @@ public sealed class MobilityBenchAdapter
 
     public InputActionMap CurrentActionMap => _actionMap;
 
-    public CharacterBody3D AttachAvatar(Node3D parent, Vector3d initialPositionEnu)
+    public CharacterBody3D AttachAvatar(Node3D parent, Vector3d initialPositionEnu, LocomotionMode initialMode = LocomotionMode.Handcart)
     {
         ArgumentNullException.ThrowIfNull(parent);
         var body = new CharacterBody3D
@@ -33,13 +38,9 @@ public sealed class MobilityBenchAdapter
             CollisionLayer = 2,
             CollisionMask = 1,
         };
-        body.AddChild(new MeshInstance3D
-        {
-            Name = "HandcartMesh",
-            Position = new Vector3(0, 0.55f, 0),
-            Mesh = new BoxMesh { Size = new Vector3(0.9f, 1.1f, 0.9f) },
-            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.86f, 0.48f, 0.16f) },
-        });
+        _visualMode = initialMode;
+        _activeRig = GsaMeshBuilder.BuildPlayerRig(initialMode);
+        body.AddChild(_activeRig.Root);
         body.AddChild(new CollisionShape3D
         {
             Name = "HandcartCollision",
@@ -49,6 +50,52 @@ public sealed class MobilityBenchAdapter
         parent.AddChild(body);
         _avatarBody = body;
         return body;
+    }
+
+    public void SetVisualPlatformMode(LocomotionMode mode)
+    {
+        if (_avatarBody is null || mode == _visualMode)
+            return;
+        _visualMode = mode;
+        if (_activeRig is not null)
+        {
+            _avatarBody.RemoveChild(_activeRig.Root);
+            _activeRig.Root.QueueFree();
+        }
+        _activeRig = GsaMeshBuilder.BuildPlayerRig(mode);
+        _avatarBody.AddChild(_activeRig.Root);
+    }
+
+    public void SyncParkedVehicle(Node3D parent, LocomotionMode? parkedMode, Vector3d parkedPosEnu, double parkedHeadingRadians)
+    {
+        if (parkedMode is null || parkedMode == LocomotionMode.OnFoot)
+        {
+            if (_parkedVehicleNode is not null)
+            {
+                _parkedVehicleNode.GetParent()?.RemoveChild(_parkedVehicleNode);
+                _parkedVehicleNode.QueueFree();
+                _parkedVehicleNode = null;
+                _parkedVehicleMode = null;
+            }
+            return;
+        }
+
+        if (_parkedVehicleNode is null || _parkedVehicleMode != parkedMode)
+        {
+            if (_parkedVehicleNode is not null)
+            {
+                _parkedVehicleNode.GetParent()?.RemoveChild(_parkedVehicleNode);
+                _parkedVehicleNode.QueueFree();
+            }
+            var parkedRig = GsaMeshBuilder.BuildPlayerRig(parkedMode.Value);
+            _parkedVehicleNode = parkedRig.Root;
+            _parkedVehicleNode.Name = "ParkedPlatformProxy";
+            _parkedVehicleMode = parkedMode;
+            parent.AddChild(_parkedVehicleNode);
+        }
+
+        _parkedVehicleNode.Position = _coordinates.ToGodot(parkedPosEnu);
+        _parkedVehicleNode.Rotation = new Vector3(0, (float)(parkedHeadingRadians - Math.PI / 2.0), 0);
     }
 
     public void ApplyInputMap(InputActionMap actionMap)
@@ -87,24 +134,72 @@ public sealed class MobilityBenchAdapter
         return InputActionMap.FromJson(Godot.FileAccess.GetFileAsString(userPath));
     }
 
-    public LocomotionInput SampleLiveInput()
+    public LocomotionInput SampleLiveInput(double currentForwardSpeedMps = 0.0)
     {
         double Read(GameInputAction action) =>
             Input.IsActionPressed(ActionPrefix + InputActionMap.WireName(action)) ? 1.0 : 0.0;
 
-        var throttle = Read(GameInputAction.Accelerate);
-        var brake = Read(GameInputAction.Brake);
-        var steer = Read(GameInputAction.SteerLeft) - Read(GameInputAction.SteerRight);
+        var accel = Read(GameInputAction.Accelerate);
+        if (accel <= 0.0 && Input.IsPhysicalKeyPressed(Key.Up))
+            accel = 1.0;
+
+        var brakeKey = Read(GameInputAction.Brake);
+        if (brakeKey <= 0.0 && Input.IsPhysicalKeyPressed(Key.Down))
+            brakeKey = 1.0;
+
+        var left = Read(GameInputAction.SteerLeft);
+        if (left <= 0.0 && Input.IsPhysicalKeyPressed(Key.Left))
+            left = 1.0;
+
+        var right = Read(GameInputAction.SteerRight);
+        if (right <= 0.0 && Input.IsPhysicalKeyPressed(Key.Right))
+            right = 1.0;
+
+        var throttle = accel;
+        var brake = brakeKey;
+        if (accel <= 0.0 && brakeKey > 0.0 && currentForwardSpeedMps <= 0.08)
+        {
+            throttle = -brakeKey;
+            brake = 0.0;
+        }
+
+        var steer = left - right;
         var interact = Input.IsActionJustPressed(ActionPrefix + InputActionMap.WireName(GameInputAction.Interact));
         return new LocomotionInput(throttle, brake, steer, interact);
     }
 
-    public void SyncAvatarPose(Vector3d positionEnu, double headingRadians)
+    public void SyncAvatarPose(
+        Vector3d positionEnu,
+        double headingRadians,
+        double dtSeconds = 0.0,
+        double forwardSpeedMps = 0.0,
+        double steerInput = 0.0,
+        double bodyPitchRadians = 0.0,
+        double bodyRollRadians = 0.0,
+        double gimbalinaStress = 0.0,
+        double gimbalinaResidualPitchRad = 0.0,
+        double gimbalinaResidualRollRad = 0.0,
+        bool isNight = false,
+        bool isBraking = false)
     {
         if (_avatarBody is null)
             return;
         _avatarBody.Position = _coordinates.ToGodot(positionEnu);
         _avatarBody.Rotation = new Vector3(0, (float)(headingRadians - Math.PI / 2.0), 0);
+        if (_activeRig is not null && dtSeconds > 0.0)
+        {
+            _activeRig.Animate(
+                dtSeconds,
+                forwardSpeedMps,
+                steerInput,
+                bodyPitchRadians,
+                bodyRollRadians,
+                gimbalinaStress,
+                gimbalinaResidualPitchRad,
+                gimbalinaResidualRollRad,
+                isNight,
+                isBraking);
+        }
     }
 
     public void RunVerificationSuite(WorldSceneManifest manifest)

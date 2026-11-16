@@ -1,6 +1,8 @@
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 using Gsa.Core.Sensors.Camera;
+using Gsa.Core.Sensors.Gnss;
+using Gsa.Engine.UI;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Gameplay;
 using Godot;
@@ -13,17 +15,16 @@ public partial class TutorialBlockScene
     private TrainingContractSession _training = null!;
     private CameraCaptureScheduler _liveCamera = null!;
     private CameraVisibilityCandidate[] _liveCandidates = [];
-    private Camera3D _playerCamera = null!;
-    private Label _trainingStatus = null!;
-    private Label _trainingFeedback = null!;
-    private Label _trainingTargets = null!;
+    private GsaGtaHud _gtaHud = null!;
     private readonly System.Collections.Generic.Dictionary<string, Button> _trainingButtons = new();
     private long _liveTick;
     private bool _captureRequested;
-    private bool _surveyView;
     private double _hudElapsed;
     private string? _smokeSaveDirectory;
     private string _lastObservation = "—";
+    private string _lastFeedbackText = "";
+    private string? _pendingVehiclePopup;
+    private string? _pendingDistrictPopup;
 
     private static string Text(string key) => TranslationServer.Translate(key).ToString();
 
@@ -37,69 +38,59 @@ public partial class TutorialBlockScene
         _liveCamera = new CameraCaptureScheduler("training_" + Guid.NewGuid().ToString("N"));
         _liveCandidates = _manifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
         _liveLocomotion!.RepositionSafeAfterRecovery(TrainingContractSession.SpawnPosition, headingRadians: Math.PI);
-        _playerCamera = GetNode<Camera3D>("InspectionCamera");
+        _lastSpeedMps = 0.0;
         BuildTrainingHud();
+
         foreach (var id in TrainingContractSession.TargetIds.Concat(new[] { "office_entry", "unload_point" }))
         {
             var item = _manifest.Objects.Single(o => o.Id == id);
             var label = new Label3D
             {
                 Text = id.StartsWith("facade_", StringComparison.Ordinal) ? id[7..] : Text("training." + id),
-                Position = _coordinates.ToGodot(item.PositionEnu + new Vector3d(0, 0, 3)),
-                FontSize = 64,
-                PixelSize = 0.015f,
+                Position = _coordinates.ToGodot(item.PositionEnu + new Vector3d(0, 0, 2.4)),
+                FontSize = 28,
+                PixelSize = 0.006f,
                 Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
-                Modulate = new Color(1, 0.85f, 0.3f),
-                NoDepthTest = true,
+                Modulate = id.StartsWith("facade_", StringComparison.Ordinal)
+                    ? new Color(1f, 0.85f, 0.25f)
+                    : (id == "office_entry" ? new Color(0.25f, 0.95f, 0.88f) : new Color(1f, 0.78f, 0.28f)),
+                OutlineModulate = Colors.Black,
+                OutlineSize = 5,
+                NoDepthTest = false,
             };
             AddChild(label);
         }
+
+        _pendingDistrictPopup = Text("district.old_center.commerce");
+        _pendingVehiclePopup = Text("vehicle.handcart.banner");
         if (loaded is { Succeeded: false } && loaded.Status != Gsa.Missions.Persistence.SaveLoadStatus.FileNotFound)
-            _trainingFeedback.Text = Text("training.load_failed");
+            _lastFeedbackText = Text("training.load_failed");
         else if (loaded?.Succeeded == true)
-            _trainingFeedback.Text = Text("training.loaded");
+            _lastFeedbackText = Text("training.loaded");
+        else
+            _lastFeedbackText = Text("training.welcome");
+
+        // Snap camera behind player immediately on frame 0
+        _chaseCamera?.Snap(
+            _coordinates.ToGodot(_liveLocomotion.PositionEnu),
+            _liveLocomotion.HeadingRadians,
+            _liveLocomotion.Mode);
         RefreshTrainingHud();
     }
 
     private void BuildTrainingHud()
     {
-        var canvas = new CanvasLayer { Name = "TrainingHud" };
-        AddChild(canvas);
-        var panel = new PanelContainer { Position = new Vector2(12, 12), CustomMinimumSize = new Vector2(330, 0), AnchorBottom = 1, OffsetBottom = -12 };
-        canvas.AddChild(panel);
-        var margin = new MarginContainer();
-        foreach (var side in new[] { "left", "right", "top", "bottom" }) margin.AddThemeConstantOverride("margin_" + side, 10);
-        panel.AddChild(margin);
-        var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
-        margin.AddChild(scroll);
-        var box = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        box.AddThemeConstantOverride("separation", 6);
-        scroll.AddChild(box);
-        Label AddLabel(string value, int fontSize = 14)
+        _gtaHud = new GsaGtaHud(this);
+        _gtaHud.ConfigureRadar(_manifest, 92f);
+
+        foreach (var action in new[] { "accept", "capture", "offload", "process", "deliver", "notebook", "view", "save", "load" })
         {
-            var label = new Label { Text = value, CustomMinimumSize = new Vector2(310, 0),
-                AutowrapMode = TextServer.AutowrapMode.WordSmart };
-            label.AddThemeFontSizeOverride("font_size", fontSize);
-            box.AddChild(label);
-            return label;
+            var labelKey = action == "notebook" ? "notebook.open" : "training.action." + action;
+            var btn = _gtaHud.AddQuickButton(Text(labelKey), () => TrainingAction(action));
+            _trainingButtons.Add(action, btn);
         }
-        AddLabel(Text("training.title"), 20);
-        var notebookButton = new Button { Text = Text("notebook.open"), FocusMode = Control.FocusModeEnum.None };
-        notebookButton.Pressed += () => TrainingAction("notebook");
-        box.AddChild(notebookButton);
-        _trainingButtons.Add("notebook", notebookButton);
-        AddLabel(Text("training.instructions"));
-        _trainingStatus = AddLabel("");
-        _trainingTargets = AddLabel("");
-        foreach (var action in new[] { "accept", "capture", "offload", "process", "deliver", "save", "load", "view" })
-        {
-            var button = new Button { Text = Text("training.action." + action), FocusMode = Control.FocusModeEnum.None };
-            button.Pressed += () => TrainingAction(action);
-            _trainingButtons.Add(action, button);
-            box.AddChild(button);
-        }
-        _trainingFeedback = AddLabel(Text("training.welcome"));
-        BuildSurveyNotebook(canvas);
+
+        BuildSurveyNotebook(_gtaHud.Layer);
     }
 
     private void TrainingAction(string action)
@@ -110,18 +101,37 @@ public partial class TutorialBlockScene
             bool succeeded;
             switch (action)
             {
-                case "accept": succeeded = _training.Accept(position); break;
+                case "accept":
+                    succeeded = _training.Accept(position);
+                    if (succeeded) _audio?.PlayOffloadChime();
+                    break;
                 case "capture":
                     succeeded = _training.CanCapture;
                     _captureRequested = succeeded;
                     break;
                 case "offload":
                     succeeded = _training.Offload(position);
-                    if (succeeded) _liveLocomotion.RefillHandcartResources(refillAutonomy: false);
+                    if (succeeded)
+                    {
+                        _liveLocomotion.RefillHandcartResources(refillAutonomy: false);
+                        _audio?.PlayOffloadChime();
+                    }
                     break;
-                case "process": succeeded = _training.Process(position); break;
-                case "deliver": succeeded = _training.Deliver(position); break;
-                case "save": succeeded = _training.Save().Succeeded; break;
+                case "process":
+                    succeeded = _training.Process(position);
+                    if (succeeded)
+                    {
+                        if (_training.Report?.Passed == true) _audio?.PlayPaymentSuccess();
+                        else _audio?.PlayAlert();
+                    }
+                    break;
+                case "deliver":
+                    succeeded = _training.Deliver(position);
+                    if (succeeded) _audio?.PlayPaymentSuccess();
+                    break;
+                case "save":
+                    succeeded = _training.Save().Succeeded;
+                    break;
                 case "load":
                     succeeded = _training.Load().Succeeded;
                     if (succeeded)
@@ -131,18 +141,60 @@ public partial class TutorialBlockScene
                         _liveLocomotion.RepositionSafeAfterRecovery(TrainingContractSession.SpawnPosition, headingRadians: Math.PI);
                     }
                     break;
-                case "notebook": _notebookPanel.Visible = !_notebookPanel.Visible; succeeded = true; break;
-                case "view": _surveyView = !_surveyView; succeeded = true; break;
-                default: return;
+                case "notebook":
+                    _notebookPanel.Visible = !_notebookPanel.Visible;
+                    succeeded = true;
+                    break;
+                case "view":
+                    _chaseCamera?.CycleMode();
+                    succeeded = true;
+                    break;
+                case "mount":
+                    succeeded = _liveLocomotion.TryToggleMount(_liveObstacles, out _);
+                    if (succeeded)
+                        _pendingVehiclePopup = Text(_liveLocomotion.Mode == LocomotionMode.OnFoot ? "vehicle.on_foot.banner" : "vehicle.handcart.banner");
+                    break;
+                case "corn":
+                    succeeded = _gimbalina.TryFeedCorn();
+                    if (succeeded) _audio?.PlayOffloadChime();
+                    break;
+                case "horn":
+                    _audio?.PlayHorn(_liveLocomotion.Mode);
+                    if (_liveLocomotion.Mode <= LocomotionMode.Bicycle)
+                        _gimbalina.ApplyStartle(StartleEventKind.Horn);
+                    succeeded = true;
+                    break;
+                case "radio":
+                    _audio?.CycleRadioStation();
+                    succeeded = true;
+                    break;
+                case "weather":
+                    _calendarWeather.SetWeather(!_calendarWeather.IsRaining, 0.75);
+                    succeeded = true;
+                    break;
+                case "time":
+                    _calendarWeather.AdvanceCalendarSeconds(7200.0);
+                    succeeded = true;
+                    break;
+                case "dither":
+                    if (_atmosphere is not null)
+                        _atmosphere.SetRetroDitherEnabled(!_atmosphere.RetroDitherEnabled);
+                    succeeded = true;
+                    break;
+                default:
+                    return;
             }
-            _trainingFeedback.Text = Text(succeeded ? "training.done." + action : "training.blocked");
-            if (action == "process" && succeeded)
-                _trainingFeedback.Text = Text(_training.Report!.Passed ? "training.qc_passed" : "training.qc_rework");
+            if (action is "accept" or "capture" or "offload" or "process" or "deliver" or "save" or "load" or "notebook" or "view")
+            {
+                _lastFeedbackText = Text(succeeded ? "training.done." + action : "training.blocked");
+                if (action == "process" && succeeded)
+                    _lastFeedbackText = Text(_training.Report!.Passed ? "training.qc_passed" : "training.qc_rework");
+            }
             RefreshTrainingHud();
         }
         catch (Exception error) when (!_smoke && error is IOException or UnauthorizedAccessException)
         {
-            _trainingFeedback.Text = Text("training.load_failed");
+            _lastFeedbackText = Text("training.load_failed");
             GD.PushWarning(error.Message);
         }
     }
@@ -150,10 +202,42 @@ public partial class TutorialBlockScene
     private bool TrainingInput(InputEvent input)
     {
         if (input is not InputEventKey { Pressed: true, Echo: false } key) return false;
-        var action = key.PhysicalKeycode switch { Key.R => "notebook", Key.C => "capture", Key.V => "view", Key.F5 => "save", Key.F9 => "load", _ => null };
+        var action = key.PhysicalKeycode switch
+        {
+            Key.R or Key.Tab or Key.M => "notebook",
+            Key.C => "capture",
+            Key.V => "view",
+            Key.F => "mount",
+            Key.G => "corn",
+            Key.H => "horn",
+            Key.X => "radio",
+            Key.P => "weather",
+            Key.T => "time",
+            Key.F5 => "save",
+            Key.F9 => "load",
+            Key.F10 => "dither",
+            Key.E => GetContextualInteractAction(),
+            _ => null,
+        };
         if (action is null) return false;
         TrainingAction(action);
         return true;
+    }
+
+    private string? GetContextualInteractAction()
+    {
+        var pos = _liveLocomotion!.PositionEnu;
+        if (_training.UnloadDistance(pos) <= 5.0 && _training.PendingCount > 0)
+            return "offload";
+        if (_training.OfficeDistance(pos) <= 8.0)
+        {
+            if (_training.Contract.State == ContractState.Disponivel) return "accept";
+            if (_training.Contract.State == ContractState.ProntoEntregar) return "deliver";
+            if (_training.PendingCount == 0 && _training.ProtectedCount > 0 &&
+                _training.Contract.State is (ContractState.Coletando or ContractState.Retrabalho))
+                return "process";
+        }
+        return null;
     }
 
     private void StepTraining(double delta, double angularVelocity)
@@ -165,20 +249,26 @@ public partial class TutorialBlockScene
             CaptureLiveFrame(angularVelocity);
         }
         _liveTick++;
-        var at = _coordinates.ToGodot(_liveLocomotion!.PositionEnu);
-        if (_surveyView)
+
+        if (_chaseCamera is not null && _liveLocomotion is not null)
         {
-            _playerCamera.Position = at + Vector3.Up;
-            var direction = new Vector3((float)Math.Cos(_liveLocomotion.HeadingRadians), 0, -(float)Math.Sin(_liveLocomotion.HeadingRadians));
-            _playerCamera.LookAt(_playerCamera.Position + direction, Vector3.Up);
+            _chaseCamera.Update(
+                delta,
+                _coordinates.ToGodot(_liveLocomotion.PositionEnu),
+                _liveLocomotion.HeadingRadians,
+                _liveLocomotion.ForwardSpeedMetresPerSecond,
+                _liveLocomotion.Mode,
+                GetWorld3D().DirectSpaceState,
+                _gimbalina.Stress,
+                _training.ClockSeconds);
         }
-        else
-        {
-            _playerCamera.Position = at + new Vector3(0, 22, 18);
-            _playerCamera.LookAt(at, Vector3.Up);
-        }
+
         _hudElapsed += delta;
-        if (_hudElapsed >= 0.25) { _hudElapsed = 0; RefreshTrainingHud(); }
+        if (_hudElapsed >= 0.1)
+        {
+            _hudElapsed = 0;
+            RefreshTrainingHud(_hudElapsed == 0 ? 0.1 : delta);
+        }
     }
 
     private void CaptureLiveFrame(double angularVelocity = 0)
@@ -187,8 +277,10 @@ public partial class TutorialBlockScene
         var mount = CameraMountEstimate.ForwardFacing;
         var origin = body.PositionEnu + Vector3d.UnitZ;
         var time = _training.ClockSeconds;
+        var baseBody = Quaterniond.FromAxisAngle(Vector3d.UnitZ, body.HeadingRadians);
         EstimatedBodyPose Pose(double dt) => new(time + dt, origin + body.VelocityEnu * dt,
-            Quaterniond.FromAxisAngle(Vector3d.UnitZ, body.HeadingRadians + angularVelocity * dt));
+            _gimbalina.ComputeEffectiveBodyToMap(
+                Quaterniond.FromAxisAngle(Vector3d.UnitZ, body.HeadingRadians + angularVelocity * dt), dt));
         var start = CameraGeometry.CameraToMap(Pose(0), mount);
         var end = CameraGeometry.CameraToMap(Pose(CameraSensorProfile.Initial.DayExposureSeconds), mount);
         var readout = CameraGeometry.CameraToMap(Pose(CameraSensorProfile.Initial.ReadoutTimeSeconds), mount);
@@ -205,32 +297,111 @@ public partial class TutorialBlockScene
             if (semantic.Count > 0 && semantic["id"].AsString() == targetId) return false;
             return from.DistanceTo(hit["position"].AsVector3()) < from.DistanceTo(to) - 0.01f;
         }
+        var weatherSnap = _calendarWeather.ExportSnapshot();
+        var envSnap = weatherSnap.ToCameraEnvironment();
         if (_training.CanCapture && _liveCamera.TryEnqueueSimulatedCapture(new CameraCaptureRequest(
-            _liveTick, time, start, end, readout, Pose(0), mount, CameraEnvironmentSnapshot.DryDay,
+            _liveTick, time, start, end, readout, new EstimatedBodyPose(time, origin, baseBody), mount, envSnap,
             _liveCandidates, Occluded), body, out var sample, out _) && sample is not null)
         {
             _training.RecordObservation(sample);
+            _audio?.PlayShutter();
             _lastObservation = string.Join(", ", sample.ObservedFeatures.Select(f => f.TargetId));
             if (_lastObservation.Length == 0) _lastObservation = Text("training.nothing_visible");
-            _trainingFeedback.Text = Text(sample.Quality.Passed ? "training.capture_ok" : "training.capture_blurred");
+            _lastFeedbackText = Text(sample.Quality.Passed ? "training.capture_ok" : "training.capture_blurred");
         }
         // Ownership moves to custody; do not retain a second unbounded thumbnail buffer.
         _liveCamera.FlushBatchManifest("live_flush");
         RefreshTrainingHud();
     }
 
-    private void RefreshTrainingHud()
+    private void RefreshTrainingHud(double dt = 0.1)
     {
         RefreshSurveyNotebook();
-        var position = _liveLocomotion!.PositionEnu;
+        if (_gtaHud is null || _liveLocomotion is null)
+            return;
+
+        var position = _liveLocomotion.PositionEnu;
+        var weather = _calendarWeather.ExportSnapshot();
         var stateKey = "training.state." + _training.Contract.State;
-        _trainingStatus.Text = string.Format(Text("training.status"), Text(stateKey), _training.SampleCount,
-            _training.PendingCount, _training.ProtectedCount, _training.Ledger.BalanceCoords,
-            _training.OfficeDistance(position).ToString("F0"), _training.UnloadDistance(position).ToString("F0"));
-        _trainingButtons["save"].Disabled = _training.SaveBlocked;
         var resolved = _training.ResolvedTargetIds;
-        _trainingTargets.Text = Text("training.targets") + " " + string.Join(" · ", TrainingContractSession.TargetIds
-            .Select(id => id[7..] + (resolved.Contains(id) ? " ✓" : " …"))) + "\n" + Text("training.observed") + " " + _lastObservation;
+
+        var targetsStr = string.Join(" · ", TrainingContractSession.TargetIds
+            .Select(id => id[7..] + (resolved.Contains(id) ? " ✓" : " …")));
+        var objDetails = $"{Text(stateKey)} · {Text("training.targets")} {targetsStr}\n" +
+                         $"O: {_training.OfficeDistance(position):F0}m · D: {_training.UnloadDistance(position):F0}m · " +
+                         $"{Text("training.observed")} {_lastObservation}";
+
+        var skyOpenness = 0.85;
+        if (_skyCache is not null && _skyCache.TryGetOpenness(_coordinates.ToGodot(position + Vector3d.UnitZ * 2.0), out var o))
+            skyOpenness = o;
+        var gnssText = skyOpenness >= 0.45 ? Text("hud.gnss.autonomous") : Text("hud.gnss.degraded");
+        var gnssColor = skyOpenness >= 0.45 ? new Color(0.32f, 0.92f, 0.56f) : new Color(0.96f, 0.78f, 0.24f);
+
+        var hours = (int)weather.HourOfDay;
+        var mins = (int)((weather.HourOfDay - hours) * 60.0);
+        var clockText = $"{hours:00}:{mins:00}";
+        var weatherText = weather.IsRaining ? Text("hud.weather.rain") : Text("hud.weather.dry");
+
+        var blips = new List<RadarBlip>();
+        foreach (var id in TrainingContractSession.TargetIds)
+        {
+            var obj = _manifest.Objects.Single(x => x.Id == id);
+            var isDone = resolved.Contains(id);
+            blips.Add(new RadarBlip(id, obj.PositionEnu, isDone ? new Color(0.28f, 0.92f, 0.54f) : new Color(1.0f, 0.80f, 0.22f), id[7..]));
+        }
+        var officeObj = _manifest.Objects.Single(x => x.Id == "office_entry");
+        var unloadObj = _manifest.Objects.Single(x => x.Id == "unload_point");
+        blips.Add(new RadarBlip("office_entry", officeObj.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
+        blips.Add(new RadarBlip("unload_point", unloadObj.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
+        foreach (var ctrl in _manifest.Objects.Where(x => x.ObjectClass == "survey_control"))
+            blips.Add(new RadarBlip(ctrl.Id, ctrl.PositionEnu, new Color(0.38f, 0.95f, 0.45f), "▲", ClampToRim: false));
+
+        var coverageSpots = _training.Samples.Select(s => s.EstimatedPose.PositionEnu).ToArray();
+
+        var radioTitle = _audio is not null && _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
+        var radioSub = _audio is not null && !string.IsNullOrEmpty(_audio.CurrentRadioSubtitleKey) ? Text(_audio.CurrentRadioSubtitleKey) : "";
+
+        _gtaHud.Update(
+            dt,
+            new GtaHudState(
+                ClockText: clockText,
+                WeatherText: weatherText,
+                RadioTitleText: radioTitle,
+                RadioSubtitleText: radioSub,
+                BalanceCoords: _training.Ledger.BalanceCoords,
+                Xp: _training.Progression.TotalXp,
+                PlatformTitleText: Text(_liveLocomotion.Mode == LocomotionMode.OnFoot ? "platform.on_foot.name" : "platform.handcart.name"),
+                GnssText: gnssText,
+                GnssColor: gnssColor,
+                ShowLidar: false,
+                LidarActive: false,
+                AutonomyFraction: _liveLocomotion.CurrentProfile.HasFiniteAutonomy
+                    ? _liveLocomotion.RemainingAutonomySeconds / _liveLocomotion.CurrentProfile.PhysicalAutonomySeconds
+                    : 1.0,
+                StorageUsed: _training.SampleCount,
+                StorageCapacity: TrainingContractSession.SampleLimit,
+                ShowGimbalinaStress: true,
+                GimbalinaStressFraction: _gimbalina.Stress / 100.0,
+                ShowVehicleCondition: false,
+                VehicleDamageFraction: 0.0,
+                ShowAttentionStars: false,
+                AttentionStars: 0,
+                ObjectiveTitle: Text("training.title"),
+                ObjectiveDetails: objDetails,
+                FeedbackText: _lastFeedbackText,
+                ContextPromptText: Text("hud.prompt.controls"),
+                SurveyViewfinderActive: _chaseCamera?.Mode == GsaCameraMode.SurveyView,
+                DistrictPopup: _pendingDistrictPopup,
+                VehiclePopup: _pendingVehiclePopup),
+            position,
+            _liveLocomotion.HeadingRadians,
+            blips,
+            coverageSpots);
+
+        _pendingDistrictPopup = null;
+        _pendingVehiclePopup = null;
+
+        _trainingButtons["save"].Disabled = _training.SaveBlocked;
         _trainingButtons["accept"].Disabled = _training.SaveBlocked || _training.Contract.State != ContractState.Disponivel || _training.OfficeDistance(position) > 8;
         _trainingButtons["capture"].Disabled = !_training.CanCapture;
         _trainingButtons["offload"].Disabled = _training.PendingCount == 0 || _training.UnloadDistance(position) > 5;

@@ -28,24 +28,31 @@ public partial class TutorialBlockScene
 
     private void BuildSurveyNotebook(CanvasLayer canvas)
     {
-        var controls = new PanelContainer
-        {
-            AnchorTop = 1, AnchorBottom = 1, AnchorRight = 1,
-            OffsetLeft = 354, OffsetRight = -12, OffsetTop = -96, OffsetBottom = -12,
-        };
-        canvas.AddChild(controls);
-        var controlsLabel = NotebookLabel(Text("training.controls") + "\n" + Text("notebook.shortcut"));
-        controlsLabel.AddThemeFontSizeOverride("font_size", 12);
-        controls.AddChild(controlsLabel);
         _notebookPanel = new PanelContainer
         {
-            Name = "SurveyNotebook", AnchorRight = 1, AnchorBottom = 1,
-            OffsetLeft = 354, OffsetTop = 12, OffsetRight = -12, OffsetBottom = -108, Visible = false,
+            Name = "SurveyNotebook",
+            AnchorLeft = 0.14f,
+            AnchorTop = 0.08f,
+            AnchorRight = 0.86f,
+            AnchorBottom = 0.86f,
+            Visible = false,
         };
         _notebookPanel.AddThemeStyleboxOverride("panel", new StyleBoxFlat
         {
-            BgColor = new Color(0.035f, 0.055f, 0.07f, 1),
-            ContentMarginLeft = 8, ContentMarginRight = 8, ContentMarginTop = 6, ContentMarginBottom = 6,
+            BgColor = new Color(0.04f, 0.06f, 0.08f, 0.96f),
+            BorderColor = new Color(0.32f, 0.44f, 0.50f, 0.95f),
+            BorderWidthBottom = 2,
+            BorderWidthLeft = 2,
+            BorderWidthRight = 2,
+            BorderWidthTop = 2,
+            CornerRadiusBottomLeft = 6,
+            CornerRadiusBottomRight = 6,
+            CornerRadiusTopLeft = 6,
+            CornerRadiusTopRight = 6,
+            ContentMarginLeft = 12,
+            ContentMarginRight = 12,
+            ContentMarginTop = 10,
+            ContentMarginBottom = 10,
         });
         canvas.AddChild(_notebookPanel);
         var layout = new VBoxContainer();

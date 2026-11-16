@@ -970,3 +970,309 @@ msgstr "dados insuficientes"
 
 msgid "notebook.unit.ratio"
 msgstr "fração"
+
+msgid "bootstrap.play_career"
+msgstr "Modo Carreira — Cidade de São Datum"
+
+msgid "bootstrap.play_sandbox"
+msgstr "Cidade Livre (4 Regiões e 7 Veículos)"
+
+msgid "bootstrap.quit"
+msgstr "Sair"
+
+msgid "hud.weather.dry"
+msgstr "SECO"
+
+msgid "hud.weather.rain"
+msgstr "CHUVA"
+
+msgid "hud.prompt.controls"
+msgstr "WASD Mover · E Interagir · C Foto · V Câmera · F Descer · G Milho · H Buzina · X Rádio · R Caderno"
+
+msgid "city.prompt.controls"
+msgstr "WASD Dirigir · C Foto · L LiDAR · B Veículo · F Descer · V Câm · Tab Tablet · X Rádio · T Hora · P Chuva"
+
+msgid "platform.on_foot.name"
+msgstr "A Pé"
+
+msgid "platform.handcart.name"
+msgstr "N0 · Carrinho e Gimbalina"
+
+msgid "platform.bicycle.name"
+msgstr "N1 · Bicicleta Cargueira"
+
+msgid "platform.scooter.name"
+msgstr "N2 · Motoneta"
+
+msgid "platform.car.name"
+msgstr "N3 · Carro Popular"
+
+msgid "platform.kombi.name"
+msgstr "N4 · Kombi da Firma (LiDAR)"
+
+msgid "platform.pickup.name"
+msgstr "N5 · Picape 4x4"
+
+msgid "platform.van.name"
+msgstr "N6 · Van MMS Profissional"
+
+msgid "district.old_center.commerce"
+msgstr "CENTRO VELHO — RUA DO COMÉRCIO"
+
+msgid "district.old_center"
+msgstr "CENTRO VELHO — SÃO DATUM"
+
+msgid "district.port"
+msgstr "PORTO E DISTRITO INDUSTRIAL"
+
+msgid "district.waterfront"
+msgstr "ORLA E ZONA SUL"
+
+msgid "district.serra"
+msgstr "SERRA E PERIFERIA"
+
+msgid "vehicle.handcart.banner"
+msgstr "CARRINHO DE MÃO · NÍVEL 0"
+
+msgid "vehicle.on_foot.banner"
+msgstr "A PÉ · ENGENHEIRO"
+
+msgid "radio.station.off"
+msgstr "Rádio Desligado"
+
+msgid "radio.station.geodesia"
+msgstr "Geodésia FM"
+
+msgid "radio.station.multicaminho"
+msgstr "Rádio Multicaminho"
+
+msgid "radio.station.onda"
+msgstr "Onda Portadora"
+
+msgid "radio.geodesia.line1"
+msgstr "Geodésia FM: 'Mantenha a base de paralaxe larga e a galinha calma!'"
+
+msgid "radio.geodesia.line2"
+msgstr "Geodésia FM: 'Altura ortométrica H = h - N, nunca confunda seu datum!'"
+
+msgid "radio.geodesia.line3"
+msgstr "Geodésia FM: 'Trânsito fluindo bem na Avenida do Comércio!'"
+
+msgid "radio.multi.line1"
+msgstr "Ouvinte na Rádio Multicaminho: 'Meu GPS me jogou no mar — só pode ser Terra Plana!'"
+
+msgid "radio.multi.line2"
+msgstr "Locutor: 'Calma, amigo, isso é multicaminho nos prédios de vidro da Orla.'"
+
+msgid "radio.multi.line3"
+msgstr "Rádio Multicaminho: 'Mantenha a base RTK a menos de 2 km e a lente limpa!'"
+
+msgid "radio.onda.line1"
+msgstr "Onda Portadora: 'Turno da noite, atenção aos motoristas erráticos perto dos bares.'"
+
+msgid "radio.onda.line2"
+msgstr "Onda Portadora: 'Confira a calibração de boresight após passar em buracos.'"
+
+msgid "radio.onda.line3"
+msgstr "Onda Portadora: 'O novo Plano Diretor de São Datum precisa de nuvens limpas!'"
+
+msgid "city.btn.tablet"
+msgstr "Tablet [Tab]"
+
+msgid "city.btn.vehicle"
+msgstr "Trocar Veículo [B]"
+
+msgid "city.btn.lidar"
+msgstr "LiDAR [L]"
+
+msgid "city.btn.radio"
+msgstr "Rádio [X]"
+
+msgid "city.btn.capture"
+msgstr "Capturar [C]"
+
+msgid "city.btn.view"
+msgstr "Câmera [V]"
+
+msgid "city.btn.save"
+msgstr "Salvar [F5]"
+
+msgid "city.tablet.title"
+msgstr "Tablet de Levantamento — São Datum"
+
+msgid "city.tab.contracts"
+msgstr "Contratos"
+
+msgid "city.tab.office"
+msgstr "Escritório e CQ"
+
+msgid "city.tab.fleet"
+msgstr "Frota e Loja"
+
+msgid "city.tab.geopedia"
+msgstr "Geopédia e Álbum"
+
+msgid "city.tab.settings"
+msgstr "Mundo e Ajustes"
+
+msgid "city.contracts.refresh"
+msgstr "Gerar novos contratos"
+
+msgid "city.contracts.accept"
+msgstr "Aceitar"
+
+msgid "city.office.no_contract"
+msgstr "Nenhum contrato ativo. Aceite um na aba Contratos."
+
+msgid "city.office.active"
+msgstr "Contrato ativo"
+
+msgid "city.office.mode_toggle"
+msgstr "Alternar Arcade / Técnico"
+
+msgid "city.office.mask_privacy"
+msgstr "Aplicar Máscaras de Privacidade"
+
+msgid "city.office.calibrate_rack"
+msgstr "Calibrar Rack"
+
+msgid "city.office.process_deliver"
+msgstr "Processar e Entregar"
+
+msgid "city.office.masks_applied"
+msgstr "Máscaras de privacidade aplicadas às detecções sensíveis."
+
+msgid "city.office.rack_calibrated"
+msgstr "Boresight e braço de alavanca do rack calibrados."
+
+msgid "city.rack.misaligned"
+msgstr "Rack descalibrado por impacto! Calibre na aba Escritório."
+
+msgid "city.rack.ok"
+msgstr "Calibrado"
+
+msgid "city.fleet.active"
+msgstr "Ativo"
+
+msgid "city.fleet.drive"
+msgstr "Dirigir"
+
+msgid "city.fleet.buy"
+msgstr "Comprar"
+
+msgid "city.fleet.insufficient_funds"
+msgstr "Saldo insuficiente em Coords para esta plataforma."
+
+msgid "city.settings.toggle_rain"
+msgstr "Alternar Chuva [P]"
+
+msgid "city.settings.advance_time"
+msgstr "Avançar Hora +2h [T]"
+
+msgid "city.settings.dither"
+msgstr "Filtro Retrô PS2 [F10]"
+
+msgid "city.sandbox.welcome"
+msgstr "Cidade Livre: todas as 4 regiões e 7 plataformas liberadas! Pressione B para trocar veículo."
+
+msgid "city.career.welcome"
+msgstr "Bem-vindo a São Datum! Pressione Tab para aceitar um contrato e mapear."
+
+msgid "city.sandbox.title"
+msgstr "Cidade Livre · São Datum"
+
+msgid "city.freeroam.title"
+msgstr "São Datum · Carreira"
+
+msgid "city.benchmark.occupied"
+msgstr "Marco geodésico ocupado!"
+
+msgid "mission.hist_05.title"
+msgstr "Corredor de Ônibus 360°"
+
+msgid "mission.hist_05.summary"
+msgstr "Mapeie o corredor da Orla e Porto em 360° fora do pico (10h–16h) para liberar a Kombi."
+
+msgid "mission.hist_06.title"
+msgstr "O Túnel do Porto"
+
+msgid "mission.hist_06.summary"
+msgstr "Escaneie 200 m na entrada do Túnel do Porto com LiDAR, DMI e paradas ZUPT sem GNSS."
+
+msgid "mission.hist_07.title"
+msgstr "Vistoria do Viaduto"
+
+msgid "mission.hist_07.summary"
+msgstr "Levante o viaduto conferindo h e H geoidal para liberar a Picape 4x4 e a Serra."
+
+msgid "mission.hist_08.title"
+msgstr "Noite de Chuva"
+
+msgid "mission.hist_08.summary"
+msgstr "Realize passadas LiDAR com filtragem de chuva na Orla e na Serra."
+
+msgid "mission.hist_09.title"
+msgstr "Grileiros no Retrovisor"
+
+msgid "mission.hist_09.summary"
+msgstr "Identifique marcos deslocados na Serra sob pressão das facções."
+
+msgid "mission.hist_10.title"
+msgstr "Obra Fantasma"
+
+msgid "mission.hist_10.summary"
+msgstr "Mapeie o perímetro clandestino para desbloquear a Van MMS de Engenharia."
+
+msgid "mission.hist_11.title"
+msgstr "O Grande Levantamento"
+
+msgid "mission.hist_11.summary"
+msgstr "Cubra os corredores viários nas 4 regiões de São Datum com a Van MMS de Engenharia."
+
+msgid "city.story.header"
+msgstr "Campanha de História (Atos 1–3)"
+
+msgid "city.story.start"
+msgstr "Iniciar Missão"
+
+msgid "city.story.completed"
+msgstr "Concluída"
+
+msgid "city.story.locked"
+msgstr "Bloqueada"
+
+msgid "city.mission_passed"
+msgstr "MISSÃO CONCLUÍDA!"
+
+msgid "city.hazard.pothole"
+msgstr "Buraco na pista! Verifique Gimbalina e a calibração do rack."
+
+msgid "city.hazard.blitz"
+msgstr "Blitz policial! Multa por excesso de velocidade: -20 C$"
+
+msgid "city.event.trio"
+msgstr "Trio Elétrico na avenida — desvio recomendado!"
+
+msgid "city.event.marathon"
+msgstr "Maratona de rua ativa — vias parcialmente fechadas!"
+
+msgid "city.event.pigeons"
+msgstr "Revoada de pombos — atenção à obstrução da lente!"
+
+msgid "city.challenge.start"
+msgstr "Desafio da Galinha iniciado! Estabilize a Gimbalina por 200 m!"
+
+msgid "city.challenge.passed"
+msgstr "DESAFIO DA GALINHA VENCIDO! +100 C$"
+
+msgid "city.countermeasure.disguise_on"
+msgstr "Disfarce de Pizzaria: ATIVO (-50% Atenção)"
+
+msgid "city.countermeasure.disguise_off"
+msgstr "Disfarce de Pizzaria: DESATIVADO"
+
+msgid "city.settings.daguerreotype"
+msgstr "Filtro Sépia Daguerreótipo"
+
+msgid "city.board_vehicle"
+msgstr "Pressione F perto do veículo estacionado para embarcar!"
