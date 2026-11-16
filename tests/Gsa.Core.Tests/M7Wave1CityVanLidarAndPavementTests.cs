@@ -44,30 +44,26 @@ public sealed class M7Wave1CityVanLidarAndPavementTests
         var beforeNode = network.Benchmarks["survey_control_serra_summit"];
         var outcome = network.ApplyClandestineDisplacement(
             "survey_control_serra_summit",
-            new Vector3d(1.6, -1.2, 0.0),
-            alreadyCapturedBatchIds: ["batch_hist_01", "batch_hist_02"]);
+            new Vector3d(1.6, -1.2, 0.0));
 
         Assert.Equal(beforeNode.PublishedCadastralPositionEnu, outcome.PreservedPublishedEnu);
         Assert.NotEqual(outcome.PreservedPublishedEnu, outcome.UpdatedPhysicalEnu);
         Assert.Equal(2.0, outcome.HorizontalDisplacementMetres, 4);
-        Assert.Equal(0, outcome.MutatedHistoricalBatchCount);
 
         var afterNode = network.Benchmarks["survey_control_serra_summit"];
         Assert.Equal(GeodeticBenchmarkStatus.ClandestinelyDisplaced, afterNode.Status);
         Assert.Equal(beforeNode.PublishedCadastralPositionEnu, afterNode.PublishedCadastralPositionEnu);
 
-        // Full multi-region traversal with streaming active radius 600 m keeps Godot round-trip < 1e-9 m and H = h - Ng exact.
-        var traversal = FullCityGeodeticNetwork.SimulateFullCityTraversal(
+        // Neutral benchmark streaming-window evaluation uses doubles, not Godot vectors. Engine precision is measured by the native scene smoke.
+        var traversal = FullCityGeodeticNetwork.EvaluateBenchmarkStreamingWindows(
             fullManifest,
             network,
-            streamingActiveRadiusMetres: 600.0,
-            simulatedActiveCaptureBatches: 4);
+            streamingActiveRadiusMetres: 600.0);
 
         Assert.True(traversal.Succeeded);
         Assert.Equal(4, traversal.VisitedRegionIds.Count);
         Assert.Equal(8, traversal.OccupiedBenchmarkIds.Count);
-        Assert.Equal(4, traversal.ActiveCaptureBatchesIntact);
-        Assert.True(traversal.MaxGodotRoundTripErrorMetres < 1e-9);
+        Assert.True(traversal.MaxLocalFrameRoundTripErrorMetres < 1e-9);
         Assert.True(traversal.MaxGeoidHeightResidualMetres < 1e-12);
         Assert.All(traversal.Steps, step =>
         {

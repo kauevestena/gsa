@@ -97,6 +97,7 @@ public partial class TutorialBlockScene : Node3D
                 throw new System.InvalidOperationException("M2 tutorial loop smoke verification failed.");
             GD.Print($"GSA_M2_LOOP_SMOKE_OK mission={m2Report.MissionId} contract={m2Report.ContractId} stars={m2Report.FinalStars}");
             VerifyPlayableTraining();
+            FullCityEnginePrecisionVerifier.Run(_manifest);
             SetPhysicsProcess(false);
             GD.Print($"GSA_WORLD_SMOKE_OK objects={_registry.Count} colliders={_registry.ColliderCount} " +
                      $"facades=20 geometry_sha256={GeometryHash}");
