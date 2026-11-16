@@ -84,7 +84,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F15-05 — Entregar perfil de engenharia e otimizar aquisição
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M7
 
@@ -100,4 +100,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Benchmark comparado e contrato de referência.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F15-05](../../../artifacts/evidence/T-F15-05/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #19](https://github.com/kauevestena/gsa/pull/19) (`172a23a`, merge `e1ddbe5`, execução `43743554214`, jobs Linux `132901780478` e Windows `132901780173`); ver [resumo CI](../../../artifacts/evidence/M7-wave1-ci/summary.json) e [evidência T-F15-05](../../../artifacts/evidence/T-F15-05/README.md).

@@ -63,7 +63,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F16-04 — Integrar facções à cidade completa
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M7
 
@@ -79,4 +79,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Playthrough de território em ambos os modos.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-04](../../../artifacts/evidence/T-F16-04/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #19](https://github.com/kauevestena/gsa/pull/19) (`172a23a`, merge `e1ddbe5`, execução `43743554214`, jobs Linux `132901780478` e Windows `132901780173`); ver [resumo CI](../../../artifacts/evidence/M7-wave1-ci/summary.json) e [evidência T-F16-04](../../../artifacts/evidence/T-F16-04/README.md).

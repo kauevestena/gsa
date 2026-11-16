@@ -12,5 +12,5 @@ Extração longitudinal por faixas transversais de `0,25 m` e estacas longitudin
 - [M7Wave1PavementCqAndFullCityFactionsTests.cs](../../../tests/Gsa.Missions.Tests/M7Wave1PavementCqAndFullCityFactionsTests.cs) (`T_F04_07_Cq_ExtractedPavementStationsPassStrictThresholdsAndExplicitGapsAreRejectedNotFabricated`)
 
 ## Estado
-Implementada nesta branch; em revisão delegada à CI.
+Aceita — [PR #19](https://github.com/kauevestena/gsa/pull/19) (`172a23adce22ed4af548beffa02f44fae8af587b`, merge `e1ddbe58860593aa9c1dd76c1e054efb251eecc2`), execução CI [43743554214](https://github.com/kauevestena/gsa/actions/runs/43743554214) (`Foundation (Linux x64)` job `132901780478` SUCCESS, `Foundation (Windows x64)` job `132901780173` SUCCESS), [resumo CI](../M7-wave1-ci/summary.json).
 

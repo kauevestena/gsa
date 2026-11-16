@@ -106,7 +106,7 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 ### T-F02-06 — Integrar cidade e rede de marcos
 
-- [ ] Aceita
+- [x] Aceita
 
 **Marco:** M7
 
@@ -122,4 +122,4 @@ Estado inicial de todas as tarefas: pendente. O campo Estado registra o andament
 
 **Evidência:** Relatório de área e replay de travessia.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F02-06](../../../artifacts/evidence/T-F02-06/README.md)).
+**Estado:** Aceita via revisão técnica delegada após aprovação na CI do [PR #19](https://github.com/kauevestena/gsa/pull/19) (`172a23a`, merge `e1ddbe5`, execução `43743554214`, jobs Linux `132901780478` e Windows `132901780173`); ver [resumo CI](../../../artifacts/evidence/M7-wave1-ci/summary.json) e [evidência T-F02-06](../../../artifacts/evidence/T-F02-06/README.md).
