@@ -25,7 +25,8 @@ public static class LocalizationSmokeChecks
             fixture.LocaleChanged += _ => notifications++;
             Require(fixture.SetLocale("pt-BR") == Error.Ok, "Locale settings must persist.");
             Require(notifications == 1, "Runtime language switch must notify presentation listeners.");
-            Require(fixture.Translate("bootstrap.status") == "Fundação do projeto", "PT-BR PO lookup failed.");
+            Require(fixture.Translate("bootstrap.status") == "Em desenvolvimento · Treinamento de levantamento", "PT-BR PO lookup failed.");
+            Require(fixture.Translate("training.title") == "Treinamento · Três fachadas", "PT-BR training PO lookup failed.");
             Require(fixture.TranslatePlural("fixture.sample_count", 0) == "0 amostras", "PT-BR zero plural failed.");
             Require(fixture.TranslatePlural("fixture.sample_count", 1) == "1 amostra", "PT-BR singular failed.");
             Require(fixture.TranslatePlural("fixture.sample_count", 2) == "2 amostras", "PT-BR plural failed.");
@@ -37,7 +38,8 @@ public static class LocalizationSmokeChecks
             reloaded.Initialize("en-US", settingsPath);
             Require(reloaded.CurrentLocale == "pt-BR", "Explicit choice must survive restart and override system language.");
             Require(reloaded.SetLocale("en-US", persist: false) == Error.Ok, "EN-US switch failed.");
-            Require(reloaded.Translate("bootstrap.status") == "Project foundation", "EN-US PO lookup failed.");
+            Require(reloaded.Translate("bootstrap.status") == "In development · Live survey training", "EN-US PO lookup failed.");
+            Require(reloaded.Translate("training.title") == "Training · Three façades", "EN-US training PO lookup failed.");
             Require(reloaded.TranslatePlural("fixture.sample_count", 1) == "1 sample", "EN-US singular failed.");
             Require(reloaded.TranslatePlural("fixture.sample_count", 2) == "2 samples", "EN-US plural failed.");
             Require(reloaded.Translate("fixture.context_value", "quality") == "Approved", "EN-US context failed.");
