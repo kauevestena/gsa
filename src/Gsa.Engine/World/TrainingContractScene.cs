@@ -84,6 +84,10 @@ public partial class TutorialBlockScene
             return label;
         }
         AddLabel(Text("training.title"), 20);
+        var notebookButton = new Button { Text = Text("notebook.open"), FocusMode = Control.FocusModeEnum.None };
+        notebookButton.Pressed += () => TrainingAction("notebook");
+        box.AddChild(notebookButton);
+        _trainingButtons.Add("notebook", notebookButton);
         AddLabel(Text("training.instructions"));
         _trainingStatus = AddLabel("");
         _trainingTargets = AddLabel("");
@@ -95,7 +99,7 @@ public partial class TutorialBlockScene
             box.AddChild(button);
         }
         _trainingFeedback = AddLabel(Text("training.welcome"));
-        AddLabel(Text("training.controls"));
+        BuildSurveyNotebook(canvas);
     }
 
     private void TrainingAction(string action)
@@ -127,6 +131,7 @@ public partial class TutorialBlockScene
                         _liveLocomotion.RepositionSafeAfterRecovery(TrainingContractSession.SpawnPosition, headingRadians: Math.PI);
                     }
                     break;
+                case "notebook": _notebookPanel.Visible = !_notebookPanel.Visible; succeeded = true; break;
                 case "view": _surveyView = !_surveyView; succeeded = true; break;
                 default: return;
             }
@@ -145,7 +150,7 @@ public partial class TutorialBlockScene
     private bool TrainingInput(InputEvent input)
     {
         if (input is not InputEventKey { Pressed: true, Echo: false } key) return false;
-        var action = key.PhysicalKeycode switch { Key.C => "capture", Key.V => "view", Key.F5 => "save", Key.F9 => "load", _ => null };
+        var action = key.PhysicalKeycode switch { Key.R => "notebook", Key.C => "capture", Key.V => "view", Key.F5 => "save", Key.F9 => "load", _ => null };
         if (action is null) return false;
         TrainingAction(action);
         return true;
@@ -216,6 +221,7 @@ public partial class TutorialBlockScene
 
     private void RefreshTrainingHud()
     {
+        RefreshSurveyNotebook();
         var position = _liveLocomotion!.PositionEnu;
         var stateKey = "training.state." + _training.Contract.State;
         _trainingStatus.Text = string.Format(Text("training.status"), Text(stateKey), _training.SampleCount,
@@ -265,6 +271,7 @@ public partial class TutorialBlockScene
             Press("load"); Press("deliver");
             Require(_training.Contract.State == ContractState.Entregue && _training.Ledger.BalanceCoords == paidBalance,
                 "Reload/delivery duplicated or lost payment.");
+            VerifySurveyNotebook();
             GD.Print($"GSA_PLAYABLE_TRAINING_SMOKE_OK samples={_training.SampleCount} targets=3 rework=true reload=true balance={paidBalance}");
         }
         finally

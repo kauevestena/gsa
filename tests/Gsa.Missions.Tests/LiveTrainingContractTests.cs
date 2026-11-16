@@ -3,6 +3,7 @@ using Gsa.Core.Sensors.Camera;
 using Gsa.Core.World;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Gameplay;
+using Gsa.Missions.Presentation;
 using Xunit;
 
 namespace Gsa.Missions.Tests;
@@ -45,6 +46,12 @@ public sealed class LiveTrainingContractTests
             Assert.True(session.RecordObservation(first));
             Assert.False(session.RecordObservation(first));
             Assert.Empty(session.ResolvedTargetIds); // A single image must not acquire world depth.
+            var notebook = SurveyNotebookPresenter.Build(session, "en-US");
+            Assert.Equal("notebook.geometry.single", notebook.Targets.Single(t => t.TargetId == "facade_18").ExplanationKey);
+            Assert.Null(notebook.LastProcessedReport);
+            Assert.Single(notebook.Photos);
+            Assert.False(notebook.Photos[0].Protected);
+            Assert.Equal(1, notebook.UnprocessedPhotoCount);
             session.Save();
             session = new TrainingContractSession(world, dir);
             Assert.True(session.Load().Succeeded);
@@ -62,7 +69,15 @@ public sealed class LiveTrainingContractTests
             Assert.Equal(3, session.ResolvedTargetIds.Count);
             Assert.True(session.Offload(office));
             var hashes = session.Custody.Entries.Select(e => e.PayloadSha256).ToArray();
+            session.Save();
+            Assert.True(session.Load().Succeeded);
+            Assert.False(session.Report!.Passed); // Unprocessed recollection must not silently replace office CQ on reload.
+            notebook = SurveyNotebookPresenter.Build(session, "pt-BR");
+            Assert.Equal(3, notebook.Targets.Count(t => t.Resolved));
+            Assert.NotNull(notebook.LastProcessedReport);
+            Assert.Equal(5, notebook.UnprocessedPhotoCount);
             Assert.True(session.Process(office));
+            Assert.Equal(0, SurveyNotebookPresenter.Build(session, "en-US").UnprocessedPhotoCount);
             Assert.True(session.Report!.Passed);
             Assert.Equal(3, session.Report.MatchedFeatureCount);
             Assert.Equal(hashes, session.Custody.Entries.Select(e => e.PayloadSha256).ToArray());
@@ -95,6 +110,9 @@ public sealed class LiveTrainingContractTests
             Assert.True(session.RecordObservation(Capture(world, 500188, Math.PI / 2, "same1")));
             Assert.True(session.RecordObservation(Capture(world, 500188, Math.PI / 2, "same2")));
             Assert.Empty(session.ResolvedTargetIds);
+            var notebook = SurveyNotebookPresenter.Build(session, "en-US");
+            Assert.Equal("notebook.geometry.parallax", notebook.Targets.Single(t => t.TargetId == "facade_18").ExplanationKey);
+            Assert.Contains("notebook.photo.empty", notebook.Photos[0].FailureKeys);
             session.Save();
             var path = Path.Combine(dir, "current.save.json");
             File.WriteAllText(path, "broken-save");

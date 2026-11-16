@@ -13,6 +13,16 @@ Este incremento conecta sistemas existentes a ações do jogador na cena Godot. 
 7. Se o CQ pedir recoleta, obtenha novas vistas das fachadas ainda pendentes, descarregue e reprocesse. Completude, privacidade e formato precisam passar.
 8. Entregue para receber até 150 Coords e 25 XP. A liquidação usa as mesmas proteções de idempotência do domínio.
 
+**R** abre o caderno de levantamento com cinco abas:
+
+- **Mapa:** quarteirão com norte para cima, escala gráfica de 20 m, direção do carrinho, escritório/descarga, alvos e posição da foto selecionada. É a geometria conhecida da cena, não uma reconstrução do levantamento.
+- **Alvos:** número de observações utilizáveis, maior paralaxe e orientação de recoleta para cada fachada. O cálculo usa apenas observações, poses estimadas e calibração.
+- **Fotos:** miniaturas sintéticas 256 × 144, condição de custódia, instante, arrastamento, saturação e motivos de rejeição. Selecionar uma foto não modifica dados brutos.
+- **Qualidade:** valores e limites da última revisão processada no escritório, separados da contagem de fotos ainda não processadas.
+- **Guia:** explicações sobre paralaxe, qualidade de imagem, custódia, CQ e limites das poses ideais.
+
+Os controles principais permanecem visíveis fora da área de rolagem do painel de ações.
+
 F5 salva; F9 carrega. Aceite, descarga, processamento e pagamento também salvam. Entrar novamente na cena restaura o treino e reposiciona o carrinho junto ao escritório. O painel tem rolagem em janelas pequenas. Escape salva e retorna ao menu.
 
 ## Escopo e limites
@@ -21,7 +31,7 @@ F5 salva; F9 carrega. Aceite, descarga, processamento e pagamento também salvam
 - Reconstrução usa somente pixels, poses estimadas e calibração de `CameraObservationSample`, pelo `FeatureInventoryTriangulator`. Coordenadas dos alvos não são copiadas para o inventário.
 - Até 200 fotos por sessão; pedidos manuais C/botão, limitados pelo relógio de 2 Hz. Os buffers duplicados do scheduler são liberados após transferir a observação para a custódia. As miniaturas são sintéticas e não capturas do framebuffer.
 - O slot separado `user://training-live` não altera saves de carreira/HIST. Ele usa os envelopes com checksum e rotação do `SaveGameManager`. Um carregamento corrompido/incompatível bloqueia novas gravações até resolver o arquivo ou carregar um save válido.
-- Processamento é uma ação síncrona no escritório; não há job de treino em andamento para persistir. Após carregar, o CQ é recalculado dos lotes protegidos sem cobrar processamento novamente. Observações ainda em campo não entram na entrega.
+- Processamento é uma ação síncrona no escritório; não há job de treino em andamento para persistir. Após carregar, o CQ é recalculado somente dos lotes protegidos incluídos na última revisão processada, identificados pela ordem dos eventos, sem cobrar novamente. Uma recoleta descarregada ainda não processada não substitui o relatório anterior, mesmo que a descarga tenha o mesmo instante de relógio. Observações ainda em campo não entram na entrega.
 - O exercício não constitui as missões HIST-01..11. A cidade completa, frota avançada, áudio final e avaliação humana permanecem trabalhos separados.
 
 ## Verificação
@@ -31,3 +41,5 @@ F5 salva; F9 carrega. Aceite, descarga, processamento e pagamento também salvam
 O smoke da cena também executa `VerifyPlayableTraining` no contexto real de física Godot: aciona os mesmos callbacks dos botões, fotografa uma vista vazia, exige retrabalho, reposiciona o carrinho em seis posições de teste, fotografa com raycasts reais, descarrega, processa, salva/carrega e entrega duas vezes sem duplicar pagamento. O smoke reposiciona o jogador para ser determinístico; não testa uma pessoa navegando com teclado.
 
 O marcador obrigatório `GSA_PLAYABLE_TRAINING_SMOKE_OK` é verificado pelo pipeline tanto na cena quanto no executável nativo exportado. Isso não substitui inspeção gráfica ou playtest humano.
+
+O smoke exige também `GSA_SURVEY_NOTEBOOK_SMOKE_OK`: abre o caderno pelo callback do botão, confere a seleção e textura de uma foto, cinco abas, progresso e relatório após carregar, além da orientação norte para cima. O verificador local e os executáveis exportados exigem esse marcador. O teste é headless; não constitui aprovação visual ou playtest humano.

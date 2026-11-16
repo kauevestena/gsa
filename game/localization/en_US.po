@@ -841,3 +841,132 @@ msgstr "Expired"
 
 msgid "training.state.Abandonado"
 msgstr "Abandoned"
+
+msgid "notebook.open"
+msgstr "Survey notebook [R]"
+
+msgid "notebook.title"
+msgstr "Survey notebook"
+
+msgid "notebook.close"
+msgstr "Close [R]"
+
+msgid "notebook.shortcut"
+msgstr "R: map, photos, quality and guide"
+
+msgid "notebook.tab.map"
+msgstr "Map"
+
+msgid "notebook.tab.targets"
+msgstr "Targets"
+
+msgid "notebook.tab.photos"
+msgstr "Photos"
+
+msgid "notebook.tab.quality"
+msgstr "Quality"
+
+msgid "notebook.tab.guide"
+msgstr "Guide"
+
+msgid "training.done.notebook"
+msgstr "Survey notebook toggled."
+
+msgid "notebook.map_legend"
+msgstr "North-up · 20 m scale bar. White arrow: you and your heading. O: office. D: unload. Purple ring: selected photo position. Numbered circles: contract targets (? pending / ✓ triangulated). This is a map of known scene geometry, not reconstructed survey data."
+
+msgid "notebook.field_progress"
+msgstr "Current field progress includes protected AND pending photos. It does not replace the last processed office report."
+
+msgid "notebook.target_row"
+msgstr "Façade {0} · {1}/{2} usable observations\nLargest parallax: {3}° · required: ≥ {4}°\n{5}"
+
+msgid "notebook.geometry.resolved"
+msgstr "Resolved by intersecting image rays. You can unload this capture."
+
+msgid "notebook.geometry.single"
+msgstr "Only one view. Move sideways, keep this façade in view and take another sharp photo."
+
+msgid "notebook.geometry.parallax"
+msgstr "The views are too similar. Increase the sideways baseline while keeping the façade visible."
+
+msgid "notebook.geometry.quality"
+msgstr "The observations failed image quality. Stop, aim and take a sharp photo."
+
+msgid "notebook.geometry.behind"
+msgstr "The ray intersection is behind a camera. Capture a new pair from different positions."
+
+msgid "notebook.geometry.grazing"
+msgstr "The view is too oblique to the support plane. Change the camera angle."
+
+msgid "notebook.geometry.unconfirmed"
+msgstr "The observation needs class or target confirmation."
+
+msgid "notebook.geometry.unseen"
+msgstr "Not observed. Find the yellow façade number and face it before photographing."
+
+msgid "notebook.synthetic"
+msgstr "Synthetic observation thumbnail (256 × 144). This is not a screenshot or a real photograph. Selecting a photo never changes the raw observation."
+
+msgid "notebook.protected"
+msgstr "protected"
+
+msgid "notebook.field"
+msgstr "in field"
+
+msgid "notebook.no_photos"
+msgstr "No photos yet. Accept the assignment, stop and press C."
+
+msgid "notebook.photo_row"
+msgstr "Time: {0} s · {1}\nMotion blur: {2} px (limit {3} px)\nClipping: {4}% (limit {5}%)\nObserved: {6}\n{7}"
+
+msgid "notebook.photo.accepted"
+msgstr "Image quality accepted. Geometry still requires multiple views."
+
+msgid "notebook.photo.blur"
+msgstr "Too much motion blur: stop before photographing."
+
+msgid "notebook.photo.clipping"
+msgstr "Too many saturated pixels: change the view."
+
+msgid "notebook.photo.lens"
+msgstr "The lens is obstructed: clean it before photographing."
+
+msgid "notebook.photo.empty"
+msgstr "No usable visible features: face a target and check for occlusion."
+
+msgid "notebook.processed_only"
+msgstr "Last office revision only. New field photos and new offloads do not update these values until you process again."
+
+msgid "notebook.unprocessed"
+msgstr "Photos not yet included in office processing: {0}"
+
+msgid "notebook.no_report"
+msgstr "No office report yet. Unload your photos and process at the office."
+
+msgid "notebook.metric_row"
+msgstr "{0}: {1} · required {2} {3} · {4}"
+
+msgid "notebook.guide"
+msgstr "1. Parallax: a single image provides a ray, not depth. Two different viewpoints must cross with at least 5° of parallax. Turning in place is not enough.\n\n2. Image quality: blur ≤ 3 px, clipping ≤ 20%, lens obstruction ≤ 20%, and visible features are required. Stop for a clear photo.\n\n3. Custody: field photos are not ready for delivery. Unload within 5 m of D, then process within 8 m of O.\n\n4. Quality review: all three façades must be reconstructed; privacy and format checks must pass. New recollection changes field progress, but the office report changes only after processing.\n\n5. This training uses ideal poses and synthetic thumbnails. A green quality result does not measure real-world GNSS accuracy."
+
+msgid "cq.metric.feature_completeness"
+msgstr "Feature completeness"
+
+msgid "cq.metric.privacy_redacted"
+msgstr "Privacy masks applied"
+
+msgid "cq.metric.format_valid"
+msgstr "Valid delivery format"
+
+msgid "cq.status.passed"
+msgstr "passed"
+
+msgid "cq.status.failed"
+msgstr "failed"
+
+msgid "cq.status.insufficient"
+msgstr "insufficient data"
+
+msgid "notebook.unit.ratio"
+msgstr "fraction"

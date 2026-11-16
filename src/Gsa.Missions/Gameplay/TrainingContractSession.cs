@@ -187,9 +187,20 @@ public sealed class TrainingContractSession
                 if (_sampleIds.Add(dto.SampleId)) _samples.Add(dto.ToDomain());
         }
         Report = null;
-        if (Contract.State is ContractState.Retrabalho or ContractState.ProntoEntregar or ContractState.Entregue)
+        var lastProcess = Contract.Events.LastOrDefault(e => e.EventType == "ProcessingCompletedEnteredQc");
+        if (lastProcess is not null)
         {
-            var merged = ContractSettlementCoordinator.BuildMergedSubmission(Contract, Custody);
+            // New offloads are not part of the last office revision. Use event order, not timestamps:
+            // a recollection may be offloaded at exactly the same clock time as the previous process.
+            var processedBatchIds = Contract.Events
+                .Where(e => e.EventType == "BatchProtected" && e.Sequence < lastProcess.Sequence)
+                .Select(e => e.BatchId!).ToHashSet(StringComparer.Ordinal);
+            var snapshot = Contract.ExportSnapshot();
+            var processedContract = ContractStateMachine.FromSnapshot(snapshot with
+            {
+                Batches = snapshot.Batches.Where(b => processedBatchIds.Contains(b.BatchId)).ToArray(),
+            });
+            var merged = ContractSettlementCoordinator.BuildMergedSubmission(processedContract, Custody);
             var masked = PrivacyMaskingService.ApplyMasksToSamples(merged.Samples, ProcessingMode.Arcade,
                 new Dictionary<string, IReadOnlyList<string>>(), out _);
             Report = QualityEvaluator.Evaluate(Contract.Snapshot!.Definition, _reference, Reconstruct(merged with { Samples = masked }));
