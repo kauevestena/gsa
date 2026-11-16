@@ -48,6 +48,7 @@ public partial class TutorialBlockScene : Node3D
     private bool _reloaded;
     private int _physicsFrames;
     private string _originalSnapshot = "";
+    private GsaPerfProbe? _perfProbe;
 
     public bool HasSkyCache => _skyCache is not null;
     public string GeometryHash => _manifest.CanonicalGeometryHash;
@@ -58,6 +59,7 @@ public partial class TutorialBlockScene : Node3D
 
     public override void _Ready()
     {
+        _perfProbe = GsaPerfProbe.TryCreateFromArgs(this, "tutorial_block");
         _smoke = OS.GetCmdlineUserArgs().Any(arg => arg is "--smoke-test" or "--bench-smoke");
         LocalizationService.EnsureCatalogsLoaded();
         try
@@ -76,6 +78,8 @@ public partial class TutorialBlockScene : Node3D
             Fail(error);
         }
     }
+
+    public override void _Process(double delta) => _perfProbe?.StepFrame(this);
 
     public override void _PhysicsProcess(double delta)
     {
@@ -165,8 +169,11 @@ public partial class TutorialBlockScene : Node3D
             node.AddChild(new MeshInstance3D
             {
                 Name = "Geometry",
-                Mesh = new BoxMesh { Size = size },
+                Mesh = CreateBoxMesh(item, size),
                 MaterialOverride = CreateMaterial(item),
+                CastShadow = item.ObjectClass is "ground" or "survey_control" or "unload_point" || item.Material is "glass" or "water"
+                    ? GeometryInstance3D.ShadowCastingSetting.Off
+                    : GeometryInstance3D.ShadowCastingSetting.On,
             });
             if (item.Collision)
                 node.AddChild(new CollisionShape3D { Name = "Collision", Shape = new BoxShape3D { Size = size } });
@@ -282,43 +289,53 @@ public partial class TutorialBlockScene : Node3D
         StepTraining(delta, angleDelta / delta);
     }
 
+    private static Mesh CreateBoxMesh(WorldBoxObject item, Vector3 size) => item.ObjectClass switch
+    {
+        "ground" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.12f),
+        "building_shell" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.095f),
+        "building_facade" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.14f),
+        _ when item.Material == "glass" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.10f),
+        _ when item.Material == "water" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.08f),
+        _ => new BoxMesh { Size = size },
+    };
+
     private static StandardMaterial3D CreateMaterial(WorldBoxObject item)
     {
         if (item.ObjectClass == "ground")
         {
             return GsaRetroTextures.CreateWorldMaterial(
-                "world_ground_asphalt", "asphalt", new Color(0.88f, 0.90f, 0.92f),
-                new Vector3(0.12f, 0.12f, 0.12f), roughness: 0.9f, triplanar: true);
+                "world_ground_asphalt_uv", "asphalt", new Color(0.88f, 0.90f, 0.92f),
+                Vector3.One, roughness: 0.9f, triplanar: false, vertexShaded: false);
         }
         if (item.ObjectClass == "building_shell")
         {
             var idx = Math.Abs(item.Id.GetHashCode()) % 3;
             var (key, tex) = idx switch
             {
-                0 => ("bldg_shell_comm", "facade_commercial"),
-                1 => ("bldg_shell_res", "facade_residential"),
-                _ => ("bldg_shell_conc", "facade_concrete"),
+                0 => ("bldg_shell_comm_uv", "facade_commercial"),
+                1 => ("bldg_shell_res_uv", "facade_residential"),
+                _ => ("bldg_shell_conc_uv", "facade_concrete"),
             };
             return GsaRetroTextures.CreateWorldMaterial(
-                key, tex, Colors.White, new Vector3(0.095f, 0.095f, 0.095f), roughness: 0.85f, triplanar: true, nightWindowGlow: true);
+                key, tex, Colors.White, Vector3.One, roughness: 0.85f, triplanar: false, nightWindowGlow: true);
         }
         if (item.ObjectClass == "building_facade")
         {
             return GsaRetroTextures.CreateWorldMaterial(
-                "bldg_target_facade", "facade_commercial", new Color(1.0f, 0.95f, 0.84f),
-                new Vector3(0.12f, 0.18f, 0.12f), roughness: 0.82f, triplanar: true);
+                "bldg_target_facade_uv", "facade_commercial", new Color(1.0f, 0.95f, 0.84f),
+                Vector3.One, roughness: 0.82f, triplanar: false);
         }
         if (item.Material == "glass")
         {
             return GsaRetroTextures.CreateWorldMaterial(
-                "world_glass_mat", "glass_tower", new Color(0.55f, 0.88f, 0.98f, 0.52f),
-                new Vector3(0.10f, 0.10f, 0.10f), roughness: 0.16f, triplanar: true, transparent: true);
+                "world_glass_mat_uv", "glass_tower", new Color(0.55f, 0.88f, 0.98f, 0.52f),
+                Vector3.One, roughness: 0.16f, triplanar: false, transparent: true);
         }
         if (item.Material == "water")
         {
             return GsaRetroTextures.CreateWorldMaterial(
-                "world_water_mat", "water", new Color(0.35f, 0.72f, 0.95f, 0.78f),
-                new Vector3(0.08f, 0.08f, 0.08f), roughness: 0.12f, triplanar: true, transparent: true);
+                "world_water_mat_uv", "water", new Color(0.35f, 0.72f, 0.95f, 0.78f),
+                Vector3.One, roughness: 0.12f, triplanar: false, transparent: true, vertexShaded: false);
         }
         if (item.ObjectClass == "office_entry")
             return GsaMeshBuilder.SolidMat(new Color(0.14f, 0.62f, 0.45f), emit: true, emissionEnergy: 0.35f);
@@ -333,7 +350,7 @@ public partial class TutorialBlockScene : Node3D
             "vegetation" => new Color(0.22f, 0.45f, 0.23f),
             _ => throw new InvalidOperationException($"Unknown material: {item.Material}"),
         };
-        return new StandardMaterial3D { AlbedoColor = color, Roughness = 0.88f };
+        return GsaMeshBuilder.SolidMat(color, roughness: 0.88f);
     }
 
     private void VerifyWorld()

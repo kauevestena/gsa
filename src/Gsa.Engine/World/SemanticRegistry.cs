@@ -42,6 +42,19 @@ public sealed class SemanticRegistry
     public Dictionary GetByInstanceId(ulong instanceId) =>
         _instanceIds.TryGetValue(instanceId, out var id) ? GetById(id) : new();
 
+    public bool TryGetFastMetadata(ulong instanceId, out string id, out string material)
+    {
+        if (_instanceIds.TryGetValue(instanceId, out var objId) && _objects.TryGetValue(objId, out var item))
+        {
+            id = item.Id;
+            material = item.Material;
+            return true;
+        }
+        id = string.Empty;
+        material = string.Empty;
+        return false;
+    }
+
     private static Dictionary Snapshot(WorldBoxObject item) => new()
     {
         ["id"] = item.Id,

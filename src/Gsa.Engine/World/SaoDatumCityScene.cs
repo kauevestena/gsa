@@ -51,7 +51,10 @@ public partial class SaoDatumCityScene : Node3D
     private Node3D _benchRoot = null!;
     private readonly HashSet<WorldSectorCellId> _builtSectors = [];
     private readonly Dictionary<WorldSectorCellId, Node3D> _sectorNodes = new();
+    private readonly Dictionary<WorldSectorCellId, List<ObstacleBoxEnu>> _sectorObstacles = new();
     private readonly Dictionary<string, Node3D> _collectibleNodes = new();
+    private Dictionary<string, WorldBoxObject> _manifestObjectsById = new(StringComparer.Ordinal);
+    private WorldSectorCellId? _lastStreamingSector;
 
     private GsaAtmosphereController _atmosphere = null!;
     private GsaCityVisualBuilder _cityVisuals = null!;
@@ -112,6 +115,9 @@ public partial class SaoDatumCityScene : Node3D
     private ObstacleBoxEnu[] _manifestObstacles = [];
     private CameraVisibilityCandidate[] _liveCandidates = [];
     private readonly List<ObstacleBoxEnu> _cityBlockObstacles = [];
+    private readonly List<ObstacleBoxEnu> _nearbyObstacles = new(32);
+    private Vector3d _nearbyObstacleAnchor = new(double.NaN, double.NaN, double.NaN);
+    private PhysicsRayQueryParameters3D? _lidarRayQuery;
     private long _tick;
     private double _hudElapsed;
     private double _lastSpeedMps;
@@ -121,6 +127,7 @@ public partial class SaoDatumCityScene : Node3D
     private string? _pendingVehiclePopup;
     private bool _captureRequested;
     private SaveGameManager _saveManager = null!;
+    private GsaPerfProbe? _perfProbe;
 
     private static string Text(string key) => TranslationServer.Translate(key).ToString();
 
@@ -131,13 +138,15 @@ public partial class SaoDatumCityScene : Node3D
             LocalizationService.EnsureCatalogsLoaded();
             _isSandbox = OS.HasEnvironment("GSA_SANDBOX") ||
                          (GetTree().Root.HasMeta(SandboxModeKey) && GetTree().Root.GetMeta(SandboxModeKey).AsString() == "sandbox");
+            _perfProbe = GsaPerfProbe.TryCreateFromArgs(this, _isSandbox ? "sao_datum_sandbox" : "sao_datum_city");
 
             _tutorialManifest = WorldSceneManifest.Parse(Godot.FileAccess.GetFileAsString(TutorialManifestPath));
             if (Godot.FileAccess.FileExists(SkyCachePath))
                 _skyCache = new SkyCacheAdapter(_tutorialManifest, Godot.FileAccess.GetFileAsString(SkyCachePath));
 
             (_fullManifest, _geodeticNetwork, _) = FullCityGeodeticNetwork.AssembleFullCity(_tutorialManifest);
-            _streamer = new OldCenterSectorStreamer(_fullManifest, activeRadiusMetres: 480.0, safetyBandRadiusMetres: 140.0);
+            _manifestObjectsById = _fullManifest.Objects.ToDictionary(o => o.Id, StringComparer.Ordinal);
+            _streamer = new OldCenterSectorStreamer(_fullManifest, activeRadiusMetres: 380.0, safetyBandRadiusMetres: 140.0);
 
             var saveDir = ProjectSettings.GlobalizePath("user://career-main");
             _saveManager = new SaveGameManager(saveDir);
@@ -226,72 +235,51 @@ public partial class SaoDatumCityScene : Node3D
         var visualBase = new Node3D { Name = "CityBaseVisuals" };
         AddChild(visualBase);
 
-        // Full 4 km² terrain & regional decks
+        // Full 4 km² terrain & regional decks (world-scale UVs, zero triplanar shader cost)
         var cityGround = new MeshInstance3D
         {
             Name = "CityAsphaltBase",
             Position = _coordinates.ToGodot(new Vector3d(501000, 7401000, 99.45)),
-            Mesh = new BoxMesh { Size = new Vector3(2400f, 0.25f, 2400f) },
+            Mesh = GsaMeshBuilder.CreateWorldUvBoxMesh(new Vector3(2400f, 0.25f, 2400f), 0.12f),
             MaterialOverride = GsaRetroTextures.CreateWorldMaterial(
-                "city_base_asphalt", "asphalt", new Color(0.84f, 0.86f, 0.90f), new Vector3(0.12f, 0.12f, 0.12f), triplanar: true),
+                "city_base_asphalt_uv", "asphalt", new Color(0.84f, 0.86f, 0.90f), triplanar: false, vertexShaded: false),
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         };
         visualBase.AddChild(cityGround);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
-        var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass", "park_grass", Colors.White, new Vector3(0.10f, 0.10f, 0.10f), triplanar: true);
+        var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
         visualBase.AddChild(new MeshInstance3D
         {
             Name = "CentralParkLawn",
             Position = _coordinates.ToGodot(new Vector3d(500350, 7400380, 99.78)),
-            Mesh = new BoxMesh { Size = new Vector3(130f, 0.3f, 130f) },
+            Mesh = GsaMeshBuilder.CreateWorldUvBoxMesh(new Vector3(130f, 0.3f, 130f), 0.10f),
             MaterialOverride = parkMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
+        var parkTrees = new List<(Vector3 Position, float Scale)>(25);
         for (var px = 500300.0; px <= 500400.0; px += 25.0)
         {
             for (var py = 7400330.0; py <= 7400430.0; py += 25.0)
-            {
-                var tree = GsaMeshBuilder.BuildStreetTree($"ParkTree_{(int)px}_{(int)py}", 1.15f);
-                tree.Position = _coordinates.ToGodot(new Vector3d(px, py, 99.9));
-                visualBase.AddChild(tree);
-            }
+                parkTrees.Add((_coordinates.ToGodot(new Vector3d(px, py, 99.9)), 1.15f));
         }
+        GsaMeshBuilder.BuildBatchedStreetTrees(visualBase, "ParkTrees", parkTrees);
 
         // Waterfront Ocean Bay (East side E > 501850) & Promenade boardwalk
         var oceanMat = GsaRetroTextures.CreateWorldMaterial(
-            "city_ocean_water", "water", new Color(0.75f, 0.90f, 1.0f), new Vector3(0.08f, 0.08f, 0.08f), roughness: 0.14f, triplanar: true);
+            "city_ocean_water_uv", "water", new Color(0.75f, 0.90f, 1.0f), roughness: 0.14f, triplanar: false, vertexShaded: false);
         visualBase.AddChild(new MeshInstance3D
         {
             Name = "OceanBay",
             Position = _coordinates.ToGodot(new Vector3d(502250, 7400500, 97.6)),
-            Mesh = new BoxMesh { Size = new Vector3(950f, 0.4f, 1400f) },
+            Mesh = GsaMeshBuilder.CreateWorldUvBoxMesh(new Vector3(950f, 0.4f, 1400f), 0.08f),
             MaterialOverride = oceanMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
 
         // Serra Mountain Smooth Highway, City Hall Monument, Central Park Fountain, Viaduct, Port Cranes/Ship, Waterfront Bridge/Pier & Hazards!
         _landmarks.BuildCityLandmarks(visualBase, _coordinates, _atmosphere);
 
-        // City Avenues & Road Grid Markings across Old Center, Port, Waterfront
-        var yellowMat = GsaMeshBuilder.SolidMat(new Color(0.92f, 0.74f, 0.14f));
-        for (var n = 7400000.0; n <= 7401800.0; n += 120.0)
-        {
-            visualBase.AddChild(new MeshInstance3D
-            {
-                Name = $"AveEW_{(int)n}",
-                Position = _coordinates.ToGodot(new Vector3d(500950, n - 4.0, 99.64)),
-                Mesh = new BoxMesh { Size = new Vector3(1900f, 0.04f, 0.28f) },
-                MaterialOverride = yellowMat,
-            });
-        }
-        for (var e = 500000.0; e <= 501800.0; e += 120.0)
-        {
-            visualBase.AddChild(new MeshInstance3D
-            {
-                Name = $"AveNS_{(int)e}",
-                Position = _coordinates.ToGodot(new Vector3d(e, 7400600, 99.64)),
-                Mesh = new BoxMesh { Size = new Vector3(0.28f, 0.04f, 1200f) },
-                MaterialOverride = yellowMat,
-            });
-        }
         // Commerce Street promenade, storefronts, curbs, signals, streetlamps & water tanks
         _cityVisuals.BuildCommerceStreetDetails(visualBase, _fullManifest, _coordinates, _atmosphere, includeBeacons: false);
         BuildWorldParkedVehicles(visualBase);
@@ -337,8 +325,8 @@ public partial class SaoDatumCityScene : Node3D
         AddChild(_worldRoot);
         foreach (var item in _fullManifest.Objects)
         {
-            if (item.ObjectClass == "ground" || item.ObjectClass == "training_park" || item.ObjectClass == "calm_zone")
-                continue; // Handled by full city base decks cleanly
+            if (item.ObjectClass is "ground" or "training_park" or "calm_zone" or "wifi_hotspot")
+                continue; // Handled by full city base decks cleanly (non-solid zone markers omitted)
 
             var size = new Vector3((float)item.SizeEnu.X, (float)item.SizeEnu.Z, (float)item.SizeEnu.Y);
             if (!size.IsFinite() || size.X <= 0 || size.Y <= 0 || size.Z <= 0)
@@ -354,14 +342,15 @@ public partial class SaoDatumCityScene : Node3D
 
             var matKey = item.ObjectClass switch
             {
-                "commercial_tower" => ("bldg_tower_glass", "glass_tower", Colors.White, false),
-                "warehouse_facade" => ("bldg_warehouse", "warehouse", Colors.White, false),
-                "building_shell" => ("bldg_city_comm", "facade_commercial", Colors.White, true),
-                "building_facade" => ("bldg_city_facade", "facade_commercial", new Color(1.0f, 0.94f, 0.82f), false),
+                "commercial_tower" => ("bldg_tower_glass_uv", "glass_tower", Colors.White, false),
+                "warehouse_facade" => ("bldg_warehouse_uv", "warehouse", Colors.White, false),
+                "building_shell" => ("bldg_city_comm_uv", "facade_commercial", Colors.White, true),
+                "building_facade" => ("bldg_city_facade_uv", "facade_commercial", new Color(1.0f, 0.94f, 0.82f), false),
                 _ => ("", "", Colors.White, false),
             };
-            var material = matKey.Item1.Length > 0
-                ? GsaRetroTextures.CreateWorldMaterial(matKey.Item1, matKey.Item2, matKey.Item3, new Vector3(0.095f, 0.095f, 0.095f), triplanar: true, nightWindowGlow: matKey.Item4)
+            var textured = matKey.Item1.Length > 0;
+            var material = textured
+                ? GsaRetroTextures.CreateWorldMaterial(matKey.Item1, matKey.Item2, matKey.Item3, triplanar: false, nightWindowGlow: matKey.Item4)
                 : GsaMeshBuilder.SolidMat(item.Material switch
                 {
                     "glass" => new Color(0.24f, 0.68f, 0.82f, 0.52f),
@@ -374,15 +363,18 @@ public partial class SaoDatumCityScene : Node3D
             node.AddChild(new MeshInstance3D
             {
                 Name = "Geometry",
-                Mesh = new BoxMesh { Size = size },
+                Mesh = textured ? GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.095f) : new BoxMesh { Size = size },
                 MaterialOverride = material,
+                CastShadow = item.ObjectClass is "survey_control" or "unload_point" or "manhole" || item.Material is "glass" or "water"
+                    ? GeometryInstance3D.ShadowCastingSetting.Off
+                    : GeometryInstance3D.ShadowCastingSetting.On,
             });
             if (item.Collision)
                 node.AddChild(new CollisionShape3D { Name = "Collision", Shape = new BoxShape3D { Size = size } });
         }
 
         _manifestObstacles = ObstacleBoxEnu.FromWorldObjects(
-            _fullManifest.Objects.Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone"))).ToArray();
+            _fullManifest.Objects.Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot"))).ToArray();
         _liveCandidates = _fullManifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
     }
 
@@ -454,10 +446,16 @@ public partial class SaoDatumCityScene : Node3D
         AddChild(_lidarCloudMesh);
     }
 
+    private static WorldSectorCellId GetStreamingSectorCell(Vector3d enu) => new(
+        (int)Math.Floor((enu.X - OldCenterMvpWorldAssembler.MvpOriginEast) / OldCenterMvpWorldAssembler.SectorSizeMetres),
+        (int)Math.Floor((enu.Y - OldCenterMvpWorldAssembler.MvpOriginNorth) / OldCenterMvpWorldAssembler.SectorSizeMetres));
+
     private void UpdateSectorStreaming(Vector3d playerEnu)
     {
+        _lastStreamingSector = GetStreamingSectorCell(playerEnu);
         var eval = _streamer.UpdateStreamingWindow(playerEnu);
         var wanted = eval.LoadedSectors.ToHashSet();
+        var changed = false;
 
         // Unload far sectors cleanly
         foreach (var existing in _builtSectors.ToArray())
@@ -470,7 +468,9 @@ public partial class SaoDatumCityScene : Node3D
                 node.QueueFree();
                 _sectorNodes.Remove(existing);
             }
+            _sectorObstacles.Remove(existing);
             _builtSectors.Remove(existing);
+            changed = true;
         }
 
         // Stream procedural neighborhood city blocks inside newly entered 100x100 m sectors!
@@ -479,33 +479,31 @@ public partial class SaoDatumCityScene : Node3D
             if (_builtSectors.Contains(sector))
                 continue;
             _builtSectors.Add(sector);
-            var sectorNode = BuildProceduralCitySector(sector);
+            var sectorObstacles = new List<ObstacleBoxEnu>(4);
+            var sectorNode = BuildProceduralCitySector(sector, sectorObstacles);
             _sectorNodes[sector] = sectorNode;
+            _sectorObstacles[sector] = sectorObstacles;
             _streamedBlocksRoot.AddChild(sectorNode);
+            changed = true;
         }
 
-        // Rebuild active obstacle list
-        _cityBlockObstacles.Clear();
-        _cityBlockObstacles.AddRange(_manifestObstacles);
-        foreach (var sec in _sectorNodes.Values)
+        if (changed || _cityBlockObstacles.Count == 0)
         {
-            foreach (var child in sec.GetChildren().OfType<StaticBody3D>())
-            {
-                if (child.HasMeta("enu_center") && child.HasMeta("enu_size"))
-                {
-                    var c = child.GetMeta("enu_center").AsVector3();
-                    var s = child.GetMeta("enu_size").AsVector3();
-                    _cityBlockObstacles.Add(new ObstacleBoxEnu(child.Name, new Vector3d(c.X, c.Y, c.Z), new Vector3d(s.X, s.Y, s.Z), true));
-                }
-            }
+            _cityBlockObstacles.Clear();
+            _cityBlockObstacles.AddRange(_manifestObstacles);
+            foreach (var list in _sectorObstacles.Values)
+                _cityBlockObstacles.AddRange(list);
+            _nearbyObstacleAnchor = new Vector3d(double.NaN, double.NaN, double.NaN);
         }
     }
 
-    private Node3D BuildProceduralCitySector(WorldSectorCellId sector)
+    private Node3D BuildProceduralCitySector(WorldSectorCellId sector, List<ObstacleBoxEnu> obstaclesOut)
     {
-        var node = new Node3D { Name = sector.WireId };
         var minE = OldCenterMvpWorldAssembler.MvpOriginEast + sector.SectorX * OldCenterMvpWorldAssembler.SectorSizeMetres;
         var minN = OldCenterMvpWorldAssembler.MvpOriginNorth + sector.SectorY * OldCenterMvpWorldAssembler.SectorSizeMetres;
+        var sectorCenterEnu = new Vector3d(minE + 50.0, minN + 50.0, 100.0);
+        var sectorOriginG = _coordinates.ToGodot(sectorCenterEnu);
+        var node = new Node3D { Name = sector.WireId, Position = sectorOriginG };
 
         // Leave the tutorial Commerce Street block, Central Park, City Hall/Viaduct, Waterfront Pier bridge lane, Port Harbor quay, Serra mountain, and Ocean free of generic blocks
         if ((sector.SectorX <= 2 && sector.SectorY == 0) ||
@@ -523,6 +521,11 @@ public partial class SaoDatumCityScene : Node3D
         var isPort = sector.SectorY >= 10;
         var isWaterfront = sector.SectorX >= 10 && sector.SectorY < 10;
 
+        var sectorBatch = new GsaStaticMeshBatcher();
+        var antennaMat = GsaMeshBuilder.SolidMat(new Color(0.46f, 0.48f, 0.52f));
+        var tankMat = GsaMeshBuilder.SolidMat(new Color(0.18f, 0.44f, 0.72f));
+        StaticBody3D? sectorCollider = null;
+
         // Place 2x2 sub-block buildings with 24 m avenue corridors clear along sector edges!
         foreach (var (ox, oy) in new (double, double)[] { (26, 26), (74, 26), (26, 74), (74, 74) })
         {
@@ -536,50 +539,53 @@ public partial class SaoDatumCityScene : Node3D
                   : 10f + (float)rng.NextDouble() * 16f;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
+            var localPos = _coordinates.ToGodot(centerEnu) - sectorOriginG;
+            var bldgName = $"Bldg_{sector.SectorX}_{sector.SectorY}_{(int)ox}_{(int)oy}";
 
-            var body = new StaticBody3D
+            obstaclesOut.Add(new ObstacleBoxEnu(bldgName, centerEnu, new Vector3d(w, d, h), true));
+
+            sectorCollider ??= new StaticBody3D { Name = "SectorColliders", CollisionLayer = 1, CollisionMask = 1 };
+            sectorCollider.AddChild(new CollisionShape3D
             {
-                Name = $"Bldg_{sector.SectorX}_{sector.SectorY}_{(int)ox}_{(int)oy}",
-                Position = _coordinates.ToGodot(centerEnu),
-                CollisionLayer = 1,
-                CollisionMask = 1,
-            };
-            body.SetMeta("enu_center", new Vector3((float)centerEnu.X, (float)centerEnu.Y, (float)centerEnu.Z));
-            body.SetMeta("enu_size", new Vector3(w, d, h));
+                Name = bldgName,
+                Position = localPos,
+                Shape = new BoxShape3D { Size = new Vector3(w, h, d) },
+            });
 
-            var style = isPort ? ("bldg_sec_ware", "warehouse", false)
-                      : isWaterfront ? ("bldg_sec_glass", "glass_tower", false)
+            var style = isPort ? ("bldg_sec_ware_uv", "warehouse", false)
+                      : isWaterfront ? ("bldg_sec_glass_uv", "glass_tower", false)
                       : rng.Next(3) switch
                       {
-                          0 => ("bldg_sec_comm", "facade_commercial", true),
-                          1 => ("bldg_sec_res", "facade_residential", true),
-                          _ => ("bldg_sec_conc", "facade_concrete", true),
+                          0 => ("bldg_sec_comm_uv", "facade_commercial", true),
+                          1 => ("bldg_sec_res_uv", "facade_residential", true),
+                          _ => ("bldg_sec_conc_uv", "facade_concrete", true),
                       };
-            var bMat = GsaRetroTextures.CreateWorldMaterial(style.Item1, style.Item2, Colors.White, new Vector3(0.095f, 0.095f, 0.095f), triplanar: true, nightWindowGlow: style.Item3);
-            body.AddChild(new MeshInstance3D
-            {
-                Mesh = new BoxMesh { Size = new Vector3(w, h, d) },
-                MaterialOverride = bMat,
-            });
+            var bMat = GsaRetroTextures.CreateWorldMaterial(style.Item1, style.Item2, Colors.White, triplanar: false, nightWindowGlow: style.Item3);
+            sectorBatch.AddBox(bMat, localPos, new Vector3(w, h, d), uvScale: 0.095f);
+
             // Sculpted Art-Deco stepped upper setback & rooftop penthouse / water tank to avoid flat box silhouettes!
             if (h > 15f && !isPort)
             {
                 var ph = 5f + (float)rng.NextDouble() * 7f;
-                body.AddChild(GsaMeshBuilder.Box("SetbackCrown", new Vector3(w * 0.64f, ph, d * 0.64f), new Vector3(0f, h * 0.5f + ph * 0.5f, 0f), bMat));
-                body.AddChild(GsaMeshBuilder.Box("RoofAntenna", new Vector3(0.35f, 5.5f, 0.35f), new Vector3(0f, h * 0.5f + ph + 2.75f, 0f), GsaMeshBuilder.SolidMat(new Color(0.46f, 0.48f, 0.52f))));
+                sectorBatch.AddBox(bMat, localPos + new Vector3(0f, h * 0.5f + ph * 0.5f, 0f), new Vector3(w * 0.64f, ph, d * 0.64f), uvScale: 0.095f);
+                sectorBatch.AddBox(antennaMat, localPos + new Vector3(0f, h * 0.5f + ph + 2.75f, 0f), new Vector3(0.35f, 5.5f, 0.35f));
             }
             else if (!isPort)
             {
-                body.AddChild(GsaMeshBuilder.Box("RoofTank", new Vector3(2.4f, 1.8f, 2.4f), new Vector3(-w * 0.25f, h * 0.5f + 0.9f, 0f), GsaMeshBuilder.SolidMat(new Color(0.18f, 0.44f, 0.72f))));
+                sectorBatch.AddBox(tankMat, localPos + new Vector3(-w * 0.25f, h * 0.5f + 0.9f, 0f), new Vector3(2.4f, 1.8f, 2.4f));
             }
-            body.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(w, h, d) } });
-            node.AddChild(body);
         }
 
-        // Add 2 street trees or streetlamp per sector
-        var tree = GsaMeshBuilder.BuildStreetTree($"SecTree_{sector.SectorX}_{sector.SectorY}", 1.0f);
-        tree.Position = _coordinates.ToGodot(new Vector3d(minE + 10.0, minN + 12.0, GetTerrainElevationEnu(minE + 10.0, minN + 12.0)));
-        node.AddChild(tree);
+        // Add sector street tree directly into the sector batch
+        var treeLocal = _coordinates.ToGodot(new Vector3d(minE + 10.0, minN + 12.0, GetTerrainElevationEnu(minE + 10.0, minN + 12.0))) - sectorOriginG;
+        sectorBatch.AddCylinder(GsaMeshBuilder.SolidMat(new Color(0.34f, 0.22f, 0.13f)), treeLocal + new Vector3(0f, 1.35f, 0f), 0.16f, 0.22f, 2.7f, radialSegments: 6);
+        sectorBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.18f, 0.44f, 0.18f)), treeLocal + new Vector3(0f, 3.25f, 0f), new Vector3(2.8f, 2.2f, 2.8f));
+
+        if (sectorCollider is not null)
+            node.AddChild(sectorCollider);
+        var batchMesh = sectorBatch.BuildSingleMeshInstance("SectorMesh", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 420f);
+        if (batchMesh is not null)
+            node.AddChild(batchMesh);
 
         return node;
     }
@@ -626,6 +632,8 @@ public partial class SaoDatumCityScene : Node3D
         "serra" => "district.serra",
         _ => (enu.Y < 7400100.0 && enu.X < 500300.0) ? "district.old_center.commerce" : "district.old_center",
     };
+
+    public override void _Process(double delta) => _perfProbe?.StepFrame(this);
 
     public override void _PhysicsProcess(double delta)
     {
@@ -694,7 +702,7 @@ public partial class SaoDatumCityScene : Node3D
         else
         {
             var prevHeading = _locomotion.HeadingRadians;
-            var step = _locomotion.Step(delta, input, 0.0, weather.SurfaceGripMultiplier, _cityBlockObstacles,
+            var step = _locomotion.Step(delta, input, 0.0, weather.SurfaceGripMultiplier, GetNearbyObstacles(activePos),
                 p => GetTerrainElevationEnu(p.X, p.Y));
             activePos = step.PositionEnu;
             activeHeading = step.HeadingRadians;
@@ -717,7 +725,7 @@ public partial class SaoDatumCityScene : Node3D
         else
             _mobility.SyncParkedVehicle(_benchRoot, null, Vector3d.Zero, 0.0);
 
-        if (_tick % 15 == 0)
+        if (_lastStreamingSector != GetStreamingSectorCell(activePos))
             UpdateSectorStreaming(activePos);
 
         _traffic.StepAndSync(delta, activePos);
@@ -761,11 +769,33 @@ public partial class SaoDatumCityScene : Node3D
         GsaScreenshotHelper.TryCaptureOnFrame(this, (int)_tick, targetFrame: 35);
     }
 
+    private IReadOnlyList<ObstacleBoxEnu> GetNearbyObstacles(Vector3d pos)
+    {
+        if (double.IsNaN(_nearbyObstacleAnchor.X) ||
+            Math.Abs(pos.X - _nearbyObstacleAnchor.X) > 20.0 ||
+            Math.Abs(pos.Y - _nearbyObstacleAnchor.Y) > 20.0)
+        {
+            _nearbyObstacles.Clear();
+            const double radius = 48.0;
+            foreach (var box in _cityBlockObstacles)
+            {
+                if (!box.Collision) continue;
+                if (pos.X + radius >= box.MinX && pos.X - radius <= box.MaxX &&
+                    pos.Y + radius >= box.MinY && pos.Y - radius <= box.MaxY)
+                {
+                    _nearbyObstacles.Add(box);
+                }
+            }
+            _nearbyObstacleAnchor = pos;
+        }
+        return _nearbyObstacles;
+    }
+
     private Vector3d ResolveObstaclePushout(Vector3d prevPos, Vector3d candidate, double radius, out string? hitId)
     {
         hitId = null;
         var cur = candidate;
-        foreach (var box in _cityBlockObstacles)
+        foreach (var box in GetNearbyObstacles(cur))
         {
             if (!box.Collision) continue;
             if (cur.X + radius > box.MinX && cur.X - radius < box.MaxX &&
@@ -984,14 +1014,15 @@ public partial class SaoDatumCityScene : Node3D
         if (!_lidarEnabled || mode < LocomotionMode.Kombi)
             return;
 
-        _lidarScanTimer += dt;
-        if (_lidarScanTimer < 0.12)
-            return;
-        _lidarScanTimer = 0.0;
-
         var profile = mode == LocomotionMode.Van ? LidarProfile.L6 : (mode == LocomotionMode.Pickup ? LidarProfile.L5 : LidarProfile.L4);
         if (_lidarSim.Profile.Id != profile.Id)
             _lidarSim = new LidarBenchSimulator(profile);
+
+        _lidarScanTimer += dt;
+        var scanInterval = Math.Max(0.10, 1.0 / profile.ScanRateHz);
+        if (_lidarScanTimer < scanInterval)
+            return;
+        _lidarScanTimer = 0.0;
 
         var lidarOrigin = pos + new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0);
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
@@ -999,21 +1030,24 @@ public partial class SaoDatumCityScene : Node3D
         var traj = new EstimatedBodyTrajectory([pose, new EstimatedBodyPose(_calendar.CalendarTimeSeconds + 1.0, lidarOrigin, yaw)]);
         var lidarToMap = LidarBenchSimulator.ComposeLidarToMap(new RigidTransform(yaw, lidarOrigin), LidarMountEstimate.Zero);
         var space = GetWorld3D().DirectSpaceState;
+        _lidarRayQuery ??= new PhysicsRayQueryParameters3D { CollisionMask = 1 };
 
         LidarRayHit? CastRay(Vector3d startEnu, Vector3d dirEnu, double maxRange)
         {
-            var fromG = _coordinates.ToGodot(startEnu);
-            var toG = _coordinates.ToGodot(startEnu + dirEnu * maxRange);
-            using var query = PhysicsRayQueryParameters3D.Create(fromG, toG, 1);
-            var hit = space.IntersectRay(query);
+            _lidarRayQuery.From = _coordinates.ToGodot(startEnu);
+            _lidarRayQuery.To = _coordinates.ToGodot(startEnu + dirEnu * maxRange);
+            var hit = space.IntersectRay(_lidarRayQuery);
             if (hit.Count == 0) return null;
             var hitPosG = hit["position"].AsVector3();
             var hitNormG = hit["normal"].AsVector3();
             var dist = (_coordinates.ToMap(hitPosG) - startEnu).Length;
             var colObj = hit["collider"].AsGodotObject();
-            var meta = colObj is null ? new Dictionary() : _registry.GetByInstanceId(colObj.GetInstanceId());
-            var mat = meta.TryGetValue("material", out var m) ? m.AsString() : "concrete";
-            var id = meta.TryGetValue("id", out var i) ? i.AsString() : "city_block";
+            string id = "city_block", mat = "concrete";
+            if (colObj is not null && _registry.TryGetFastMetadata(colObj.GetInstanceId(), out var regId, out var regMat))
+            {
+                id = regId;
+                mat = regMat;
+            }
             return new LidarRayHit(dist, new Vector3d(hitNormG.X, -hitNormG.Z, hitNormG.Y), mat, id);
         }
 

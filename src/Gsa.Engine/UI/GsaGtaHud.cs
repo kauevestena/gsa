@@ -83,6 +83,25 @@ public sealed class GsaGtaHud
     private string _lastDistrict = "";
     private string _lastVehicle = "";
     private string _lastRadioTitle = "";
+    private string _cachedClockWeather = "";
+    private string _cachedRadioLabel = "";
+    private int _cachedBalance = int.MinValue;
+    private string _cachedPlatformText = "";
+    private string _cachedGnssText = "";
+    private Color _cachedGnssColor = new(-1f, -1f, -1f);
+    private string _cachedSensorsText = "";
+    private string _cachedSlotIcon = "";
+    private string _cachedSlotAmmo = "";
+    private string _cachedObjectiveTitle = "";
+    private string _cachedObjectiveDetails = "";
+    private string _cachedFeedbackText = "";
+    private string _cachedPromptText = "";
+    private string _cachedSubtitleText = "";
+    private int _cachedStarsLit = -1;
+    private double _cachedAutonomy = -1.0;
+    private double _cachedStoragePct = -1.0;
+    private double _cachedStressPct = -1.0;
+    private double _cachedDamagePct = -1.0;
 
     public GsaGtaHud(Node parent)
     {
@@ -391,26 +410,73 @@ public sealed class GsaGtaHud
         IReadOnlyList<RadarBlip> blips,
         IReadOnlyList<Vector3d> coverageSpots)
     {
-        _clockLabel.Text = $"{state.ClockText} · {state.WeatherText}";
-        _radioLabel.Text = state.RadioTitleText;
-        _moneyLabel.Text = $"C$ {state.BalanceCoords:00000000}";
-        _platformLabel.Text = $"{state.PlatformTitleText} · {state.Xp} XP";
-        _gnssLabel.Text = state.GnssText;
-        _gnssLabel.AddThemeColorOverride("font_color", state.GnssColor);
-        _sensorsLabel.Text = state.ShowLidar
+        var clockWeather = $"{state.ClockText} · {state.WeatherText}";
+        if (clockWeather != _cachedClockWeather)
+        {
+            _cachedClockWeather = clockWeather;
+            _clockLabel.Text = clockWeather;
+        }
+        if (state.RadioTitleText != _cachedRadioLabel)
+        {
+            _cachedRadioLabel = state.RadioTitleText;
+            _radioLabel.Text = state.RadioTitleText;
+        }
+        if (state.BalanceCoords != _cachedBalance)
+        {
+            _cachedBalance = state.BalanceCoords;
+            _moneyLabel.Text = $"C$ {state.BalanceCoords:00000000}";
+        }
+        var platformText = $"{state.PlatformTitleText} · {state.Xp} XP";
+        if (platformText != _cachedPlatformText)
+        {
+            _cachedPlatformText = platformText;
+            _platformLabel.Text = platformText;
+        }
+        if (state.GnssText != _cachedGnssText)
+        {
+            _cachedGnssText = state.GnssText;
+            _gnssLabel.Text = state.GnssText;
+        }
+        if (!_cachedGnssColor.IsEqualApprox(state.GnssColor))
+        {
+            _cachedGnssColor = state.GnssColor;
+            _gnssLabel.AddThemeColorOverride("font_color", state.GnssColor);
+        }
+        var sensorsText = state.ShowLidar
             ? (state.LidarActive ? "CAM · GNSS · LiDAR●" : "CAM · GNSS · LiDAR○")
             : "CAM · GNSS";
+        if (sensorsText != _cachedSensorsText)
+        {
+            _cachedSensorsText = sensorsText;
+            _sensorsLabel.Text = sensorsText;
+        }
 
-        _sensorSlotIconLabel.Text = state.ShowLidar
+        var slotIcon = state.ShowLidar
             ? (state.LidarActive ? "LiDAR" : "360°")
             : (state.ShowVehicleCondition ? "CAM+" : "CAM");
-        _sensorSlotAmmoLabel.Text = $"{state.StorageUsed}/{state.StorageCapacity}";
+        if (slotIcon != _cachedSlotIcon)
+        {
+            _cachedSlotIcon = slotIcon;
+            _sensorSlotIconLabel.Text = slotIcon;
+        }
+        var slotAmmo = $"{state.StorageUsed}/{state.StorageCapacity}";
+        if (slotAmmo != _cachedSlotAmmo)
+        {
+            _cachedSlotAmmo = slotAmmo;
+            _sensorSlotAmmoLabel.Text = slotAmmo;
+            _storageLabel.Text = slotAmmo;
+        }
 
-        _starsLabel.Visible = state.ShowAttentionStars;
+        if (_starsLabel.Visible != state.ShowAttentionStars)
+            _starsLabel.Visible = state.ShowAttentionStars;
         if (state.ShowAttentionStars)
         {
             var lit = Math.Clamp(state.AttentionStars, 0, 5);
-            _starsLabel.Text = new string('★', lit) + new string('☆', 5 - lit);
+            if (lit != _cachedStarsLit)
+            {
+                _cachedStarsLit = lit;
+                _starsLabel.Text = new string('★', lit) + new string('☆', 5 - lit);
+            }
             _starPulseTime += dt * 4.5;
             var starAlpha = lit > 0 ? 0.68f + 0.32f * MathF.Sin((float)_starPulseTime) : 0.45f;
             _starsLabel.Modulate = new Color(1f, 1f, 1f, starAlpha);
@@ -421,13 +487,23 @@ public sealed class GsaGtaHud
             _lastRadioTitle = state.RadioTitleText;
             _radioCenterBanner.Text = state.RadioTitleText;
             _radioBannerTimer = 3.0;
+            _radioCenterBanner.Visible = true;
         }
         else if (string.IsNullOrEmpty(state.RadioTitleText))
         {
             _lastRadioTitle = "";
         }
-        _radioBannerTimer = Math.Max(0.0, _radioBannerTimer - dt);
-        _radioCenterBanner.Modulate = new Color(1f, 1f, 1f, (float)Math.Clamp(_radioBannerTimer, 0.0, 1.0));
+        if (_radioBannerTimer > 0.0)
+        {
+            _radioBannerTimer = Math.Max(0.0, _radioBannerTimer - dt);
+            _radioCenterBanner.Modulate = new Color(1f, 1f, 1f, (float)Math.Clamp(_radioBannerTimer, 0.0, 1.0));
+            if (_radioBannerTimer <= 0.0)
+                _radioCenterBanner.Visible = false;
+        }
+        else if (_radioCenterBanner.Visible)
+        {
+            _radioCenterBanner.Visible = false;
+        }
 
         if (_celebrationTimer > 0.0)
         {
@@ -437,44 +513,109 @@ public sealed class GsaGtaHud
                 _celebrationBox.Visible = false;
         }
 
-        _autonomyBar.Value = Math.Clamp(state.AutonomyFraction * 100.0, 0.0, 100.0);
-        _storageBar.Value = state.StorageCapacity > 0
+        var autoPct = Math.Clamp(state.AutonomyFraction * 100.0, 0.0, 100.0);
+        if (Math.Abs(autoPct - _cachedAutonomy) > 0.1)
+        {
+            _cachedAutonomy = autoPct;
+            _autonomyBar.Value = autoPct;
+        }
+        var storagePct = state.StorageCapacity > 0
             ? Math.Clamp(100.0 * state.StorageUsed / state.StorageCapacity, 0.0, 100.0)
             : 0.0;
-        _storageLabel.Text = $"{state.StorageUsed}/{state.StorageCapacity}";
+        if (Math.Abs(storagePct - _cachedStoragePct) > 0.1)
+        {
+            _cachedStoragePct = storagePct;
+            _storageBar.Value = storagePct;
+        }
 
-        _stressRow.Visible = state.ShowGimbalinaStress;
+        if (_stressRow.Visible != state.ShowGimbalinaStress)
+            _stressRow.Visible = state.ShowGimbalinaStress;
         if (state.ShowGimbalinaStress)
-            _stressBar.Value = Math.Clamp(state.GimbalinaStressFraction * 100.0, 0.0, 100.0);
+        {
+            var stressPct = Math.Clamp(state.GimbalinaStressFraction * 100.0, 0.0, 100.0);
+            if (Math.Abs(stressPct - _cachedStressPct) > 0.1)
+            {
+                _cachedStressPct = stressPct;
+                _stressBar.Value = stressPct;
+            }
+        }
 
-        _damageRow.Visible = state.ShowVehicleCondition;
+        if (_damageRow.Visible != state.ShowVehicleCondition)
+            _damageRow.Visible = state.ShowVehicleCondition;
         if (state.ShowVehicleCondition)
-            _damageBar.Value = Math.Clamp(state.VehicleDamageFraction * 100.0, 0.0, 100.0);
+        {
+            var dmgPct = Math.Clamp(state.VehicleDamageFraction * 100.0, 0.0, 100.0);
+            if (Math.Abs(dmgPct - _cachedDamagePct) > 0.1)
+            {
+                _cachedDamagePct = dmgPct;
+                _damageBar.Value = dmgPct;
+            }
+        }
 
-        _objectiveTitleLabel.Text = state.ObjectiveTitle;
-        _objectiveDetailsLabel.Text = state.ObjectiveDetails;
-        _feedbackLabel.Text = state.FeedbackText;
-        _promptLabel.Text = state.ContextPromptText;
-        _subtitleLabel.Text = state.RadioSubtitleText;
-        ViewfinderOverlay.Visible = state.SurveyViewfinderActive;
+        if (state.ObjectiveTitle != _cachedObjectiveTitle)
+        {
+            _cachedObjectiveTitle = state.ObjectiveTitle;
+            _objectiveTitleLabel.Text = state.ObjectiveTitle;
+        }
+        if (state.ObjectiveDetails != _cachedObjectiveDetails)
+        {
+            _cachedObjectiveDetails = state.ObjectiveDetails;
+            _objectiveDetailsLabel.Text = state.ObjectiveDetails;
+        }
+        if (state.FeedbackText != _cachedFeedbackText)
+        {
+            _cachedFeedbackText = state.FeedbackText;
+            _feedbackLabel.Text = state.FeedbackText;
+        }
+        if (state.ContextPromptText != _cachedPromptText)
+        {
+            _cachedPromptText = state.ContextPromptText;
+            _promptLabel.Text = state.ContextPromptText;
+        }
+        if (state.RadioSubtitleText != _cachedSubtitleText)
+        {
+            _cachedSubtitleText = state.RadioSubtitleText;
+            _subtitleLabel.Text = state.RadioSubtitleText;
+        }
+        if (ViewfinderOverlay.Visible != state.SurveyViewfinderActive)
+            ViewfinderOverlay.Visible = state.SurveyViewfinderActive;
 
         if (!string.IsNullOrEmpty(state.DistrictPopup) && state.DistrictPopup != _lastDistrict)
         {
             _lastDistrict = state.DistrictPopup;
             _districtBanner.Text = state.DistrictPopup;
             _districtTimer = 3.8;
+            _districtBanner.Visible = true;
         }
         if (!string.IsNullOrEmpty(state.VehiclePopup) && state.VehiclePopup != _lastVehicle)
         {
             _lastVehicle = state.VehiclePopup;
             _vehicleBanner.Text = state.VehiclePopup;
             _vehicleTimer = 3.2;
+            _vehicleBanner.Visible = true;
         }
 
-        _districtTimer = Math.Max(0.0, _districtTimer - dt);
-        _vehicleTimer = Math.Max(0.0, _vehicleTimer - dt);
-        _districtBanner.Modulate = new Color(1f, 1f, 1f, (float)Math.Clamp(_districtTimer, 0.0, 1.0));
-        _vehicleBanner.Modulate = new Color(1f, 1f, 1f, (float)Math.Clamp(_vehicleTimer, 0.0, 1.0));
+        if (_districtTimer > 0.0)
+        {
+            _districtTimer = Math.Max(0.0, _districtTimer - dt);
+            _districtBanner.Modulate = new Color(1f, 1f, 1f, (float)Math.Clamp(_districtTimer, 0.0, 1.0));
+            if (_districtTimer <= 0.0) _districtBanner.Visible = false;
+        }
+        else if (_districtBanner.Visible)
+        {
+            _districtBanner.Visible = false;
+        }
+
+        if (_vehicleTimer > 0.0)
+        {
+            _vehicleTimer = Math.Max(0.0, _vehicleTimer - dt);
+            _vehicleBanner.Modulate = new Color(1f, 1f, 1f, (float)Math.Clamp(_vehicleTimer, 0.0, 1.0));
+            if (_vehicleTimer <= 0.0) _vehicleBanner.Visible = false;
+        }
+        else if (_vehicleBanner.Visible)
+        {
+            _vehicleBanner.Visible = false;
+        }
 
         Radar.UpdateTelemetry(playerPosEnu, headingRadians, blips, coverageSpots);
     }

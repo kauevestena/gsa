@@ -28,6 +28,7 @@ public partial class SaoDatumCityScene
     private Button _calmToggleBtn = null!;
     private Button _ditherToggleBtn = null!;
     private Button _daguerreotypeBtn = null!;
+    private readonly List<RadarBlip> _radarBlips = new(32);
     private ulong _contractSeed = 101;
     private readonly List<ContractDefinition> _offeredContracts = [];
 
@@ -525,20 +526,21 @@ public partial class SaoDatumCityScene
             ? new Color(0.24f, 0.94f, 0.86f)
             : (skyOpenness >= 0.45 ? new Color(0.32f, 0.92f, 0.56f) : new Color(0.96f, 0.78f, 0.24f));
 
-        var blips = new List<RadarBlip>();
+        var blips = _radarBlips;
+        blips.Clear();
         foreach (var bm in _geodeticNetwork.Benchmarks.Values)
             blips.Add(new RadarBlip(bm.BenchmarkId, bm.PhysicalPositionEnu, new Color(0.35f, 0.92f, 0.48f), "▲", ClampToRim: false));
 
-        if (_fullManifest.Objects.FirstOrDefault(o => o.Id == "office_entry") is { } off)
+        if (_manifestObjectsById.TryGetValue("office_entry", out var off))
             blips.Add(new RadarBlip("office_entry", off.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
-        if (_fullManifest.Objects.FirstOrDefault(o => o.Id == "unload_point") is { } unl)
+        if (_manifestObjectsById.TryGetValue("unload_point", out var unl))
             blips.Add(new RadarBlip("unload_point", unl.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
 
         if (_activeContract is not null)
         {
             foreach (var fid in _activeContract.RequiredFeatureIds.Take(8))
             {
-                Vector3d? tPos = _fullManifest.Objects.FirstOrDefault(o => o.Id == fid)?.PositionEnu;
+                Vector3d? tPos = _manifestObjectsById.TryGetValue(fid, out var fo) ? fo.PositionEnu : null;
                 if (tPos is null && _geodeticNetwork.Benchmarks.TryGetValue(fid, out var bmNode))
                     tPos = bmNode.PhysicalPositionEnu;
                 if (tPos is null) continue;

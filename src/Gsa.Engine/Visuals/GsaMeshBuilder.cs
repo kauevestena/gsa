@@ -120,6 +120,75 @@ public sealed class PlayerVisualRig
 /// <summary>Builds low-poly PS2/GTA III-era 3D vehicles, Elias + Gimbalina rigs, traffic silhouettes, and street props.</summary>
 public static class GsaMeshBuilder
 {
+    private static readonly Dictionary<(uint ColorRgba, byte RoughnessByte, bool Emit, short EnergyCentis), StandardMaterial3D> SolidMaterialCache = new();
+    private static readonly QuadMesh UnitQuadMesh = new() { Size = Vector2.One };
+    private static readonly CylinderMesh TreeTrunkMesh = new() { TopRadius = 0.18f, BottomRadius = 0.28f, Height = 2.6f, RadialSegments = 6 };
+    private static readonly SphereMesh TreeCanopyLowerMesh = new() { Radius = 1.65f, Height = 2.3f, RadialSegments = 7, Rings = 4 };
+    private static readonly SphereMesh TreeCanopyTopMesh = new() { Radius = 1.15f, Height = 1.7f, RadialSegments = 6, Rings = 3 };
+
+    public static Mesh CreateWorldUvBoxMesh(Vector3 size, float uvScale = 0.1f)
+    {
+        var batcher = new GsaStaticMeshBatcher();
+        var dummy = SolidMat(Colors.White);
+        batcher.AddBox(dummy, Vector3.Zero, size, uvScale: uvScale);
+        var mesh = batcher.BuildCombinedArrayMesh()!;
+        return mesh;
+    }
+
+    public static void BuildBatchedStreetTrees(
+        Node3D parent,
+        string name,
+        IReadOnlyList<(Vector3 Position, float Scale)> trees,
+        float visibilityRangeEnd = 0f)
+    {
+        if (trees.Count == 0)
+            return;
+
+        var trunkMat = SolidMat(new Color(0.36f, 0.24f, 0.14f));
+        var foliageLowMat = GsaRetroTextures.CreateWorldMaterial("tree_foliage_mat", "park_grass", new Color(0.85f, 1.0f, 0.78f));
+        var foliageTopMat = GsaRetroTextures.CreateWorldMaterial("tree_foliage_top_mat", "park_grass", new Color(0.95f, 1.1f, 0.85f));
+        var shadowMat = GsaRetroTextures.CreateWorldMaterial("shadow_blob_mat", "shadow_blob", Colors.White, unshaded: true, transparent: true);
+
+        TreeTrunkMesh.Material = trunkMat;
+        TreeCanopyLowerMesh.Material = foliageLowMat;
+        TreeCanopyTopMesh.Material = foliageTopMat;
+
+        var trunkMm = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D, Mesh = TreeTrunkMesh, InstanceCount = trees.Count };
+        var lowMm = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D, Mesh = TreeCanopyLowerMesh, InstanceCount = trees.Count };
+        var topMm = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D, Mesh = TreeCanopyTopMesh, InstanceCount = trees.Count };
+        var shadowMm = new MultiMesh { TransformFormat = MultiMesh.TransformFormatEnum.Transform3D, Mesh = UnitQuadMesh, InstanceCount = trees.Count };
+
+        var shadowRot = Basis.FromEuler(new Vector3(-MathF.PI * 0.5f, 0f, 0f));
+        for (var i = 0; i < trees.Count; i++)
+        {
+            var (pos, s) = trees[i];
+            var sb = Basis.Identity.Scaled(new Vector3(s, s, s));
+            trunkMm.SetInstanceTransform(i, new Transform3D(sb, pos + new Vector3(0f, 1.3f * s, 0f)));
+            lowMm.SetInstanceTransform(i, new Transform3D(sb, pos + new Vector3(0f, 3.0f * s, 0f)));
+            topMm.SetInstanceTransform(i, new Transform3D(sb, pos + new Vector3(0.2f * s, 4.1f * s, -0.1f * s)));
+            shadowMm.SetInstanceTransform(i, new Transform3D(shadowRot.Scaled(new Vector3(3.0f * s, 1f, 3.0f * s)), pos + new Vector3(0f, 0.03f, 0f)));
+        }
+
+        void AddLayer(string suffix, MultiMesh mm, StandardMaterial3D? matOverride, float visEnd)
+        {
+            var mmi = new MultiMeshInstance3D
+            {
+                Name = $"{name}_{suffix}",
+                Multimesh = mm,
+                MaterialOverride = matOverride,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            };
+            if (visEnd > 0f)
+                mmi.VisibilityRangeEnd = visEnd;
+            parent.AddChild(mmi);
+        }
+
+        AddLayer("Trunks", trunkMm, trunkMat, visibilityRangeEnd);
+        AddLayer("CanopyLow", lowMm, foliageLowMat, visibilityRangeEnd);
+        AddLayer("CanopyTop", topMm, foliageTopMat, visibilityRangeEnd);
+        AddLayer("Shadows", shadowMm, shadowMat, visibilityRangeEnd > 0f ? MathF.Min(visibilityRangeEnd, 90f) : 90f);
+    }
+
     public static PlayerVisualRig BuildPlayerRig(LocomotionMode mode)
     {
         var root = new Node3D { Name = $"PlayerVisual_{mode}" };
@@ -182,10 +251,12 @@ public static class GsaMeshBuilder
             Name = "BlobShadow",
             Position = new Vector3(0f, 0.025f, 0f),
             RotationDegrees = new Vector3(-90f, 0f, 0f),
-            Mesh = new QuadMesh { Size = new Vector2(width, length) },
+            Scale = new Vector3(width, length, 1f),
+            Mesh = UnitQuadMesh,
             MaterialOverride = GsaRetroTextures.CreateWorldMaterial(
                 "shadow_blob_mat", "shadow_blob", Colors.White, unshaded: true, transparent: true),
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            VisibilityRangeEnd = 80f,
         };
         parent.AddChild(quad);
         return quad;
@@ -572,8 +643,8 @@ public static class GsaMeshBuilder
 
     private static void AttachVehicleLights(Node3D parent, PlayerVisualRig rig, float zFront, float zRear, float halfWidth, float height)
     {
-        var headMat = SolidMat(new Color(1.0f, 0.96f, 0.80f), emit: true, emissionEnergy: 0.25f);
-        var tailMat = SolidMat(new Color(0.95f, 0.14f, 0.12f), emit: true, emissionEnergy: 0.10f);
+        var headMat = SolidMat(new Color(1.0f, 0.96f, 0.80f), emit: true, emissionEnergy: 0.25f, uncached: true);
+        var tailMat = SolidMat(new Color(0.95f, 0.14f, 0.12f), emit: true, emissionEnergy: 0.10f, uncached: true);
         rig.HeadlightMat = headMat;
         rig.TaillightMat = tailMat;
 
@@ -639,12 +710,13 @@ public static class GsaMeshBuilder
 
             void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 normal)
             {
+                // Clockwise front-face winding matching Godot BoxMesh
                 st.SetColor(col);
                 st.SetNormal(normal);
                 st.AddVertex(a);
                 st.SetColor(col);
                 st.SetNormal(normal);
-                st.AddVertex(b);
+                st.AddVertex(d);
                 st.SetColor(col);
                 st.SetNormal(normal);
                 st.AddVertex(c);
@@ -657,7 +729,7 @@ public static class GsaMeshBuilder
                 st.AddVertex(c);
                 st.SetColor(col);
                 st.SetNormal(normal);
-                st.AddVertex(d);
+                st.AddVertex(b);
             }
 
             Quad(p101, p100, p110, p111, Vector3.Right);   // +X front
@@ -731,11 +803,11 @@ public static class GsaMeshBuilder
             void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 normal)
             {
                 st.SetColor(col); st.SetNormal(normal); st.AddVertex(a);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(b);
+                st.SetColor(col); st.SetNormal(normal); st.AddVertex(d);
                 st.SetColor(col); st.SetNormal(normal); st.AddVertex(c);
                 st.SetColor(col); st.SetNormal(normal); st.AddVertex(a);
                 st.SetColor(col); st.SetNormal(normal); st.AddVertex(c);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(d);
+                st.SetColor(col); st.SetNormal(normal); st.AddVertex(b);
             }
 
             Quad(p101, p100, p110, p111, Vector3.Right);
@@ -761,22 +833,25 @@ public static class GsaMeshBuilder
         {
             Name = "Trunk",
             Position = new Vector3(0f, 1.3f, 0f),
-            Mesh = new CylinderMesh { TopRadius = 0.18f, BottomRadius = 0.28f, Height = 2.6f, RadialSegments = 7 },
+            Mesh = TreeTrunkMesh,
             MaterialOverride = SolidMat(new Color(0.36f, 0.24f, 0.14f)),
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
         tree.AddChild(new MeshInstance3D
         {
             Name = "CanopyLower",
             Position = new Vector3(0f, 3.0f, 0f),
-            Mesh = new SphereMesh { Radius = 1.65f, Height = 2.3f, RadialSegments = 8, Rings = 5 },
+            Mesh = TreeCanopyLowerMesh,
             MaterialOverride = GsaRetroTextures.CreateWorldMaterial("tree_foliage_mat", "park_grass", new Color(0.85f, 1.0f, 0.78f)),
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
         tree.AddChild(new MeshInstance3D
         {
             Name = "CanopyTop",
             Position = new Vector3(0.2f, 4.1f, -0.1f),
-            Mesh = new SphereMesh { Radius = 1.15f, Height = 1.7f, RadialSegments = 7, Rings = 4 },
+            Mesh = TreeCanopyTopMesh,
             MaterialOverride = GsaRetroTextures.CreateWorldMaterial("tree_foliage_top_mat", "park_grass", new Color(0.95f, 1.1f, 0.85f)),
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
         AddShadowBlob(tree, 3.0f, 3.0f);
         return tree;
@@ -786,7 +861,7 @@ public static class GsaMeshBuilder
     {
         var root = new Node3D { Name = name };
         var poleMat = SolidMat(new Color(0.24f, 0.27f, 0.30f));
-        var bulbMat = SolidMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f);
+        var bulbMat = SolidMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f, uncached: true);
 
         root.AddChild(Box("Pole", new Vector3(0.14f, 5.2f, 0.14f), new Vector3(0f, 2.6f, 0f), poleMat));
         root.AddChild(Box("Arm", new Vector3(1.1f, 0.10f, 0.10f), new Vector3(0.50f, 5.15f, 0f), poleMat));
@@ -814,9 +889,9 @@ public static class GsaMeshBuilder
         var root = new Node3D { Name = name };
         var poleMat = SolidMat(new Color(0.20f, 0.22f, 0.24f));
         var housingMat = SolidMat(new Color(0.11f, 0.12f, 0.13f));
-        var redMat = SolidMat(new Color(0.95f, 0.15f, 0.12f), emit: true, emissionEnergy: 0.1f);
-        var amberMat = SolidMat(new Color(0.98f, 0.72f, 0.10f), emit: true, emissionEnergy: 0.1f);
-        var greenMat = SolidMat(new Color(0.16f, 0.92f, 0.42f), emit: true, emissionEnergy: 1.8f);
+        var redMat = SolidMat(new Color(0.95f, 0.15f, 0.12f), emit: true, emissionEnergy: 0.1f, uncached: true);
+        var amberMat = SolidMat(new Color(0.98f, 0.72f, 0.10f), emit: true, emissionEnergy: 0.1f, uncached: true);
+        var greenMat = SolidMat(new Color(0.16f, 0.92f, 0.42f), emit: true, emissionEnergy: 1.8f, uncached: true);
 
         root.AddChild(Box("Post", new Vector3(0.16f, 4.8f, 0.16f), new Vector3(0f, 2.4f, 0f), poleMat));
         root.AddChild(Box("Cantilever", new Vector3(2.4f, 0.12f, 0.12f), new Vector3(1.1f, 4.7f, 0f), poleMat));
@@ -873,12 +948,30 @@ public static class GsaMeshBuilder
         return node;
     }
 
-    public static StandardMaterial3D SolidMat(Color color, float roughness = 0.78f, bool emit = false, float emissionEnergy = 1.2f)
+    public static StandardMaterial3D SolidMat(
+        Color color,
+        float roughness = 0.78f,
+        bool emit = false,
+        float emissionEnergy = 1.2f,
+        bool uncached = false)
     {
+        var key = (
+            color.ToRgba32(),
+            (byte)Math.Clamp((int)MathF.Round(roughness * 255f), 0, 255),
+            emit,
+            emit ? (short)Math.Clamp((int)MathF.Round(emissionEnergy * 100f), short.MinValue, short.MaxValue) : (short)0);
+
+        if (!uncached && SolidMaterialCache.TryGetValue(key, out var cached))
+            return cached;
+
         var mat = new StandardMaterial3D
         {
             AlbedoColor = color,
             Roughness = roughness,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
+            SpecularMode = roughness < 0.35f
+                ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
+                : BaseMaterial3D.SpecularModeEnum.Disabled,
         };
         if (emit)
         {
@@ -886,6 +979,8 @@ public static class GsaMeshBuilder
             mat.Emission = color;
             mat.EmissionEnergyMultiplier = emissionEnergy;
         }
+        if (!uncached)
+            SolidMaterialCache[key] = mat;
         return mat;
     }
 
@@ -905,6 +1000,8 @@ public static class GsaMeshBuilder
             Modulate = Colors.White,
             OutlineModulate = Colors.Black,
             OutlineSize = 6,
+            AlphaCut = Label3D.AlphaCutMode.Discard,
+            VisibilityRangeEnd = 70f,
         });
         return sign;
     }

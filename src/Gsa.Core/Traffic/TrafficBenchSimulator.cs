@@ -3,6 +3,13 @@ using Gsa.Core.Randomness;
 
 namespace Gsa.Core.Traffic;
 
+public readonly record struct TrafficVisualAgent(
+    string Id,
+    bool IsVehicle,
+    Vector3d PositionEnu,
+    double HeadingRadians,
+    double SpeedMetresPerSecond);
+
 public sealed record TrafficAgentSnapshot(
     string Id,
     bool IsVehicle,
@@ -56,6 +63,8 @@ public sealed class TrafficBenchSimulator
     private readonly RoadNetworkGraph _graph;
     private readonly GaussianRandom _rng;
     private readonly List<AgentState> _agents = [];
+    private readonly List<AgentState> _deadlockRemovalScratch = [];
+    private readonly List<string> _viableSegmentScratch = [];
     private readonly bool _respawnAfterDeadlockRemoval;
     private long _nextSpawnSerial;
 
@@ -96,6 +105,16 @@ public sealed class TrafficBenchSimulator
             SignalGroup.NorthSouthCrosswalk => phase is >= 12.0 and < 22.0 ? SignalAspect.Green : SignalAspect.Red,
             _ => SignalAspect.Red,
         };
+    }
+
+    public void CopyVisualAgentsTo(List<TrafficVisualAgent> destination)
+    {
+        destination.Clear();
+        for (var i = 0; i < _agents.Count; i++)
+        {
+            var a = _agents[i];
+            destination.Add(new TrafficVisualAgent(a.Id, a.IsVehicle, a.PositionEnu, a.HeadingRadians, a.Speed));
+        }
     }
 
     public IReadOnlyList<TrafficAgentSnapshot> GetSnapshots() =>
@@ -149,11 +168,19 @@ public sealed class TrafficBenchSimulator
         var minSpacing = ComputeMinimumVehicleSpacing();
         var playerBlocked = IsPlayerBlocked(playerPositionEnu);
 
+        var activeVehicles = 0;
+        var activePeds = 0;
+        for (var i = 0; i < _agents.Count; i++)
+        {
+            if (_agents[i].IsVehicle) activeVehicles++;
+            else activePeds++;
+        }
+
         return new TrafficStepSummary(
             Tick,
             ElapsedSeconds,
-            _agents.Count(a => a.IsVehicle),
-            _agents.Count(a => !a.IsVehicle),
+            activeVehicles,
+            activePeds,
             stoppedAtSignal,
             pedCrossing,
             DeadlockRemovals,
@@ -243,16 +270,27 @@ public sealed class TrafficBenchSimulator
 
     private string ChooseNextSegment(RoadLaneSegment current, AgentState agent)
     {
-        if (current.NextSegmentIds.Count == 1)
-            return current.NextSegmentIds[0];
+        var nextIds = current.NextSegmentIds;
+        if (nextIds.Count == 1)
+            return nextIds[0];
 
-        var viable = current.NextSegmentIds
-            .Where(nextId => _graph.Segments[nextId].SignalGroup == SignalGroup.AlwaysGreen ||
-                             GetSignalAspect(_graph.Segments[nextId].SignalGroup) == SignalAspect.Green)
-            .ToArray();
-        var pool = viable.Length > 0 ? viable : current.NextSegmentIds.ToArray();
-        var index = (int)(_rng.NextUniformOpenUnit() * pool.Length);
-        return pool[Math.Clamp(index, 0, pool.Length - 1)];
+        _viableSegmentScratch.Clear();
+        for (var i = 0; i < nextIds.Count; i++)
+        {
+            var nextId = nextIds[i];
+            var group = _graph.Segments[nextId].SignalGroup;
+            if (group == SignalGroup.AlwaysGreen || GetSignalAspect(group) == SignalAspect.Green)
+                _viableSegmentScratch.Add(nextId);
+        }
+
+        if (_viableSegmentScratch.Count > 0)
+        {
+            var idx = Math.Clamp((int)(_rng.NextUniformOpenUnit() * _viableSegmentScratch.Count), 0, _viableSegmentScratch.Count - 1);
+            return _viableSegmentScratch[idx];
+        }
+
+        var fallbackIdx = Math.Clamp((int)(_rng.NextUniformOpenUnit() * nextIds.Count), 0, nextIds.Count - 1);
+        return nextIds[fallbackIdx];
     }
 
     private bool CanEnterSegmentSafely(AgentState agent, string nextSegId)
@@ -315,20 +353,22 @@ public sealed class TrafficBenchSimulator
 
     private void HandleOffCameraDeadlocks(double dt, Vector3d? cameraPos, Vector3d? cameraForward)
     {
-        var toRemove = new List<AgentState>();
-        foreach (var agent in _agents)
+        _deadlockRemovalScratch.Clear();
+        for (var i = 0; i < _agents.Count; i++)
         {
+            var agent = _agents[i];
             if (agent.Speed < 0.05 && (!agent.WaitingAtSignal || agent.ForcedStall))
                 agent.StalledSeconds += dt;
             else
                 agent.StalledSeconds = 0.0;
 
             if (agent.StalledSeconds + 1e-9 >= DeadlockThresholdSeconds && IsOffCamera(agent.PositionEnu, cameraPos, cameraForward))
-                toRemove.Add(agent);
+                _deadlockRemovalScratch.Add(agent);
         }
 
-        foreach (var dead in toRemove)
+        for (var i = 0; i < _deadlockRemovalScratch.Count; i++)
         {
+            var dead = _deadlockRemovalScratch[i];
             _agents.Remove(dead);
             DeadlockRemovals++;
             if (_respawnAfterDeadlockRemoval)
@@ -471,18 +511,22 @@ public sealed class TrafficBenchSimulator
 
     private double ComputeMinimumVehicleSpacing()
     {
-        var min = double.PositiveInfinity;
+        var minSq = double.PositiveInfinity;
         for (var i = 0; i < _agents.Count; i++)
         {
-            if (!_agents[i].IsVehicle) continue;
+            var a = _agents[i];
+            if (!a.IsVehicle) continue;
             for (var j = i + 1; j < _agents.Count; j++)
             {
-                if (!_agents[j].IsVehicle) continue;
-                var d = RoadNetworkGraph.DistanceXy(_agents[i].PositionEnu, _agents[j].PositionEnu);
-                if (d < min) min = d;
+                var b = _agents[j];
+                if (!b.IsVehicle) continue;
+                var dx = a.PositionEnu.X - b.PositionEnu.X;
+                var dy = a.PositionEnu.Y - b.PositionEnu.Y;
+                var dSq = dx * dx + dy * dy;
+                if (dSq < minSq) minSq = dSq;
             }
         }
-        return min;
+        return double.IsPositiveInfinity(minSq) ? minSq : Math.Sqrt(minSq);
     }
 
     private bool IsPlayerBlocked(Vector3d? playerPos)

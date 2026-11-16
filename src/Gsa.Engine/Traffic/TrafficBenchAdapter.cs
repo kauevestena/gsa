@@ -32,6 +32,8 @@ public sealed class TrafficBenchAdapter
     private readonly GodotCoordinateAdapter _coordinates;
     private readonly TrafficBenchSimulator _simulator;
     private readonly MultiMeshInstance3D[] _vehiclePools = new MultiMeshInstance3D[4];
+    private readonly System.Collections.Generic.List<TrafficVisualAgent> _visualBuffer = new(TrafficBenchSimulator.TargetVehicleCount + TrafficBenchSimulator.TargetPedestrianCount);
+    private readonly System.Collections.Generic.Dictionary<string, (int Pool, int Hash, Color Tint)> _agentVisualCache = new(StringComparer.Ordinal);
     private MultiMeshInstance3D? _pedestrianMeshNode;
     private MultiMeshInstance3D? _shadowPool;
     private double _walkTime;
@@ -60,6 +62,8 @@ public sealed class TrafficBenchAdapter
             {
                 VertexColorUseAsAlbedo = true,
                 Roughness = 0.52f,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
+                SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled,
             });
             var mm = new MultiMesh
             {
@@ -78,6 +82,8 @@ public sealed class TrafficBenchAdapter
         {
             VertexColorUseAsAlbedo = true,
             Roughness = 0.85f,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
+            SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled,
         });
         var pedMm = new MultiMesh
         {
@@ -125,20 +131,37 @@ public sealed class TrafficBenchAdapter
         if (_vehiclePools[0] is null || _pedestrianMeshNode is null)
             return;
 
-        var snapshots = _simulator.GetSnapshots();
+        _simulator.CopyVisualAgentsTo(_visualBuffer);
         Span<int> vehicleIndices = stackalloc int[4];
         var pedIndex = 0;
         var shadowIndex = 0;
+        var pedShadowBasis = new Basis(new Vector3(0.85f, 0f, 0f), new Vector3(0f, 0f, -0.85f), Vector3.Up);
+        var walkPhase = (float)_walkTime * 7.5f;
 
-        foreach (var agent in snapshots)
+        foreach (var agent in _visualBuffer)
         {
             var godotPos = _coordinates.ToGodot(agent.PositionEnu);
-            var basis = Basis.FromEuler(new Vector3(0.0f, (float)agent.HeadingRadians, 0.0f));
-            var hash = StableHash(agent.Id);
+            var (sinH, cosH) = MathF.SinCos((float)agent.HeadingRadians);
+            var basis = new Basis(new Vector3(cosH, 0f, -sinH), Vector3.Up, new Vector3(sinH, 0f, cosH));
+
+            if (!_agentVisualCache.TryGetValue(agent.Id, out var vis))
+            {
+                var hash = StableHash(agent.Id);
+                var pool = hash % 10 < 2 ? 1 : (hash % 10 < 4 ? 2 : (hash % 10 == 4 ? 3 : 0));
+                var tint = agent.IsVehicle
+                    ? (pool == 1
+                        ? new Color(0.95f, 0.74f, 0.14f)
+                        : pool == 2
+                            ? new Color(0.86f, 0.88f, 0.90f)
+                            : SedanPalette[hash % SedanPalette.Length])
+                    : PedJacketPalette[hash % PedJacketPalette.Length];
+                vis = (pool, hash, tint);
+                _agentVisualCache[agent.Id] = vis;
+            }
 
             if (agent.IsVehicle)
             {
-                var pool = hash % 10 < 2 ? 1 : (hash % 10 < 4 ? 2 : (hash % 10 == 4 ? 3 : 0));
+                var pool = vis.Pool;
                 var mm = _vehiclePools[pool].Multimesh;
                 if (vehicleIndices[pool] >= mm.InstanceCount)
                 {
@@ -149,17 +172,14 @@ public sealed class TrafficBenchAdapter
                 {
                     var idx = vehicleIndices[pool]++;
                     mm.SetInstanceTransform(idx, new Transform3D(basis, godotPos));
-                    var color = pool == 1
-                        ? new Color(0.95f, 0.74f, 0.14f) // Liberty City Yellow Taxi
-                        : pool == 2
-                            ? new Color(0.86f, 0.88f, 0.90f) // Delivery Van
-                            : SedanPalette[hash % SedanPalette.Length];
-                    mm.SetInstanceColor(idx, color);
+                    mm.SetInstanceColor(idx, vis.Tint);
 
                     if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)
                     {
-                        var shBasis = Basis.FromEuler(new Vector3(-MathF.PI * 0.5f, (float)agent.HeadingRadians, 0f))
-                            .Scaled(new Vector3(4.5f, 1f, 2.2f));
+                        var shBasis = new Basis(
+                            new Vector3(cosH * 4.5f, 0f, -sinH * 4.5f),
+                            new Vector3(-sinH * 2.2f, 0f, -cosH * 2.2f),
+                            Vector3.Up);
                         _shadowPool.Multimesh.SetInstanceTransform(shadowIndex++,
                             new Transform3D(shBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
                     }
@@ -168,20 +188,18 @@ public sealed class TrafficBenchAdapter
             else if (pedIndex < _pedestrianMeshNode.Multimesh.InstanceCount)
             {
                 var bob = agent.SpeedMetresPerSecond > 0.1
-                    ? MathF.Abs(MathF.Sin((float)_walkTime * 7.5f + hash)) * 0.055f
+                    ? MathF.Abs(MathF.Sin(walkPhase + vis.Hash)) * 0.055f
                     : 0f;
                 var idx = pedIndex++;
                 _pedestrianMeshNode.Multimesh.SetInstanceTransform(
                     idx,
                     new Transform3D(basis, new Vector3(godotPos.X, godotPos.Y + bob, godotPos.Z)));
-                _pedestrianMeshNode.Multimesh.SetInstanceColor(idx, PedJacketPalette[hash % PedJacketPalette.Length]);
+                _pedestrianMeshNode.Multimesh.SetInstanceColor(idx, vis.Tint);
 
                 if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)
                 {
-                    var shBasis = Basis.FromEuler(new Vector3(-MathF.PI * 0.5f, 0f, 0f))
-                        .Scaled(new Vector3(0.85f, 1f, 0.85f));
                     _shadowPool.Multimesh.SetInstanceTransform(shadowIndex++,
-                        new Transform3D(shBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
+                        new Transform3D(pedShadowBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
                 }
             }
         }

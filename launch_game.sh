@@ -11,4 +11,7 @@ export DISPLAY=:1
 export XAUTHORITY=$(ls -t /run/user/1000/.mutter-Xwaylandauth.* 2>/dev/null | head -n 1)
 
 cd /home/kaue/tests/gsa
-exec "$GODOT" --path game res://Bootstrap.tscn
+if [ -n "${WAYLAND_DISPLAY:-}" ] && [[ " $* " != *" --display-driver "* ]] && [[ " $* " != *" --headless "* ]]; then
+    exec "$GODOT" --path game --display-driver wayland res://Bootstrap.tscn "$@"
+fi
+exec "$GODOT" --path game res://Bootstrap.tscn "$@"

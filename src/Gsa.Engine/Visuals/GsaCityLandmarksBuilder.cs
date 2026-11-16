@@ -51,62 +51,74 @@ public sealed class GsaCityLandmarksBuilder
         GodotCoordinateAdapter coords,
         GsaAtmosphereController atmosphere)
     {
-        var roadAsphaltMat = GsaRetroTextures.CreateWorldMaterial("city_road_asphalt", "asphalt", new Color(0.78f, 0.80f, 0.85f), new Vector3(0.14f, 0.14f, 0.14f), triplanar: true);
-        var crosswalkMat = GsaRetroTextures.CreateWorldMaterial("city_crosswalk", "crosswalk", Colors.White, new Vector3(1f, 1f, 1f));
-        var sidewalkMat = GsaRetroTextures.CreateWorldMaterial("city_sidewalk", "sidewalk", Colors.White, new Vector3(0.24f, 0.24f, 0.24f), triplanar: true);
+        var roadBatch = new GsaStaticMeshBatcher();
+        var structureBatch = new GsaStaticMeshBatcher();
+        var lampBulbBatch = new GsaStaticMeshBatcher();
+        var treeList = new List<(Vector3 Position, float Scale)>(64);
+
+        var roadAsphaltMat = GsaRetroTextures.CreateWorldMaterial(
+            "city_road_asphalt_uv", "asphalt", new Color(0.78f, 0.80f, 0.85f), triplanar: false, vertexShaded: false);
+        var crosswalkMat = GsaRetroTextures.CreateWorldMaterial("city_crosswalk_uv", "crosswalk", Colors.White, triplanar: false);
+        var sidewalkMat = GsaRetroTextures.CreateWorldMaterial("city_sidewalk_uv", "sidewalk", Colors.White, triplanar: false);
         var concMat = GsaMeshBuilder.SolidMat(new Color(0.54f, 0.56f, 0.55f));
         var bridgeSteelMat = GsaMeshBuilder.SolidMat(new Color(0.15f, 0.42f, 0.34f), roughness: 0.55f);
         var craneRedMat = GsaMeshBuilder.SolidMat(new Color(0.78f, 0.18f, 0.14f));
-        var waterMat = GsaRetroTextures.CreateWorldMaterial("city_ocean_water", "water", new Color(0.75f, 0.90f, 1.0f), new Vector3(0.08f, 0.08f, 0.08f), roughness: 0.14f, triplanar: true);
-
-        // 1. Paved Avenue Grid with Crosswalks & Intersection Pads
+        var waterMat = GsaRetroTextures.CreateWorldMaterial(
+            "city_ocean_water_uv", "water", new Color(0.75f, 0.90f, 1.0f), roughness: 0.14f, triplanar: false, vertexShaded: false);
         var yellowLine = GsaMeshBuilder.SolidMat(new Color(0.92f, 0.74f, 0.14f));
+        var lampPoleMat = GsaMeshBuilder.SolidMat(new Color(0.24f, 0.27f, 0.30f));
+        var sharedLampBulbMat = GsaMeshBuilder.SolidMat(new Color(1.0f, 0.88f, 0.56f), emit: true, emissionEnergy: 0.0f, uncached: true);
+        atmosphere.RegisterStreetlamp(sharedLampBulbMat, null);
+
+        // 1. Paved Avenue Grid with Crosswalks & Intersection Pads (batched into single meshes)
         for (var n = 7400120.0; n <= 7401800.0; n += 120.0)
         {
             var aveWidth = n <= 7401000.0 ? 1860f : 960f;
             var centerE = n <= 7401000.0 ? 500930.0 : 500480.0;
-            visualBase.AddChild(GsaMeshBuilder.Box($"AveDeckEW_{(int)n}", new Vector3(aveWidth, 0.08f, 13.5f),
-                coords.ToGodot(new Vector3d(centerE, n - 4.0, 99.60)), roadAsphaltMat));
-            visualBase.AddChild(GsaMeshBuilder.Box($"AveLineEW_{(int)n}", new Vector3(aveWidth, 0.03f, 0.35f),
-                coords.ToGodot(new Vector3d(centerE, n - 4.0, 99.66)), yellowLine));
+            roadBatch.AddBox(roadAsphaltMat, coords.ToGodot(new Vector3d(centerE, n - 4.0, 99.60)), new Vector3(aveWidth, 0.08f, 13.5f), uvScale: 0.14f);
+            roadBatch.AddBox(yellowLine, coords.ToGodot(new Vector3d(centerE, n - 4.0, 99.66)), new Vector3(aveWidth, 0.03f, 0.35f));
         }
+        // Commerce Blvd / North Ave center lines (N = 7400000)
+        roadBatch.AddBox(yellowLine, coords.ToGodot(new Vector3d(500950, 7399996.0, 99.64)), new Vector3(1900f, 0.04f, 0.28f));
+
         for (var e = 500000.0; e <= 501800.0; e += 120.0)
         {
             var aveLen = e < 501000.0 ? 1760f : 980f;
             var centerN = e < 501000.0 ? 7400900.0 : 7400490.0;
-            visualBase.AddChild(GsaMeshBuilder.Box($"AveDeckNS_{(int)e}", new Vector3(13.5f, 0.08f, aveLen),
-                coords.ToGodot(new Vector3d(e, centerN, 99.60)), roadAsphaltMat));
-            visualBase.AddChild(GsaMeshBuilder.Box($"AveLineNS_{(int)e}", new Vector3(0.35f, 0.03f, aveLen),
-                coords.ToGodot(new Vector3d(e, centerN, 99.66)), yellowLine));
+            roadBatch.AddBox(roadAsphaltMat, coords.ToGodot(new Vector3d(e, centerN, 99.60)), new Vector3(13.5f, 0.08f, aveLen), uvScale: 0.14f);
+            roadBatch.AddBox(yellowLine, coords.ToGodot(new Vector3d(e, centerN, 99.66)), new Vector3(0.35f, 0.03f, aveLen));
         }
 
         // Crosswalks at busy Old Center intersections
         foreach (var e in new[] { 500120.0, 500240.0, 500360.0, 500480.0 })
         {
             foreach (var n in new[] { 7400116.0, 7400236.0 })
-            {
-                visualBase.AddChild(GsaMeshBuilder.Box($"Crosswalk_{(int)e}_{(int)n}", new Vector3(3.6f, 0.05f, 12.0f),
-                    coords.ToGodot(new Vector3d(e + 8.5, n, 99.67)), crosswalkMat));
-            }
+                roadBatch.AddBoxNormalizedUv(crosswalkMat, coords.ToGodot(new Vector3d(e + 8.5, n, 99.67)), new Vector3(3.6f, 0.05f, 12.0f));
         }
 
         // 2. Old Center Landmark: Municipal City Hall Monumental Plaza (E=500450, N=7400450)
-        BuildCityHall(visualBase, coords, concMat, sidewalkMat);
+        BuildCityHall(structureBatch, roadBatch, coords, concMat, sidewalkMat);
 
         // 3. Central Park Fountain, Pond, Walkways & Chicken Challenge Track (500285..500415, 7400315..7400445)
-        BuildCentralParkLandmarks(visualBase, coords, concMat, sidewalkMat, waterMat, atmosphere);
+        BuildCentralParkLandmarks(visualBase, roadBatch, structureBatch, lampBulbBatch, lampPoleMat, sharedLampBulbMat, coords, concMat, sidewalkMat, waterMat);
 
         // 4. Old Center Elevated Viaduct (HIST-07, E=500605..500755, N=7400479)
-        BuildViaductOverpass(visualBase, coords, concMat, roadAsphaltMat, yellowLine);
+        BuildViaductOverpass(structureBatch, coords, concMat, roadAsphaltMat, yellowLine);
 
         // 5. Port District Landmarks: Gantry Cranes, Stacked Containers, Harbor Tunnel, Freight Ship!
-        BuildPortDistrictLandmarks(visualBase, coords, craneRedMat, concMat, waterMat);
+        BuildPortDistrictLandmarks(roadBatch, structureBatch, coords, craneRedMat, concMat, waterMat);
 
         // 6. Waterfront District Landmarks: Callahan Truss Bridge, Pier, Palm Walk, Docked Survey Boat!
-        BuildWaterfrontDistrictLandmarks(visualBase, coords, bridgeSteelMat, concMat, sidewalkMat, atmosphere);
+        BuildWaterfrontDistrictLandmarks(structureBatch, lampBulbBatch, lampPoleMat, sharedLampBulbMat, treeList, coords, bridgeSteelMat, sidewalkMat);
 
         // 7. Serra Mountain Paved Switchback Highway & Summit Broadcast Tower!
-        BuildSerraMountainLandmarks(visualBase, coords, roadAsphaltMat, concMat, craneRedMat);
+        BuildSerraMountainLandmarks(visualBase, structureBatch, treeList, coords, roadAsphaltMat, concMat, craneRedMat);
+
+        // Commit batched landmarks
+        roadBatch.BuildSeparatedNodes(visualBase, "CityRoadGrid", GeometryInstance3D.ShadowCastingSetting.Off);
+        structureBatch.BuildSeparatedNodes(visualBase, "CityLandmarks", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 460f);
+        lampBulbBatch.BuildSeparatedNodes(visualBase, "CityLandmarkBulbs", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 320f);
+        GsaMeshBuilder.BuildBatchedStreetTrees(visualBase, "LandmarkTrees", treeList, visibilityRangeEnd: 380f);
 
         // 8. Street Hazards: Roadwork Potholes & Cones + Police Blitz Checkpoint + Trio Elétrico / Marathon / Pigeons
         var potholes = new[]
@@ -145,37 +157,46 @@ public sealed class GsaCityLandmarksBuilder
         visualBase.AddChild(PigeonFlockNode);
     }
 
-    private static void BuildCityHall(Node3D parent, GodotCoordinateAdapter coords, StandardMaterial3D concMat, StandardMaterial3D sidewalkMat)
+    private static void BuildCityHall(
+        GsaStaticMeshBatcher structureBatch,
+        GsaStaticMeshBatcher roadBatch,
+        GodotCoordinateAdapter coords,
+        StandardMaterial3D concMat,
+        StandardMaterial3D sidewalkMat)
     {
-        var hall = new Node3D { Name = "CityHallMonument", Position = coords.ToGodot(new Vector3d(500462, 7400505, 100.0)) };
+        var hallPos = coords.ToGodot(new Vector3d(500462, 7400505, 100.0));
         var marble = GsaMeshBuilder.SolidMat(new Color(0.84f, 0.82f, 0.78f));
         var domeMat = GsaMeshBuilder.SolidMat(new Color(0.24f, 0.46f, 0.40f), roughness: 0.4f);
+        var bannerMat = GsaMeshBuilder.SolidMat(new Color(0.95f, 0.78f, 0.22f), emit: true, emissionEnergy: 0.7f);
 
-        hall.AddChild(GsaMeshBuilder.Box("PlazaDeck", new Vector3(42f, 0.35f, 36f), new Vector3(0f, 0.17f, 0f), sidewalkMat));
-        hall.AddChild(GsaMeshBuilder.Box("Steps", new Vector3(26f, 0.8f, 8f), new Vector3(0f, 0.55f, 12f), concMat));
-        hall.AddChild(GsaMeshBuilder.Box("MainHall", new Vector3(28f, 12f, 20f), new Vector3(0f, 6.4f, -2f), marble));
+        roadBatch.AddBox(sidewalkMat, hallPos + new Vector3(0f, 0.17f, 0f), new Vector3(42f, 0.35f, 36f), uvScale: 0.24f);
+        structureBatch.AddBox(concMat, hallPos + new Vector3(0f, 0.55f, 12f), new Vector3(26f, 0.8f, 8f));
+        structureBatch.AddBox(marble, hallPos + new Vector3(0f, 6.4f, -2f), new Vector3(28f, 12f, 20f));
         for (var cx = -10f; cx <= 10f; cx += 4f)
-            hall.AddChild(new MeshInstance3D { Position = new Vector3(cx, 6.2f, 9.5f), Mesh = new CylinderMesh { TopRadius = 0.45f, BottomRadius = 0.55f, Height = 10.5f, RadialSegments = 8 }, MaterialOverride = marble });
-        hall.AddChild(GsaMeshBuilder.Box("Pediment", new Vector3(26f, 1.8f, 3.2f), new Vector3(0f, 12.2f, 9.5f), marble));
-        hall.AddChild(new MeshInstance3D { Position = new Vector3(0f, 15.5f, -2f), Mesh = new CylinderMesh { TopRadius = 5.5f, BottomRadius = 6.2f, Height = 6.5f, RadialSegments = 12 }, MaterialOverride = domeMat });
-        hall.AddChild(GsaMeshBuilder.Box("ClockBanner", new Vector3(14f, 1.4f, 0.4f), new Vector3(0f, 10.2f, 8.2f), GsaMeshBuilder.SolidMat(new Color(0.95f, 0.78f, 0.22f), emit: true, emissionEnergy: 0.7f)));
-        parent.AddChild(hall);
+            structureBatch.AddCylinder(marble, hallPos + new Vector3(cx, 6.2f, 9.5f), 0.45f, 0.55f, 10.5f, radialSegments: 8);
+        structureBatch.AddBox(marble, hallPos + new Vector3(0f, 12.2f, 9.5f), new Vector3(26f, 1.8f, 3.2f));
+        structureBatch.AddCylinder(domeMat, hallPos + new Vector3(0f, 15.5f, -2f), 5.5f, 6.2f, 6.5f, radialSegments: 10);
+        structureBatch.AddBox(bannerMat, hallPos + new Vector3(0f, 10.2f, 8.2f), new Vector3(14f, 1.4f, 0.4f));
     }
 
     private void BuildCentralParkLandmarks(
         Node3D parent,
+        GsaStaticMeshBatcher roadBatch,
+        GsaStaticMeshBatcher structureBatch,
+        GsaStaticMeshBatcher lampBulbBatch,
+        StandardMaterial3D poleMat,
+        StandardMaterial3D bulbMat,
         GodotCoordinateAdapter coords,
         StandardMaterial3D concMat,
         StandardMaterial3D sidewalkMat,
-        StandardMaterial3D waterMat,
-        GsaAtmosphereController atmosphere)
+        StandardMaterial3D waterMat)
     {
-        var park = new Node3D { Name = "CentralParkDetails", Position = coords.ToGodot(new Vector3d(500350, 7400380, 100.0)) };
-        park.AddChild(GsaMeshBuilder.Box("PathNS", new Vector3(4.5f, 0.14f, 124f), new Vector3(0f, 0.08f, 0f), sidewalkMat));
-        park.AddChild(GsaMeshBuilder.Box("PathEW", new Vector3(124f, 0.14f, 4.5f), new Vector3(0f, 0.08f, 0f), sidewalkMat));
-        park.AddChild(new MeshInstance3D { Position = new Vector3(0f, 0.35f, 0f), Mesh = new CylinderMesh { TopRadius = 9.0f, BottomRadius = 9.5f, Height = 0.7f, RadialSegments = 16 }, MaterialOverride = concMat });
-        park.AddChild(new MeshInstance3D { Position = new Vector3(0f, 0.55f, 0f), Mesh = new CylinderMesh { TopRadius = 8.2f, BottomRadius = 8.2f, Height = 0.4f, RadialSegments = 16 }, MaterialOverride = waterMat });
-        park.AddChild(new MeshInstance3D { Position = new Vector3(0f, 2.2f, 0f), Mesh = new CylinderMesh { TopRadius = 1.2f, BottomRadius = 2.0f, Height = 3.2f, RadialSegments = 10 }, MaterialOverride = concMat });
+        var parkPos = coords.ToGodot(new Vector3d(500350, 7400380, 100.0));
+        roadBatch.AddBox(sidewalkMat, parkPos + new Vector3(0f, 0.08f, 0f), new Vector3(4.5f, 0.14f, 124f), uvScale: 0.24f);
+        roadBatch.AddBox(sidewalkMat, parkPos + new Vector3(0f, 0.08f, 0f), new Vector3(124f, 0.14f, 4.5f), uvScale: 0.24f);
+        structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 0.35f, 0f), 9.0f, 9.5f, 0.7f, radialSegments: 14);
+        structureBatch.AddCylinder(waterMat, parkPos + new Vector3(0f, 0.55f, 0f), 8.2f, 8.2f, 0.4f, radialSegments: 14, uvScale: 0.08f);
+        structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 2.2f, 0f), 1.2f, 2.0f, 3.2f, radialSegments: 8);
 
         // Chicken Challenge 200 m Track Checkered Beacons (N = 7400350)
         var startBeacon = GsaMeshBuilder.BuildBeaconRing("ChickenTrackStart", new Color(0.98f, 0.38f, 0.72f), 2.2f, 1.4f);
@@ -188,182 +209,165 @@ public sealed class GsaCityLandmarksBuilder
         // Ornamental park lamps
         foreach (var off in new Vector3[] { new(-14f, 0f, -14f), new(14f, 0f, 14f), new(-14f, 0f, 14f), new(14f, 0f, -14f) })
         {
-            var (lNode, bMat, light) = GsaMeshBuilder.BuildStreetlamp($"ParkLamp_{(int)off.X}_{(int)off.Z}", withRealLight: false);
-            lNode.Position = off;
-            park.AddChild(lNode);
-            atmosphere.RegisterStreetlamp(bMat, light);
+            var p = parkPos + off;
+            structureBatch.AddBox(poleMat, p + new Vector3(0f, 2.6f, 0f), new Vector3(0.14f, 5.2f, 0.14f));
+            structureBatch.AddBox(poleMat, p + new Vector3(0.50f, 5.15f, 0f), new Vector3(1.1f, 0.10f, 0.10f));
+            lampBulbBatch.AddBox(bulbMat, p + new Vector3(0.98f, 5.06f, 0f), new Vector3(0.34f, 0.10f, 0.22f));
         }
-        parent.AddChild(park);
     }
 
     private static void BuildViaductOverpass(
-        Node3D parent,
+        GsaStaticMeshBatcher structureBatch,
         GodotCoordinateAdapter coords,
         StandardMaterial3D concMat,
         StandardMaterial3D asphaltMat,
         StandardMaterial3D yellowMat)
     {
-        var deck = new Node3D { Name = "ViaductOverpass" };
-        // Elevated center span E=500655..500705, N=7400479, Z=106.5
-        deck.AddChild(GsaMeshBuilder.Box("ViaductCenterSpan", new Vector3(50f, 0.8f, 14f), coords.ToGodot(new Vector3d(500680, 7400479, 106.1)), concMat));
-        deck.AddChild(GsaMeshBuilder.Box("ViaductCenterRoad", new Vector3(50f, 0.06f, 12.2f), coords.ToGodot(new Vector3d(500680, 7400479, 106.52)), asphaltMat));
-        deck.AddChild(GsaMeshBuilder.Box("ViaductCenterLine", new Vector3(50f, 0.04f, 0.35f), coords.ToGodot(new Vector3d(500680, 7400479, 106.55)), yellowMat));
+        structureBatch.AddBox(concMat, coords.ToGodot(new Vector3d(500680, 7400479, 106.1)), new Vector3(50f, 0.8f, 14f));
+        structureBatch.AddBox(asphaltMat, coords.ToGodot(new Vector3d(500680, 7400479, 106.52)), new Vector3(50f, 0.06f, 12.2f), uvScale: 0.14f);
+        structureBatch.AddBox(yellowMat, coords.ToGodot(new Vector3d(500680, 7400479, 106.55)), new Vector3(50f, 0.04f, 0.35f));
 
-        // West & East sloped approach ramps (7.4 deg grade)
-        deck.AddChild(GsaMeshBuilder.Box("ViaductRampW", new Vector3(50.6f, 0.7f, 13.6f), coords.ToGodot(new Vector3d(500630, 7400479, 103.0)), asphaltMat, rotDeg: new Vector3(0f, 0f, 7.4f)));
-        deck.AddChild(GsaMeshBuilder.Box("ViaductRampE", new Vector3(50.6f, 0.7f, 13.6f), coords.ToGodot(new Vector3d(500730, 7400479, 103.0)), asphaltMat, rotDeg: new Vector3(0f, 0f, -7.4f)));
+        structureBatch.AddBox(asphaltMat, coords.ToGodot(new Vector3d(500630, 7400479, 103.0)), new Vector3(50.6f, 0.7f, 13.6f), rotDeg: new Vector3(0f, 0f, 7.4f), uvScale: 0.14f);
+        structureBatch.AddBox(asphaltMat, coords.ToGodot(new Vector3d(500730, 7400479, 103.0)), new Vector3(50.6f, 0.7f, 13.6f), rotDeg: new Vector3(0f, 0f, -7.4f), uvScale: 0.14f);
 
         foreach (var px in new[] { 500658.0, 500680.0, 500702.0 })
             foreach (var pn in new[] { 7400474.5, 7400483.5 })
-                deck.AddChild(new MeshInstance3D { Position = coords.ToGodot(new Vector3d(px, pn, 103.0)), Mesh = new CylinderMesh { TopRadius = 0.8f, BottomRadius = 0.9f, Height = 6.2f, RadialSegments = 10 }, MaterialOverride = concMat });
-
-        parent.AddChild(deck);
+                structureBatch.AddCylinder(concMat, coords.ToGodot(new Vector3d(px, pn, 103.0)), 0.8f, 0.9f, 6.2f, radialSegments: 8);
     }
 
     private static void BuildPortDistrictLandmarks(
-        Node3D parent,
+        GsaStaticMeshBatcher roadBatch,
+        GsaStaticMeshBatcher structureBatch,
         GodotCoordinateAdapter coords,
         StandardMaterial3D craneMat,
         StandardMaterial3D concMat,
         StandardMaterial3D waterMat)
     {
-        var port = new Node3D { Name = "PortDistrictLandmarks" };
-        // Harbor water basin north of N=7401820
-        port.AddChild(GsaMeshBuilder.Box("HarborBasin", new Vector3(950f, 0.4f, 260f), coords.ToGodot(new Vector3d(500480, 7401930, 97.6)), waterMat));
-        port.AddChild(GsaMeshBuilder.Box("QuayWall", new Vector3(920f, 2.2f, 12f), coords.ToGodot(new Vector3d(500480, 7401800, 99.1)), concMat));
+        roadBatch.AddBox(waterMat, coords.ToGodot(new Vector3d(500480, 7401930, 97.6)), new Vector3(950f, 0.4f, 260f), uvScale: 0.08f);
+        structureBatch.AddBox(concMat, coords.ToGodot(new Vector3d(500480, 7401800, 99.1)), new Vector3(920f, 2.2f, 12f));
 
-        // 2 Giant Lattice Gantry Cranes + Colorful Shipping Container Stacks
-        var containerColors = new Color[] { new(0.78f, 0.22f, 0.16f), new(0.16f, 0.44f, 0.72f), new(0.22f, 0.56f, 0.34f), new(0.84f, 0.58f, 0.14f) };
+        var craneCabinMat = GsaMeshBuilder.SolidMat(new Color(0.95f, 0.85f, 0.22f));
         for (var i = 0; i < 2; i++)
         {
-            var ce = 500260.0 + i * 240.0;
-            var crane = new Node3D { Position = coords.ToGodot(new Vector3d(ce, 7401790, 100.0)) };
+            var cp = coords.ToGodot(new Vector3d(500260.0 + i * 240.0, 7401790, 100.0));
             foreach (var offX in new[] { -8f, 8f })
             {
-                crane.AddChild(GsaMeshBuilder.Box("LegF", new Vector3(1.4f, 24f, 1.4f), new Vector3(offX, 12f, 6f), craneMat));
-                crane.AddChild(GsaMeshBuilder.Box("LegB", new Vector3(1.4f, 24f, 1.4f), new Vector3(offX, 12f, -6f), craneMat));
+                structureBatch.AddBox(craneMat, cp + new Vector3(offX, 12f, 6f), new Vector3(1.4f, 24f, 1.4f));
+                structureBatch.AddBox(craneMat, cp + new Vector3(offX, 12f, -6f), new Vector3(1.4f, 24f, 1.4f));
             }
-            crane.AddChild(GsaMeshBuilder.Box("Boom", new Vector3(20f, 2.0f, 44f), new Vector3(0f, 23f, -10f), craneMat));
-            crane.AddChild(GsaMeshBuilder.Box("Cabin", new Vector3(4.5f, 3.2f, 4.5f), new Vector3(0f, 19f, -18f), GsaMeshBuilder.SolidMat(new Color(0.95f, 0.85f, 0.22f))));
-            port.AddChild(crane);
+            structureBatch.AddBox(craneMat, cp + new Vector3(0f, 23f, -10f), new Vector3(20f, 2.0f, 44f));
+            structureBatch.AddBox(craneCabinMat, cp + new Vector3(0f, 19f, -18f), new Vector3(4.5f, 3.2f, 4.5f));
         }
 
+        // Single vertex-tinted material for all 35 shipping containers!
+        var containerColors = new Color[] { new(0.78f, 0.22f, 0.16f), new(0.16f, 0.44f, 0.72f), new(0.22f, 0.56f, 0.34f), new(0.84f, 0.58f, 0.14f) };
+        var containerMat = GsaRetroTextures.CreateWorldMaterial("cont_ware_uv", "warehouse", Colors.White, triplanar: false, vertexColorAlbedo: true);
         for (var s = 0; s < 14; s++)
         {
             var e = 500160.0 + (s % 7) * 58.0;
             var n = 7401680.0 + (s / 7) * 44.0;
             for (var tier = 0; tier < 2 + (s % 2); tier++)
             {
-                var colMat = GsaRetroTextures.CreateWorldMaterial($"cont_{s}_{tier}", "warehouse", containerColors[(s + tier) % containerColors.Length], new Vector3(0.25f, 0.25f, 0.25f), triplanar: true);
-                port.AddChild(GsaMeshBuilder.Box($"Container_{s}_{tier}", new Vector3(12f, 2.9f, 3.2f), coords.ToGodot(new Vector3d(e, n, 101.5 + tier * 3.0)), colMat));
+                structureBatch.AddBox(containerMat, coords.ToGodot(new Vector3d(e, n, 101.5 + tier * 3.0)),
+                    new Vector3(12f, 2.9f, 3.2f), uvScale: 0.25f, vertexColor: containerColors[(s + tier) % containerColors.Length]);
             }
         }
 
-        // Port Industrial Sheds & Harbor Quay Railway Spur (E2 rail teaser!)
-        var wareMat = GsaRetroTextures.CreateWorldMaterial("port_shed_ware", "warehouse", new Color(0.86f, 0.88f, 0.90f), new Vector3(0.095f, 0.095f, 0.095f), triplanar: true);
-        port.AddChild(GsaMeshBuilder.Box("PortTransitShedW", new Vector3(44f, 12f, 26f), coords.ToGodot(new Vector3d(500280, 7401640, 106.0)), wareMat));
-        port.AddChild(GsaMeshBuilder.Box("PortTransitShedE", new Vector3(44f, 12f, 26f), coords.ToGodot(new Vector3d(500440, 7401640, 106.0)), wareMat));
-        port.AddChild(GsaMeshBuilder.Box("QuayRailBed", new Vector3(820f, 0.25f, 4.2f), coords.ToGodot(new Vector3d(500480, 7401760, 100.05)), GsaMeshBuilder.SolidMat(new Color(0.32f, 0.27f, 0.22f))));
-        port.AddChild(GsaMeshBuilder.Box("QuayRailA", new Vector3(820f, 0.14f, 0.18f), coords.ToGodot(new Vector3d(500480, 7401759.2, 100.22)), GsaMeshBuilder.SolidMat(new Color(0.65f, 0.67f, 0.70f))));
-        port.AddChild(GsaMeshBuilder.Box("QuayRailB", new Vector3(820f, 0.14f, 0.18f), coords.ToGodot(new Vector3d(500480, 7401760.8, 100.22)), GsaMeshBuilder.SolidMat(new Color(0.65f, 0.67f, 0.70f))));
+        var wareMat = GsaRetroTextures.CreateWorldMaterial("port_shed_ware_uv", "warehouse", new Color(0.86f, 0.88f, 0.90f), triplanar: false);
+        structureBatch.AddBox(wareMat, coords.ToGodot(new Vector3d(500280, 7401640, 106.0)), new Vector3(44f, 12f, 26f), uvScale: 0.095f);
+        structureBatch.AddBox(wareMat, coords.ToGodot(new Vector3d(500440, 7401640, 106.0)), new Vector3(44f, 12f, 26f), uvScale: 0.095f);
+        roadBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.32f, 0.27f, 0.22f)), coords.ToGodot(new Vector3d(500480, 7401760, 100.05)), new Vector3(820f, 0.25f, 4.2f));
+        var railSteel = GsaMeshBuilder.SolidMat(new Color(0.65f, 0.67f, 0.70f));
+        roadBatch.AddBox(railSteel, coords.ToGodot(new Vector3d(500480, 7401759.2, 100.22)), new Vector3(820f, 0.14f, 0.18f));
+        roadBatch.AddBox(railSteel, coords.ToGodot(new Vector3d(500480, 7401760.8, 100.22)), new Vector3(820f, 0.14f, 0.18f));
 
-        // Moored Cargo Ship in Port Harbor
-        var ship = new Node3D { Name = "CargoFreighter", Position = coords.ToGodot(new Vector3d(500360, 7401875, 99.0)) };
-        ship.AddChild(GsaMeshBuilder.Box("Hull", new Vector3(62f, 7.5f, 16f), new Vector3(0f, 2.2f, 0f), GsaMeshBuilder.SolidMat(new Color(0.18f, 0.20f, 0.22f))));
-        ship.AddChild(GsaMeshBuilder.Box("RedWaterline", new Vector3(63f, 2.2f, 16.4f), new Vector3(0f, -0.4f, 0f), craneMat));
-        ship.AddChild(GsaMeshBuilder.Box("BridgeHouse", new Vector3(12f, 11f, 13f), new Vector3(-20f, 10.5f, 0f), GsaMeshBuilder.SolidMat(new Color(0.90f, 0.91f, 0.92f))));
-        ship.AddChild(GsaMeshBuilder.Box("Funnel", new Vector3(4.5f, 5.5f, 4.5f), new Vector3(-23f, 17.5f, 0f), GsaMeshBuilder.SolidMat(new Color(0.92f, 0.62f, 0.14f))));
-        port.AddChild(ship);
+        // Moored Cargo Ship
+        var shipPos = coords.ToGodot(new Vector3d(500360, 7401875, 99.0));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.18f, 0.20f, 0.22f)), shipPos + new Vector3(0f, 2.2f, 0f), new Vector3(62f, 7.5f, 16f));
+        structureBatch.AddBox(craneMat, shipPos + new Vector3(0f, -0.4f, 0f), new Vector3(63f, 2.2f, 16.4f));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.90f, 0.91f, 0.92f)), shipPos + new Vector3(-20f, 10.5f, 0f), new Vector3(12f, 11f, 13f));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.92f, 0.62f, 0.14f)), shipPos + new Vector3(-23f, 17.5f, 0f), new Vector3(4.5f, 5.5f, 4.5f));
 
-        // Harbor Tunnel Entrance Portal (HIST-06, E=500480, N=7401320)
-        var tunnel = new Node3D { Name = "HarborTunnelPortal", Position = coords.ToGodot(new Vector3d(500480, 7401320, 100.0)) };
-        tunnel.AddChild(GsaMeshBuilder.Box("PierL", new Vector3(3.5f, 7.5f, 24f), new Vector3(-9f, 3.75f, 0f), concMat));
-        tunnel.AddChild(GsaMeshBuilder.Box("PierR", new Vector3(3.5f, 7.5f, 24f), new Vector3(9f, 3.75f, 0f), concMat));
-        tunnel.AddChild(GsaMeshBuilder.Box("Roof", new Vector3(21.5f, 2.4f, 24f), new Vector3(0f, 7.2f, 0f), concMat));
-        tunnel.AddChild(GsaMeshBuilder.Box("WarnSign", new Vector3(12f, 1.1f, 0.5f), new Vector3(0f, 6.2f, 12.2f), GsaMeshBuilder.SolidMat(new Color(0.98f, 0.68f, 0.10f), emit: true, emissionEnergy: 1.2f)));
-        port.AddChild(tunnel);
-
-        parent.AddChild(port);
+        // Harbor Tunnel Entrance Portal
+        var tunPos = coords.ToGodot(new Vector3d(500480, 7401320, 100.0));
+        structureBatch.AddBox(concMat, tunPos + new Vector3(-9f, 3.75f, 0f), new Vector3(3.5f, 7.5f, 24f));
+        structureBatch.AddBox(concMat, tunPos + new Vector3(9f, 3.75f, 0f), new Vector3(3.5f, 7.5f, 24f));
+        structureBatch.AddBox(concMat, tunPos + new Vector3(0f, 7.2f, 0f), new Vector3(21.5f, 2.4f, 24f));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.98f, 0.68f, 0.10f), emit: true, emissionEnergy: 1.2f), tunPos + new Vector3(0f, 6.2f, 12.2f), new Vector3(12f, 1.1f, 0.5f));
     }
 
     private static void BuildWaterfrontDistrictLandmarks(
-        Node3D parent,
+        GsaStaticMeshBatcher structureBatch,
+        GsaStaticMeshBatcher lampBulbBatch,
+        StandardMaterial3D poleMat,
+        StandardMaterial3D bulbMat,
+        List<(Vector3 Position, float Scale)> treeList,
         GodotCoordinateAdapter coords,
         StandardMaterial3D steelMat,
-        StandardMaterial3D concMat,
-        StandardMaterial3D sidewalkMat,
-        GsaAtmosphereController atmosphere)
+        StandardMaterial3D sidewalkMat)
     {
-        var wf = new Node3D { Name = "WaterfrontLandmarks" };
         var woodMat = GsaMeshBuilder.SolidMat(new Color(0.52f, 0.36f, 0.22f));
-
-        // Coastal Suspension / Steel Truss Bridge leading onto Waterfront Pier (E=501740..501880, N=7400448)
-        var bridgeDeckMat = GsaRetroTextures.CreateWorldMaterial("bridge_asphalt", "asphalt", new Color(0.84f, 0.86f, 0.90f), new Vector3(0.14f, 0.14f, 0.14f), triplanar: true);
+        var bridgeDeckMat = GsaRetroTextures.CreateWorldMaterial("bridge_asphalt_uv", "asphalt", new Color(0.84f, 0.86f, 0.90f), triplanar: false);
         var cableMat = GsaMeshBuilder.SolidMat(new Color(0.24f, 0.28f, 0.30f));
         var yellowLine = GsaMeshBuilder.SolidMat(new Color(0.92f, 0.74f, 0.14f));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeRampW", new Vector3(72f, 0.8f, 14f), coords.ToGodot(new Vector3d(501775, 7400448, 102.2)), bridgeDeckMat, rotDeg: new Vector3(0f, 0f, 4.2f)));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeRampE", new Vector3(72f, 0.8f, 14f), coords.ToGodot(new Vector3d(501845, 7400448, 102.2)), bridgeDeckMat, rotDeg: new Vector3(0f, 0f, -4.2f)));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeStripeW", new Vector3(70f, 0.05f, 0.32f), coords.ToGodot(new Vector3d(501775, 7400448, 102.63)), yellowLine, rotDeg: new Vector3(0f, 0f, 4.2f)));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeStripeE", new Vector3(70f, 0.05f, 0.32f), coords.ToGodot(new Vector3d(501845, 7400448, 102.63)), yellowLine, rotDeg: new Vector3(0f, 0f, -4.2f)));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeMainSpan", new Vector3(64f, 0.9f, 14.2f), coords.ToGodot(new Vector3d(501810, 7400448, 104.8)), bridgeDeckMat));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeRailL", new Vector3(130f, 1.0f, 0.35f), coords.ToGodot(new Vector3d(501810, 7400441.2, 105.6)), steelMat));
-        wf.AddChild(GsaMeshBuilder.Box("BridgeRailR", new Vector3(130f, 1.0f, 0.35f), coords.ToGodot(new Vector3d(501810, 7400454.8, 105.6)), steelMat));
+        var redBeaconMat = GsaMeshBuilder.SolidMat(Colors.Red, emit: true, emissionEnergy: 2.0f);
+
+        structureBatch.AddBox(bridgeDeckMat, coords.ToGodot(new Vector3d(501775, 7400448, 102.2)), new Vector3(72f, 0.8f, 14f), rotDeg: new Vector3(0f, 0f, 4.2f), uvScale: 0.14f);
+        structureBatch.AddBox(bridgeDeckMat, coords.ToGodot(new Vector3d(501845, 7400448, 102.2)), new Vector3(72f, 0.8f, 14f), rotDeg: new Vector3(0f, 0f, -4.2f), uvScale: 0.14f);
+        structureBatch.AddBox(yellowLine, coords.ToGodot(new Vector3d(501775, 7400448, 102.63)), new Vector3(70f, 0.05f, 0.32f), rotDeg: new Vector3(0f, 0f, 4.2f));
+        structureBatch.AddBox(yellowLine, coords.ToGodot(new Vector3d(501845, 7400448, 102.63)), new Vector3(70f, 0.05f, 0.32f), rotDeg: new Vector3(0f, 0f, -4.2f));
+        structureBatch.AddBox(bridgeDeckMat, coords.ToGodot(new Vector3d(501810, 7400448, 104.8)), new Vector3(64f, 0.9f, 14.2f), uvScale: 0.14f);
+        structureBatch.AddBox(steelMat, coords.ToGodot(new Vector3d(501810, 7400441.2, 105.6)), new Vector3(130f, 1.0f, 0.35f));
+        structureBatch.AddBox(steelMat, coords.ToGodot(new Vector3d(501810, 7400454.8, 105.6)), new Vector3(130f, 1.0f, 0.35f));
+
         foreach (var tx in new[] { 501780.0, 501840.0 })
         {
-            wf.AddChild(GsaMeshBuilder.Box($"BridgeTowerL_{(int)tx}", new Vector3(1.6f, 18f, 1.6f), coords.ToGodot(new Vector3d(tx, 7400441.5, 109.0)), steelMat));
-            wf.AddChild(GsaMeshBuilder.Box($"BridgeTowerR_{(int)tx}", new Vector3(1.6f, 18f, 1.6f), coords.ToGodot(new Vector3d(tx, 7400454.5, 109.0)), steelMat));
-            wf.AddChild(GsaMeshBuilder.Box($"BridgeCross_{(int)tx}", new Vector3(1.6f, 1.8f, 14.5f), coords.ToGodot(new Vector3d(tx, 7400448.0, 117.5)), steelMat));
-            wf.AddChild(GsaMeshBuilder.Box($"BridgeBeaconL_{(int)tx}", new Vector3(0.55f, 0.55f, 0.55f), coords.ToGodot(new Vector3d(tx, 7400441.5, 118.6)), GsaMeshBuilder.SolidMat(Colors.Red, emit: true, emissionEnergy: 2.0f)));
-            // Stay cables fanning down from tower top (118) to deck edges (104.8)!
-            wf.AddChild(GsaMeshBuilder.Box($"StayCableLW_{(int)tx}", new Vector3(26f, 0.16f, 0.16f), coords.ToGodot(new Vector3d(tx - 11.0, 7400441.5, 111.4)), cableMat, rotDeg: new Vector3(0f, 0f, -30f)));
-            wf.AddChild(GsaMeshBuilder.Box($"StayCableLE_{(int)tx}", new Vector3(26f, 0.16f, 0.16f), coords.ToGodot(new Vector3d(tx + 11.0, 7400441.5, 111.4)), cableMat, rotDeg: new Vector3(0f, 0f, 30f)));
-            wf.AddChild(GsaMeshBuilder.Box($"StayCableRW_{(int)tx}", new Vector3(26f, 0.16f, 0.16f), coords.ToGodot(new Vector3d(tx - 11.0, 7400454.5, 111.4)), cableMat, rotDeg: new Vector3(0f, 0f, -30f)));
-            wf.AddChild(GsaMeshBuilder.Box($"StayCableRE_{(int)tx}", new Vector3(26f, 0.16f, 0.16f), coords.ToGodot(new Vector3d(tx + 11.0, 7400454.5, 111.4)), cableMat, rotDeg: new Vector3(0f, 0f, 30f)));
+            structureBatch.AddBox(steelMat, coords.ToGodot(new Vector3d(tx, 7400441.5, 109.0)), new Vector3(1.6f, 18f, 1.6f));
+            structureBatch.AddBox(steelMat, coords.ToGodot(new Vector3d(tx, 7400454.5, 109.0)), new Vector3(1.6f, 18f, 1.6f));
+            structureBatch.AddBox(steelMat, coords.ToGodot(new Vector3d(tx, 7400448.0, 117.5)), new Vector3(1.6f, 1.8f, 14.5f));
+            structureBatch.AddBox(redBeaconMat, coords.ToGodot(new Vector3d(tx, 7400441.5, 118.6)), new Vector3(0.55f, 0.55f, 0.55f));
+            structureBatch.AddBox(cableMat, coords.ToGodot(new Vector3d(tx - 11.0, 7400441.5, 111.4)), new Vector3(26f, 0.16f, 0.16f), rotDeg: new Vector3(0f, 0f, -30f));
+            structureBatch.AddBox(cableMat, coords.ToGodot(new Vector3d(tx + 11.0, 7400441.5, 111.4)), new Vector3(26f, 0.16f, 0.16f), rotDeg: new Vector3(0f, 0f, 30f));
+            structureBatch.AddBox(cableMat, coords.ToGodot(new Vector3d(tx - 11.0, 7400454.5, 111.4)), new Vector3(26f, 0.16f, 0.16f), rotDeg: new Vector3(0f, 0f, -30f));
+            structureBatch.AddBox(cableMat, coords.ToGodot(new Vector3d(tx + 11.0, 7400454.5, 111.4)), new Vector3(26f, 0.16f, 0.16f), rotDeg: new Vector3(0f, 0f, 30f));
         }
 
-        // Flanking Glass Waterfront Towers near bridge approach
-        var glassMat = GsaRetroTextures.CreateWorldMaterial("wf_glass_flank", "glass_tower", Colors.White, new Vector3(0.09f, 0.09f, 0.09f), triplanar: true);
-        wf.AddChild(GsaMeshBuilder.Box("WfApproachTowerN", new Vector3(24f, 34f, 24f), coords.ToGodot(new Vector3d(501742, 7400488, 117.0)), glassMat));
-        wf.AddChild(GsaMeshBuilder.Box("WfApproachTowerS", new Vector3(24f, 28f, 24f), coords.ToGodot(new Vector3d(501742, 7400408, 114.0)), glassMat));
+        var glassMat = GsaRetroTextures.CreateWorldMaterial("wf_glass_flank_uv", "glass_tower", Colors.White, triplanar: false);
+        structureBatch.AddBox(glassMat, coords.ToGodot(new Vector3d(501742, 7400488, 117.0)), new Vector3(24f, 34f, 24f), uvScale: 0.09f);
+        structureBatch.AddBox(glassMat, coords.ToGodot(new Vector3d(501742, 7400408, 114.0)), new Vector3(24f, 28f, 24f), uvScale: 0.09f);
 
-        // Wooden Waterfront Survey Pier + Seawall Boardwalk (E=501890..501970, N=7400448)
-        wf.AddChild(GsaMeshBuilder.Box("SeawallWalk", new Vector3(12f, 1.8f, 920f), coords.ToGodot(new Vector3d(501790, 7400490, 100.2)), sidewalkMat));
-        wf.AddChild(GsaMeshBuilder.Box("SurveyPier", new Vector3(95f, 0.9f, 18f), coords.ToGodot(new Vector3d(501930, 7400448, 100.3)), woodMat));
+        structureBatch.AddBox(sidewalkMat, coords.ToGodot(new Vector3d(501790, 7400490, 100.2)), new Vector3(12f, 1.8f, 920f), uvScale: 0.24f);
+        structureBatch.AddBox(woodMat, coords.ToGodot(new Vector3d(501930, 7400448, 100.3)), new Vector3(95f, 0.9f, 18f));
 
-        // Palm trees & boardwalk lamps along seawall!
         for (var n = 7400080.0; n <= 7400900.0; n += 65.0)
         {
-            var tree = GsaMeshBuilder.BuildStreetTree($"PalmWater_{(int)n}", 1.25f);
-            tree.Position = coords.ToGodot(new Vector3d(501785.0, n, 100.8));
-            wf.AddChild(tree);
-            var (lNode, bMat, lgt) = GsaMeshBuilder.BuildStreetlamp($"WfLamp_{(int)n}", withRealLight: false);
-            lNode.Position = coords.ToGodot(new Vector3d(501793.0, n + 18.0, 100.8));
-            wf.AddChild(lNode);
-            atmosphere.RegisterStreetlamp(bMat, lgt);
+            treeList.Add((coords.ToGodot(new Vector3d(501785.0, n, 100.8)), 1.25f));
+            var lp = coords.ToGodot(new Vector3d(501793.0, n + 18.0, 100.8));
+            structureBatch.AddBox(poleMat, lp + new Vector3(0f, 2.6f, 0f), new Vector3(0.14f, 5.2f, 0.14f));
+            structureBatch.AddBox(poleMat, lp + new Vector3(0.50f, 5.15f, 0f), new Vector3(1.1f, 0.10f, 0.10f));
+            lampBulbBatch.AddBox(bulbMat, lp + new Vector3(0.98f, 5.06f, 0f), new Vector3(0.34f, 0.10f, 0.22f));
         }
 
-        // Docked Survey Boat next to Pier!
-        var boat = new Node3D { Name = "DockedSurveyBoat", Position = coords.ToGodot(new Vector3d(501945, 7400468, 98.4)) };
-        boat.AddChild(GsaMeshBuilder.Box("Hull", new Vector3(11.5f, 1.8f, 4.2f), new Vector3(0f, 0.6f, 0f), GsaMeshBuilder.SolidMat(new Color(0.92f, 0.94f, 0.96f))));
-        boat.AddChild(GsaMeshBuilder.Box("Stripe", new Vector3(11.6f, 0.35f, 4.3f), new Vector3(0f, 1.1f, 0f), GsaMeshBuilder.SolidMat(new Color(0.14f, 0.56f, 0.72f))));
-        boat.AddChild(GsaMeshBuilder.Box("Cabin", new Vector3(4.2f, 1.6f, 2.8f), new Vector3(-1.2f, 1.8f, 0f), GsaMeshBuilder.SolidMat(new Color(0.16f, 0.24f, 0.32f))));
-        boat.AddChild(GsaMeshBuilder.Box("Mast", new Vector3(0.25f, 2.2f, 0.25f), new Vector3(-1.2f, 3.2f, 0f), GsaMeshBuilder.SolidMat(Colors.Yellow, emit: true)));
-        wf.AddChild(boat);
-
-        parent.AddChild(wf);
+        // Docked Survey Boat next to Pier
+        var boatPos = coords.ToGodot(new Vector3d(501945, 7400468, 98.4));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.92f, 0.94f, 0.96f)), boatPos + new Vector3(0f, 0.6f, 0f), new Vector3(11.5f, 1.8f, 4.2f));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.14f, 0.56f, 0.72f)), boatPos + new Vector3(0f, 1.1f, 0f), new Vector3(11.6f, 0.35f, 4.3f));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.16f, 0.24f, 0.32f)), boatPos + new Vector3(-1.2f, 1.8f, 0f), new Vector3(4.2f, 1.6f, 2.8f));
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(Colors.Yellow, emit: true), boatPos + new Vector3(-1.2f, 3.2f, 0f), new Vector3(0.25f, 2.2f, 0.25f));
     }
 
     private void BuildSerraMountainLandmarks(
         Node3D parent,
+        GsaStaticMeshBatcher structureBatch,
+        List<(Vector3 Position, float Scale)> treeList,
         GodotCoordinateAdapter coords,
         StandardMaterial3D asphaltMat,
         StandardMaterial3D concMat,
         StandardMaterial3D towerRedMat)
     {
         var serra = new Node3D { Name = "SerraMountain" };
-        var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass", "park_grass", Colors.White, new Vector3(0.10f, 0.10f, 0.10f), triplanar: true);
+        var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
 
-        // Smooth sloped ground plane matching SampleDriveableElevationEnu (0..28m X, 0..28m Y -> tilted hillside!)
         var st = new SurfaceTool();
         st.Begin(Mesh.PrimitiveType.Triangles);
         const int grid = 12;
@@ -380,22 +384,30 @@ public sealed class GsaCityLandmarksBuilder
                 var v10 = coords.ToGodot(new Vector3d(e1, n0, SampleDriveableElevationEnu(e1, n0) - 0.15));
                 var v11 = coords.ToGodot(new Vector3d(e1, n1, SampleDriveableElevationEnu(e1, n1) - 0.15));
                 var v01 = coords.ToGodot(new Vector3d(e0, n1, SampleDriveableElevationEnu(e0, n1) - 0.15));
-                st.AddVertex(v00); st.AddVertex(v11); st.AddVertex(v10);
-                st.AddVertex(v00); st.AddVertex(v01); st.AddVertex(v11);
+                Vector2 UvAt(Vector3 v) => new(v.X * 0.10f, v.Z * 0.10f);
+                st.SetUV(UvAt(v00)); st.AddVertex(v00);
+                st.SetUV(UvAt(v11)); st.AddVertex(v11);
+                st.SetUV(UvAt(v10)); st.AddVertex(v10);
+                st.SetUV(UvAt(v00)); st.AddVertex(v00);
+                st.SetUV(UvAt(v01)); st.AddVertex(v01);
+                st.SetUV(UvAt(v11)); st.AddVertex(v11);
             }
         }
         st.GenerateNormals();
-        serra.AddChild(new MeshInstance3D { Name = "SerraSlopedTerrain", Mesh = st.Commit(), MaterialOverride = parkMat });
+        serra.AddChild(new MeshInstance3D
+        {
+            Name = "SerraSlopedTerrain",
+            Mesh = st.Commit(),
+            MaterialOverride = parkMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
 
-        // Serra Summit Broadcast Tower & Observation Deck (E=501860, N=7401860)
         var sumElev = SampleDriveableElevationEnu(501860, 7401860);
-        var summit = new Node3D { Name = "SerraSummitObservatory", Position = coords.ToGodot(new Vector3d(501860, 7401860, sumElev)) };
-        summit.AddChild(GsaMeshBuilder.Box("OverlookPad", new Vector3(36f, 1.2f, 36f), new Vector3(0f, 0.5f, 0f), concMat));
-        summit.AddChild(new MeshInstance3D { Position = new Vector3(0f, 18f, 0f), Mesh = new CylinderMesh { TopRadius = 0.35f, BottomRadius = 1.8f, Height = 36f, RadialSegments = 8 }, MaterialOverride = towerRedMat });
-        summit.AddChild(new MeshInstance3D { Position = new Vector3(0f, 36.5f, 0f), Mesh = new SphereMesh { Radius = 0.7f, Height = 1.4f }, MaterialOverride = GsaMeshBuilder.SolidMat(Colors.Red, emit: true, emissionEnergy: 2.5f) });
-        serra.AddChild(summit);
+        var sumPos = coords.ToGodot(new Vector3d(501860, 7401860, sumElev));
+        structureBatch.AddBox(concMat, sumPos + new Vector3(0f, 0.5f, 0f), new Vector3(36f, 1.2f, 36f));
+        structureBatch.AddCylinder(towerRedMat, sumPos + new Vector3(0f, 18f, 0f), 0.35f, 1.8f, 36f, radialSegments: 7);
+        structureBatch.AddBox(GsaMeshBuilder.SolidMat(Colors.Red, emit: true, emissionEnergy: 2.5f), sumPos + new Vector3(0f, 36.5f, 0f), new Vector3(1.1f, 1.1f, 1.1f));
 
-        // Continuous smooth paved Serra Mountain Highway up to Summit Observatory!
         var roadSt = new SurfaceTool();
         roadSt.Begin(Mesh.PrimitiveType.Triangles);
         const int roadSteps = 24;
@@ -412,21 +424,28 @@ public sealed class GsaCityLandmarksBuilder
             var p0R = coords.ToGodot(new Vector3d(cE0 + halfW, cN0 - halfW, SampleDriveableElevationEnu(cE0 + halfW, cN0 - halfW) + 0.08));
             var p1L = coords.ToGodot(new Vector3d(cE1 - halfW, cN1 + halfW, SampleDriveableElevationEnu(cE1 - halfW, cN1 + halfW) + 0.08));
             var p1R = coords.ToGodot(new Vector3d(cE1 + halfW, cN1 - halfW, SampleDriveableElevationEnu(cE1 + halfW, cN1 - halfW) + 0.08));
-            roadSt.AddVertex(p0L); roadSt.AddVertex(p1R); roadSt.AddVertex(p0R);
-            roadSt.AddVertex(p0L); roadSt.AddVertex(p1L); roadSt.AddVertex(p1R);
+            roadSt.SetUV(new Vector2(0f, (float)t0 * 80f)); roadSt.AddVertex(p0L);
+            roadSt.SetUV(new Vector2(1.8f, (float)t1 * 80f)); roadSt.AddVertex(p1R);
+            roadSt.SetUV(new Vector2(1.8f, (float)t0 * 80f)); roadSt.AddVertex(p0R);
+            roadSt.SetUV(new Vector2(0f, (float)t0 * 80f)); roadSt.AddVertex(p0L);
+            roadSt.SetUV(new Vector2(0f, (float)t1 * 80f)); roadSt.AddVertex(p1L);
+            roadSt.SetUV(new Vector2(1.8f, (float)t1 * 80f)); roadSt.AddVertex(p1R);
         }
         roadSt.GenerateNormals();
-        serra.AddChild(new MeshInstance3D { Name = "SerraSummitHighway", Mesh = roadSt.Commit(), MaterialOverride = asphaltMat });
+        serra.AddChild(new MeshInstance3D
+        {
+            Name = "SerraSummitHighway",
+            Mesh = roadSt.Commit(),
+            MaterialOverride = asphaltMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
 
-        // Scatter lush hillside trees flanking the climb
         for (var i = 0; i < 24; i++)
         {
             var e = 501080.0 + (i % 6) * 155.0;
             var n = 7401080.0 + (i / 6) * 210.0;
             var elev = SampleDriveableElevationEnu(e, n);
-            var tree = GsaMeshBuilder.BuildStreetTree($"SerraTree_{i}", 1.35f);
-            tree.Position = coords.ToGodot(new Vector3d(e, n, elev));
-            serra.AddChild(tree);
+            treeList.Add((coords.ToGodot(new Vector3d(e, n, elev)), 1.35f));
         }
 
         parent.AddChild(serra);
@@ -460,4 +479,3 @@ public sealed class GsaCityLandmarksBuilder
         return flock;
     }
 }
-

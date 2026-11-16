@@ -25,6 +25,16 @@ public sealed class GsaProceduralAudio
     private readonly AudioStreamGeneratorPlayback? _radioPlayback;
     private readonly List<SynthVoice> _voices = [];
     private readonly Random _rng = new(90210);
+    private readonly Vector2[] _sfxBuffer = new Vector2[4096];
+    private readonly Vector2[] _radioBuffer = new Vector2[4096];
+    private static readonly Vector2[] SilentBuffer = new Vector2[4096];
+    private static readonly float[][] StationChordBass =
+    [
+        [0f, 0f, 0f, 0f],
+        [130.81f, 146.83f, 164.81f, 196.00f], // Geodésia FM: upbeat golden-age retro pop-funk
+        [110.00f, 130.81f, 146.83f, 98.00f],  // Rádio Multicaminho: driving nightwave MSX synth
+        [146.83f, 164.81f, 196.00f, 174.61f], // Onda Portadora: late-night lounge Rhodes groove
+    ];
     private float _radioPhaseA;
     private float _radioPhaseB;
     private float _radioBeatTime;
@@ -225,90 +235,118 @@ public sealed class GsaProceduralAudio
             _voices.Clear();
             return;
         }
-        var frames = _sfxPlayback.GetFramesAvailable();
-        if (frames <= 0)
+        var remaining = _sfxPlayback.GetFramesAvailable();
+        if (remaining <= 0)
             return;
 
-        const float dt = 1f / SampleRate;
-        for (var i = 0; i < frames; i++)
+        var hasEngine = _currentMode >= LocomotionMode.Scooter && SfxVolume > 0.01f;
+        if (_voices.Count == 0 && !hasEngine)
         {
-            var mix = 0f;
-            for (var v = _voices.Count - 1; v >= 0; v--)
+            while (remaining > 0)
             {
-                var voice = _voices[v];
-                var t = voice.Elapsed / voice.Duration;
-                if (t >= 1f)
-                {
-                    _voices.RemoveAt(v);
-                    continue;
-                }
-                var freq = Mathf.Lerp(voice.FreqStart, voice.FreqEnd, t);
-                voice.Phase += freq * dt;
-                if (voice.Phase >= 1f) voice.Phase -= 1f;
-
-                var env = (1f - t) * MathF.Min(1f, t * 12f);
-                var sample = voice.Wave switch
-                {
-                    1 => voice.Phase < 0.5f ? 0.8f : -0.8f,
-                    2 => (float)(_rng.NextDouble() * 2.0 - 1.0),
-                    3 => voice.Phase * 2f - 1f,
-                    _ => MathF.Sin(voice.Phase * MathF.Tau),
-                };
-                mix += sample * env * voice.Gain * SfxVolume;
-                voice.Elapsed += dt;
+                var chunk = Math.Min(remaining, SilentBuffer.Length);
+                _sfxPlayback.PushBuffer(SilentBuffer.AsSpan(0, chunk));
+                remaining -= chunk;
             }
-                var clamped = Math.Clamp(mix, -0.95f, 0.95f);
-                // Continuous vehicle engine purr/revving + brake screech
-                if (_currentMode >= LocomotionMode.Scooter && SfxVolume > 0.01f)
-                {
-                    var maxSpd = Math.Max(8f, (float)PlatformProfile.ForMode(_currentMode).MaxSpeedMetresPerSecond);
-                    var speedFrac = Math.Clamp(_currentSpeedAbs / maxSpd, 0f, 1.15f);
-                    // Simulate 3-gear RPM sweep!
-                    var gearPos = (speedFrac * 2.6f) % 1.0f;
-                    var rpmNorm = _currentSpeedAbs < 0.4f ? 0.05f : Math.Clamp(0.28f + gearPos * 0.72f, 0.15f, 1.0f);
-                    var baseHz = _currentMode == LocomotionMode.Scooter ? 58f : (_currentMode == LocomotionMode.Van ? 36f : 44f);
-                    var engFreq = baseHz + rpmNorm * (_currentMode == LocomotionMode.Scooter ? 95f : 72f);
+            return;
+        }
 
+        const float dt = 1f / SampleRate;
+        var maxSpd = hasEngine ? Math.Max(8f, (float)PlatformProfile.ForMode(_currentMode).MaxSpeedMetresPerSecond) : 8f;
+        var speedFrac = hasEngine ? Math.Clamp(_currentSpeedAbs / maxSpd, 0f, 1.15f) : 0f;
+        var gearPos = (speedFrac * 2.6f) % 1.0f;
+        var rpmNorm = _currentSpeedAbs < 0.4f ? 0.05f : Math.Clamp(0.28f + gearPos * 0.72f, 0.15f, 1.0f);
+        var baseHz = _currentMode == LocomotionMode.Scooter ? 58f : (_currentMode == LocomotionMode.Van ? 36f : 44f);
+        var engFreq = baseHz + rpmNorm * (_currentMode == LocomotionMode.Scooter ? 95f : 72f);
+        var engAmp = (0.045f + 0.04f * rpmNorm) * SfxVolume;
+        var isScreeching = hasEngine && _currentBraking && _currentSpeedAbs > 4.5f;
+
+        while (remaining > 0)
+        {
+            var chunk = Math.Min(remaining, _sfxBuffer.Length);
+            for (var i = 0; i < chunk; i++)
+            {
+                var mix = 0f;
+                for (var v = _voices.Count - 1; v >= 0; v--)
+                {
+                    var voice = _voices[v];
+                    var t = voice.Elapsed / voice.Duration;
+                    if (t >= 1f)
+                    {
+                        _voices.RemoveAt(v);
+                        continue;
+                    }
+                    var freq = Mathf.Lerp(voice.FreqStart, voice.FreqEnd, t);
+                    voice.Phase += freq * dt;
+                    if (voice.Phase >= 1f) voice.Phase -= 1f;
+
+                    var env = (1f - t) * MathF.Min(1f, t * 12f);
+                    var sample = voice.Wave switch
+                    {
+                        1 => voice.Phase < 0.5f ? 0.8f : -0.8f,
+                        2 => (float)(_rng.NextDouble() * 2.0 - 1.0),
+                        3 => voice.Phase * 2f - 1f,
+                        _ => MathF.Sin(voice.Phase * MathF.Tau),
+                    };
+                    mix += sample * env * voice.Gain * SfxVolume;
+                    voice.Elapsed += dt;
+                }
+                var clamped = Math.Clamp(mix, -0.95f, 0.95f);
+                if (hasEngine)
+                {
                     _enginePhaseA = (_enginePhaseA + engFreq * dt) % 1f;
                     _enginePhaseB = (_enginePhaseB + engFreq * 2.0f * dt) % 1f;
                     var rumble = MathF.Sin(_enginePhaseA * MathF.Tau) * 0.6f + (_enginePhaseB * 2f - 1f) * 0.4f;
-                    clamped = Math.Clamp(clamped + rumble * (0.045f + 0.04f * rpmNorm) * SfxVolume, -0.95f, 0.95f);
+                    clamped = Math.Clamp(clamped + rumble * engAmp, -0.95f, 0.95f);
 
-                    if (_currentBraking && _currentSpeedAbs > 4.5f)
+                    if (isScreeching)
                     {
                         _screechPhase = (_screechPhase + 1140f * dt) % 1f;
                         var squeal = MathF.Sin(_screechPhase * MathF.Tau) * 0.075f * SfxVolume;
                         clamped = Math.Clamp(clamped + squeal, -0.95f, 0.95f);
                     }
                 }
-                _sfxPlayback.PushFrame(new Vector2(clamped, clamped));
+                _sfxBuffer[i] = new Vector2(clamped, clamped);
             }
+            _sfxPlayback.PushBuffer(_sfxBuffer.AsSpan(0, chunk));
+            remaining -= chunk;
+        }
+    }
+
+    private void PumpRadioBuffer(bool isRaining)
+    {
+        if (_radioPlayback is null)
+            return;
+        var remaining = _radioPlayback.GetFramesAvailable();
+        if (remaining <= 0)
+            return;
+
+        var radioActive = RadioStation > 0 && MusicVolume > 0.01f;
+        var rainActive = isRaining && SfxVolume > 0.01f;
+        if (!radioActive && !rainActive)
+        {
+            while (remaining > 0)
+            {
+                var chunk = Math.Min(remaining, SilentBuffer.Length);
+                _radioPlayback.PushBuffer(SilentBuffer.AsSpan(0, chunk));
+                remaining -= chunk;
+            }
+            return;
         }
 
-        private void PumpRadioBuffer(bool isRaining)
+        const float dt = 1f / SampleRate;
+        var chordBass = StationChordBass[Math.Clamp(RadioStation, 0, StationChordBass.Length - 1)];
+        var bpmSteps = RadioStation == 2 ? 3.2f : 2.2f;
+
+        while (remaining > 0)
         {
-            if (_radioPlayback is null)
-                return;
-            var frames = _radioPlayback.GetFramesAvailable();
-            if (frames <= 0)
-                return;
-
-            const float dt = 1f / SampleRate;
-            float[] chordBass = RadioStation switch
-            {
-                1 => [130.81f, 146.83f, 164.81f, 196.00f], // Geodésia FM: upbeat golden-age retro pop-funk
-                2 => [110.00f, 130.81f, 146.83f, 98.00f],  // Rádio Multicaminho: driving nightwave MSX synth
-                3 => [146.83f, 164.81f, 196.00f, 174.61f], // Onda Portadora: late-night lounge Rhodes groove
-                _ => [0f, 0f, 0f, 0f],
-            };
-
-            for (var i = 0; i < frames; i++)
+            var chunk = Math.Min(remaining, _radioBuffer.Length);
+            for (var i = 0; i < chunk; i++)
             {
                 var sample = 0f;
-                if (RadioStation > 0 && MusicVolume > 0.01f)
+                if (radioActive)
                 {
                     _radioBeatTime += dt;
-                    var bpmSteps = RadioStation == 2 ? 3.2f : 2.2f;
                     var step = (int)(_radioBeatTime * bpmSteps) % 4;
                     var eighth = (int)(_radioBeatTime * bpmSteps * 2.0f) % 8;
                     var beatFrac = (_radioBeatTime * bpmSteps) % 1.0f;
@@ -326,12 +364,15 @@ public sealed class GsaProceduralAudio
                     var lead = (RadioStation == 2 ? (_radioPhaseB * 2f - 1f) : MathF.Sin(_radioPhaseB * MathF.Tau)) * 0.24f * env;
                     sample += (bass + lead + kick + hat) * 0.34f * MusicVolume;
                 }
-            if (isRaining && SfxVolume > 0.01f)
-            {
-                sample += (float)(_rng.NextDouble() * 2.0 - 1.0) * 0.035f * SfxVolume;
+                if (rainActive)
+                {
+                    sample += (float)(_rng.NextDouble() * 2.0 - 1.0) * 0.035f * SfxVolume;
+                }
+                sample = Math.Clamp(sample, -0.95f, 0.95f);
+                _radioBuffer[i] = new Vector2(sample, sample);
             }
-            sample = Math.Clamp(sample, -0.95f, 0.95f);
-            _radioPlayback.PushFrame(new Vector2(sample, sample));
+            _radioPlayback.PushBuffer(_radioBuffer.AsSpan(0, chunk));
+            remaining -= chunk;
         }
     }
 }

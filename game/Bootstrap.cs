@@ -14,9 +14,11 @@ public partial class Bootstrap : Control
     private readonly LocalizationService _localization = new();
     private Camera3D? _menuCamera;
     private float _menuOrbitAngle;
+    private GsaPerfProbe? _perfProbe;
 
     public override void _Ready()
     {
+        _perfProbe = GsaPerfProbe.TryCreateFromArgs(this, "bootstrap");
         _smokeTest = OS.GetCmdlineUserArgs().Contains("--smoke-test");
         var benchSmoke = OS.GetCmdlineUserArgs().Contains("--bench-smoke");
         if (benchSmoke)
@@ -95,7 +97,12 @@ public partial class Bootstrap : Control
             Environment = new Godot.Environment
             {
                 BackgroundMode = Godot.Environment.BGMode.Sky,
-                Sky = new Sky { SkyMaterial = skyMat },
+                Sky = new Sky
+                {
+                    SkyMaterial = skyMat,
+                    RadianceSize = Sky.RadianceSizeEnum.Size32,
+                    ProcessMode = Sky.ProcessModeEnum.Incremental,
+                },
                 AmbientLightSource = Godot.Environment.AmbientSource.Sky,
                 AmbientLightEnergy = 0.75f,
                 FogEnabled = true,
@@ -112,9 +119,10 @@ public partial class Bootstrap : Control
             LightEnergy = 1.3f,
         });
 
-        // Asphalt street, glowing city towers & parked Kombi + Handcart centerpiece
-        world.AddChild(GsaMeshBuilder.Box("Ground", new Vector3(260f, 0.2f, 260f), new Vector3(0f, -0.1f, 0f),
-            GsaRetroTextures.CreateWorldMaterial("menu_asphalt", "asphalt", new Color(0.85f, 0.88f, 0.92f), new Vector3(0.14f, 0.14f, 0.14f), triplanar: true)));
+        // Batched asphalt street & glowing city towers (world UVs, zero triplanar shader cost)
+        var dioramaBatch = new GsaStaticMeshBatcher();
+        var groundMat = GsaRetroTextures.CreateWorldMaterial("menu_asphalt_uv", "asphalt", new Color(0.85f, 0.88f, 0.92f), triplanar: false, vertexShaded: false);
+        dioramaBatch.AddBox(groundMat, new Vector3(0f, -0.1f, 0f), new Vector3(260f, 0.2f, 260f), uvScale: 0.14f);
 
         GsaRetroTextures.SetNightWindowEmissionEnergy(0.55f);
         var rng = new Random(2001);
@@ -135,10 +143,11 @@ public partial class Bootstrap : Control
                 1 => "facade_residential",
                 _ => "facade_concrete",
             };
-            world.AddChild(GsaMeshBuilder.Box($"SkyTower_{i}", new Vector3(w, h, w),
-                new Vector3(x * dist, h * 0.5f, z * dist),
-                GsaRetroTextures.CreateWorldMaterial($"menu_bldg_{i % 3}", style, Colors.White, new Vector3(0.085f, 0.085f, 0.085f), triplanar: true, nightWindowGlow: true)));
+            var bMat = GsaRetroTextures.CreateWorldMaterial($"menu_bldg_{i % 3}_uv", style, Colors.White, triplanar: false, nightWindowGlow: true);
+            dioramaBatch.AddBox(bMat, new Vector3(x * dist, h * 0.5f, z * dist), new Vector3(w, h, w), uvScale: 0.085f);
         }
+        dioramaBatch.BuildSeparatedNodes(world, "MenuBackdrop", GeometryInstance3D.ShadowCastingSetting.Off);
+        GsaRetroTextures.SetNightWindowEmissionEnergy(0.55f);
 
         var kombi = GsaMeshBuilder.BuildPlayerRig(LocomotionMode.Kombi);
         kombi.Root.Position = new Vector3(2.4f, 0f, -1.0f);
@@ -226,6 +235,7 @@ public partial class Bootstrap : Control
         {
             GsaScreenshotHelper.TryCaptureOnFrame(this, ++_frames, targetFrame: 12);
         }
+        _perfProbe?.StepFrame(this);
     }
 
     public override void _UnhandledInput(InputEvent @event)

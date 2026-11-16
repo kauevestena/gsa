@@ -55,7 +55,9 @@ public static class GsaRetroTextures
         bool triplanar = false,
         bool unshaded = false,
         bool transparent = false,
-        bool nightWindowGlow = false)
+        bool nightWindowGlow = false,
+        bool vertexShaded = true,
+        bool vertexColorAlbedo = false)
     {
         if (MaterialCache.TryGetValue(key, out var cached))
             return cached;
@@ -68,11 +70,18 @@ public static class GsaRetroTextures
             TextureFilter = BaseMaterial3D.TextureFilterEnum.NearestWithMipmaps,
             Uv1Triplanar = triplanar,
             Uv1WorldTriplanar = triplanar,
+            SpecularMode = roughness < 0.35f
+                ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
+                : BaseMaterial3D.SpecularModeEnum.Disabled,
         };
+        if (vertexColorAlbedo)
+            mat.VertexColorUseAsAlbedo = true;
         if (uvScale.HasValue)
             mat.Uv1Scale = uvScale.Value;
         if (unshaded)
             mat.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+        else if (vertexShaded)
+            mat.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex;
         if (transparent)
             mat.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
         if (nightWindowGlow)
@@ -103,6 +112,9 @@ public static class GsaRetroTextures
             if (key.Contains("asphalt", StringComparison.Ordinal) || key.Contains("road", StringComparison.Ordinal))
             {
                 mat.Roughness = isRaining ? 0.28f : 0.88f;
+                mat.SpecularMode = isRaining
+                    ? BaseMaterial3D.SpecularModeEnum.SchlickGgx
+                    : BaseMaterial3D.SpecularModeEnum.Disabled;
                 mat.AlbedoColor = isRaining ? new Color(0.68f, 0.72f, 0.78f) : Colors.White;
             }
         }

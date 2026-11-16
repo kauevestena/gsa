@@ -14,6 +14,7 @@ public enum GsaCameraMode
 public sealed class GsaThirdPersonCamera
 {
     private readonly Camera3D _camera;
+    private readonly PhysicsRayQueryParameters3D _camRayQuery = new() { CollisionMask = 1 };
     private float _orbitYawOffset;
     private float _orbitPitch = 0.30f;
     private float _zoomDistance = 6.8f;
@@ -153,8 +154,9 @@ public sealed class GsaThirdPersonCamera
         // Collision push-forward so buildings don't block the player (ignore hits inside vehicle radius)
         if (spaceState is not null)
         {
-            using var query = PhysicsRayQueryParameters3D.Create(pivot, idealCamPos, 1);
-            var hit = spaceState.IntersectRay(query);
+            _camRayQuery.From = pivot;
+            _camRayQuery.To = idealCamPos;
+            var hit = spaceState.IntersectRay(_camRayQuery);
             if (hit.Count > 0)
             {
                 var hitPos = hit["position"].AsVector3();

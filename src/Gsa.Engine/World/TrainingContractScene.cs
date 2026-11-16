@@ -17,6 +17,8 @@ public partial class TutorialBlockScene
     private CameraVisibilityCandidate[] _liveCandidates = [];
     private GsaGtaHud _gtaHud = null!;
     private readonly System.Collections.Generic.Dictionary<string, Button> _trainingButtons = new();
+    private System.Collections.Generic.Dictionary<string, Gsa.Core.World.WorldBoxObject> _manifestById = new(StringComparer.Ordinal);
+    private readonly System.Collections.Generic.List<RadarBlip> _radarBlips = new(16);
     private long _liveTick;
     private bool _captureRequested;
     private double _hudElapsed;
@@ -36,6 +38,7 @@ public partial class TutorialBlockScene
         _training = new TrainingContractSession(_manifest, slot);
         var loaded = _smoke ? null : _training.Load();
         _liveCamera = new CameraCaptureScheduler("training_" + Guid.NewGuid().ToString("N"));
+        _manifestById = _manifest.Objects.ToDictionary(o => o.Id, StringComparer.Ordinal);
         _liveCandidates = _manifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
         _liveLocomotion!.RepositionSafeAfterRecovery(TrainingContractSession.SpawnPosition, headingRadians: Math.PI);
         _lastSpeedMps = 0.0;
@@ -43,7 +46,7 @@ public partial class TutorialBlockScene
 
         foreach (var id in TrainingContractSession.TargetIds.Concat(new[] { "office_entry", "unload_point" }))
         {
-            var item = _manifest.Objects.Single(o => o.Id == id);
+            var item = _manifestById[id];
             var label = new Label3D
             {
                 Text = id.StartsWith("facade_", StringComparison.Ordinal) ? id[7..] : Text("training." + id),
@@ -57,6 +60,8 @@ public partial class TutorialBlockScene
                 OutlineModulate = Colors.Black,
                 OutlineSize = 5,
                 NoDepthTest = false,
+                AlphaCut = Label3D.AlphaCutMode.Discard,
+                VisibilityRangeEnd = 70f,
             };
             AddChild(label);
         }
@@ -342,19 +347,22 @@ public partial class TutorialBlockScene
         var clockText = $"{hours:00}:{mins:00}";
         var weatherText = weather.IsRaining ? Text("hud.weather.rain") : Text("hud.weather.dry");
 
-        var blips = new List<RadarBlip>();
+        _radarBlips.Clear();
         foreach (var id in TrainingContractSession.TargetIds)
         {
-            var obj = _manifest.Objects.Single(x => x.Id == id);
+            var obj = _manifestById[id];
             var isDone = resolved.Contains(id);
-            blips.Add(new RadarBlip(id, obj.PositionEnu, isDone ? new Color(0.28f, 0.92f, 0.54f) : new Color(1.0f, 0.80f, 0.22f), id[7..]));
+            _radarBlips.Add(new RadarBlip(id, obj.PositionEnu, isDone ? new Color(0.28f, 0.92f, 0.54f) : new Color(1.0f, 0.80f, 0.22f), id[7..]));
         }
-        var officeObj = _manifest.Objects.Single(x => x.Id == "office_entry");
-        var unloadObj = _manifest.Objects.Single(x => x.Id == "unload_point");
-        blips.Add(new RadarBlip("office_entry", officeObj.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
-        blips.Add(new RadarBlip("unload_point", unloadObj.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
-        foreach (var ctrl in _manifest.Objects.Where(x => x.ObjectClass == "survey_control"))
-            blips.Add(new RadarBlip(ctrl.Id, ctrl.PositionEnu, new Color(0.38f, 0.95f, 0.45f), "▲", ClampToRim: false));
+        var officeObj = _manifestById["office_entry"];
+        var unloadObj = _manifestById["unload_point"];
+        _radarBlips.Add(new RadarBlip("office_entry", officeObj.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
+        _radarBlips.Add(new RadarBlip("unload_point", unloadObj.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
+        foreach (var obj in _manifest.Objects)
+        {
+            if (obj.ObjectClass == "survey_control")
+                _radarBlips.Add(new RadarBlip(obj.Id, obj.PositionEnu, new Color(0.38f, 0.95f, 0.45f), "▲", ClampToRim: false));
+        }
 
         var coverageSpots = _training.Samples.Select(s => s.EstimatedPose.PositionEnu).ToArray();
 
@@ -395,7 +403,7 @@ public partial class TutorialBlockScene
                 VehiclePopup: _pendingVehiclePopup),
             position,
             _liveLocomotion.HeadingRadians,
-            blips,
+            _radarBlips,
             coverageSpots);
 
         _pendingDistrictPopup = null;

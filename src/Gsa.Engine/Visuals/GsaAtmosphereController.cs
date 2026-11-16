@@ -17,8 +17,14 @@ public sealed class GsaAtmosphereController
     private CanvasLayer? _ditherLayer;
     private ShaderMaterial? _filterMat;
     private bool _lastRaining;
+    private bool _lastNight;
+    private bool _atmosphereInitialized;
+    private double _lastVisualHour = double.NaN;
     private bool _ditherEnabled;
     private bool _daguerreotypeEnabled;
+    private Color _lastSkyTop = new(-1f, -1f, -1f);
+    private Color _lastSkyHorizon = new(-1f, -1f, -1f);
+    private Color _lastFogColor = new(-1f, -1f, -1f);
 
     public bool RetroDitherEnabled => _ditherEnabled;
     public bool DaguerreotypeEnabled => _daguerreotypeEnabled;
@@ -38,10 +44,16 @@ public sealed class GsaAtmosphereController
             SunCurve = 0.12f,
             SkyCurve = 0.22f,
         };
+        var sky = new Sky
+        {
+            SkyMaterial = _skyMat,
+            RadianceSize = Sky.RadianceSizeEnum.Size32,
+            ProcessMode = Sky.ProcessModeEnum.Incremental,
+        };
         _env = new Godot.Environment
         {
             BackgroundMode = Godot.Environment.BGMode.Sky,
-            Sky = new Sky { SkyMaterial = _skyMat },
+            Sky = sky,
             AmbientLightSource = Godot.Environment.AmbientSource.Sky,
             AmbientLightSkyContribution = 0.65f,
             AmbientLightEnergy = 0.75f,
@@ -52,14 +64,13 @@ public sealed class GsaAtmosphereController
             FogDepthBegin = 75f,
             FogDepthEnd = 390f,
             FogSkyAffect = 0.35f,
-            GlowEnabled = true,
-            GlowIntensity = 0.32f,
-            GlowStrength = 0.85f,
-            GlowBloom = 0.14f,
-            GlowHdrThreshold = 0.92f,
+            GlowEnabled = false,
         };
         _worldEnv = new WorldEnvironment { Name = "Environment", Environment = _env };
         _root.AddChild(_worldEnv);
+
+        if (!string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
+            RenderingServer.DirectionalShadowAtlasSetSize(1024, false);
 
         _sun = new DirectionalLight3D
         {
@@ -68,7 +79,9 @@ public sealed class GsaAtmosphereController
             LightColor = new Color(1.0f, 0.94f, 0.82f),
             LightEnergy = 1.25f,
             ShadowEnabled = true,
-            DirectionalShadowMaxDistance = 120f,
+            DirectionalShadowMode = DirectionalLight3D.ShadowMode.Orthogonal,
+            DirectionalShadowMaxDistance = 72f,
+            ShadowBias = 0.08f,
         };
         _root.AddChild(_sun);
 
@@ -147,97 +160,126 @@ public sealed class GsaAtmosphereController
         var isNight = weather.IsNight;
         var isRaining = weather.IsRaining;
 
-        // Smooth GTA III time-of-day sky & fog palette (morning haze, crisp midday, golden dusk, deep indigo night)
-        Color skyTop;
-        Color skyHorizon;
-        Color sunColor;
-        Color fogColor;
-        float sunEnergy;
-        float ambientEnergy;
-        float sunPitchDeg;
+        var needsSkyUpdate = !_atmosphereInitialized ||
+                             isNight != _lastNight ||
+                             isRaining != _lastRaining ||
+                             Math.Abs(hour - _lastVisualHour) >= 0.025;
 
-        if (isNight)
+        if (needsSkyUpdate)
         {
-            skyTop = new Color(0.05f, 0.08f, 0.16f);
-            skyHorizon = new Color(0.12f, 0.16f, 0.25f);
-            sunColor = new Color(0.45f, 0.56f, 0.78f);
-            fogColor = new Color(0.09f, 0.12f, 0.18f);
-            sunEnergy = 0.24f;
-            ambientEnergy = 0.42f;
-            sunPitchDeg = -55f;
-        }
-        else if (hour < 8.5)
-        {
-            var t = (float)((hour - 6.0) / 2.5);
-            skyTop = new Color(0.18f, 0.34f, 0.56f).Lerp(new Color(0.24f, 0.48f, 0.76f), t);
-            skyHorizon = new Color(0.84f, 0.62f, 0.44f).Lerp(new Color(0.68f, 0.76f, 0.82f), t);
-            sunColor = new Color(1.0f, 0.76f, 0.50f).Lerp(new Color(1.0f, 0.94f, 0.82f), t);
-            fogColor = new Color(0.72f, 0.66f, 0.60f).Lerp(new Color(0.64f, 0.72f, 0.78f), t);
-            sunEnergy = 0.75f + 0.55f * t;
-            ambientEnergy = 0.60f + 0.18f * t;
-            sunPitchDeg = -18f - 28f * t;
-        }
-        else if (hour >= 17.0)
-        {
-            var t = (float)Math.Clamp((hour - 17.0) / 3.0, 0.0, 1.0);
-            skyTop = new Color(0.24f, 0.48f, 0.76f).Lerp(new Color(0.16f, 0.18f, 0.34f), t);
-            skyHorizon = new Color(0.68f, 0.76f, 0.82f).Lerp(new Color(0.86f, 0.45f, 0.26f), t);
-            sunColor = new Color(1.0f, 0.94f, 0.82f).Lerp(new Color(1.0f, 0.52f, 0.26f), t);
-            fogColor = new Color(0.64f, 0.72f, 0.78f).Lerp(new Color(0.55f, 0.40f, 0.36f), t);
-            sunEnergy = 1.25f - 0.70f * t;
-            ambientEnergy = 0.75f - 0.25f * t;
-            sunPitchDeg = -46f + 30f * t;
-        }
-        else
-        {
-            skyTop = new Color(0.24f, 0.48f, 0.76f);
-            skyHorizon = new Color(0.68f, 0.76f, 0.82f);
-            sunColor = new Color(1.0f, 0.95f, 0.85f);
-            fogColor = new Color(0.64f, 0.72f, 0.78f);
-            sunEnergy = 1.28f;
-            ambientEnergy = 0.78f;
-            sunPitchDeg = -52f;
+            _lastVisualHour = hour;
+
+            // Smooth GTA III time-of-day sky & fog palette (morning haze, crisp midday, golden dusk, deep indigo night)
+            Color skyTop;
+            Color skyHorizon;
+            Color sunColor;
+            Color fogColor;
+            float sunEnergy;
+            float ambientEnergy;
+            float sunPitchDeg;
+
+            if (isNight)
+            {
+                skyTop = new Color(0.05f, 0.08f, 0.16f);
+                skyHorizon = new Color(0.12f, 0.16f, 0.25f);
+                sunColor = new Color(0.45f, 0.56f, 0.78f);
+                fogColor = new Color(0.09f, 0.12f, 0.18f);
+                sunEnergy = 0.24f;
+                ambientEnergy = 0.42f;
+                sunPitchDeg = -55f;
+            }
+            else if (hour < 8.5)
+            {
+                var t = (float)((hour - 6.0) / 2.5);
+                skyTop = new Color(0.18f, 0.34f, 0.56f).Lerp(new Color(0.24f, 0.48f, 0.76f), t);
+                skyHorizon = new Color(0.84f, 0.62f, 0.44f).Lerp(new Color(0.68f, 0.76f, 0.82f), t);
+                sunColor = new Color(1.0f, 0.76f, 0.50f).Lerp(new Color(1.0f, 0.94f, 0.82f), t);
+                fogColor = new Color(0.72f, 0.66f, 0.60f).Lerp(new Color(0.64f, 0.72f, 0.78f), t);
+                sunEnergy = 0.75f + 0.55f * t;
+                ambientEnergy = 0.60f + 0.18f * t;
+                sunPitchDeg = -18f - 28f * t;
+            }
+            else if (hour >= 17.0)
+            {
+                var t = (float)Math.Clamp((hour - 17.0) / 3.0, 0.0, 1.0);
+                skyTop = new Color(0.24f, 0.48f, 0.76f).Lerp(new Color(0.16f, 0.18f, 0.34f), t);
+                skyHorizon = new Color(0.68f, 0.76f, 0.82f).Lerp(new Color(0.86f, 0.45f, 0.26f), t);
+                sunColor = new Color(1.0f, 0.94f, 0.82f).Lerp(new Color(1.0f, 0.52f, 0.26f), t);
+                fogColor = new Color(0.64f, 0.72f, 0.78f).Lerp(new Color(0.55f, 0.40f, 0.36f), t);
+                sunEnergy = 1.25f - 0.70f * t;
+                ambientEnergy = 0.75f - 0.25f * t;
+                sunPitchDeg = -46f + 30f * t;
+            }
+            else
+            {
+                skyTop = new Color(0.24f, 0.48f, 0.76f);
+                skyHorizon = new Color(0.68f, 0.76f, 0.82f);
+                sunColor = new Color(1.0f, 0.95f, 0.85f);
+                fogColor = new Color(0.64f, 0.72f, 0.78f);
+                sunEnergy = 1.28f;
+                ambientEnergy = 0.78f;
+                sunPitchDeg = -52f;
+            }
+
+            if (isRaining)
+            {
+                var rainDesat = new Color(0.36f, 0.41f, 0.46f);
+                skyTop = skyTop.Lerp(rainDesat * 0.75f, 0.65f);
+                skyHorizon = skyHorizon.Lerp(rainDesat, 0.72f);
+                fogColor = fogColor.Lerp(rainDesat, 0.78f);
+                sunEnergy *= 0.52f;
+                _env.FogDepthBegin = 45f;
+                _env.FogDepthEnd = 250f;
+            }
+            else
+            {
+                _env.FogDepthBegin = 75f;
+                _env.FogDepthEnd = 390f;
+            }
+
+            // Only dirty ProceduralSkyMaterial when colors actually changed so Godot skips per-frame sky cubemap re-convolution
+            if (!_lastSkyTop.IsEqualApprox(skyTop))
+            {
+                _lastSkyTop = skyTop;
+                _skyMat.SkyTopColor = skyTop;
+            }
+            if (!_lastSkyHorizon.IsEqualApprox(skyHorizon))
+            {
+                _lastSkyHorizon = skyHorizon;
+                _skyMat.SkyHorizonColor = skyHorizon;
+            }
+            if (!_lastFogColor.IsEqualApprox(fogColor))
+            {
+                _lastFogColor = fogColor;
+                _skyMat.GroundHorizonColor = fogColor;
+                _env.FogLightColor = fogColor;
+            }
+
+            _env.AmbientLightEnergy = ambientEnergy;
+            _sun.LightColor = sunColor;
+            _sun.LightEnergy = sunEnergy;
+            _sun.RotationDegrees = new Vector3(sunPitchDeg, -35f + (float)((hour - 6.0) * 6.0), 0f);
         }
 
-        if (isRaining)
-        {
-            var rainDesat = new Color(0.36f, 0.41f, 0.46f);
-            skyTop = skyTop.Lerp(rainDesat * 0.75f, 0.65f);
-            skyHorizon = skyHorizon.Lerp(rainDesat, 0.72f);
-            fogColor = fogColor.Lerp(rainDesat, 0.78f);
-            sunEnergy *= 0.52f;
-            _env.FogDepthBegin = 45f;
-            _env.FogDepthEnd = 250f;
-        }
-        else
-        {
-            _env.FogDepthBegin = 75f;
-            _env.FogDepthEnd = 390f;
-        }
-
-        _skyMat.SkyTopColor = skyTop;
-        _skyMat.SkyHorizonColor = skyHorizon;
-        _skyMat.GroundHorizonColor = fogColor;
-        _env.FogLightColor = fogColor;
-        _env.AmbientLightEnergy = ambientEnergy;
-        _sun.LightColor = sunColor;
-        _sun.LightEnergy = sunEnergy;
-        _sun.RotationDegrees = new Vector3(sunPitchDeg, -35f + (float)((hour - 6.0) * 6.0), 0f);
-
-        GsaRetroTextures.SetNightWindowEmissionEnergy(isNight ? 0.55f : 0.0f);
-        if (isRaining != _lastRaining)
+        if (!_atmosphereInitialized || isRaining != _lastRaining)
         {
             _lastRaining = isRaining;
             GsaRetroTextures.SetWetAsphaltState(isRaining);
         }
 
-        var lampEnergy = isNight ? 2.4f : 0.0f;
-        foreach (var (bulbMat, light) in _streetlamps)
+        if (!_atmosphereInitialized || isNight != _lastNight)
         {
-            bulbMat.EmissionEnergyMultiplier = lampEnergy;
-            if (light is not null)
-                light.Visible = isNight;
+            _lastNight = isNight;
+            GsaRetroTextures.SetNightWindowEmissionEnergy(isNight ? 0.55f : 0.0f);
+            var lampEnergy = isNight ? 2.4f : 0.0f;
+            foreach (var (bulbMat, light) in _streetlamps)
+            {
+                bulbMat.EmissionEnergyMultiplier = lampEnergy;
+                if (light is not null)
+                    light.Visible = isNight;
+            }
         }
+        _atmosphereInitialized = true;
 
         _rainMesh.Visible = isRaining;
         if (isRaining && dtSeconds > 0.0)

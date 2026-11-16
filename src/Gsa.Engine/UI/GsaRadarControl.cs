@@ -11,20 +11,64 @@ public readonly record struct RadarBlip(
     string Label,
     bool ClampToRim = true);
 
-/// <summary>Iconic GTA III bottom-left circular radar minimap with heading rotation, orbiting N marker, heatmap, and blips.</summary>
+/// <summary>Iconic GTA III bottom-left circular radar minimap with heading rotation, orbiting N marker, heatmap, and zero-alloc clipping.</summary>
 public sealed partial class GsaRadarControl : Control
 {
-    private WorldSceneManifest? _manifest;
+    private readonly record struct StaticRadarRect(
+        double CenterE,
+        double CenterN,
+        double HalfW,
+        double HalfH,
+        double MaxHalfExtent,
+        Color Color);
+
+    private const int ClipSegments = 20;
+    private readonly Vector2[] _clipUnit = new Vector2[ClipSegments];
+    private readonly Vector2[] _clipScaled = new Vector2[ClipSegments];
+    private readonly Vector2[] _polyBufA = new Vector2[ClipSegments + 8];
+    private readonly Vector2[] _polyBufB = new Vector2[ClipSegments + 8];
+    private readonly Vector2[] _playerArrow = new Vector2[4];
+    private readonly List<StaticRadarRect> _staticRects = [];
+
     private Vector3d _playerPosEnu;
     private double _headingRadians = Math.PI / 2.0;
     private IReadOnlyList<RadarBlip> _blips = [];
     private IReadOnlyList<Vector3d> _coverageSpots = [];
     private float _rangeMetres = 95f;
 
+    public GsaRadarControl()
+    {
+        for (var i = 0; i < ClipSegments; i++)
+        {
+            var ang = i * (MathF.Tau / ClipSegments);
+            _clipUnit[i] = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+        }
+    }
+
     public void Configure(WorldSceneManifest manifest, float rangeMetres = 95f)
     {
-        _manifest = manifest;
         _rangeMetres = rangeMetres;
+        _staticRects.Clear();
+        if (manifest is not null)
+        {
+            foreach (var obj in manifest.Objects)
+            {
+                if (obj.ObjectClass is not ("building_shell" or "warehouse_facade" or "commercial_tower" or "training_park"))
+                    continue;
+                var hw = obj.SizeEnu.X * 0.5;
+                var hh = obj.SizeEnu.Y * 0.5;
+                var col = obj.ObjectClass == "training_park"
+                    ? new Color(0.16f, 0.36f, 0.18f, 0.72f)
+                    : new Color(0.38f, 0.44f, 0.49f, 0.90f);
+                _staticRects.Add(new StaticRadarRect(
+                    obj.PositionEnu.X,
+                    obj.PositionEnu.Y,
+                    hw,
+                    hh,
+                    Math.Sqrt(hw * hw + hh * hh),
+                    col));
+            }
+        }
         QueueRedraw();
     }
 
@@ -53,58 +97,82 @@ public sealed partial class GsaRadarControl : Control
         DrawCircle(center, radius + 4.5f, new Color(0.20f, 0.23f, 0.27f, 0.98f));
         DrawCircle(center, radius, new Color(0.08f, 0.13f, 0.14f, 0.96f));
 
-        // Rotate relative to player heading so UP on radar = player forward!
         var scale = radius / _rangeMetres;
         var cosH = (float)Math.Cos(_headingRadians);
         var sinH = (float)Math.Sin(_headingRadians);
+        var clipRadius = radius - 2f;
+        var clipRadiusSq = clipRadius * clipRadius;
 
-        Vector2 EnuToRadarOffset(Vector3d enu)
+        for (var i = 0; i < ClipSegments; i++)
+            _clipScaled[i] = _clipUnit[i] * clipRadius;
+
+        Vector2 EnuToRadarOffset(double enuX, double enuY)
         {
-            var dE = (float)(enu.X - _playerPosEnu.X);
-            var dN = (float)(enu.Y - _playerPosEnu.Y);
-            // Forward dot product -> -Y screen, Right dot product -> +X screen
+            var dE = (float)(enuX - _playerPosEnu.X);
+            var dN = (float)(enuY - _playerPosEnu.Y);
             var fwd = dE * cosH + dN * sinH;
             var right = dE * sinH - dN * cosH;
             return new Vector2(right, -fwd) * scale;
         }
 
-        var clipCircle = new Vector2[24];
-        for (var i = 0; i < clipCircle.Length; i++)
-        {
-            var ang = i * (MathF.Tau / clipCircle.Length);
-            clipCircle[i] = center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (radius - 2f);
-        }
-
         void DrawClippedRect(double centerE, double centerN, double widthE, double heightN, Color color)
         {
-            var off = EnuToRadarOffset(new Vector3d(centerE, centerN, 100.0));
             var halfW = (float)widthE * 0.5f * scale;
             var halfH = (float)heightN * 0.5f * scale;
-            if (off.Length() > radius + halfW + halfH || halfW < 0.6f || halfH < 0.6f)
+            if (halfW < 0.6f || halfH < 0.6f)
+                return;
+
+            var dE = (float)(centerE - _playerPosEnu.X);
+            var dN = (float)(centerN - _playerPosEnu.Y);
+            var maxExtentWorld = (float)(Math.Sqrt(widthE * widthE + heightN * heightN) * 0.5) + _rangeMetres;
+            if (MathF.Abs(dE) > maxExtentWorld || MathF.Abs(dN) > maxExtentWorld)
+                return;
+
+            var off = new Vector2(dE * sinH - dN * cosH, -(dE * cosH + dN * sinH)) * scale;
+            var boundR = MathF.Sqrt(halfW * halfW + halfH * halfH);
+            if (off.Length() > clipRadius + boundR)
                 return;
 
             var axisE = new Vector2(sinH, -cosH) * halfW;
             var axisN = new Vector2(-cosH, -sinH) * halfH;
-            Vector2[] rawPoly =
-            [
-                center + off - axisE - axisN,
-                center + off + axisE - axisN,
-                center + off + axisE + axisN,
-                center + off - axisE + axisN,
-            ];
-            foreach (var poly in Geometry2D.IntersectPolygons(rawPoly, clipCircle))
+            var p0 = off - axisE - axisN;
+            var p1 = off + axisE - axisN;
+            var p2 = off + axisE + axisN;
+            var p3 = off - axisE + axisN;
+
+            if (p0.LengthSquared() <= clipRadiusSq &&
+                p1.LengthSquared() <= clipRadiusSq &&
+                p2.LengthSquared() <= clipRadiusSq &&
+                p3.LengthSquared() <= clipRadiusSq)
             {
-                if (poly.Length >= 3 && ComputePolygonArea(poly) > 1.5f)
-                    DrawColoredPolygon(poly, color);
+                _polyBufA[0] = center + p0;
+                _polyBufA[1] = center + p1;
+                _polyBufA[2] = center + p2;
+                _polyBufA[3] = center + p3;
+                DrawColoredPolygon(new ReadOnlySpan<Vector2>(_polyBufA, 0, 4), color, default(ReadOnlySpan<Vector2>), null);
+                return;
             }
+
+            _polyBufA[0] = p0;
+            _polyBufA[1] = p1;
+            _polyBufA[2] = p2;
+            _polyBufA[3] = p3;
+            var count = ClipConvexToCircle(_polyBufA, 4, _polyBufB, _clipScaled);
+            if (count < 3)
+                return;
+
+            for (var i = 0; i < count; i++)
+                _polyBufA[i] += center;
+            if (ComputePolygonArea(_polyBufA.AsSpan(0, count)) > 1.5f)
+                DrawColoredPolygon(new ReadOnlySpan<Vector2>(_polyBufA, 0, count), color, default(ReadOnlySpan<Vector2>), null);
         }
 
         // District land/water/park backing inside circular radar
-        DrawClippedRect(502250, 7400500, 950, 1400, new Color(0.08f, 0.24f, 0.42f, 0.88f)); // Ocean Bay
-        DrawClippedRect(501500, 7401500, 1000, 1000, new Color(0.24f, 0.21f, 0.16f, 0.72f)); // Serra hills
-        DrawClippedRect(500350, 7400380, 130, 130, new Color(0.15f, 0.36f, 0.18f, 0.85f)); // Central Park
+        DrawClippedRect(502250, 7400500, 950, 1400, new Color(0.08f, 0.24f, 0.42f, 0.88f));
+        DrawClippedRect(501500, 7401500, 1000, 1000, new Color(0.24f, 0.21f, 0.16f, 0.72f));
+        DrawClippedRect(500350, 7400380, 130, 130, new Color(0.15f, 0.36f, 0.18f, 0.85f));
 
-        // Road grid corridors (Commerce Blvd + North Ave + full city arterial avenues)
+        // Road grid corridors
         var roadCol = new Color(0.22f, 0.25f, 0.28f, 0.92f);
         var centerLineCol = new Color(0.55f, 0.48f, 0.22f, 0.50f);
         DrawClippedRect(500120, 7399989.0, 244, 15.0, roadCol);
@@ -112,54 +180,58 @@ public sealed partial class GsaRadarControl : Control
         DrawClippedRect(500112, 7400020.0, 10.0, 76.0, roadCol);
         if (_rangeMetres > 105f)
         {
-            for (var n = 7400000.0; n <= 7401800.0; n += 120.0)
+            var minN = Math.Max(7400000.0, Math.Floor((_playerPosEnu.Y - _rangeMetres - 20.0) / 120.0) * 120.0);
+            var maxN = Math.Min(7401800.0, Math.Ceiling((_playerPosEnu.Y + _rangeMetres + 20.0) / 120.0) * 120.0);
+            for (var n = minN; n <= maxN; n += 120.0)
             {
                 DrawClippedRect(500950, n - 4.0, 1900, 14.0, roadCol);
                 DrawClippedRect(500950, n - 4.0, 1900, 1.5, centerLineCol);
             }
-            for (var e = 500000.0; e <= 501800.0; e += 120.0)
+            var minE = Math.Max(500000.0, Math.Floor((_playerPosEnu.X - _rangeMetres - 20.0) / 120.0) * 120.0);
+            var maxE = Math.Min(501800.0, Math.Ceiling((_playerPosEnu.X + _rangeMetres + 20.0) / 120.0) * 120.0);
+            for (var e = minE; e <= maxE; e += 120.0)
             {
                 DrawClippedRect(e, 7400600, 14.0, 1200, roadCol);
                 DrawClippedRect(e, 7400600, 1.5, 1200, centerLineCol);
             }
         }
 
-        // Subtle range ring
-        DrawArc(center, radius * 0.5f, 0f, Mathf.Tau, 32, new Color(0.28f, 0.38f, 0.42f, 0.25f), 1.0f);
+        DrawArc(center, radius * 0.5f, 0f, Mathf.Tau, 28, new Color(0.28f, 0.38f, 0.42f, 0.25f), 1.0f);
 
-        if (_manifest is not null)
+        // Nearby cached buildings & parks (only test items near radar range!)
+        var rangePlusPad = (double)_rangeMetres + 40.0;
+        for (var i = 0; i < _staticRects.Count; i++)
         {
-            // Draw nearby buildings & parks as rotated mini-rectangles clipped cleanly against the radar circle
-            foreach (var obj in _manifest.Objects)
-            {
-                if (obj.ObjectClass is not ("building_shell" or "warehouse_facade" or "commercial_tower" or "training_park"))
-                    continue;
-                var col = obj.ObjectClass == "training_park"
-                    ? new Color(0.16f, 0.36f, 0.18f, 0.72f)
-                    : new Color(0.38f, 0.44f, 0.49f, 0.90f);
-                DrawClippedRect(obj.PositionEnu.X, obj.PositionEnu.Y, obj.SizeEnu.X, obj.SizeEnu.Y, col);
-            }
+            var rect = _staticRects[i];
+            if (Math.Abs(rect.CenterE - _playerPosEnu.X) > rangePlusPad + rect.MaxHalfExtent ||
+                Math.Abs(rect.CenterN - _playerPosEnu.Y) > rangePlusPad + rect.MaxHalfExtent)
+                continue;
+            DrawClippedRect(rect.CenterE, rect.CenterN, rect.HalfW * 2.0, rect.HalfH * 2.0, rect.Color);
         }
 
         // Coverage heatmap cells collected by player
-        foreach (var spot in _coverageSpots)
+        var spotRadius = MathF.Max(4.5f, 3.5f * scale);
+        var spotCol = new Color(0.22f, 0.86f, 0.48f, 0.32f);
+        for (var i = 0; i < _coverageSpots.Count; i++)
         {
-            var off = EnuToRadarOffset(spot);
-            if (off.Length() <= radius - 5f)
-                DrawCircle(center + off, MathF.Max(4.5f, 3.5f * scale), new Color(0.22f, 0.86f, 0.48f, 0.32f));
+            var spot = _coverageSpots[i];
+            var off = EnuToRadarOffset(spot.X, spot.Y);
+            if (off.LengthSquared() <= (radius - 5f) * (radius - 5f))
+                DrawCircle(center + off, spotRadius, spotCol);
         }
 
         var font = ThemeDB.FallbackFont;
-        // Blips (targets, office, unload, controls)
-        foreach (var blip in _blips)
+        var rimDist = radius - 6f;
+        for (var i = 0; i < _blips.Count; i++)
         {
-            var off = EnuToRadarOffset(blip.PositionEnu);
+            var blip = _blips[i];
+            var off = EnuToRadarOffset(blip.PositionEnu.X, blip.PositionEnu.Y);
             var dist = off.Length();
-            if (dist > radius - 6f)
+            if (dist > rimDist)
             {
                 if (!blip.ClampToRim)
                     continue;
-                off = off.Normalized() * (radius - 6f);
+                off = off * (rimDist / dist);
             }
             var p = center + off;
             DrawCircle(p, 5.2f, Colors.Black);
@@ -169,26 +241,71 @@ public sealed partial class GsaRadarControl : Control
         }
 
         // Player arrow centered pointing straight UP
-        DrawColoredPolygon(
-        [
-            center + new Vector2(0f, -8f),
-            center + new Vector2(5.5f, 6f),
-            center + new Vector2(0f, 3f),
-            center + new Vector2(-5.5f, 6f),
-        ], Colors.White);
+        _playerArrow[0] = center + new Vector2(0f, -8f);
+        _playerArrow[1] = center + new Vector2(5.5f, 6f);
+        _playerArrow[2] = center + new Vector2(0f, 3f);
+        _playerArrow[3] = center + new Vector2(-5.5f, 6f);
+        DrawColoredPolygon(_playerArrow, Colors.White);
 
-        // Orbiting North indicator around outer rim (classic GTA III signature!)
+        // Orbiting North indicator around outer rim
         var northOff = new Vector2(-cosH, -sinH) * (radius + 2f);
         var nPos = center + northOff;
         DrawCircle(nPos, 8.5f, new Color(0.08f, 0.09f, 0.11f, 0.96f));
         DrawArc(nPos, 8.5f, 0f, Mathf.Tau, 16, new Color(0.88f, 0.76f, 0.28f), 1.5f);
         DrawString(font, nPos + new Vector2(-4f, 4f), "N", fontSize: 11, modulate: new Color(1.0f, 0.85f, 0.30f));
 
-        // Crisp outer rim ring
-        DrawArc(center, radius, 0f, Mathf.Tau, 48, new Color(0.68f, 0.74f, 0.78f, 0.75f), 2.0f);
+        DrawArc(center, radius, 0f, Mathf.Tau, 40, new Color(0.68f, 0.74f, 0.78f, 0.75f), 2.0f);
     }
 
-    private static float ComputePolygonArea(Vector2[] poly)
+    private static int ClipConvexToCircle(Vector2[] poly, int count, Vector2[] scratch, Vector2[] clipPoly)
+    {
+        for (var edge = 0; edge < clipPoly.Length; edge++)
+        {
+            if (count == 0)
+                return 0;
+
+            var a = clipPoly[edge];
+            var b = clipPoly[(edge + 1) % clipPoly.Length];
+            var abX = b.X - a.X;
+            var abY = b.Y - a.Y;
+
+            var outCount = 0;
+            var prev = poly[count - 1];
+            var prevCross = abX * (prev.Y - a.Y) - abY * (prev.X - a.X);
+
+            for (var i = 0; i < count; i++)
+            {
+                var curr = poly[i];
+                var currCross = abX * (curr.Y - a.Y) - abY * (curr.X - a.X);
+
+                if (currCross >= 0f)
+                {
+                    if (prevCross < 0f && outCount < scratch.Length)
+                    {
+                        var t = prevCross / (prevCross - currCross);
+                        scratch[outCount++] = prev + (curr - prev) * t;
+                    }
+                    if (outCount < scratch.Length)
+                        scratch[outCount++] = curr;
+                }
+                else if (prevCross >= 0f && outCount < scratch.Length)
+                {
+                    var t = prevCross / (prevCross - currCross);
+                    scratch[outCount++] = prev + (curr - prev) * t;
+                }
+
+                prev = curr;
+                prevCross = currCross;
+            }
+
+            count = outCount;
+            for (var i = 0; i < count; i++)
+                poly[i] = scratch[i];
+        }
+        return count;
+    }
+
+    private static float ComputePolygonArea(ReadOnlySpan<Vector2> poly)
     {
         var area = 0f;
         for (var i = 0; i < poly.Length; i++)
@@ -200,4 +317,3 @@ public sealed partial class GsaRadarControl : Control
         return MathF.Abs(area) * 0.5f;
     }
 }
-
