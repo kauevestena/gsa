@@ -23,8 +23,7 @@ public sealed record BenchmarkDisplacementOutcome(
     string BenchmarkId,
     Vector3d PreservedPublishedEnu,
     Vector3d UpdatedPhysicalEnu,
-    double HorizontalDisplacementMetres,
-    int MutatedHistoricalBatchCount);
+    double HorizontalDisplacementMetres);
 
 public sealed record FinalCitySurveySectorSpec(
     string SectorId,
@@ -50,7 +49,7 @@ public sealed record FullCityTraversalWaypointResult(
     string WaypointId,
     string RegionId,
     Vector3d EnuPosition,
-    double GodotRoundTripErrorMetres,
+    double LocalFrameRoundTripErrorMetres,
     double GeoidOrthometricResidualMetres,
     int LoadedCellCount,
     bool CaptureAllowed,
@@ -60,9 +59,8 @@ public sealed record FullCityTraversalResult(
     bool Succeeded,
     IReadOnlyList<string> VisitedRegionIds,
     IReadOnlyList<string> OccupiedBenchmarkIds,
-    double MaxGodotRoundTripErrorMetres,
+    double MaxLocalFrameRoundTripErrorMetres,
     double MaxGeoidHeightResidualMetres,
-    int ActiveCaptureBatchesIntact,
     IReadOnlyList<FullCityTraversalWaypointResult> Steps);
 
 /// <summary>Integrates all four city regions (~4 km²) and the 8-benchmark primary geodetic network cleanly separated from contract checkpoints (T-F02-06).</summary>
@@ -140,8 +138,7 @@ public sealed class FullCityGeodeticNetwork
 
     public BenchmarkDisplacementOutcome ApplyClandestineDisplacement(
         string benchmarkId,
-        Vector3d physicalDeltaEnu,
-        IReadOnlyList<string>? alreadyCapturedBatchIds = null)
+        Vector3d physicalDeltaEnu)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(benchmarkId);
         if (!_benchmarksById.TryGetValue(benchmarkId, out var current))
@@ -163,8 +160,7 @@ public sealed class FullCityGeodeticNetwork
             BenchmarkId: benchmarkId,
             PreservedPublishedEnu: current.PublishedCadastralPositionEnu,
             UpdatedPhysicalEnu: nextPhysical,
-            HorizontalDisplacementMetres: Math.Round(horizontalDelta, 4),
-            MutatedHistoricalBatchCount: 0);
+            HorizontalDisplacementMetres: Math.Round(horizontalDelta, 4));
     }
 
     public static (WorldSceneManifest FullManifest, FullCityGeodeticNetwork Network, FinalCitySurveySectorManifest SurveyManifest)
@@ -202,11 +198,11 @@ public sealed class FullCityGeodeticNetwork
         return (fullManifest, network, surveyManifest);
     }
 
-    public static FullCityTraversalResult SimulateFullCityTraversal(
+    /// <summary>Evaluates neutral streaming windows at benchmark positions; does not run Godot physics or verify capture custody.</summary>
+    public static FullCityTraversalResult EvaluateBenchmarkStreamingWindows(
         WorldSceneManifest fullManifest,
         FullCityGeodeticNetwork network,
-        double streamingActiveRadiusMetres = 600.0,
-        int simulatedActiveCaptureBatches = 4)
+        double streamingActiveRadiusMetres = 600.0)
     {
         ArgumentNullException.ThrowIfNull(fullManifest);
         ArgumentNullException.ThrowIfNull(network);
@@ -232,7 +228,7 @@ public sealed class FullCityGeodeticNetwork
         var visitedRegions = new List<string>();
         var occupiedBenchmarks = new List<string>();
         var steps = new List<FullCityTraversalWaypointResult>(orderedRoute.Length);
-        var maxGodotErr = 0.0;
+        var maxLocalFrameErr = 0.0;
         var maxGeoidErr = 0.0;
 
         foreach (var benchmarkId in orderedRoute)
@@ -242,7 +238,7 @@ public sealed class FullCityGeodeticNetwork
             var local = frame.ToLocal(enu);
             var backToEnu = frame.ToMap(local);
             var roundTripErr = (backToEnu - enu).Length;
-            maxGodotErr = Math.Max(maxGodotErr, roundTripErr);
+            maxLocalFrameErr = Math.Max(maxLocalFrameErr, roundTripErr);
 
             var expectedH = enu.Z - LocalGeoidModel.Separation(enu);
             var geoidResidual = Math.Abs(LocalGeoidModel.ToOrthometricHeight(enu) - expectedH);
@@ -257,7 +253,7 @@ public sealed class FullCityGeodeticNetwork
                 WaypointId: node.BenchmarkId,
                 RegionId: node.RegionId,
                 EnuPosition: enu,
-                GodotRoundTripErrorMetres: roundTripErr,
+                LocalFrameRoundTripErrorMetres: roundTripErr,
                 GeoidOrthometricResidualMetres: geoidResidual,
                 LoadedCellCount: streamEval.LoadedSectors.Count,
                 CaptureAllowed: streamEval.CaptureAllowed,
@@ -267,16 +263,15 @@ public sealed class FullCityGeodeticNetwork
         var succeeded = steps.All(s => s.CaptureAllowed && !s.SuspendedByUnloadedSafetyBand) &&
                         visitedRegions.Count == 4 &&
                         occupiedBenchmarks.Count == 8 &&
-                        maxGodotErr < 1e-9 &&
+                        maxLocalFrameErr < 1e-9 &&
                         maxGeoidErr < 1e-12;
 
         return new FullCityTraversalResult(
             Succeeded: succeeded,
             VisitedRegionIds: Array.AsReadOnly(visitedRegions.ToArray()),
             OccupiedBenchmarkIds: Array.AsReadOnly(occupiedBenchmarks.ToArray()),
-            MaxGodotRoundTripErrorMetres: maxGodotErr,
+            MaxLocalFrameRoundTripErrorMetres: maxLocalFrameErr,
             MaxGeoidHeightResidualMetres: maxGeoidErr,
-            ActiveCaptureBatchesIntact: simulatedActiveCaptureBatches,
             Steps: Array.AsReadOnly(steps.ToArray()));
     }
 }

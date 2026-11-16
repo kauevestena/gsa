@@ -14,7 +14,7 @@ msgid "bootstrap.open_bench"
 msgstr "Explorar o quarteirão"
 
 msgid "bootstrap.status"
-msgstr "Fundação do projeto"
+msgstr "Em desenvolvimento · Treinamento de levantamento"
 
 msgid "bootstrap.language"
 msgstr "Idioma"
@@ -706,3 +706,138 @@ msgstr "A proteção Cidade Calma neutralizou a ameaça no veículo estacionado.
 
 msgid "faction.threat.suppressed_by_calm"
 msgstr "A proteção Cidade Calma suprimiu todas as ameaças de facção."
+
+msgid "training.title"
+msgstr "Treinamento · Três fachadas"
+
+msgid "training.instructions"
+msgstr "Levante as fachadas 18–20 perto do escritório. Pare, aponte para cada fachada e fotografe de DUAS posições separadas por pelo menos 1 m. Volte, descarregue, processe e entregue."
+
+msgid "training.controls"
+msgstr "W: mover · S: frear · A/D: virar\nC: foto · V: câmera · F5/F9: salvar/carregar\nTreino com poses ideais e imagens simuladas. Em desenvolvimento."
+
+msgid "training.status"
+msgstr "{0}\nFotos: {1}/200 · Campo: {2} · Protegidas: {3}\nSaldo: {4} Coords\nEscritório: {5} m · Descarga: {6} m"
+
+msgid "training.targets"
+msgstr "Trianguladas:"
+
+msgid "training.observed"
+msgstr "Última foto:"
+
+msgid "training.office_entry"
+msgstr "Escritório"
+
+msgid "training.unload_point"
+msgstr "Descarga"
+
+msgid "training.nothing_visible"
+msgstr "Nenhum alvo visível"
+
+msgid "training.capture_ok"
+msgstr "Foto registrada. Desloque-se lateralmente para uma segunda vista."
+
+msgid "training.capture_blurred"
+msgstr "Foto reprovada na qualidade. Pare e tente novamente."
+
+msgid "training.qc_passed"
+msgstr "Qualidade aprovada! Entregue no escritório. Processamento avançou o relógio em 10 minutos."
+
+msgid "training.qc_rework"
+msgstr "Recolete as fachadas pendentes (…): duas vistas nítidas com paralaxe. Processamento avançou o relógio em 10 minutos."
+
+msgid "training.welcome"
+msgstr "Aceite o serviço aqui no escritório para começar."
+
+msgid "training.blocked"
+msgstr "Ação indisponível. Confira a etapa, a distância e as fotos pendentes."
+
+msgid "training.loaded"
+msgstr "Treino restaurado. Você voltou ao escritório."
+
+msgid "training.load_failed"
+msgstr "Não foi possível ler ou gravar o treino. Arquivos existentes foram mantidos."
+
+msgid "training.action.accept"
+msgstr "1 · Aceitar serviço"
+
+msgid "training.action.capture"
+msgstr "2 · Fotografar [C]"
+
+msgid "training.action.offload"
+msgstr "3 · Descarregar fotos (até 5 m)"
+
+msgid "training.action.process"
+msgstr "4 · Processar · 10 min · 8 Coords"
+
+msgid "training.action.deliver"
+msgstr "5 · Entregar e receber"
+
+msgid "training.action.save"
+msgstr "Salvar treino [F5]"
+
+msgid "training.action.load"
+msgstr "Carregar treino [F9]"
+
+msgid "training.action.view"
+msgstr "Alternar câmera de coleta / aérea [V]"
+
+msgid "training.done.accept"
+msgstr "Aceito. As fachadas 18–20 têm números amarelos."
+
+msgid "training.done.capture"
+msgstr "Aguardando o próximo instante da câmera (até 0,5 s)."
+
+msgid "training.done.offload"
+msgstr "Fotos protegidas. Vá ao escritório para processar."
+
+msgid "training.done.process"
+msgstr "Processamento concluído."
+
+msgid "training.done.deliver"
+msgstr "Entregue! Pagamento e XP salvos."
+
+msgid "training.done.save"
+msgstr "Treino salvo."
+
+msgid "training.done.load"
+msgstr "Treino restaurado no escritório."
+
+msgid "training.done.view"
+msgstr "Câmera alternada."
+
+msgid "training.state.Disponivel"
+msgstr "Disponível"
+
+msgid "training.state.Aceito"
+msgstr "Aceito"
+
+msgid "training.state.Coletando"
+msgstr "Coletando"
+
+msgid "training.state.ProntoProcessar"
+msgstr "Pronto para processar"
+
+msgid "training.state.Processando"
+msgstr "Processando"
+
+msgid "training.state.EmCQ"
+msgstr "Controle de qualidade"
+
+msgid "training.state.Retrabalho"
+msgstr "Recoleta necessária"
+
+msgid "training.state.ProntoEntregar"
+msgstr "Pronto para entregar"
+
+msgid "training.state.Entregue"
+msgstr "Entregue"
+
+msgid "training.state.EntregueParcial"
+msgstr "Entregue parcialmente"
+
+msgid "training.state.Expirado"
+msgstr "Expirado"
+
+msgid "training.state.Abandonado"
+msgstr "Abandonado"

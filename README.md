@@ -2,7 +2,13 @@
 
 Jogo offline de levantamento móvel em São Datum, em implementação guiada pela [pasta specs](specs/README.md).
 
-A fundação **M0** foi integrada no [PR #1](https://github.com/kauevestena/gsa/pull/1), após CI Linux/Windows. O início de **M1** acrescenta um quarteirão 3D semântico, vinte fachadas, modelo de alturas, visibilidade estática do céu e modelos puros de câmera/GNSS. A tela inicial permite trocar idioma e abrir o quarteirão; Escape retorna à tela inicial. Locomoção, aquisição integrada, CQ e campanha permanecem nos incrementos seguintes.
+O domínio de simulação chegou ao primeiro incremento de M7, com sensores, contratos, CQ, processamento, economia, persistência e montagem regional testados. Essa cobertura de bibliotecas não significa que todas as funcionalidades estejam integradas ao jogo.
+
+## Treinamento jogável
+
+A tela inicial permite trocar idioma e abrir o quarteirão. O exercício **Três fachadas** conecta fotos da câmera na cena, triangulação com paralaxe, descarga, processamento, CQ/recoleta, pagamento e save/load. Comece aceitando o serviço perto do escritório; use W/S/A/D para mover/frear/virar, C para fotografar e V para alternar a câmera. Instruções e limites em [Treinamento jogável](docs/live-training.md).
+
+O treino usa poses ideais e imagens sintéticas, está marcado como **em desenvolvimento** e é separado da campanha histórica. A cidade M7 e a frota avançada ainda não são acessíveis pelo fluxo normal da cena.
 
 ## Preparar e verificar
 
@@ -27,7 +33,7 @@ dotnet test Gsa.Domain.slnf --no-restore
 dotnet run --project src/Gsa.Tools -- validate-content content
 ```
 
-A CLI retorna JSON com arquivo, JSONPath e motivo: exit 0 para conteúdo válido, 2 para inválido e 1 para uso incorreto. Os [catálogos neutros](content/README.md) incluem os quatro produtos; o [schema de contrato](content/schemas/README.md) preserva o exemplo normativo. São fixtures de desenvolvimento, sem missões jogáveis.
+A CLI retorna JSON com arquivo, JSONPath e motivo: exit 0 para conteúdo válido, 2 para inválido e 1 para uso incorreto. Os [catálogos neutros](content/README.md) incluem os quatro produtos; o [schema de contrato](content/schemas/README.md) preserva o exemplo normativo. São catálogos e fixtures de desenvolvimento; o exercício interativo atual é descrito acima.
 
 O pré-cálculo de céu usa a mesma [geometria neutra](game/world/README.md) que a cena e os colliders:
 
@@ -41,8 +47,6 @@ Consulte os [comandos manuais e versões](docs/toolchain.md) para abrir o editor
 
 ## Estado
 
-M0 tem aceite técnico delegado e CI nativa aprovada nos dois sistemas; ver [registro da CI](artifacts/evidence/M0-ci/summary.json) e [evidências históricas](artifacts/evidence/T-F01-02/README.md). Os incrementos iniciais M1 passam por testes puros, física headless da cena e verificação do export. [Toolchain](docs/toolchain.md) e [dependências](docs/dependencies.md) permanecem fixadas.
+Consulte o [roadmap](specs/roadmap.md) e as evidências por tarefa para o estado técnico das bibliotecas. A integração jogável atual está documentada separadamente; aceite técnico e testes automatizados não equivalem à aprovação humana de um marco.
 
-Inspeção gráfica, isolamento de rede Windows e benchmark na máquina de referência ainda não foram realizados. CI headless não os substitui. O usuário delegou revisão técnica e merges com CI verde; requisitos de playtest/produção humana permanecem explícitos. O gate M1 depende também de locomoção, sensores integrados, tráfego, LiDAR e medição de desempenho.
-
-O usuário autorizou publicar branches/PRs no repositório existente e mesclar após a CI passar. O desenvolvimento prossegue por incrementos; a licença do jogo continua pendente conforme EXT-02.
+Os gates humanos M2/M3 seguem em `pending_human_playtest_cohort`. O desempenho na GPU de referência continua em `pending_reference_hardware`. Inspeção gráfica e isolamento de rede Windows permanecem separados da CI headless. A licença do jogo ainda está pendente conforme EXT-02.

@@ -220,7 +220,7 @@ def main() -> int:
                           marker="GSA_WORLD_SMOKE_OK")
         for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK",
                        "GSA_GIMBALINA_SMOKE_OK", "GSA_TRAFFIC_SMOKE_OK", "GSA_LIDAR_SMOKE_OK",
-                       "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK"):
+                       "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK", "GSA_PLAYABLE_TRAINING_SMOKE_OK", "GSA_CITY_ENGINE_PRECISION_SMOKE_OK"):
             if marker not in world_smoke:
                 raise RuntimeError(f"Missing world verification marker: {marker}")
 
@@ -264,7 +264,7 @@ def main() -> int:
                                    marker="GSA_WORLD_SMOKE_OK", runtime_env=clean)
                 for marker in ("GSA_SKY_SMOKE_OK", "GSA_MOBILITY_SMOKE_OK", "GSA_CAMERA_SMOKE_OK",
                                "GSA_GIMBALINA_SMOKE_OK", "GSA_TRAFFIC_SMOKE_OK", "GSA_LIDAR_SMOKE_OK",
-                               "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK"):
+                               "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK", "GSA_PLAYABLE_TRAINING_SMOKE_OK", "GSA_CITY_ENGINE_PRECISION_SMOKE_OK"):
                     if marker not in world_output:
                         raise RuntimeError(f"{target}: missing exported world marker {marker}")
                 if args.offline_smoke:

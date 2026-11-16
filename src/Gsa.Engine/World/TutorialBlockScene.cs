@@ -8,6 +8,7 @@ using Gsa.Engine.Mobility;
 using Gsa.Engine.Sensors;
 using Gsa.Engine.Traffic;
 using Gsa.Missions.Campaign;
+using Gsa.Missions.Gameplay;
 using Godot;
 using Dictionary = Godot.Collections.Dictionary;
 
@@ -53,6 +54,7 @@ public partial class TutorialBlockScene : Node3D
             BuildWorld();
             BuildInspectionView();
             BuildBenchSystems();
+            InitializeTraining();
             SetPhysicsProcess(true);
         }
         catch (Exception error)
@@ -94,6 +96,8 @@ public partial class TutorialBlockScene : Node3D
             if (!m2Report.FinalReportPassed || m2Report.FinalStars != 5)
                 throw new System.InvalidOperationException("M2 tutorial loop smoke verification failed.");
             GD.Print($"GSA_M2_LOOP_SMOKE_OK mission={m2Report.MissionId} contract={m2Report.ContractId} stars={m2Report.FinalStars}");
+            VerifyPlayableTraining();
+            FullCityEnginePrecisionVerifier.Run(_manifest);
             SetPhysicsProcess(false);
             GD.Print($"GSA_WORLD_SMOKE_OK objects={_registry.Count} colliders={_registry.ColliderCount} " +
                      $"facades=20 geometry_sha256={GeometryHash}");
@@ -107,9 +111,15 @@ public partial class TutorialBlockScene : Node3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (TrainingInput(@event))
+        {
+            GetViewport().SetInputAsHandled();
+            return;
+        }
         if (@event.IsActionPressed("ui_cancel"))
         {
             GetViewport().SetInputAsHandled();
+            if (!_training.SaveBlocked) _training.Save();
             var result = GetTree().ChangeSceneToFile("res://Bootstrap.tscn");
             if (result != Error.Ok)
                 Fail(new InvalidOperationException($"Cannot return to bootstrap: {result}"));
@@ -216,11 +226,14 @@ public partial class TutorialBlockScene : Node3D
         if (_mobilityBench is null || _liveLocomotion is null || delta <= 0)
             return;
         var input = _mobilityBench.SampleLiveInput();
+        var previousHeading = _liveLocomotion.HeadingRadians;
         var result = _liveLocomotion.Step(delta, input, 0.0, 1.0, _liveObstacles);
         if (input.InteractPressed)
             _liveLocomotion.TryInteract(InteractiveTargetEnu.FromWorldObjects(_manifest.Objects), _liveObstacles);
         _mobilityBench.SyncAvatarPose(result.PositionEnu, result.HeadingRadians);
         _trafficBench?.StepAndSync(delta, result.PositionEnu);
+        var angleDelta = Math.Atan2(Math.Sin(result.HeadingRadians - previousHeading), Math.Cos(result.HeadingRadians - previousHeading));
+        StepTraining(delta, angleDelta / delta);
     }
 
     private static StandardMaterial3D CreateMaterial(WorldBoxObject item)
