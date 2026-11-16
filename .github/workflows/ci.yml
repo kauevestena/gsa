@@ -54,6 +54,15 @@ jobs:
       - name: Test, validate, build and export natively
         run: python scripts/verify.py --exports host
 
+      - name: Preserve native playable build
+        if: ${{ success() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gsa-native-${{ matrix.host }}
+          path: artifacts/exports/${{ matrix.host }}/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Preserve logs and test results
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
