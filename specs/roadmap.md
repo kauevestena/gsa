@@ -21,6 +21,10 @@ flowchart LR
 
 Os gates M2/M3 verificam diversão/aprendizado antes de investir no restante da cidade. Protótipo LiDAR de M1 é técnico e não amplia o MVP. Tarefas de bancada de túnel/viaduto são validadas em M5; sua integração narrativa no ato 2 fecha em M6. A disponibilidade de uma funcionalidade não significa que todo o conteúdo de campanha correspondente já foi produzido.
 
+## Integração jogável atual
+
+O [treinamento Três fachadas](../docs/live-training.md) conecta aquisição na cena, triangulação, custódia, processamento, CQ, pagamento e saves. É um exercício separado da campanha e não fecha os gates humanos M2/M3 nem o benchmark de referência. Os marcos abaixo descrevem o domínio e suas evidências; sua numeração não indica que todas as funcionalidades estejam expostas na cena.
+
 ## Lista executável
 
 ### M0 — Fundação

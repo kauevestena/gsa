@@ -14,7 +14,7 @@ msgid "bootstrap.open_bench"
 msgstr "Explore the block"
 
 msgid "bootstrap.status"
-msgstr "Project foundation"
+msgstr "In development · Live survey training"
 
 msgid "bootstrap.language"
 msgstr "Language"
@@ -706,3 +706,138 @@ msgstr "Calm City protection neutralized the parked-vehicle threat."
 
 msgid "faction.threat.suppressed_by_calm"
 msgstr "Calm City protection suppressed all faction threats."
+
+msgid "training.title"
+msgstr "Training · Three façades"
+
+msgid "training.instructions"
+msgstr "Survey façades 18–20 near the office. Stop, face each façade and take photos from TWO positions at least 1 m apart. Return to unload, process and deliver."
+
+msgid "training.controls"
+msgstr "W: move · S: brake · A/D: turn\nC: photo · V: camera · F5/F9: save/load\nTraining uses ideal poses and simulated images. In development."
+
+msgid "training.status"
+msgstr "{0}\nPhotos: {1}/200 · Field: {2} · Protected: {3}\nBalance: {4} Coords\nOffice: {5} m · Unload: {6} m"
+
+msgid "training.targets"
+msgstr "Triangulated:"
+
+msgid "training.observed"
+msgstr "Last photo:"
+
+msgid "training.office_entry"
+msgstr "Office"
+
+msgid "training.unload_point"
+msgstr "Unload"
+
+msgid "training.nothing_visible"
+msgstr "No visible targets"
+
+msgid "training.capture_ok"
+msgstr "Photo recorded. Move sideways for a second view."
+
+msgid "training.capture_blurred"
+msgstr "Photo rejected by quality checks. Stop and try again."
+
+msgid "training.qc_passed"
+msgstr "Quality approved! Deliver at the office. Processing advanced the clock by 10 minutes."
+
+msgid "training.qc_rework"
+msgstr "Recollect unresolved façades (…): take two sharp views with parallax. Processing advanced the clock by 10 minutes."
+
+msgid "training.welcome"
+msgstr "Accept the assignment here at the office to begin."
+
+msgid "training.blocked"
+msgstr "Action unavailable. Check the contract stage, distance and pending photos."
+
+msgid "training.loaded"
+msgstr "Training restored. You are back at the office."
+
+msgid "training.load_failed"
+msgstr "Could not read or write the training save. Existing files were kept."
+
+msgid "training.action.accept"
+msgstr "1 · Accept assignment"
+
+msgid "training.action.capture"
+msgstr "2 · Take photo [C]"
+
+msgid "training.action.offload"
+msgstr "3 · Unload photos (within 5 m)"
+
+msgid "training.action.process"
+msgstr "4 · Process · 10 min · 8 Coords"
+
+msgid "training.action.deliver"
+msgstr "5 · Deliver and receive payment"
+
+msgid "training.action.save"
+msgstr "Save training [F5]"
+
+msgid "training.action.load"
+msgstr "Load training [F9]"
+
+msgid "training.action.view"
+msgstr "Switch survey / overhead view [V]"
+
+msgid "training.done.accept"
+msgstr "Accepted. Façades 18–20 have yellow number labels."
+
+msgid "training.done.capture"
+msgstr "Waiting for the next camera tick (up to 0.5 s)."
+
+msgid "training.done.offload"
+msgstr "Photos protected. Go to the office to process."
+
+msgid "training.done.process"
+msgstr "Processing completed."
+
+msgid "training.done.deliver"
+msgstr "Delivered! Payment and XP saved."
+
+msgid "training.done.save"
+msgstr "Training saved."
+
+msgid "training.done.load"
+msgstr "Training restored at the office."
+
+msgid "training.done.view"
+msgstr "Camera switched."
+
+msgid "training.state.Disponivel"
+msgstr "Available"
+
+msgid "training.state.Aceito"
+msgstr "Accepted"
+
+msgid "training.state.Coletando"
+msgstr "Collecting"
+
+msgid "training.state.ProntoProcessar"
+msgstr "Ready to process"
+
+msgid "training.state.Processando"
+msgstr "Processing"
+
+msgid "training.state.EmCQ"
+msgstr "Quality review"
+
+msgid "training.state.Retrabalho"
+msgstr "Recollection required"
+
+msgid "training.state.ProntoEntregar"
+msgstr "Ready to deliver"
+
+msgid "training.state.Entregue"
+msgstr "Delivered"
+
+msgid "training.state.EntregueParcial"
+msgstr "Partially delivered"
+
+msgid "training.state.Expirado"
+msgstr "Expired"
+
+msgid "training.state.Abandonado"
+msgstr "Abandoned"
