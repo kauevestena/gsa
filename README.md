@@ -45,6 +45,8 @@ O pipeline gera esse cache antes de importar/exportar a cena. O cache derivado f
 
 Consulte os [comandos manuais e versões](docs/toolchain.md) para abrir o editor. Distribua a pasta inteira de cada export, incluindo PCK e runtime .NET. Ferramentas, caches, executáveis e saves ficam fora do Git. A instalação e o restore usam rede; o jogo exportado usa runtime autocontido.
 
+O [protocolo de desempenho do LiDAR](docs/lidar-performance.md) mede CPU, alocações e recargas de chunks, com hashes completos para comparar os resultados científicos entre revisões.
+
 ## Estado
 
 Consulte o [roadmap](specs/roadmap.md) e as evidências por tarefa para o estado técnico das bibliotecas. A integração jogável atual está documentada separadamente; aceite técnico e testes automatizados não equivalem à aprovação humana de um marco.
