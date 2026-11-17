@@ -1330,3 +1330,291 @@ msgstr "O modo livre não grava nem recarrega o save da carreira."
 
 msgid "save.error.manual_blocked_during_offload"
 msgstr "Aguarde o término do descarregamento antes de salvar manualmente."
+
+msgid "geopedia.lever_arm.title"
+msgstr "Braço de alavanca (lever arm)"
+
+msgid "geopedia.lever_arm.example"
+msgstr "A posição do sensor é deslocada em relação à origem do veículo. Um erro de 0,10 m no braço estimado produz 0,10 m de erro sem rotação."
+
+msgid "geopedia.lever_arm.unit_effect"
+msgstr "Metros no referencial do veículo; a atitude gira esse vetor antes de somá-lo à posição da trajetória."
+
+msgid "geopedia.lever_arm.model_limit"
+msgstr "Montagem física e estimada são distintas. Conhecer o slot não revela a montagem correta ao processamento."
+
+msgid "geopedia.boresight.title"
+msgstr "Boresight: orientação de montagem"
+
+msgid "geopedia.boresight.example"
+msgstr "Nas passadas da oficina, ajuste a orientação relativa entre sensor e veículo usando superfícies comuns."
+
+msgid "geopedia.boresight.unit_effect"
+msgstr "Radianos; a 100 m, um erro angular de 0,001 rad causa aproximadamente 0,10 m de desvio lateral."
+
+msgid "geopedia.boresight.model_limit"
+msgstr "A oficina exige pelo menos três planos não paralelos para observar o ajuste completo. Resíduo baixo em um único plano não garante calibração completa."
+
+msgid "geopedia.time_sync.title"
+msgstr "Sincronização temporal"
+
+msgid "geopedia.time_sync.example"
+msgstr "Uma diferença de 0,02 s entre sensor e trajetória, a 10 m/s, desloca o ponto em aproximadamente 0,20 m."
+
+msgid "geopedia.time_sync.unit_effect"
+msgstr "Segundos; o processamento consulta a pose no tempo do sensor mais o offset estimado e interpola posição e atitude."
+
+msgid "geopedia.time_sync.model_limit"
+msgstr "Fora do intervalo da trajetória, o retorno é inválido. Velocidade constante sozinha não separa offset temporal de braço longitudinal."
+
+msgid "geopedia.imu_ins.title"
+msgstr "IMU e navegação inercial"
+
+msgid "geopedia.imu_ins.example"
+msgstr "No domínio de navegação, giroscópio integra atitude e aceleração observada alimenta o filtro de posição e velocidade durante interrupções GNSS."
+
+msgid "geopedia.imu_ins.unit_effect"
+msgstr "Aceleração em m/s² e rotação em rad/s; bias e passeio aleatório acumulam deriva. Gravidade local do jogo: 9,80665 m/s²."
+
+msgid "geopedia.imu_ins.model_limit"
+msgstr "O filtro didático tem seis estados de translação e atitude complementar; não é um INS comercial completo. A prévia da cidade ainda usa poses ideais."
+
+msgid "geopedia.dmi_zupt.title"
+msgstr "DMI e atualização de velocidade zero"
+
+msgid "geopedia.dmi_zupt.example"
+msgstr "DMI observa velocidade longitudinal. ZUPT usa uma parada comprovada pelos sensores para atualizar velocidade zero."
+
+msgid "geopedia.dmi_zupt.unit_effect"
+msgstr "DMI em m/s; na pista molhada sua variância longitudinal é multiplicada por 25. ZUPT exige 2 s com velocidade <0,05 m/s, giro <0,01 rad/s e diferença da gravidade <0,1 m/s²."
+
+msgid "geopedia.dmi_zupt.model_limit"
+msgstr "Parar visualmente o veículo não basta: sem evidência observada suficiente, o filtro não aplica ZUPT. O DMI também sofre escala e derrapagem."
+
+msgid "geopedia.base_rtk_ppk.title"
+msgstr "Base, DGNSS, RTK e PPK"
+
+msgid "geopedia.base_rtk_ppk.example"
+msgstr "Instale uma base em marco conhecido para corrigir erro comum. PPK reaplica o log temporal da base ao produto no escritório."
+
+msgid "geopedia.base_rtk_ppk.unit_effect"
+msgstr "No modelo RTK: abertura de céu ≥0,4 permite float; ≥0,7 por 10 s e base a ≤2 km permitem fix, com perfil compatível e correções disponíveis."
+
+msgid "geopedia.base_rtk_ppk.model_limit"
+msgstr "Sem simulação de portadora RF. A base não elimina multipath local. PPK exige logs compatíveis e nunca é um estado GNSS ao vivo; o ícone da cidade é simplificado."
+
+msgid "geopedia.lidar_density.title"
+msgstr "LiDAR: densidade e cobertura"
+
+msgid "geopedia.lidar_density.example"
+msgstr "O CQ conta retornos válidos distintos por célula de suporte. Mesclar novamente o mesmo lote não aumenta a densidade."
+
+msgid "geopedia.lidar_density.unit_effect"
+msgstr "Pontos/m² sobre a área útil recortada; produtos LiDAR usam células de 1×1 m. O contrato define a densidade-alvo e a fração de células exigida."
+
+msgid "geopedia.lidar_density.model_limit"
+msgstr "A nuvem colorida da cidade é uma prévia limitada e amostrada. Sua contagem visível, taxa nominal e LOD não medem a densidade oficial do produto."
+
+msgid "geopedia.lidar_occlusion.title"
+msgstr "LiDAR: oclusão e passadas"
+
+msgid "geopedia.lidar_occlusion.example"
+msgstr "Uma fachada ou veículo pode ocultar a superfície exigida. Outra passada com linha de visada diferente pode preencher a lacuna."
+
+msgid "geopedia.lidar_occlusion.unit_effect"
+msgstr "Cobertura é área útil observada dividida pela área exigida. Alta densidade em uma parte não compensa uma área sem observações."
+
+msgid "geopedia.lidar_occlusion.model_limit"
+msgstr "A prévia não certifica completude. Octree, chunks e representantes de LOD aceleram consulta e desenho; o CQ continua usando amostras originais."
+
+msgid "geopedia.lidar_returns.title"
+msgstr "LiDAR: múltiplos retornos"
+
+msgid "geopedia.lidar_returns.example"
+msgstr "Na vegetação transmissiva, um pulso pode alcançar mais de uma superfície. Número de retorno identifica a ordem dentro do pulso."
+
+msgid "geopedia.lidar_returns.unit_effect"
+msgstr "O simulador admite até três retornos e encerra com energia abaixo de 0,1, alcance excedido ou superfície opaca."
+
+msgid "geopedia.lidar_returns.model_limit"
+msgstr "É um modelo discreto de material e energia, sem forma de onda completa. A prévia urbana não comprova aquisição multirretorno de vegetação."
+
+msgid "geopedia.rmse.title"
+msgstr "RMSE e checagem independente"
+
+msgid "geopedia.rmse.example"
+msgstr "Compare posições estimadas com referências independentes de checagem. Os pontos usados no ajuste não substituem checkpoints."
+
+msgid "geopedia.rmse.unit_effect"
+msgstr "RMSE absoluto em metros: raiz da média dos quadrados das distâncias 3D. O jogo exige pelo menos três correspondências e distribuição pela área."
+
+msgid "geopedia.rmse.model_limit"
+msgstr "Sem correspondências suficientes o resultado é insuficiente, nunca zero. Sigma do filtro e resíduo entre passadas não são o mesmo RMSE absoluto."
+
+msgid "geopedia.camera_calibration.title"
+msgstr "Calibração de câmera"
+
+msgid "geopedia.camera_calibration.example"
+msgstr "Na bancada, observe uma grade conhecida em pelo menos três poses distintas e reserve outra pose para validação."
+
+msgid "geopedia.camera_calibration.unit_effect"
+msgstr "Intrínsecos fx, fy, cx e cy em pixels; k1 e k2 descrevem distorção radial normalizada. O solver minimiza resíduos de reprojeção."
+
+msgid "geopedia.camera_calibration.model_limit"
+msgstr "Modelo pinhole com dois termos radiais. Um resíduo baixo na grade usada no ajuste não substitui validação independente nem calibração de montagem."
+
+msgid "geopedia.historical_geodesy.title"
+msgstr "Marcos e geodésia histórica"
+
+msgid "geopedia.historical_geodesy.example"
+msgstr "O Marco Zero e a Torre do Relógio conectam a rede de São Datum às referências de posição e altura. Verifique um marco deslocado antes de usá-lo como controle."
+
+msgid "geopedia.historical_geodesy.unit_effect"
+msgstr "Coordenadas e alturas em metros só têm significado com referência declarada. O jogo distingue coordenada catalogada e posição física do marco."
+
+msgid "geopedia.historical_geodesy.model_limit"
+msgstr "São Datum e sua história são fictícios; o sistema local não possui código EPSG. A rede não é uma reconstrução histórica de um levantamento real."
+
+msgid "geopedia.trajectory_drift.title"
+msgstr "Deriva e incerteza de trajetória"
+
+msgid "geopedia.trajectory_drift.example"
+msgstr "Durante interrupções GNSS, o filtro propaga posição, velocidade e covariância. Novas observações podem restringir o crescimento da incerteza."
+
+msgid "geopedia.trajectory_drift.unit_effect"
+msgstr "Sigma de posição em metros; sigma 3D é a raiz da soma das variâncias das três componentes. Idade da solução GNSS em segundos."
+
+msgid "geopedia.trajectory_drift.model_limit"
+msgstr "Sigma é incerteza do modelo, não erro medido contra a verdade. Sem trajetória estimada conectada à cena, o painel informa indisponibilidade em vez de deriva zero."
+
+msgid "geopedia.territory_attention.title"
+msgstr "Atenção territorial"
+
+msgid "geopedia.territory_attention.example"
+msgstr "Captura ativa chama atenção na zona; disfarce e Cidade calma alteram a resposta. O mapa mostra valores do rastreador de cada território."
+
+msgid "geopedia.territory_attention.unit_effect"
+msgstr "Pontuação de 0 a 100; os níveis mudam em 20, 40, 60, 80 e 100. Ações têm intervalo mínimo de 30 s e aviso de pelo menos 3 s."
+
+msgid "geopedia.territory_attention.model_limit"
+msgstr "Pontuação não é ameaça em execução. Cidade calma ou contrato tranquilo suprime ações hostis mesmo que reste atenção registrada."
+
+msgid "city.tab.technical"
+msgstr "Técnico"
+
+msgid "geopedia.ui.summary"
+msgstr "Ovos: {0}/{1} · Marcos: {2}/8 · Cartas: {3}/{4}"
+
+msgid "geopedia.ui.example"
+msgstr "Exemplo no jogo"
+
+msgid "geopedia.ui.units"
+msgstr "Unidades e efeito"
+
+msgid "geopedia.ui.limit"
+msgstr "Limites do modelo"
+
+msgid "geopedia.ui.locked"
+msgstr "○ Verbete bloqueado. Descubra o conceito ou alcance o marco {0}."
+
+msgid "geopedia.ui.select"
+msgstr "Escolha um verbete"
+
+msgid "survey.technical.preview"
+msgstr "△ Prévia de campo — não é CQ oficial"
+
+msgid "survey.technical.ideal_pose"
+msgstr "A cidade usa poses ideais na prévia. Deriva estimada, sigma e RMSE oficial estão indisponíveis nesta cena."
+
+msgid "survey.technical.cloud_show"
+msgstr "Mostrar nuvem da prévia"
+
+msgid "survey.technical.attention_show"
+msgstr "Mostrar territórios no mapa"
+
+msgid "survey.technical.cloud_help"
+msgstr "A visibilidade não altera a captura. A prévia usa um anel limitado e canais amostrados; pontos visíveis não certificam densidade nem entrega."
+
+msgid "survey.technical.lidar_off"
+msgstr "○ LiDAR pausado"
+
+msgid "survey.technical.lidar_on"
+msgstr "● LiDAR capturando prévia"
+
+msgid "survey.technical.profile"
+msgstr "Perfil"
+
+msgid "survey.technical.nominal_rays"
+msgstr "Raios primários nominais"
+
+msgid "survey.technical.sampled_rays"
+msgstr "Raios primários programados na prévia"
+
+msgid "survey.technical.range"
+msgstr "Alcance máximo do perfil"
+
+msgid "survey.technical.range_sigma"
+msgstr "Sigma de distância do perfil (não é precisão 3D)"
+
+msgid "survey.technical.visible_points"
+msgstr "Pontos no anel de exibição"
+
+msgid "survey.technical.rate_unit"
+msgstr "raios/s"
+
+msgid "survey.technical.requirements"
+msgstr "Exigências do contrato ativo"
+
+msgid "survey.technical.no_requirements"
+msgstr "Nenhum contrato ativo. Os limites são definidos por contrato."
+
+msgid "survey.technical.requirement"
+msgstr "{0}: {1} {2} {3} · excelente: {4}"
+
+msgid "survey.technical.required_true"
+msgstr "obrigatório: verdadeiro"
+
+msgid "survey.technical.required_false"
+msgstr "obrigatório: falso"
+
+msgid "survey.technical.attention"
+msgstr "Atenção por território (0–100)"
+
+msgid "survey.technical.zone"
+msgstr "{0} · {1} · atenção {2}/100 · nível {3} · intervalo {4} s"
+
+msgid "survey.technical.protected"
+msgstr "◇ Proteção ativa: ações hostis suprimidas"
+
+msgid "survey.technical.unprotected"
+msgstr "△ Proteção calma inativa; nível não indica uma ação em andamento"
+
+msgid "survey.map.legend"
+msgstr "▲ Marco · ★ Alvo · △ Posição · [n] Atenção territorial; consulte Técnico para valores. Nuvem: prévia 3D; deriva: indisponível."
+
+msgid "survey.technical.surface"
+msgstr "Superfície de suporte"
+
+msgid "survey.technical.cell_size"
+msgstr "Lado da célula de CQ"
+
+msgid "survey.technical.density_target"
+msgstr "Densidade-alvo por célula"
+
+msgid "survey.technical.density_unit"
+msgstr "pontos/m²"
+
+msgid "city.map.port"
+msgstr "PORTO"
+
+msgid "city.map.serra"
+msgstr "SERRA"
+
+msgid "city.map.old_center"
+msgstr "CENTRO VELHO"
+
+msgid "city.map.waterfront"
+msgstr "ORLA"
+
+msgid "survey.technical.deliverable"
+msgstr "Entregável {0} · área {1}"

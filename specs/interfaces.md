@@ -108,6 +108,10 @@ Eventos de domínio têm `event_id`, `instance_id`, `tick`, `kind`, `payload_ver
 
 GDScript usa métodos C# da fachada com IDs, escalares, `Dictionary`, `Array` e tipos Godot. O adaptador faz validação/conversão para DTOs do domínio. Não expor coleções mutáveis do Core. Eventos publicados: estado do contrato, status de sensor, lote protegido, processamento concluído, relatório disponível, dinheiro/XP e erro recuperável. Atualizações de HUD são agregadas a 10 Hz; física/amostragem mantêm seus relógios.
 
+Incremento de apresentação T-F11-05 (17/11/2026): `GeopediaCatalogCoordinator.AllEntries` agrega o catálogo inicial e o avançado, mantendo `MvpEntries` para consumidores do MVP e os IDs persistentes existentes. Cada artigo conserva exemplo, unidade/efeito e limite didático; desbloqueio por equipamento não concede colecionáveis ou conclusão narrativa.
+
+`LidarPreviewView` e `AttentionZoneView` são snapshots de apresentação, separados de `QualityReport`. Taxa nominal/programada, sigma de distância do perfil e pontos no anel visual não são densidade nem RMSE oficial. `TechnicalRequirementView` copia os limiares efetivos do contrato e seus entregáveis, preservando valor, comparador, unidade e contexto de suporte. A UI não recalcula CQ nem altera requisitos ao trocar modo/idioma. A cena da cidade ainda usa poses ideais; ausência de trajetória estimada não pode ser apresentada como deriva/sigma zero. Controles de visibilidade não param aquisição e não alteram atenção.
+
 ## Save e replay
 
 `SaveManifest`: versão do save, versão do conteúdo/modelos, geração, checksum, relógios, seeds/RNG, configuração, carreiras/ledger, contratos, veículo/montagem, lotes, chunks, receitas e referências. `ReplayManifest`: mesmas versões, tick inicial/final, observações brutas, poses visuais, eventos, seeds e catálogo de hashes. Nenhum formato incorpora dependências de cenas serializadas como estado autoritativo do domínio.

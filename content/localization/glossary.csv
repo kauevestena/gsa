@@ -13,3 +13,20 @@ exposure_blur,arrasto de exposição,exposure blur,Deslocamento da imagem durant
 control_vs_check,controle e checagem,control vs check,Pontos de controle auxiliam o ajuste e checkpoints independentes validam o CQ.,Control points support adjustment while independent checkpoints validate QC.,Nunca misturar pontos de controle e checagem no estimador.
 dgnss,DGNSS,DGNSS,GNSS diferencial usando correções de estação-base para reduzir erro correlacionado.,Differential GNSS applying base-station corrections to reduce correlated error.,Limitado por janela operacional e descorrelação de 0.02 m/km na linha de base.
 projection,projeção cartográfica,map projection,Transformação matemática da superfície curva terrestre para o plano.,Mathematical transformation from curved Earth surface to a plane.,Nenhuma projeção cartográfica preserva simultaneamente área e forma e distância e direção.
+lever_arm,braço de alavanca,lever arm,Vetor entre a origem do veículo e o sensor.,Vector from the body origin to the sensor.,Usar a expressão inglesa entre parênteses na primeira ocorrência.
+boresight,boresight,boresight,Orientação relativa de montagem do sensor.,Relative sensor mounting orientation.,Distinguir montagem física da estimada.
+time_sync,sincronização temporal,time synchronization,Alinhamento dos relógios do sensor e da trajetória.,Alignment of sensor and trajectory clocks.,Offset estimado em segundos.
+imu,IMU,IMU,Unidade de medição inercial.,Inertial measurement unit.,Acelerômetros e giroscópios fornecem observações.
+ins,navegação inercial,inertial navigation,Navegação por integração de observações inerciais.,Navigation by integration of inertial observations.,Explicitar a simplificação do filtro de seis estados.
+dmi,DMI,DMI,Instrumento de medição de distância e velocidade longitudinal.,Instrument measuring distance and longitudinal speed.,Derrapagem e escala afetam a observação.
+zupt,atualização de velocidade zero,zero-velocity update,Atualização do filtro após evidência observada de parada.,Filter update after observed evidence of a stop.,Manter a sigla ZUPT.
+rtk,RTK,RTK,Solução GNSS corrigida em tempo real no modelo didático.,Real-time corrected GNSS solution in the teaching model.,Não simula portadora RF.
+ppk,PPK,PPK,Correção pós-processada com log temporal compatível da base.,Postprocessed correction with a compatible time-stamped base log.,Nunca exibir PPK como solução em tempo real.
+lidar,LiDAR,LiDAR,Sensor de distâncias observadas por pulsos e direções.,Sensor of observed ranges from pulses and directions.,Distinguir amostras originais e prévia de exibição.
+density,densidade de pontos,point density,Retornos válidos distintos por área útil de suporte.,Distinct valid returns per useful support area.,Unidade pontos/m² e cálculo por célula.
+occlusion,oclusão,occlusion,Bloqueio da linha de visada até uma superfície.,Blocked line of sight to a surface.,Não equivale a ausência física da superfície.
+multiple_returns,múltiplos retornos,multiple returns,Mais de um retorno ordenado do mesmo pulso.,More than one ordered return from the same pulse.,Não confundir retorno com uma nova emissão.
+rmse,RMSE,RMSE,Raiz da média dos quadrados dos erros de checagem.,Root mean square of check errors.,Separar RMSE absoluto e resíduo relativo entre passadas.
+calibration,calibração,calibration,Estimativa de parâmetros a partir de observações conhecidas.,Parameter estimation from known observations.,Preservar dados independentes de validação.
+uncertainty,incerteza,uncertainty,Dispersão descrita pelo modelo do estimador.,Dispersion described by the estimator model.,Não é o erro verdadeiro observado.
+attention,atenção territorial,territory attention,Pontuação de reação territorial à atividade de captura.,Territory reaction score to capture activity.,Pontuação não é uma ação hostil em execução.

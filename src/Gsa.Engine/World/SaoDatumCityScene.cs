@@ -783,6 +783,8 @@ public partial class SaoDatumCityScene : Node3D
         {
             _hudElapsed = 0;
             RefreshCityHud(0.1, activePos, activeHeading, activeMode, weather, gStep.Stress, attn);
+            if (_tabletPanel.Visible && _tabletTabs.CurrentTab is MapTabletTab or TechnicalTabletTab)
+                RefreshTechnicalTablet();
         }
         GsaScreenshotHelper.TryCaptureOnFrame(this, (int)_tick, targetFrame: 35);
     }
@@ -1062,7 +1064,7 @@ public partial class SaoDatumCityScene : Node3D
         if (!_lidarEnabled || mode < LocomotionMode.Kombi)
             return;
 
-        var profile = mode == LocomotionMode.Van ? LidarProfile.L6 : (mode == LocomotionMode.Pickup ? LidarProfile.L5 : LidarProfile.L4);
+        var profile = CityLidarProfile(mode);
         if (_lidarSim.Profile.Id != profile.Id)
         {
             _lidarSim = new LidarBenchSimulator(profile);
@@ -1101,7 +1103,7 @@ public partial class SaoDatumCityScene : Node3D
             return new LidarRayHit(dist, new Vector3d(hitNormG.X, -hitNormG.Z, hitNormG.Y), mat, id);
         }
 
-        var channelStep = profile.Grade >= 6 ? 4 : (profile.Grade == 5 ? 2 : 1);
+        var channelStep = CityLidarChannelStep(profile);
         if (_lidarSim.TrySimulateScanSlice(_calendar.CalendarTimeSeconds, lidarToMap, traj, LidarMountEstimate.Zero,
             isRaining, CastRay, sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
@@ -1189,6 +1191,7 @@ public partial class SaoDatumCityScene : Node3D
             _carSim = null;
 
         _mobility.SetVisualPlatformMode(targetMode);
+        _geopedia.UnlockAdvancedForPlatformLevel(PlatformProfile.ForMode(targetMode).Level);
         _pendingVehiclePopup = Text($"platform.{targetMode.ToString().ToLowerInvariant()}.name");
         _audio.PlayOffloadChime();
     }

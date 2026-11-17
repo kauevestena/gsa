@@ -1330,3 +1330,291 @@ msgstr "Sandbox does not write or reload the career save."
 
 msgid "save.error.manual_blocked_during_offload"
 msgstr "Wait until offloading finishes before saving manually."
+
+msgid "geopedia.lever_arm.title"
+msgstr "Lever arm"
+
+msgid "geopedia.lever_arm.example"
+msgstr "The sensor is offset from the vehicle origin. A 0.10 m error in the estimated lever arm produces a 0.10 m error without rotation."
+
+msgid "geopedia.lever_arm.unit_effect"
+msgstr "Metres in the body frame; attitude rotates this vector before adding it to the trajectory position."
+
+msgid "geopedia.lever_arm.model_limit"
+msgstr "Physical and estimated mounts are separate. Knowing the slot does not reveal the correct mount to processing."
+
+msgid "geopedia.boresight.title"
+msgstr "Boresight: mounting orientation"
+
+msgid "geopedia.boresight.example"
+msgstr "In the workshop passes, fit the relative sensor-to-body orientation using shared surfaces."
+
+msgid "geopedia.boresight.unit_effect"
+msgstr "Radians; at 100 m, a 0.001 rad angular error causes approximately 0.10 m of lateral displacement."
+
+msgid "geopedia.boresight.model_limit"
+msgstr "The workshop requires at least three nonparallel planes to observe the full adjustment. A low residual on one plane does not guarantee full calibration."
+
+msgid "geopedia.time_sync.title"
+msgstr "Time synchronization"
+
+msgid "geopedia.time_sync.example"
+msgstr "A 0.02 s sensor-to-trajectory offset at 10 m/s shifts a point by approximately 0.20 m."
+
+msgid "geopedia.time_sync.unit_effect"
+msgstr "Seconds; processing queries the pose at sensor time plus the estimated offset and interpolates position and attitude."
+
+msgid "geopedia.time_sync.model_limit"
+msgstr "Returns outside the trajectory interval are invalid. Constant speed alone cannot separate time offset from a longitudinal lever arm."
+
+msgid "geopedia.imu_ins.title"
+msgstr "IMU and inertial navigation"
+
+msgid "geopedia.imu_ins.example"
+msgstr "In the navigation domain, the gyroscope integrates attitude and observed acceleration drives the position and velocity filter through GNSS outages."
+
+msgid "geopedia.imu_ins.unit_effect"
+msgstr "Acceleration in m/s² and rotation in rad/s; bias and random walk accumulate drift. Game local gravity: 9.80665 m/s²."
+
+msgid "geopedia.imu_ins.model_limit"
+msgstr "The teaching filter has six translational states and complementary attitude; it is not a complete commercial INS. The city preview still uses ideal poses."
+
+msgid "geopedia.dmi_zupt.title"
+msgstr "DMI and zero-velocity update"
+
+msgid "geopedia.dmi_zupt.example"
+msgstr "DMI observes longitudinal speed. ZUPT uses a sensor-confirmed stop to update zero velocity."
+
+msgid "geopedia.dmi_zupt.unit_effect"
+msgstr "DMI in m/s; wet roads multiply its longitudinal variance by 25. ZUPT requires 2 s with speed <0.05 m/s, rotation <0.01 rad/s and gravity difference <0.1 m/s²."
+
+msgid "geopedia.dmi_zupt.model_limit"
+msgstr "A visually stopped vehicle is insufficient: without enough observed evidence the filter does not apply ZUPT. DMI also has scale error and slip."
+
+msgid "geopedia.base_rtk_ppk.title"
+msgstr "Base, DGNSS, RTK and PPK"
+
+msgid "geopedia.base_rtk_ppk.example"
+msgstr "Install a base on a known mark to correct common error. PPK reapplies the time-stamped base log to the office product."
+
+msgid "geopedia.base_rtk_ppk.unit_effect"
+msgstr "In the RTK model: sky openness ≥0.4 permits float; ≥0.7 for 10 s and a base within 2 km permit fix, with a compatible profile and available corrections."
+
+msgid "geopedia.base_rtk_ppk.model_limit"
+msgstr "No RF carrier simulation. The base does not remove local multipath. PPK requires compatible logs and is never a live GNSS state; the city icon is simplified."
+
+msgid "geopedia.lidar_density.title"
+msgstr "LiDAR: density and coverage"
+
+msgid "geopedia.lidar_density.example"
+msgstr "QC counts distinct valid returns per support cell. Merging the same batch again does not increase density."
+
+msgid "geopedia.lidar_density.unit_effect"
+msgstr "Points/m² over clipped useful area; LiDAR products use 1×1 m cells. The contract defines the target density and required cell fraction."
+
+msgid "geopedia.lidar_density.model_limit"
+msgstr "The coloured city cloud is a bounded sampled preview. Its visible count, nominal rate and LOD do not measure official product density."
+
+msgid "geopedia.lidar_occlusion.title"
+msgstr "LiDAR: occlusion and passes"
+
+msgid "geopedia.lidar_occlusion.example"
+msgstr "A facade or vehicle can hide the required surface. Another pass with a different line of sight can fill the gap."
+
+msgid "geopedia.lidar_occlusion.unit_effect"
+msgstr "Coverage is observed useful area divided by required area. High density in one part does not compensate for an unobserved area."
+
+msgid "geopedia.lidar_occlusion.model_limit"
+msgstr "The preview does not certify completeness. Octrees, chunks and LOD representatives speed queries and drawing; QC still uses original samples."
+
+msgid "geopedia.lidar_returns.title"
+msgstr "LiDAR: multiple returns"
+
+msgid "geopedia.lidar_returns.example"
+msgstr "In transmissive vegetation, one pulse can reach multiple surfaces. Return number identifies the order within a pulse."
+
+msgid "geopedia.lidar_returns.unit_effect"
+msgstr "The simulator permits up to three returns and stops below 0.1 energy, beyond range or at an opaque surface."
+
+msgid "geopedia.lidar_returns.model_limit"
+msgstr "This is a discrete material-and-energy model without a full waveform. The city preview does not establish multiple-return vegetation acquisition."
+
+msgid "geopedia.rmse.title"
+msgstr "RMSE and independent checks"
+
+msgid "geopedia.rmse.example"
+msgstr "Compare estimated positions with independent check references. Points used in adjustment do not replace checkpoints."
+
+msgid "geopedia.rmse.unit_effect"
+msgstr "Absolute RMSE in metres: square root of the mean squared 3D distances. The game requires at least three matches and distribution across the area."
+
+msgid "geopedia.rmse.model_limit"
+msgstr "Without sufficient matches the result is insufficient, never zero. Filter sigma and inter-pass residual are not the same as absolute RMSE."
+
+msgid "geopedia.camera_calibration.title"
+msgstr "Camera calibration"
+
+msgid "geopedia.camera_calibration.example"
+msgstr "On the bench, observe a known grid in at least three distinct poses and reserve another pose for validation."
+
+msgid "geopedia.camera_calibration.unit_effect"
+msgstr "Intrinsics fx, fy, cx and cy are in pixels; k1 and k2 describe normalized radial distortion. The solver minimizes reprojection residuals."
+
+msgid "geopedia.camera_calibration.model_limit"
+msgstr "Pinhole model with two radial terms. A low residual on the fitted grid does not replace independent validation or mounting calibration."
+
+msgid "geopedia.historical_geodesy.title"
+msgstr "Survey marks and historical geodesy"
+
+msgid "geopedia.historical_geodesy.example"
+msgstr "Zero Stone and Clock Tower connect the São Datum network to position and height references. Verify a displaced mark before using it as control."
+
+msgid "geopedia.historical_geodesy.unit_effect"
+msgstr "Coordinates and heights in metres need a declared reference. The game separates a mark’s catalogued coordinate from its physical position."
+
+msgid "geopedia.historical_geodesy.model_limit"
+msgstr "São Datum and its history are fictional; the local system has no EPSG code. The network is not a historical reconstruction of a real survey."
+
+msgid "geopedia.trajectory_drift.title"
+msgstr "Trajectory drift and uncertainty"
+
+msgid "geopedia.trajectory_drift.example"
+msgstr "During GNSS outages the filter propagates position, velocity and covariance. New observations can constrain uncertainty growth."
+
+msgid "geopedia.trajectory_drift.unit_effect"
+msgstr "Position sigma in metres; 3D sigma is the square root of the sum of the three component variances. GNSS solution age is in seconds."
+
+msgid "geopedia.trajectory_drift.model_limit"
+msgstr "Sigma is model uncertainty, not error measured against truth. Without an estimated trajectory connected to the scene, the panel reports unavailability instead of zero drift."
+
+msgid "geopedia.territory_attention.title"
+msgstr "Territory attention"
+
+msgid "geopedia.territory_attention.example"
+msgstr "Active capture attracts attention in a zone; disguise and Calm City change the response. The map shows values from each territory tracker."
+
+msgid "geopedia.territory_attention.unit_effect"
+msgstr "Score from 0 to 100; levels change at 20, 40, 60, 80 and 100. Actions have a minimum 30 s cooldown and at least 3 s warning."
+
+msgid "geopedia.territory_attention.model_limit"
+msgstr "Score is not an action in progress. Calm City or a calm contract suppresses hostile actions even if recorded attention remains."
+
+msgid "city.tab.technical"
+msgstr "Technical"
+
+msgid "geopedia.ui.summary"
+msgstr "Eggs: {0}/{1} · Marks: {2}/8 · Cards: {3}/{4}"
+
+msgid "geopedia.ui.example"
+msgstr "Game example"
+
+msgid "geopedia.ui.units"
+msgstr "Units and effect"
+
+msgid "geopedia.ui.limit"
+msgstr "Model limits"
+
+msgid "geopedia.ui.locked"
+msgstr "○ Entry locked. Discover the concept or reach milestone {0}."
+
+msgid "geopedia.ui.select"
+msgstr "Choose an article"
+
+msgid "survey.technical.preview"
+msgstr "△ Field preview — not official QC"
+
+msgid "survey.technical.ideal_pose"
+msgstr "The city uses ideal preview poses. Estimated drift, sigma and official RMSE are unavailable in this scene."
+
+msgid "survey.technical.cloud_show"
+msgstr "Show preview cloud"
+
+msgid "survey.technical.attention_show"
+msgstr "Show territories on the map"
+
+msgid "survey.technical.cloud_help"
+msgstr "Visibility does not alter capture. The preview uses a bounded ring and sampled channels; visible points do not certify density or delivery."
+
+msgid "survey.technical.lidar_off"
+msgstr "○ LiDAR paused"
+
+msgid "survey.technical.lidar_on"
+msgstr "● LiDAR capturing preview"
+
+msgid "survey.technical.profile"
+msgstr "Profile"
+
+msgid "survey.technical.nominal_rays"
+msgstr "Nominal primary rays"
+
+msgid "survey.technical.sampled_rays"
+msgstr "Scheduled preview primary rays"
+
+msgid "survey.technical.range"
+msgstr "Profile maximum range"
+
+msgid "survey.technical.range_sigma"
+msgstr "Profile range sigma (not 3D accuracy)"
+
+msgid "survey.technical.visible_points"
+msgstr "Points in display ring"
+
+msgid "survey.technical.rate_unit"
+msgstr "rays/s"
+
+msgid "survey.technical.requirements"
+msgstr "Active contract requirements"
+
+msgid "survey.technical.no_requirements"
+msgstr "No active contract. Limits are defined per contract."
+
+msgid "survey.technical.requirement"
+msgstr "{0}: {1} {2} {3} · excellent: {4}"
+
+msgid "survey.technical.required_true"
+msgstr "required: true"
+
+msgid "survey.technical.required_false"
+msgstr "required: false"
+
+msgid "survey.technical.attention"
+msgstr "Attention by territory (0–100)"
+
+msgid "survey.technical.zone"
+msgstr "{0} · {1} · attention {2}/100 · level {3} · cooldown {4} s"
+
+msgid "survey.technical.protected"
+msgstr "◇ Protection active: hostile actions suppressed"
+
+msgid "survey.technical.unprotected"
+msgstr "△ Calm protection inactive; level does not indicate an action in progress"
+
+msgid "survey.map.legend"
+msgstr "▲ Mark · ★ Target · △ Position · [n] Territory attention; see Technical for values. Cloud: 3D preview; drift: unavailable."
+
+msgid "survey.technical.surface"
+msgstr "Support surface"
+
+msgid "survey.technical.cell_size"
+msgstr "QC cell side"
+
+msgid "survey.technical.density_target"
+msgstr "Target density per cell"
+
+msgid "survey.technical.density_unit"
+msgstr "points/m²"
+
+msgid "city.map.port"
+msgstr "PORT"
+
+msgid "city.map.serra"
+msgstr "HIGHLANDS"
+
+msgid "city.map.old_center"
+msgstr "OLD CENTER"
+
+msgid "city.map.waterfront"
+msgstr "WATERFRONT"
+
+msgid "survey.technical.deliverable"
+msgstr "Deliverable {0} · area {1}"

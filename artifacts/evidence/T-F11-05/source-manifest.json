@@ -1,0 +1,17 @@
+{
+  "base_commit": "b4b4c47c848687cb84e287e2d87af48833dc3720",
+  "sha256": {
+    "content/localization/glossary.csv": "bfcab068a2550b0869be8657650b474ffced08ae8c8c9bb8c5e68d137e3f0b8b",
+    "game/localization/en_US.po": "1ffaf17d344aba251ab1d4daea86e5e2f8f69793cf6be78dc93cc59ed119ff63",
+    "game/localization/pt_BR.po": "e9fd1c900cf5bdf68879b2704a7bafef474a4821abe47bdfbfc55c0f9e31a5dd",
+    "scripts/check_bootstrap.py": "2240684966365ee759073e700f7f4137a53b5160d8765c62d0dd2dc290374bbb",
+    "src/Gsa.Engine/World/AdvancedSurveyTablet.cs": "c9840153bf958afac3381fad94b6dc1ee67bcda4afcb85b3db70bfad62d8de0a",
+    "src/Gsa.Engine/World/AdvancedSurveyTabletSmoke.cs": "6cc596d664a6a067d59eeb404d8a71a8d11cc36274d7833527451bf048336ae2",
+    "src/Gsa.Engine/World/CitySaveSmoke.cs": "fa7dca4b9ada922216402e3f77e065fa1c0a25b239265e7d6eb0d51bdce743c7",
+    "src/Gsa.Engine/World/SaoDatumCityScene.cs": "37900cbbd8399e2b4686507c7c68ab8e553e7a0ad50542e46c12401a00ba5688",
+    "src/Gsa.Engine/World/SaoDatumTablet.cs": "1921b65e73ebc4cb01b4038b33a9b3b4fda41e9f3a6fe605ca23e8234909f2b0",
+    "src/Gsa.Missions/Presentation/AdvancedSurveyPresenter.cs": "a48da8f3fe1fa9d1d712799b50641ae979757961c3ddaa1a0f84546563c7af55",
+    "src/Gsa.Missions/Presentation/GeopediaAndMvpLocalizationCatalog.cs": "a0c97e66992af0c06b018b92f23b0ac932f7dbcfe7f91b65e673da6ea0b2ffb1",
+    "tests/Gsa.Missions.Tests/AdvancedSurveyPresentationTests.cs": "76a90b1341a322cafc3ef967008a4e8d6bfc23108f5b4e3d1ec04485129afbf3"
+  }
+}

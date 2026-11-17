@@ -23,7 +23,6 @@ public partial class SaoDatumCityScene
     private VBoxContainer _contractsTab = null!;
     private Label _officeStatusLabel = null!;
     private VBoxContainer _fleetTab = null!;
-    private Label _geopediaLabel = null!;
     private CityFullMapControl _cityMap = null!;
     private Button _calmToggleBtn = null!;
     private Button _ditherToggleBtn = null!;
@@ -91,7 +90,7 @@ public partial class SaoDatumCityScene
         };
         title.AddThemeFontSizeOverride("font_size", 18);
         header.AddChild(title);
-        var closeBtn = new Button { Text = Text("notebook.close"), FocusMode = Control.FocusModeEnum.None };
+        var closeBtn = new Button { Text = Text("notebook.close") };
         closeBtn.Pressed += () => _tabletPanel.Hide();
         header.AddChild(closeBtn);
 
@@ -159,11 +158,12 @@ public partial class SaoDatumCityScene
         var mapTab = AddTab("notebook.tab.map");
         _cityMap = new CityFullMapControl { CustomMinimumSize = new Vector2(0, 340), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         mapTab.AddChild(_cityMap);
+        _cityMapLegend = TechnicalLabel(Text("survey.map.legend"));
+        mapTab.AddChild(_cityMapLegend);
 
         // 5. Geopédia & Collectibles Tab
         var geoTab = AddTab("city.tab.geopedia");
-        _geopediaLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        geoTab.AddChild(_geopediaLabel);
+        BuildAdvancedGeopedia(geoTab);
 
         // 6. Settings & Sandbox Controls Tab
         var setTab = AddTab("city.tab.settings");
@@ -204,6 +204,9 @@ public partial class SaoDatumCityScene
         var timeBtn = new Button { Text = Text("city.settings.advance_time"), FocusMode = Control.FocusModeEnum.None };
         timeBtn.Pressed += () => _calendar.AdvanceCalendarSeconds(7200.0);
         setTab.AddChild(timeBtn);
+
+        // 7. Technical diagnostics. Reuses live snapshots; never approves scientific quality from a preview.
+        BuildTechnicalTablet(AddTab("city.tab.technical"));
 
         RefreshTabletContents();
     }
@@ -463,31 +466,10 @@ public partial class SaoDatumCityScene
         }
 
         // Map tab
-        var activeTargetEnu = (_activeContract?.RequiredFeatureIds ?? [])
-            .Select(id => _fullManifest.Objects.FirstOrDefault(o => o.Id == id)?.PositionEnu)
-            .Where(p => p.HasValue)
-            .Select(p => p!.Value)
-            .ToArray();
-        _cityMap.UpdateMap(
-            CurrentPositionEnu(),
-            CurrentHeadingRadians(),
-            _geodeticNetwork.Benchmarks.Values.ToArray(),
-            activeTargetEnu);
+        RefreshCityMapSnapshot();
 
-        // Geopédia & Collectibles tab
-        var lines = new List<string>
-        {
-            $"Eggs: {_collectibles.CollectedEggIds.Count}/{MvpCollectiblesCoordinator.MaxDailyEggs} · Benchmarks: {_collectibles.OccupiedLandmarkIds.Count}/8 · Cards: {_collectibles.CollectedCardIds.Count}/{MvpCollectiblesCoordinator.AllSixProjectionCards.Count}",
-            "",
-        };
-        var dict = BuildTranslationLookup();
-        foreach (var entry in GeopediaCatalogCoordinator.MvpEntries)
-        {
-            var article = _geopedia.RenderEntry(entry.Id, TranslationServer.GetLocale().ToString(), dict);
-            var tag = article.Unlocked ? "✓" : "○";
-            lines.Add($"{tag} {article.Title} — {article.GameExample}");
-        }
-        _geopediaLabel.Text = string.Join("\n", lines);
+        RefreshAdvancedGeopedia();
+        RefreshTechnicalTablet();
 
         // Settings buttons
         _citySaveLabel.Text = Text("save.ui.help") + "\n" + _citySaveNotice;
@@ -495,19 +477,6 @@ public partial class SaoDatumCityScene
         _calmToggleBtn.Text = Text(_calmPolicy.CalmCityEnabled ? "hud.calm_protection.active" : "hud.calm_protection.inactive");
         _ditherToggleBtn.Text = Text("city.settings.dither") + ": " + (_atmosphere.RetroDitherEnabled ? "ON" : "OFF");
         _daguerreotypeBtn.Text = Text("city.settings.daguerreotype") + ": " + (_atmosphere.DaguerreotypeEnabled ? "ON" : "OFF");
-    }
-
-    private Dictionary<string, string> BuildTranslationLookup()
-    {
-        var d = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var entry in GeopediaCatalogCoordinator.MvpEntries)
-        {
-            d[entry.TitleKey] = Text(entry.TitleKey);
-            d[entry.ExampleKey] = Text(entry.ExampleKey);
-            d[entry.UnitAndEffectKey] = Text(entry.UnitAndEffectKey);
-            d[entry.ModelLimitKey] = Text(entry.ModelLimitKey);
-        }
-        return d;
     }
 
     private void RefreshCityHud(
@@ -621,6 +590,17 @@ public partial class SaoDatumCityScene
 
     private void TryLoadCareer() => LoadCityCareerState();
 
+    private void RefreshCityMapSnapshot()
+    {
+        var targets = new List<Vector3d>();
+        foreach (var id in _activeContract?.RequiredFeatureIds ?? [])
+        {
+            if (_manifestObjectsById.TryGetValue(id, out var obj)) targets.Add(obj.PositionEnu);
+            else if (_geodeticNetwork.Benchmarks.TryGetValue(id, out var mark)) targets.Add(mark.PhysicalPositionEnu);
+        }
+        _cityMap.UpdateMap(CurrentPositionEnu(), CurrentHeadingRadians(), _geodeticNetwork.Benchmarks.Values.ToArray(), targets);
+    }
+
 }
 
 /// <summary>Full 4 km² North-Up city map control displayed inside the São Datum Tablet.</summary>
@@ -630,6 +610,14 @@ public sealed partial class CityFullMapControl : Control
     private double _heading;
     private IReadOnlyList<GeodeticBenchmarkNode> _benchmarks = [];
     private IReadOnlyList<Vector3d> _waypoints = [];
+    private IReadOnlyList<AttentionZoneView> _attentionZones = [];
+    internal int AttentionOverlayCount => _attentionZones.Count;
+
+    public void UpdateAttention(IReadOnlyList<AttentionZoneView> zones)
+    {
+        _attentionZones = zones;
+        QueueRedraw();
+    }
 
     public void UpdateMap(
         Vector3d player,
@@ -677,18 +665,34 @@ public sealed partial class CityFullMapControl : Control
             DrawLine(MapPt(new Vector3d(e, 7400000, 100)), MapPt(new Vector3d(e, 7401850, 100)), roadCol, 1.4f);
 
         var font = ThemeDB.FallbackFont;
-        DrawString(font, origin + new Vector2(10, 22), "PORTO", fontSize: 12);
-        DrawString(font, origin + new Vector2(half + 10, 22), "SERRA", fontSize: 12);
-        DrawString(font, origin + new Vector2(10, half + 22), "CENTRO VELHO", fontSize: 12);
-        DrawString(font, origin + new Vector2(half + 10, half + 22), "ORLA", fontSize: 12);
+        DrawString(font, origin + new Vector2(10, 22), TranslationServer.Translate("city.map.port"), fontSize: 12);
+        DrawString(font, origin + new Vector2(half + 10, 22), TranslationServer.Translate("city.map.serra"), fontSize: 12);
+        DrawString(font, origin + new Vector2(10, half + 22), TranslationServer.Translate("city.map.old_center"), fontSize: 12);
+        DrawString(font, origin + new Vector2(half + 10, half + 22), TranslationServer.Translate("city.map.waterfront"), fontSize: 12);
+
+        for (var i = 0; i < _attentionZones.Count; i++)
+        {
+            var zone = _attentionZones[i];
+            var topLeft = MapPt(new Vector3d(zone.Bounds.MinEast, zone.Bounds.MaxNorth, 0));
+            var bottomRight = MapPt(new Vector3d(zone.Bounds.MaxEast, zone.Bounds.MinNorth, 0));
+            var rect = new Rect2(topLeft, bottomRight - topLeft);
+            var colour = zone.ProtectionActive ? new Color(0.30f, 0.82f, 0.88f) : new Color(0.98f, 0.66f, 0.28f);
+            DrawRect(rect, new Color(colour, 0.08f + 0.20f * (float)(zone.AttentionScore / 100.0)));
+            DrawRect(rect, colour, filled: false, width: 1f);
+            DrawString(font, topLeft + new Vector2(2, 14), $"[{i + 1}] {zone.ThreatLevel}", fontSize: 12, modulate: colour);
+        }
 
         foreach (var bm in _benchmarks)
-            DrawCircle(MapPt(bm.PhysicalPositionEnu), 4f, new Color(0.32f, 0.92f, 0.48f));
+        {
+            var point = MapPt(bm.PhysicalPositionEnu);
+            DrawColoredPolygon([point + new Vector2(0, -5), point + new Vector2(-4, 4), point + new Vector2(4, 4)], new Color(0.32f, 0.92f, 0.48f));
+        }
         foreach (var wp in _waypoints)
         {
             var pt = MapPt(wp);
             DrawCircle(pt, 6f, Colors.Black);
             DrawCircle(pt, 4.5f, new Color(1.0f, 0.78f, 0.16f));
+            DrawString(font, pt + new Vector2(5, -4), "★", fontSize: 12);
         }
 
         var here = MapPt(_player);
