@@ -1,0 +1,117 @@
+{
+  "benchmark_id": "LIDAR-CPU-V1",
+  "date": "2026-11-16",
+  "baseline_revision": "fe6936665767477c62c985b977097b1776ac39ac",
+  "candidate_code_revision": "acd5b58f05fda113c030cabe14a2c3ef686ed6fc",
+  "candidate_source_tree_sha": "ab08414543c32d89cbf2a0c05816f78b0df3b9a7",
+  "warmup_runs": 1,
+  "measured_runs": 5,
+  "tiered_compilation": false,
+  "compiler_optimize": true,
+  "scenarios": {
+    "overlapping_chunk_query": {
+      "baseline_median_ms": 111.2556,
+      "candidate_median_ms": 9.0705,
+      "speedup": 12.265652389614687,
+      "baseline_median_allocated_bytes": 83903048,
+      "candidate_median_allocated_bytes": 10499944,
+      "allocation_reduction_percent": 87.48562269156182,
+      "count": 512,
+      "baseline_reload_counts": [
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "candidate_reload_counts": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "scientific_payload_sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B",
+      "all_results_identical": true
+    },
+    "resident_chunk_query": {
+      "baseline_median_ms": 0.1752,
+      "candidate_median_ms": 0.1776,
+      "speedup": 0.9864864864864864,
+      "baseline_median_allocated_bytes": 13376,
+      "candidate_median_allocated_bytes": 13736,
+      "allocation_reduction_percent": -2.6913875598086223,
+      "count": 512,
+      "baseline_reload_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "candidate_reload_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "scientific_payload_sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B",
+      "all_results_identical": true
+    },
+    "resident_full_cloud_query": {
+      "baseline_median_ms": 4.9977,
+      "candidate_median_ms": 3.9501,
+      "speedup": 1.2652084757347914,
+      "baseline_median_allocated_bytes": 3147008,
+      "candidate_median_allocated_bytes": 3147560,
+      "allocation_reduction_percent": -0.017540470186294677,
+      "count": 131072,
+      "baseline_reload_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "candidate_reload_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "scientific_payload_sha256": "A7934AD4B12AA73A509CF30D78EB15701F35D2CA2D7CCC1AA400CF2E24A6DC8E",
+      "all_results_identical": true
+    },
+    "continuous_l6_rain_swath": {
+      "baseline_median_ms": 15.6055,
+      "candidate_median_ms": 9.4546,
+      "speedup": 1.6505722082372603,
+      "baseline_median_allocated_bytes": 13608408,
+      "candidate_median_allocated_bytes": 4826768,
+      "allocation_reduction_percent": 64.53098701920166,
+      "count": 24644,
+      "baseline_reload_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "candidate_reload_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "scientific_payload_sha256": "C4032BCFF43C11342239F243C9C1F97D922C2FBE87824C0B0DCA81F4887A7E4E",
+      "all_results_identical": true
+    }
+  },
+  "source_sha256": {
+    "src/Gsa.Core/Sensors/Lidar/KombiProfilerAndOctreeStore.cs": "36b2c755a94e129ac6d0a587dea6335c0afd7bb516e421e37bc25b297eddfbbc",
+    "src/Gsa.Tools/Benchmark/LidarPerformanceTool.cs": "2678d2f475217e42fb614a12b162b153bba89d7a8df0f945466172bebd9c76f3"
+  }
+}
