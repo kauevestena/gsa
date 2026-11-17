@@ -167,6 +167,12 @@ public partial class SaoDatumCityScene
 
         // 6. Settings & Sandbox Controls Tab
         var setTab = AddTab("city.tab.settings");
+        _citySaveLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        setTab.AddChild(_citySaveLabel);
+        _recoverCitySaveButton = new Button { Text = Text("save.ui.recover_previous"), FocusMode = Control.FocusModeEnum.None };
+        _recoverCitySaveButton.Pressed += () => { LoadCityCareerState(recover: true); RefreshTabletContents(); };
+        setTab.AddChild(_recoverCitySaveButton);
+
         _calmToggleBtn = new Button { FocusMode = Control.FocusModeEnum.None };
         _calmToggleBtn.Pressed += () =>
         {
@@ -278,6 +284,7 @@ public partial class SaoDatumCityScene
         _audio.PlayOffloadChime();
         _feedbackText = $"{Text(def.TitleKey)} — {def.RequiredFeatureIds.Count} targets";
         _tabletPanel.Hide();
+        if (!_isSandbox) SaveCityCareerState(SaveTrigger.ContractAccepted, announce: false);
     }
 
     private void ProcessAndDeliverCityContract()
@@ -331,7 +338,7 @@ public partial class SaoDatumCityScene
             _activeMachine = null;
             _activeStorySpec = null;
             GenerateContractOffers();
-            if (!_isSandbox) SaveCareer();
+            if (!_isSandbox) SaveCityCareerState(SaveTrigger.ContractSettled, announce: false);
         }
         else
         {
@@ -483,6 +490,8 @@ public partial class SaoDatumCityScene
         _geopediaLabel.Text = string.Join("\n", lines);
 
         // Settings buttons
+        _citySaveLabel.Text = Text("save.ui.help") + "\n" + _citySaveNotice;
+        _recoverCitySaveButton.Visible = !_isSandbox && _citySaveStatus?.PreviousGenerationAvailable == true;
         _calmToggleBtn.Text = Text(_calmPolicy.CalmCityEnabled ? "hud.calm_protection.active" : "hud.calm_protection.inactive");
         _ditherToggleBtn.Text = Text("city.settings.dither") + ": " + (_atmosphere.RetroDitherEnabled ? "ON" : "OFF");
         _daguerreotypeBtn.Text = Text("city.settings.daguerreotype") + ": " + (_atmosphere.DaguerreotypeEnabled ? "ON" : "OFF");
@@ -608,38 +617,10 @@ public partial class SaoDatumCityScene
         _pendingVehiclePopup = null;
     }
 
-    private void SaveCareer()
-    {
-        var state = new SaveGameState(
-            1, SaveTrigger.Manual, _tick,
-            new SaveClockState(_calendar.CalendarTimeSeconds, _calendar.CalendarTimeSeconds),
-            new SaveRngState(1, 1, _fieldSamples.Count),
-            _ledger.ExportState(),
-            _progression.ExportSnapshot(),
-            new SaveEquipmentMountState(
-                _fleet.ActivePlatform.Id,
-                _fleet.OwnedPlatforms.Select(p => p.ToString()).ToArray(),
-                new Dictionary<string, string>()),
-            new BatchCustodyStore().ExportSnapshot(),
-            []);
-        var res = _saveManager.Save(state, SaveTrigger.Manual);
-        _feedbackText = Text(res.Succeeded ? "training.done.save" : "training.load_failed");
-    }
+    private void SaveCareer() => SaveCityCareerState();
 
-    private void TryLoadCareer()
-    {
-        var res = _saveManager.LoadCurrent();
-        if (!res.Succeeded || res.State is null)
-        {
-            _feedbackText = Text("city.career.welcome");
-            return;
-        }
-        var runtime = SaveGameManager.RestoreRuntime(res.State);
-        _ledger = runtime.Ledger;
-        _progression = runtime.Progression;
-        _calendar = new WorldCalendarAndWeatherController(res.State.Clocks.SimulationTimeSeconds);
-        _feedbackText = Text("training.done.load");
-    }
+    private void TryLoadCareer() => LoadCityCareerState();
+
 }
 
 /// <summary>Full 4 km² North-Up city map control displayed inside the São Datum Tablet.</summary>

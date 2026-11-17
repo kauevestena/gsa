@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M2–M7. Origem: Loop de jogo e estrutura; Arquitetura técnica; Missões. Estado: especificado; não implementado.
+Marcos: M2–M7. Origem: Loop de jogo e estrutura; Arquitetura técnica; Missões. Estado: custódia, saves e replay de domínio implementados; migração v1→v2, recuperação segura e snapshot da cidade aceitos por revisão delegada após CI nativa Linux/Windows do PR #23. Limites de integração estão documentados em docs/save-compatibility.md.
 
 ## Requisitos
 

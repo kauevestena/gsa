@@ -36,11 +36,14 @@ public sealed class CameraCaptureScheduler
     public int PendingQueueCount => _pendingQueueCount;
     public int SaturatedDroppedCount => _saturatedDroppedCount;
     public int MaxPendingQueueSamples { get; }
+    public long NextCaptureSequence => _nextSequence;
 
-    public CameraCaptureScheduler(string sensorId, CameraSensorProfile? profile = null)
+    public CameraCaptureScheduler(string sensorId, CameraSensorProfile? profile = null, long initialSequence = 0)
     {
         if (string.IsNullOrWhiteSpace(sensorId))
             throw new ArgumentException("Sensor ID is required.", nameof(sensorId));
+        if (initialSequence < 0) throw new ArgumentOutOfRangeException(nameof(initialSequence));
+        _nextSequence = initialSequence;
         _sensorId = sensorId;
         _profile = profile ?? CameraSensorProfile.Initial;
         _tickInterval = Math.Max(1, (int)Math.Round(PhysicsTicksPerSecond / _profile.RateHz));
@@ -71,6 +74,11 @@ public sealed class CameraCaptureScheduler
 
         if (!IsCaptureTick(request.Tick))
             return false;
+        if (_nextSequence == long.MaxValue)
+        {
+            stopReason = "sensor_sequence_exhausted";
+            return false;
+        }
 
         if (_pendingQueueCount >= MaxPendingQueueSamples)
         {

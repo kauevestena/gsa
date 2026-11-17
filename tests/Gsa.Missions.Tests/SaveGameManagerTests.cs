@@ -96,7 +96,7 @@ public sealed class SaveGameManagerTests : IDisposable
         Assert.Equal(275, runtime.Ledger.BalanceCoords);
         Assert.Equal(40, runtime.Ledger.FineDebtCoords);
         Assert.Equal("handcart", runtime.Equipment.ActivePlatformId);
-        Assert.Equal("cam_basic", runtime.Equipment.MountedSlots["front"]);
+        Assert.Equal("camera-initial", runtime.Equipment.MountedSlots["front"]);
 
         // Contract deadline snapshot and batch custody preserved
         var restoredContract = Assert.Single(runtime.Contracts);

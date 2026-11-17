@@ -1276,3 +1276,57 @@ msgstr "Daguerreotype Sepia Filter"
 
 msgid "city.board_vehicle"
 msgstr "Press F near parked vehicle to board!"
+
+msgid "save.error.current_protected"
+msgstr "The current save cannot be read safely. No save was overwritten. Use recovery in Settings."
+
+msgid "save.error.invalid_state"
+msgstr "The save contains invalid data. The original was preserved."
+
+msgid "save.error.future_version"
+msgstr "This save was created by a newer version. Open it with that version; the file was preserved."
+
+msgid "save.error.incompatible_version"
+msgstr "Incompatible save version. The file was preserved."
+
+msgid "save.error.content_version"
+msgstr "The save uses content or models incompatible with this version. The file was preserved."
+
+msgid "save.error.missing_schema_version"
+msgstr "The save has no valid version. The original was preserved."
+
+msgid "save.error.empty_envelope"
+msgstr "The save is incomplete. The original was preserved."
+
+msgid "save.error.checksum_mismatch"
+msgstr "The save failed its integrity check. The original was preserved."
+
+msgid "save.error.schema_mismatch"
+msgstr "The inner and outer save versions do not match. The original was preserved."
+
+msgid "save.error.read_failed"
+msgstr "The save could not be read. Check access to the file."
+
+msgid "save.error.write_failed"
+msgstr "The save could not be written. Check free space and permissions."
+
+msgid "save.error.recovery_failed"
+msgstr "Recovery did not complete. Original files were preserved."
+
+msgid "save.ui.help"
+msgstr "F5 saves; F9 reloads. Recovery uses the previous generation and keeps a copy of the replaced file."
+
+msgid "save.ui.recover_previous"
+msgstr "Recover previous generation and preserve original"
+
+msgid "save.ui.recovered"
+msgstr "Previous generation recovered. The replaced file was preserved in the save directory."
+
+msgid "save.ui.migrated"
+msgstr "Previous save converted to this version. The original will be kept as a backup on the next save."
+
+msgid "save.ui.sandbox_separate"
+msgstr "Sandbox does not write or reload the career save."
+
+msgid "save.error.manual_blocked_during_offload"
+msgstr "Wait until offloading finishes before saving manually."

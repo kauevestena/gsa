@@ -18,6 +18,12 @@ public partial class Bootstrap : Control
 
     public override void _Ready()
     {
+        if (OS.GetCmdlineUserArgs().Contains("--city-save-smoke"))
+        {
+            SetProcess(false);
+            Callable.From(() => OpenCity("career")).CallDeferred();
+            return;
+        }
         _perfProbe = GsaPerfProbe.TryCreateFromArgs(this, "bootstrap");
         _smokeTest = OS.GetCmdlineUserArgs().Contains("--smoke-test");
         var benchSmoke = OS.GetCmdlineUserArgs().Contains("--bench-smoke");

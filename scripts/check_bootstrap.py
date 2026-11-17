@@ -224,6 +224,10 @@ def main() -> int:
             if marker not in world_smoke:
                 raise RuntimeError(f"Missing world verification marker: {marker}")
 
+        run("city-save-smoke", [godot, "--headless", "--path", "game",
+                                "res://world/SaoDatumCity.tscn", "--", "--city-save-smoke"],
+            marker="GSA_CITY_SAVE_SMOKE_OK")
+
         targets = ("linux", "windows") if args.exports == "all" else (
             (host,) if args.exports == "host" else ())
         for target in targets:
@@ -267,6 +271,9 @@ def main() -> int:
                                "GSA_PILOT_KIT_SMOKE_OK", "GSA_BENCHMARK_SMOKE_OK", "GSA_M2_LOOP_SMOKE_OK", "GSA_PLAYABLE_TRAINING_SMOKE_OK", "GSA_SURVEY_NOTEBOOK_SMOKE_OK", "GSA_CITY_ENGINE_PRECISION_SMOKE_OK"):
                     if marker not in world_output:
                         raise RuntimeError(f"{target}: missing exported world marker {marker}")
+                run(f"export-city-save-smoke-{target}",
+                    prefix + [executable, "--headless", "--", "--city-save-smoke"],
+                    marker="GSA_CITY_SAVE_SMOKE_OK", runtime_env=clean)
                 if args.offline_smoke:
                     report["network_isolation"] = "linux_network_namespace"
         current_locks = {str(p.relative_to(ROOT)): sha256(p) for p in lock_paths()}

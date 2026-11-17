@@ -66,7 +66,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F12-04 — Adicionar migração e compatibilidade
 
-- [ ] Aceita
+- [x] Aceita
+
+**Estado:** aceita por revisão técnica delegada após CI Linux/Windows do [PR #23](https://github.com/kauevestena/gsa/pull/23), código `e0b68b21b3f9d27c997ca0d4f7ba451dcfd1b776`, execução `44013474205`, jobs Linux `133805719610` e Windows `133805719851`. Conversão v1→v2, aliases, versões de conteúdo/modelo/mundo, invalidação de referências derivadas, proteção contra sobrescrita e recuperação explícita; snapshot da cidade e isolamento do Sandbox. Foram aprovados 455 testes e os smokes nativos da cidade, incluindo captura e recuperação pelo tablet. Ver [resumo CI](../../../artifacts/evidence/T-F12-04/ci-summary.json) e [evidências T-F12-04](../../../artifacts/evidence/T-F12-04/README.md). O head final do PR continua sujeito à CI antes do merge.
 
 **Marco:** M7
 

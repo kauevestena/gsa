@@ -79,6 +79,17 @@ public sealed record LocomotionStepResult(
     CaptureStopReason CaptureStopReason);
 
 /// <summary>Deterministic kinematic locomotion for on-foot (3 m/s) and handcart (2 m/s) modes in ENU.</summary>
+public sealed record LocomotionSaveSnapshot(
+    LocomotionMode Mode,
+    LocomotionMode MountedVehicleMode,
+    Vector3d PositionEnu,
+    double HeadingRadians,
+    Vector3d ParkedVehiclePositionEnu,
+    double ParkedVehicleHeadingRadians,
+    double RemainingAutonomySeconds,
+    int UsedVirtualStorageUnits,
+    bool GimbalinaFled);
+
 public sealed class LocomotionSimulator
 {
     public const double MaxMountDistanceMetres = 1.8;
@@ -119,6 +130,36 @@ public sealed class LocomotionSimulator
     }
 
     public Quaterniond BodyToMap => Quaterniond.FromAxisAngle(Vector3d.UnitZ, HeadingRadians);
+
+    public LocomotionSaveSnapshot ExportSaveSnapshot() => new(
+        Mode, MountedVehicleMode, PositionEnu, HeadingRadians, HandcartPositionEnu,
+        HandcartHeadingRadians, RemainingAutonomySeconds, UsedVirtualStorageUnits, GimbalinaFled);
+
+    /// <summary>Restores player/parked vehicle and resources. Motion resumes at rest.</summary>
+    public static LocomotionSimulator FromSaveSnapshot(LocomotionSaveSnapshot snapshot, WorldBounds? bounds = null)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        if (!Enum.IsDefined(snapshot.Mode) || !Enum.IsDefined(snapshot.MountedVehicleMode) ||
+            snapshot.MountedVehicleMode == LocomotionMode.OnFoot ||
+            (snapshot.Mode != LocomotionMode.OnFoot && snapshot.Mode != snapshot.MountedVehicleMode) ||
+            !double.IsFinite(snapshot.HeadingRadians) || !double.IsFinite(snapshot.ParkedVehicleHeadingRadians) ||
+            !double.IsFinite(snapshot.RemainingAutonomySeconds) || snapshot.RemainingAutonomySeconds < 0 ||
+            snapshot.UsedVirtualStorageUnits < 0)
+            throw new ArgumentException("Invalid saved locomotion state.", nameof(snapshot));
+        if (bounds is { } extent && (!extent.ContainsBox(snapshot.PositionEnu, Vector3d.Zero) ||
+            !extent.ContainsBox(snapshot.ParkedVehiclePositionEnu, Vector3d.Zero)))
+            throw new ArgumentException("Saved locomotion lies outside this world.", nameof(snapshot));
+        var result = new LocomotionSimulator(snapshot.PositionEnu, snapshot.HeadingRadians, snapshot.MountedVehicleMode, bounds)
+        {
+            Mode = snapshot.Mode,
+            HandcartPositionEnu = snapshot.ParkedVehiclePositionEnu,
+            HandcartHeadingRadians = NormalizeAngle(snapshot.ParkedVehicleHeadingRadians),
+            RemainingAutonomySeconds = snapshot.RemainingAutonomySeconds,
+            UsedVirtualStorageUnits = snapshot.UsedVirtualStorageUnits,
+            GimbalinaFled = snapshot.GimbalinaFled,
+        };
+        return result;
+    }
 
     public CaptureStopReason EvaluateCaptureReadiness(int pendingUnits = 1)
     {

@@ -8,7 +8,7 @@ O domínio de simulação chegou ao primeiro incremento de M7, com sensores, con
 
 A tela inicial permite trocar idioma e abrir o quarteirão. O exercício **Três fachadas** conecta fotos da câmera na cena, triangulação com paralaxe, descarga, processamento, CQ/recoleta, pagamento e save/load. Comece aceitando o serviço perto do escritório; use W/S/A/D para mover/frear/virar, C para fotografar, V para alternar a câmera e R para abrir o caderno com mapa, fotos, diagnóstico dos alvos, CQ e guia. Instruções e limites em [Treinamento jogável](docs/live-training.md).
 
-O treino usa poses ideais e imagens sintéticas, está marcado como **em desenvolvimento** e é separado da campanha histórica. A cidade M7 e a frota avançada ainda não são acessíveis pelo fluxo normal da cena.
+O treino usa poses ideais e imagens sintéticas, está marcado como **em desenvolvimento** e é separado da campanha histórica. A cena de cidade oferece Carreira/Modo Livre, acesso à frota e contratos simplificados. A integração de CQ avançado e campanha continua em desenvolvimento; a cobertura das bibliotecas não equivale ao aceite dessas missões na cena.
 
 ## Preparar e verificar
 
@@ -46,6 +46,8 @@ O pipeline gera esse cache antes de importar/exportar a cena. O cache derivado f
 Consulte os [comandos manuais e versões](docs/toolchain.md) para abrir o editor. Distribua a pasta inteira de cada export, incluindo PCK e runtime .NET. Ferramentas, caches, executáveis e saves ficam fora do Git. A instalação e o restore usam rede; o jogo exportado usa runtime autocontido.
 
 O [protocolo de desempenho do LiDAR](docs/lidar-performance.md) mede CPU, alocações e recargas de chunks, com hashes completos para comparar os resultados científicos entre revisões.
+
+A carreira usa [save v2 com migração e recuperação](docs/save-compatibility.md): preserva fotos, contrato, frota, estacionamento e progresso; protege saves futuros/corrompidos contra sobrescrita e isola o modo livre.
 
 ## Estado
 

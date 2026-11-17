@@ -1,0 +1,26 @@
+{
+  "task": "T-F12-04",
+  "pull_request": "https://github.com/kauevestena/gsa/pull/23",
+  "code_head_sha": "e0b68b21b3f9d27c997ca0d4f7ba451dcfd1b776",
+  "source_tree_sha": "6d1027b7cbbc2e7ff440bece2aa52f63c5cc6bad",
+  "workflow_run_id": 44013474205,
+  "workflow_url": "https://github.com/kauevestena/gsa/actions/runs/44013474205",
+  "conclusion": "success",
+  "domain_tests_local": 455,
+  "local_pipeline_checks": 24,
+  "jobs": [
+    {
+      "id": 133805719610,
+      "name": "Foundation (Linux x64)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133805719851,
+      "name": "Foundation (Windows x64)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "scope": "Native Linux and Windows headless tests and exports. Graphical review and human playtests are not implied."
+}

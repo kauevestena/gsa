@@ -1276,3 +1276,57 @@ msgstr "Filtro Sépia Daguerreótipo"
 
 msgid "city.board_vehicle"
 msgstr "Pressione F perto do veículo estacionado para embarcar!"
+
+msgid "save.error.current_protected"
+msgstr "O save atual não pode ser lido com segurança. Nenhum arquivo foi sobrescrito. Use a recuperação na aba Ajustes."
+
+msgid "save.error.invalid_state"
+msgstr "O save contém dados inválidos. O original foi preservado."
+
+msgid "save.error.future_version"
+msgstr "Este save foi criado por uma versão mais nova. Use essa versão para abri-lo; o arquivo foi preservado."
+
+msgid "save.error.incompatible_version"
+msgstr "Versão de save incompatível. O arquivo foi preservado."
+
+msgid "save.error.content_version"
+msgstr "O save usa conteúdo ou modelos incompatíveis com esta versão. O arquivo foi preservado."
+
+msgid "save.error.missing_schema_version"
+msgstr "O save não informa uma versão válida. O original foi preservado."
+
+msgid "save.error.empty_envelope"
+msgstr "O save está incompleto. O original foi preservado."
+
+msgid "save.error.checksum_mismatch"
+msgstr "O save falhou na verificação de integridade. O original foi preservado."
+
+msgid "save.error.schema_mismatch"
+msgstr "As versões interna e externa do save não correspondem. O original foi preservado."
+
+msgid "save.error.read_failed"
+msgstr "Não foi possível ler o save. Verifique o acesso ao arquivo."
+
+msgid "save.error.write_failed"
+msgstr "Não foi possível gravar o save. Verifique espaço e permissões."
+
+msgid "save.error.recovery_failed"
+msgstr "A recuperação não foi concluída. Os arquivos originais foram preservados."
+
+msgid "save.ui.help"
+msgstr "F5 salva; F9 recarrega. A recuperação usa a geração anterior e preserva uma cópia do arquivo substituído."
+
+msgid "save.ui.recover_previous"
+msgstr "Recuperar geração anterior e preservar original"
+
+msgid "save.ui.recovered"
+msgstr "Geração anterior recuperada. O arquivo substituído foi preservado no diretório de saves."
+
+msgid "save.ui.migrated"
+msgstr "Save anterior convertido para esta versão. O original será mantido como backup na próxima gravação."
+
+msgid "save.ui.sandbox_separate"
+msgstr "O modo livre não grava nem recarrega o save da carreira."
+
+msgid "save.error.manual_blocked_during_offload"
+msgstr "Aguarde o término do descarregamento antes de salvar manualmente."

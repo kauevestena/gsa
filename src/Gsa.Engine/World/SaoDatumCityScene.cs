@@ -36,6 +36,7 @@ public partial class SaoDatumCityScene : Node3D
     private const string TutorialManifestPath = "res://world/tutorial-block.json";
     private const string SkyCachePath = "res://world/tutorial-sky.json";
     private const int MaxLidarDisplayPoints = 18000;
+    private const double SouthAccessRoadMinimumNorth = 7399982.0;
 
     private readonly GodotCoordinateAdapter _coordinates = new();
     private readonly SemanticRegistry _registry = new();
@@ -150,7 +151,11 @@ public partial class SaoDatumCityScene : Node3D
             _manifestObjectsById = _fullManifest.Objects.ToDictionary(o => o.Id, StringComparer.Ordinal);
             _streamer = new OldCenterSectorStreamer(_fullManifest, activeRadiusMetres: 380.0, safetyBandRadiusMetres: 140.0);
 
-            var saveDir = ProjectSettings.GlobalizePath("user://career-main");
+            _citySaveSmoke = OS.GetCmdlineUserArgs().Contains("--city-save-smoke");
+            if (_citySaveSmoke) _isSandbox = false;
+            var saveDir = _citySaveSmoke
+                ? (_citySmokeDirectory = Path.Combine(Path.GetTempPath(), "gsa-city-save-smoke-" + Guid.NewGuid().ToString("N")))
+                : ProjectSettings.GlobalizePath(_isSandbox ? "user://sandbox-session" : "user://career-main");
             _saveManager = new SaveGameManager(saveDir);
 
             BuildCityEnvironment();
@@ -640,6 +645,21 @@ public partial class SaoDatumCityScene : Node3D
         if (delta <= 0) return;
         _tick++;
 
+        if (_citySaveSmoke && !_citySaveSmokeCompleted)
+        {
+            if (_tick >= 2)
+            {
+                try { RunCitySaveSmoke(); }
+                catch (Exception error)
+                {
+                    GD.PushError(error.ToString());
+                    SetPhysicsProcess(false);
+                    GetTree().Quit(1);
+                }
+            }
+            return;
+        }
+
         var weather = _calendar.StepPhysical(delta);
         var activePos = CurrentPositionEnu();
         var activeHeading = CurrentHeadingRadians();
@@ -686,7 +706,7 @@ public partial class SaoDatumCityScene : Node3D
             var terrainZ = GetTerrainElevationEnu(resolvedPos.X, resolvedPos.Y);
             var finalCarPos = new Vector3d(
                 Math.Clamp(resolvedPos.X, 500005, 501995),
-                Math.Clamp(resolvedPos.Y, 7399982, 7401995),
+                Math.Clamp(resolvedPos.Y, SouthAccessRoadMinimumNorth, 7401995),
                 terrainZ);
             _carSim.ApplyExternalPositionAdjustment(finalCarPos);
 
