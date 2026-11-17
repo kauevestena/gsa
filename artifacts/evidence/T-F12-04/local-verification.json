@@ -1,0 +1,160 @@
+{
+  "base_commit": "86458b1f8f8f070e163affceb9f414ac756a1b0a",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "version": "#1 SMP Tue Oct 20 21:56:04 UTC 2026"
+  },
+  "versions": {
+    "godot": "4.7.2.stable.mono.official.ed1daf0bf",
+    "dotnet_sdk": "10.0.404"
+  },
+  "domain_tests": {
+    "total": 455,
+    "executed": 455,
+    "passed": 455,
+    "failed": 0,
+    "notExecuted": 0
+  },
+  "native_smoke": {
+    "linux": "passed_headless",
+    "windows": "not_run"
+  },
+  "graphical_smoke": {
+    "linux": "not_run",
+    "windows": "not_run"
+  },
+  "network_isolation": "not_tested",
+  "package_locks_unchanged": true,
+  "command": "DOTNET_PROCESSOR_COUNT=1 python3 scripts/verify.py --exports host",
+  "local_code_commit": "139a3ccfe147e135210f012e24934e40891b2ff0",
+  "checks": [
+    {
+      "name": "dotnet-version",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "godot-version",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "specs",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "installer-tests",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "architecture",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "domain-restore",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "domain-tests",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "validate-content",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "invalid-content",
+      "status": "passed",
+      "exit_code": 2
+    },
+    {
+      "name": "precompute-sky",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "validate-art-kit",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "restore",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "import",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m1-benchmark",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m2-gate",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m3-gate",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "editor-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "world-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "city-save-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-world-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-city-save-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    }
+  ],
+  "source_sha256": {
+    "src/Gsa.Missions/Persistence/SaveCompatibility.cs": "ed37ed4507d5c7ac04122c17582e0d60d5cd7259dab02b27d8dbe02640113483",
+    "src/Gsa.Missions/Persistence/SaveGameManager.cs": "329c63a2cb2246c8776fed02304c9dd002a8499bd205811348e3e17c33e0a677",
+    "src/Gsa.Engine/World/SaoDatumCityPersistence.cs": "b41e2fad9f4131d69bef470ca56f98abc597bf0b6f051316b8b22b3f5f0c7402",
+    "src/Gsa.Engine/World/CitySaveSmoke.cs": "ca25e63a4975a10f30acd8b1aa9c1394abb896ad5d3677abee6b4be7492dc4f0"
+  },
+  "note": "Local working-tree verification; CI independently validates the complete published PR head. Headless tests do not imply graphical review."
+}

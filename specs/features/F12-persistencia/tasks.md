@@ -68,6 +68,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 - [ ] Aceita
 
+**Estado:** em implementação/revisão (17/11/2026). Conversão pura v1→v2, aliases de equipamento, versões de conteúdo/modelo/mundo, invalidação de caches derivados, bloqueio de sobrescrita de saves inválidos/futuros e recuperação explícita com cópia preservada. Integração da cena de cidade persiste fotos, contrato/prazos, frota, posição/estacionamento, Geopédia/colecionáveis e objetivos, isolando Sandbox. Testes locais e CI devem passar antes do aceite; ver [evidências T-F12-04](../../../artifacts/evidence/T-F12-04/README.md).
+
 **Marco:** M7
 
 **Dependências:** T-F12-03

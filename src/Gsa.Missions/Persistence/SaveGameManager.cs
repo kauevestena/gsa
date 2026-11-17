@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Economy;
 
@@ -21,6 +22,8 @@ public enum SaveOperationStatus
 {
     Executed = 0,
     BlockedDuringAtomicTransition = 1,
+    BlockedUnreadableCurrent = 2,
+    InvalidState = 3,
 }
 
 public enum SaveLoadStatus
@@ -59,7 +62,13 @@ public sealed record SaveGameState(
     CustodyStoreSnapshot CustodyStore,
     IReadOnlyList<ContractInstanceSnapshot> Contracts,
     int ConfirmedVehicleLossCount = 0,
-    double? LastVehicleLossAtSeconds = null);
+    double? LastVehicleLossAtSeconds = null,
+    SaveContentVersions? Content = null,
+    SaveCitySessionState? City = null)
+{
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+}
 
 public sealed record SaveFileEnvelope(
     int SchemaVersion,
@@ -81,7 +90,9 @@ public sealed record SaveLoadResult(
     SaveGameState? State,
     bool PreviousGenerationAvailable,
     string? DiagnosticReasonKey = null,
-    string? DiagnosticDetail = null)
+    string? DiagnosticDetail = null,
+    SaveCompatibilityInfo? Compatibility = null,
+    string? PreservedOriginalPath = null)
 {
     public bool Succeeded => Status == SaveLoadStatus.Loaded && State is not null;
 }
@@ -100,7 +111,7 @@ public sealed record RestoredCareerRuntime(
 /// <summary>Atomic generation-rotated career save manager preserving clocks, RNG, ledger, custody, and corrupt files.</summary>
 public sealed class SaveGameManager
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
     public const string CurrentFileName = "current.save.json";
     public const string PreviousFileName = "previous.save.json";
 
@@ -117,13 +128,26 @@ public sealed class SaveGameManager
         Directory.CreateDirectory(SlotDirectory);
 
         var current = LoadFile(CurrentSavePath);
-        if (current.Succeeded && current.State is not null)
-            _lastGeneration = current.State.SaveGeneration;
+        var previous = LoadFile(PreviousSavePath);
+        _lastGeneration = Math.Max(current.State?.SaveGeneration ?? 0, previous.State?.SaveGeneration ?? 0);
     }
 
     public SaveOperationResult Save(SaveGameState state, SaveTrigger trigger)
     {
         ArgumentNullException.ThrowIfNull(state);
+
+        var existing = LoadFile(CurrentSavePath);
+        if (existing.Status != SaveLoadStatus.FileNotFound && !existing.Succeeded)
+            return new SaveOperationResult(SaveOperationStatus.BlockedUnreadableCurrent, _lastGeneration,
+                CurrentSavePath, string.Empty, "save.error.current_protected");
+
+        try { state = SaveCompatibility.Normalize(state, state.SchemaVersion).State; }
+        catch (Exception error) when (error is ArgumentException or InvalidOperationException or
+            FormatException or KeyNotFoundException or NullReferenceException)
+        {
+            return new SaveOperationResult(SaveOperationStatus.InvalidState, _lastGeneration,
+                CurrentSavePath, string.Empty, "save.error.invalid_state");
+        }
 
         if (trigger == SaveTrigger.Manual &&
             state.CustodyStore.Entries.Any(e => e.Stage == BatchCustodyStage.Offloading))
@@ -138,7 +162,11 @@ public sealed class SaveGameManager
 
         Directory.CreateDirectory(SlotDirectory);
 
-        var nextGen = Math.Max(_lastGeneration + 1, state.SaveGeneration + 1);
+        var generation = Math.Max(Math.Max(_lastGeneration, state.SaveGeneration), existing.State?.SaveGeneration ?? 0);
+        if (generation == long.MaxValue)
+            return new SaveOperationResult(SaveOperationStatus.InvalidState, _lastGeneration,
+                CurrentSavePath, string.Empty, "save.error.invalid_state");
+        var nextGen = generation + 1;
         var normalized = state with
         {
             SchemaVersion = CurrentSchemaVersion,
@@ -154,8 +182,7 @@ public sealed class SaveGameManager
         // Rotate valid current.save.json into previous.save.json without overwriting backup with garbage.
         if (File.Exists(CurrentSavePath))
         {
-            var existingValid = LoadFile(CurrentSavePath);
-            if (existingValid.Succeeded)
+            if (existing.Succeeded)
             {
                 var currentBytes = File.ReadAllBytes(CurrentSavePath);
                 WriteAtomicBytes(PreviousSavePath, currentBytes);
@@ -216,6 +243,33 @@ public sealed class SaveGameManager
         return previous with { PreviousGenerationAvailable = previous.Succeeded };
     }
 
+    /// <summary>Explicit recovery: preserve the rejected current file, keep the backup, then restore it atomically.</summary>
+    public SaveLoadResult RestorePreviousGeneration()
+    {
+        var previous = LoadFile(PreviousSavePath);
+        if (!previous.Succeeded)
+            return previous;
+        string? preserved = null;
+        try
+        {
+            var backupBytes = File.ReadAllBytes(PreviousSavePath);
+            if (File.Exists(CurrentSavePath))
+            {
+                var archivePath = Path.Combine(SlotDirectory, $"preserved-{Guid.NewGuid():N}.save.json");
+                WriteAtomicBytes(archivePath, File.ReadAllBytes(CurrentSavePath));
+                preserved = archivePath;
+            }
+            WriteAtomicBytes(CurrentSavePath, backupBytes);
+            _lastGeneration = Math.Max(_lastGeneration, previous.State!.SaveGeneration);
+            return LoadCurrent() with { PreservedOriginalPath = preserved };
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, true,
+                "save.error.recovery_failed", ex.Message, PreservedOriginalPath: preserved);
+        }
+    }
+
     public static RestoredCareerRuntime RestoreRuntime(SaveGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
@@ -240,96 +294,52 @@ public sealed class SaveGameManager
     private static SaveLoadResult LoadFile(string path)
     {
         if (!File.Exists(path))
-            return new SaveLoadResult(SaveLoadStatus.FileNotFound, null, false, "save.error.not_found", $"Missing '{Path.GetFileName(path)}'.");
-
-        string rawJson;
+            return new(SaveLoadStatus.FileNotFound, null, false, "save.error.not_found");
         try
         {
-            rawJson = File.ReadAllText(path, Encoding.UTF8);
+            var rawJson = File.ReadAllText(path, Encoding.UTF8);
+            using var document = JsonDocument.Parse(rawJson);
+            if (document.RootElement.ValueKind != JsonValueKind.Object ||
+                !document.RootElement.TryGetProperty(nameof(SaveFileEnvelope.SchemaVersion), out var version) ||
+                !version.TryGetInt32(out var sourceVersion))
+                return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.missing_schema_version");
+            if (sourceVersion > CurrentSchemaVersion)
+                return new(SaveLoadStatus.UnsupportedFutureVersion, null, false, "save.error.future_version");
+            if (sourceVersion < 1)
+                return new(SaveLoadStatus.IncompatibleVersion, null, false, "save.error.incompatible_version");
+
+            var envelope = JsonSerializer.Deserialize<SaveFileEnvelope>(rawJson);
+            if (envelope is null || string.IsNullOrWhiteSpace(envelope.PayloadJson) || string.IsNullOrWhiteSpace(envelope.PayloadSha256))
+                return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.empty_envelope");
+            if (!string.Equals(ComputeSha256Hex(envelope.PayloadJson), envelope.PayloadSha256, StringComparison.OrdinalIgnoreCase))
+                return new(SaveLoadStatus.ChecksumMismatch, null, false, "save.error.checksum_mismatch");
+
+            using var payload = JsonDocument.Parse(envelope.PayloadJson);
+            if (payload.RootElement.ValueKind != JsonValueKind.Object ||
+                !payload.RootElement.TryGetProperty(nameof(SaveGameState.SchemaVersion), out var innerVersion) ||
+                !innerVersion.TryGetInt32(out var inner))
+                return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.missing_schema_version");
+            if (inner > CurrentSchemaVersion)
+                return new(SaveLoadStatus.UnsupportedFutureVersion, null, false, "save.error.future_version");
+            if (inner != sourceVersion)
+                return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.schema_mismatch");
+
+            var state = JsonSerializer.Deserialize<SaveGameState>(envelope.PayloadJson);
+            if (state is null || (sourceVersion == 2 && state.Content is null))
+                return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.invalid_state");
+            if (state.Content is { } content && (content.CatalogVersion is < 1 or > 2 || content.ModelVersion != 1 || content.WorldVersion != 1))
+                return new(SaveLoadStatus.IncompatibleVersion, null, false, "save.error.content_version");
+            var (normalized, info) = SaveCompatibility.Normalize(state, sourceVersion);
+            return new(SaveLoadStatus.Loaded, normalized, false, Compatibility: info);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, false, "save.error.read_failed", ex.Message);
+            return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.read_failed", ex.Message);
         }
-
-        SaveFileEnvelope? envelope;
-        try
+        catch (Exception ex) when (ex is JsonException or ArgumentException or InvalidOperationException or
+            FormatException or OverflowException or KeyNotFoundException or NullReferenceException or NotSupportedException)
         {
-            using var doc = JsonDocument.Parse(rawJson);
-            if (!doc.RootElement.TryGetProperty(nameof(SaveFileEnvelope.SchemaVersion), out var versionEl) ||
-                versionEl.ValueKind != JsonValueKind.Number)
-            {
-                return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, false, "save.error.missing_schema_version", "Missing numeric SchemaVersion.");
-            }
-
-            var schemaVersion = versionEl.GetInt32();
-            if (schemaVersion > CurrentSchemaVersion)
-            {
-                return new SaveLoadResult(
-                    SaveLoadStatus.UnsupportedFutureVersion,
-                    null,
-                    false,
-                    "save.error.future_version",
-                    $"Save schema_version {schemaVersion} exceeds supported version {CurrentSchemaVersion}.");
-            }
-
-            if (schemaVersion < CurrentSchemaVersion)
-            {
-                return new SaveLoadResult(
-                    SaveLoadStatus.IncompatibleVersion,
-                    null,
-                    false,
-                    "save.error.incompatible_version",
-                    $"Save schema_version {schemaVersion} is older than {CurrentSchemaVersion}.");
-            }
-
-            envelope = JsonSerializer.Deserialize<SaveFileEnvelope>(rawJson);
-        }
-        catch (JsonException ex)
-        {
-            return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, false, "save.error.corrupted_json", ex.Message);
-        }
-
-        if (envelope is null || string.IsNullOrWhiteSpace(envelope.PayloadJson) || string.IsNullOrWhiteSpace(envelope.PayloadSha256))
-        {
-            return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, false, "save.error.empty_envelope", "Save envelope is missing payload fields.");
-        }
-
-        var actualSha = ComputeSha256Hex(envelope.PayloadJson);
-        if (!string.Equals(actualSha, envelope.PayloadSha256, StringComparison.OrdinalIgnoreCase))
-        {
-            return new SaveLoadResult(
-                SaveLoadStatus.ChecksumMismatch,
-                null,
-                false,
-                "save.error.checksum_mismatch",
-                $"Expected SHA-256 '{envelope.PayloadSha256}' but observed '{actualSha}'.");
-        }
-
-        try
-        {
-            using var payloadDoc = JsonDocument.Parse(envelope.PayloadJson);
-            if (payloadDoc.RootElement.TryGetProperty(nameof(SaveGameState.SchemaVersion), out var innerVerEl) &&
-                innerVerEl.ValueKind == JsonValueKind.Number &&
-                innerVerEl.GetInt32() > CurrentSchemaVersion)
-            {
-                return new SaveLoadResult(
-                    SaveLoadStatus.UnsupportedFutureVersion,
-                    null,
-                    false,
-                    "save.error.future_version",
-                    $"Inner state schema_version {innerVerEl.GetInt32()} exceeds {CurrentSchemaVersion}.");
-            }
-
-            var state = JsonSerializer.Deserialize<SaveGameState>(envelope.PayloadJson);
-            if (state is null)
-                return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, false, "save.error.null_state", "Deserialized save state was null.");
-
-            return new SaveLoadResult(SaveLoadStatus.Loaded, state, false);
-        }
-        catch (JsonException ex)
-        {
-            return new SaveLoadResult(SaveLoadStatus.CorruptedPayload, null, false, "save.error.corrupted_payload", ex.Message);
+            return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.invalid_state", ex.Message);
         }
     }
 

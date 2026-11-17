@@ -47,6 +47,8 @@ Consulte os [comandos manuais e versões](docs/toolchain.md) para abrir o editor
 
 O [protocolo de desempenho do LiDAR](docs/lidar-performance.md) mede CPU, alocações e recargas de chunks, com hashes completos para comparar os resultados científicos entre revisões.
 
+A carreira usa [save v2 com migração e recuperação](docs/save-compatibility.md): preserva fotos, contrato, frota, estacionamento e progresso; protege saves futuros/corrompidos contra sobrescrita e isola o modo livre.
+
 ## Estado
 
 Consulte o [roadmap](specs/roadmap.md) e as evidências por tarefa para o estado técnico das bibliotecas. A integração jogável atual está documentada separadamente; aceite técnico e testes automatizados não equivalem à aprovação humana de um marco.
