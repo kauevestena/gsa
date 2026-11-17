@@ -49,7 +49,7 @@ public sealed record UiLongScreenAuditResult(
     int CommandBarBottomPx,
     bool EssentialCommandsVisible);
 
-/// <summary>Bilingual Geopédia catalog, persistent entry unlocks, glossary/PO parity audit, and 150% UI scale layout validation.</summary>
+/// <summary>Bilingual Geopédia catalog, persistent entry unlocks, and glossary/PO parity audit.</summary>
 public sealed class GeopediaCatalogCoordinator
 {
     public const int ReferenceViewportWidthPx = 1920;
@@ -79,6 +79,44 @@ public sealed class GeopediaCatalogCoordinator
         new("geopedia_card_stereographic", "card_stereographic", "geopedia.card_stereographic.title", "geopedia.card_stereographic.example", "geopedia.card_stereographic.unit_effect", "geopedia.card_stereographic.model_limit", "M3", ["projection"]),
     ];
 
+    public static IReadOnlyList<GeopediaEntry> AdvancedEntries { get; } = Array.AsReadOnly(new[]
+    {
+        Advanced("lever_arm", "M4", "lever_arm"),
+        Advanced("boresight", "M4", "boresight"),
+        Advanced("time_sync", "M4", "time_sync"),
+        Advanced("imu_ins", "M4", "imu", "ins"),
+        Advanced("dmi_zupt", "M5", "dmi", "zupt"),
+        Advanced("base_rtk_ppk", "M4", "gnss", "dgnss", "rtk", "ppk"),
+        Advanced("lidar_density", "M5", "lidar", "density"),
+        Advanced("lidar_occlusion", "M5", "lidar", "occlusion"),
+        Advanced("lidar_returns", "M6", "lidar", "multiple_returns"),
+        Advanced("rmse", "M4", "rmse", "control_vs_check"),
+        Advanced("camera_calibration", "M4", "camera", "calibration"),
+        Advanced("historical_geodesy", "M4", "datum", "height"),
+        Advanced("trajectory_drift", "M5", "ins", "uncertainty"),
+        Advanced("territory_attention", "M4", "attention"),
+    });
+
+    public static IReadOnlyList<GeopediaEntry> AllEntries { get; } =
+        Array.AsReadOnly(MvpEntries.Concat(AdvancedEntries).ToArray());
+
+    private static GeopediaEntry Advanced(string concept, string milestone, params string[] terms) => new(
+        "geopedia_" + concept, concept, $"geopedia.{concept}.title", $"geopedia.{concept}.example",
+        $"geopedia.{concept}.unit_effect", $"geopedia.{concept}.model_limit", milestone, Array.AsReadOnly(terms));
+
+    /// <summary>Unlock explanations for equipment in use; never awards collectible or campaign completion entries.</summary>
+    public int UnlockAdvancedForPlatformLevel(int level)
+    {
+        if (level is < 0 or > 6) throw new ArgumentOutOfRangeException(nameof(level));
+        var added = 0;
+        foreach (var entry in AdvancedEntries)
+        {
+            var requiredLevel = entry.UnlockMilestone switch { "M4" => 3, "M5" => 4, _ => 5 };
+            if (level >= requiredLevel && _unlockedIds.Add(entry.Id)) added++;
+        }
+        return added;
+    }
+
     public GeopediaCatalogCoordinator(IEnumerable<string>? restoredUnlockedIds = null)
     {
         if (restoredUnlockedIds is not null)
@@ -91,7 +129,7 @@ public sealed class GeopediaCatalogCoordinator
     public bool UnlockByEntryId(string entryId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(entryId);
-        if (!MvpEntries.Any(e => string.Equals(e.Id, entryId, StringComparison.Ordinal)))
+        if (!AllEntries.Any(e => string.Equals(e.Id, entryId, StringComparison.Ordinal)))
             throw new ArgumentException($"Unknown Geopédia entry '{entryId}'.", nameof(entryId));
 
         return _unlockedIds.Add(entryId);
@@ -100,7 +138,7 @@ public sealed class GeopediaCatalogCoordinator
     public bool UnlockByConceptId(string conceptId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(conceptId);
-        var entry = MvpEntries.FirstOrDefault(e => string.Equals(e.ConceptId, conceptId, StringComparison.Ordinal))
+        var entry = AllEntries.FirstOrDefault(e => string.Equals(e.ConceptId, conceptId, StringComparison.Ordinal))
             ?? throw new ArgumentException($"Unknown Geopédia concept '{conceptId}'.", nameof(conceptId));
 
         return _unlockedIds.Add(entry.Id);
@@ -110,7 +148,7 @@ public sealed class GeopediaCatalogCoordinator
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(milestone);
         var added = 0;
-        foreach (var entry in MvpEntries.Where(e => string.Equals(e.UnlockMilestone, milestone, StringComparison.Ordinal) && !e.ConceptId.StartsWith("landmark_", StringComparison.Ordinal) && !e.ConceptId.StartsWith("card_", StringComparison.Ordinal)))
+        foreach (var entry in AllEntries.Where(e => string.Equals(e.UnlockMilestone, milestone, StringComparison.Ordinal) && !e.ConceptId.StartsWith("landmark_", StringComparison.Ordinal) && !e.ConceptId.StartsWith("card_", StringComparison.Ordinal)))
         {
             if (_unlockedIds.Add(entry.Id))
                 added++;
@@ -131,7 +169,7 @@ public sealed class GeopediaCatalogCoordinator
         ArgumentException.ThrowIfNullOrWhiteSpace(entryId);
         ArgumentNullException.ThrowIfNull(translationsByKey);
 
-        var entry = MvpEntries.FirstOrDefault(e => string.Equals(e.Id, entryId, StringComparison.Ordinal))
+        var entry = AllEntries.FirstOrDefault(e => string.Equals(e.Id, entryId, StringComparison.Ordinal))
             ?? throw new ArgumentException($"Unknown Geopédia entry '{entryId}'.", nameof(entryId));
 
         var normalizedLocale = string.Equals(locale, "pt-BR", StringComparison.OrdinalIgnoreCase) ||
@@ -279,7 +317,7 @@ public sealed class GeopediaCatalogCoordinator
         var glossaryIds = new HashSet<string>(glossary.Select(g => g.TermId), StringComparer.Ordinal);
         var requiredKeys = new HashSet<string>(enMap.Keys.Concat(ptMap.Keys), StringComparer.Ordinal);
 
-        foreach (var entry in MvpEntries)
+        foreach (var entry in AllEntries)
         {
             requiredKeys.Add(entry.TitleKey);
             requiredKeys.Add(entry.ExampleKey);
@@ -302,7 +340,7 @@ public sealed class GeopediaCatalogCoordinator
         foreach (var kv in ptMap.Where(kv => string.IsNullOrWhiteSpace(kv.Value)))
             empty.Add($"pt_BR:{kv.Key}");
 
-        var missingTerms = MvpEntries
+        var missingTerms = AllEntries
             .SelectMany(e => e.GlossaryTermIds)
             .Distinct(StringComparer.Ordinal)
             .Where(t => !glossaryIds.Contains(t))

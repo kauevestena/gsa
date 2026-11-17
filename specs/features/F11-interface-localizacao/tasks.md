@@ -88,6 +88,8 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 - [ ] Aceita
 
+**Estado:** incremento de código em revisão (17/11/2026). Catálogo avançado bilíngue, leitor de verbetes com unidades/limitações, diagnóstico da prévia LiDAR, requisitos locais do contrato/entregáveis e overlay de atenção; ver [evidências](../../../artifacts/evidence/T-F11-05/README.md) e [guia do tablet](../../../docs/advanced-survey-tablet.md). A cidade ainda não fornece trajetória estimada: deriva/sigma permanecem explicitamente indisponíveis. Inspeção visual e integração da trajetória continuam pendentes; não fechar a tarefa por este incremento.
+
 **Marco:** M7
 
 **Dependências:** T-F11-03, T-F15-03, T-F14-04

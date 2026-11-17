@@ -49,6 +49,8 @@ O [protocolo de desempenho do LiDAR](docs/lidar-performance.md) mede CPU, aloca�
 
 A carreira usa [save v2 com migração e recuperação](docs/save-compatibility.md): preserva fotos, contrato, frota, estacionamento e progresso; protege saves futuros/corrompidos contra sobrescrita e isola o modo livre.
 
+O tablet da cidade inclui [Geopédia avançada e diagnóstico técnico](docs/advanced-survey-tablet.md): 30 verbetes bilíngues, limites do contrato ativo, parâmetros da prévia LiDAR e territórios de atenção. A prévia continua separada do CQ oficial; deriva estimada é explicitamente indisponível nesta cena.
+
 ## Estado
 
 Consulte o [roadmap](specs/roadmap.md) e as evidências por tarefa para o estado técnico das bibliotecas. A integração jogável atual está documentada separadamente; aceite técnico e testes automatizados não equivalem à aprovação humana de um marco.
