@@ -1,0 +1,145 @@
+{
+  "base_commit": "d62fa750f86def32c6a35afc20344af89833877b",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "version": "#1 SMP Tue Oct 20 21:56:04 UTC 2026"
+  },
+  "versions": {
+    "godot": "4.7.2.stable.mono.official.ed1daf0bf",
+    "dotnet_sdk": "10.0.404"
+  },
+  "domain_tests": {
+    "total": 441,
+    "executed": 441,
+    "passed": 441,
+    "failed": 0,
+    "notExecuted": 0
+  },
+  "native_smoke": {
+    "linux": "passed_headless",
+    "windows": "not_run"
+  },
+  "graphical_smoke": {
+    "linux": "not_run",
+    "windows": "not_run"
+  },
+  "network_isolation": "not_tested",
+  "package_locks_unchanged": true,
+  "command": "DOTNET_PROCESSOR_COUNT=1 python3 scripts/verify.py --exports host",
+  "published_source_revision": "acd5b58f05fda113c030cabe14a2c3ef686ed6fc",
+  "source_tree_sha": "ab08414543c32d89cbf2a0c05816f78b0df3b9a7",
+  "note": "Local validation commit and published source revision share this exact source tree; only commit metadata differs. CI independently validates the PR head.",
+  "checks": [
+    {
+      "name": "dotnet-version",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "godot-version",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "specs",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "installer-tests",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "architecture",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "domain-restore",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "domain-tests",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "validate-content",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "invalid-content",
+      "status": "passed",
+      "exit_code": 2
+    },
+    {
+      "name": "precompute-sky",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "validate-art-kit",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "restore",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "import",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m1-benchmark",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m2-gate",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m3-gate",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "editor-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "world-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-world-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    }
+  ]
+}

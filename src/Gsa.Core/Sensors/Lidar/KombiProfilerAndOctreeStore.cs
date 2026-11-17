@@ -148,6 +148,10 @@ public sealed class KombiLidarProfilerAcquisition
         var effectiveRange = LidarMaterialProperties.GetEffectiveRangeMetres(_profile.MaxRangeMetres, isRaining);
 
         var rawRays = new List<RawLidarRayMeasurement>(scanLineCount * pattern.Count);
+        // Scratch belongs to this acquisition call, so callbacks may re-enter without
+        // clearing another call's pulse. Reuse it across all rays in the swath.
+        var pulseReturns = new List<(double RangeMetres, double Intensity)>(LidarMaterialProperties.MaxReturnsPerPulse);
+        var seenTargets = new HashSet<string>(StringComparer.Ordinal);
 
         for (var lineIdx = 0; lineIdx < scanLineCount; lineIdx++)
         {
@@ -176,7 +180,8 @@ public sealed class KombiLidarProfilerAcquisition
                     continue;
                 }
 
-                var hits = TraceSingleOrMultiReturnPulse(trueLidarToMap.Translation, dirMap, effectiveRange, rayCaster, zeroNoise);
+                var hits = TraceSingleOrMultiReturnPulse(trueLidarToMap.Translation, dirMap, effectiveRange,
+                    rayCaster, zeroNoise, pulseReturns, seenTargets);
                 for (var h = 0; h < hits.Count; h++)
                 {
                     var (range, intensity) = hits[h];
@@ -203,12 +208,14 @@ public sealed class KombiLidarProfilerAcquisition
         Vector3d dirMap,
         double effectiveMaxRange,
         Func<Vector3d, Vector3d, double, LidarRayHit?> rayCaster,
-        bool zeroNoise)
+        bool zeroNoise,
+        List<(double RangeMetres, double Intensity)> accepted,
+        HashSet<string> seenTargets)
     {
-        var accepted = new List<(double, double)>(LidarMaterialProperties.MaxReturnsPerPulse);
+        accepted.Clear();
+        seenTargets.Clear();
         var residualEnergy = 1.0;
         var currentDist = 0.0;
-        var seenTargets = new HashSet<string>(StringComparer.Ordinal);
 
         for (var bounce = 0; bounce < LidarMaterialProperties.MaxReturnsPerPulse; bounce++)
         {
@@ -517,9 +524,23 @@ public sealed class PointCloudOctreeAndChunkStore
         if (!_derivedIndicesValid || _root is null)
             return Array.Empty<GeoreferencedLidarSample>();
 
-        var matching = new List<GeoreferencedLidarSample>();
-        CollectScientificSamplesInBox(_root, regionMinEnu, regionMaxEnu, matching);
-        return Array.AsReadOnly(matching.ToArray());
+        // Spatial traversal can alternate source chunks at every leaf. Group only
+        // the matching references first, then load each chunk once. Scatter back
+        // into traversal order so cache size never changes the scientific result.
+        var matchingByChunk = new Dictionary<string, List<(int OutputIndex, int IndexInChunk)>>(StringComparer.Ordinal);
+        var count = 0;
+        CollectScientificReferencesInBox(_root, regionMinEnu, regionMaxEnu, matchingByChunk, ref count);
+        if (count == 0)
+            return Array.Empty<GeoreferencedLidarSample>();
+
+        var matching = new GeoreferencedLidarSample[count];
+        foreach (var (chunkId, references) in matchingByChunk)
+        {
+            var samples = LoadChunkSamples(chunkId);
+            foreach (var (outputIndex, indexInChunk) in references)
+                matching[outputIndex] = samples[indexInChunk];
+        }
+        return Array.AsReadOnly(matching);
     }
 
     public OctreeIndexMetrics GetMetrics()
@@ -659,11 +680,12 @@ public sealed class PointCloudOctreeAndChunkStore
         }
     }
 
-    private void CollectScientificSamplesInBox(
+    private void CollectScientificReferencesInBox(
         OctreeNode node,
         Vector3d qMin,
         Vector3d qMax,
-        List<GeoreferencedLidarSample> output)
+        Dictionary<string, List<(int OutputIndex, int IndexInChunk)>> matchingByChunk,
+        ref int count)
     {
         if (!Intersects(node.Min, node.Max, qMin, qMax))
             return;
@@ -673,29 +695,42 @@ public sealed class PointCloudOctreeAndChunkStore
             foreach (var r in node.SampleRefs)
             {
                 if (Contains(qMin, qMax, r.PositionEnu))
-                    output.Add(LoadChunkSample(r.ChunkId, r.IndexInChunk));
+                    AddMatchingReference(r, matchingByChunk, ref count);
             }
             foreach (var page in node.OverflowPages)
             {
                 foreach (var r in page)
                 {
                     if (Contains(qMin, qMax, r.PositionEnu))
-                        output.Add(LoadChunkSample(r.ChunkId, r.IndexInChunk));
+                        AddMatchingReference(r, matchingByChunk, ref count);
                 }
             }
             return;
         }
 
         foreach (var child in node.Children!)
-            CollectScientificSamplesInBox(child, qMin, qMax, output);
+            CollectScientificReferencesInBox(child, qMin, qMax, matchingByChunk, ref count);
     }
 
-    private GeoreferencedLidarSample LoadChunkSample(string chunkId, int indexInChunk)
+    private static void AddMatchingReference(
+        SampleIndexEntry entry,
+        Dictionary<string, List<(int OutputIndex, int IndexInChunk)>> matchingByChunk,
+        ref int count)
+    {
+        if (!matchingByChunk.TryGetValue(entry.ChunkId, out var references))
+        {
+            references = [];
+            matchingByChunk.Add(entry.ChunkId, references);
+        }
+        references.Add((count++, entry.IndexInChunk));
+    }
+
+    private GeoreferencedLidarSample[] LoadChunkSamples(string chunkId)
     {
         if (_residentChunks.TryGetValue(chunkId, out var samples))
         {
             TouchLru(chunkId);
-            return samples[indexInChunk];
+            return samples;
         }
 
         var meta = _chunkMeta[chunkId];
@@ -707,7 +742,7 @@ public sealed class PointCloudOctreeAndChunkStore
         var deserialized = DeserializeChunk(serialized, meta.SampleCount);
         _backingReloadCount++;
         CacheChunkInRam(chunkId, deserialized, meta.ResidentByteSize);
-        return deserialized[indexInChunk];
+        return deserialized;
     }
 
     private void CacheChunkInRam(string chunkId, GeoreferencedLidarSample[] samples, long byteSize)

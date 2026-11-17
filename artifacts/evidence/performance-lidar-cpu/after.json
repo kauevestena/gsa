@@ -1,0 +1,160 @@
+{
+  "benchmark_id": "LIDAR-CPU-V1",
+  "runtime": ".NET 10.0.15",
+  "os": "Debian GNU/Linux 13 (trixie)",
+  "processor_count": 9,
+  "jit_optimization_disabled": false,
+  "warmup_runs": 1,
+  "measured_runs": 5,
+  "scientific_results_deterministic": true,
+  "scenarios": {
+    "overlapping_chunk_query": [
+      {
+        "elapsed_ms": 11.3248,
+        "allocated_bytes": 10499944,
+        "count": 512,
+        "chunk_reloads": 2,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 18.6572,
+        "allocated_bytes": 10499944,
+        "count": 512,
+        "chunk_reloads": 2,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 8.9283,
+        "allocated_bytes": 10499944,
+        "count": 512,
+        "chunk_reloads": 2,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 9.0705,
+        "allocated_bytes": 10499944,
+        "count": 512,
+        "chunk_reloads": 2,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 8.2606,
+        "allocated_bytes": 10499944,
+        "count": 512,
+        "chunk_reloads": 2,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      }
+    ],
+    "resident_chunk_query": [
+      {
+        "elapsed_ms": 0.164,
+        "allocated_bytes": 13736,
+        "count": 512,
+        "chunk_reloads": 0,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 0.1776,
+        "allocated_bytes": 13736,
+        "count": 512,
+        "chunk_reloads": 0,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 0.1761,
+        "allocated_bytes": 13736,
+        "count": 512,
+        "chunk_reloads": 0,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 0.2032,
+        "allocated_bytes": 13736,
+        "count": 512,
+        "chunk_reloads": 0,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      },
+      {
+        "elapsed_ms": 0.1916,
+        "allocated_bytes": 13736,
+        "count": 512,
+        "chunk_reloads": 0,
+        "sha256": "14E25AA84277B0BBBC00F8D8535C357868418AAB0D42D60A6F4AC59EAC7E128B"
+      }
+    ],
+    "resident_full_cloud_query": [
+      {
+        "elapsed_ms": 3.9501,
+        "allocated_bytes": 3147560,
+        "count": 131072,
+        "chunk_reloads": 0,
+        "sha256": "A7934AD4B12AA73A509CF30D78EB15701F35D2CA2D7CCC1AA400CF2E24A6DC8E"
+      },
+      {
+        "elapsed_ms": 4.1788,
+        "allocated_bytes": 3147560,
+        "count": 131072,
+        "chunk_reloads": 0,
+        "sha256": "A7934AD4B12AA73A509CF30D78EB15701F35D2CA2D7CCC1AA400CF2E24A6DC8E"
+      },
+      {
+        "elapsed_ms": 3.9178,
+        "allocated_bytes": 3147560,
+        "count": 131072,
+        "chunk_reloads": 0,
+        "sha256": "A7934AD4B12AA73A509CF30D78EB15701F35D2CA2D7CCC1AA400CF2E24A6DC8E"
+      },
+      {
+        "elapsed_ms": 4.3878,
+        "allocated_bytes": 3147560,
+        "count": 131072,
+        "chunk_reloads": 0,
+        "sha256": "A7934AD4B12AA73A509CF30D78EB15701F35D2CA2D7CCC1AA400CF2E24A6DC8E"
+      },
+      {
+        "elapsed_ms": 3.8401,
+        "allocated_bytes": 3147560,
+        "count": 131072,
+        "chunk_reloads": 0,
+        "sha256": "A7934AD4B12AA73A509CF30D78EB15701F35D2CA2D7CCC1AA400CF2E24A6DC8E"
+      }
+    ],
+    "continuous_l6_rain_swath": [
+      {
+        "elapsed_ms": 9.5765,
+        "allocated_bytes": 4826768,
+        "count": 24644,
+        "chunk_reloads": 0,
+        "sha256": "C4032BCFF43C11342239F243C9C1F97D922C2FBE87824C0B0DCA81F4887A7E4E"
+      },
+      {
+        "elapsed_ms": 9.4546,
+        "allocated_bytes": 4826768,
+        "count": 24644,
+        "chunk_reloads": 0,
+        "sha256": "C4032BCFF43C11342239F243C9C1F97D922C2FBE87824C0B0DCA81F4887A7E4E"
+      },
+      {
+        "elapsed_ms": 9.3352,
+        "allocated_bytes": 4826768,
+        "count": 24644,
+        "chunk_reloads": 0,
+        "sha256": "C4032BCFF43C11342239F243C9C1F97D922C2FBE87824C0B0DCA81F4887A7E4E"
+      },
+      {
+        "elapsed_ms": 9.695,
+        "allocated_bytes": 4826768,
+        "count": 24644,
+        "chunk_reloads": 0,
+        "sha256": "C4032BCFF43C11342239F243C9C1F97D922C2FBE87824C0B0DCA81F4887A7E4E"
+      },
+      {
+        "elapsed_ms": 9.293,
+        "allocated_bytes": 4826768,
+        "count": 24644,
+        "chunk_reloads": 0,
+        "sha256": "C4032BCFF43C11342239F243C9C1F97D922C2FBE87824C0B0DCA81F4887A7E4E"
+      }
+    ]
+  }
+}
