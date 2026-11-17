@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M0–M8. Origem: Público e objetivos pedagógicos; Direção de arte e orçamento técnico; Localização bilíngue (EN-US / PT-BR). Estado: T-F11-01 a T-F11-04 aceitas tecnicamente; incremento de catálogo avançado/tablet T-F11-05 em revisão. Overlay de trajetória estimada, inspeção visual e revisão final continuam pendentes.
+Marcos: M0–M8. Origem: Público e objetivos pedagógicos; Direção de arte e orçamento técnico; Localização bilíngue (EN-US / PT-BR). Estado: T-F11-01 a T-F11-04 aceitas tecnicamente; catálogo avançado/tablet e navegação diagnóstica T-F11-05 em revisão. Inspeção visual/controle e revisão final continuam pendentes.
 
 ## Requisitos
 

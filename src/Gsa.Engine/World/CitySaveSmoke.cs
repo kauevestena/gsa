@@ -97,6 +97,7 @@ public partial class SaoDatumCityScene
         Require(previous.SequenceEqual(File.ReadAllBytes(_saveManager.PreviousSavePath)), "backup changed during recovery");
         Require(JsonSerializer.Serialize(BuildCitySaveState().City) == expected, "recovered session differs");
         RunAdvancedSurveyTabletSmoke();
+        RunCityNavigationSmoke();
         TryLoadCareer(); // The tablet fixture changes presentation/platform inputs without writing a save.
         Require(JsonSerializer.Serialize(BuildCitySaveState().City) == expected, "tablet checks changed saved session");
         var current = File.ReadAllBytes(_saveManager.CurrentSavePath);

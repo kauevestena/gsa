@@ -21,7 +21,7 @@ public static class SkyPrecomputer
         if (!double.IsFinite(height) || height < manifest.Bounds.Min.Z || height > manifest.Bounds.Max.Z)
             throw new ArgumentOutOfRangeException(nameof(eyeHeightM), "The sky sampling plane must lie within scene bounds.");
 
-        var directions = Directions(directionCount);
+        var directions = BuildHemisphereDirections(directionCount);
         var boxes = manifest.Objects.Where(o => o.Collision && !o.Dynamic).Select(o =>
             new WorldBounds(o.PositionEnu - o.SizeEnu / 2, o.PositionEnu + o.SizeEnu / 2)).ToArray();
         var cells = new SkyCell[eastCount * northCount];
@@ -74,7 +74,13 @@ public static class SkyPrecomputer
             bottom + Math.Min(cellSizeM, bounds.Max.Y - bottom) / 2, height);
     }
 
-    private static Vector3d[] Directions(int count)
+    public static IReadOnlyList<Vector3d> CreateHemisphereDirections(int count)
+    {
+        if (count is < 1 or > 4096) throw new ArgumentOutOfRangeException(nameof(count));
+        return Array.AsReadOnly(BuildHemisphereDirections(count));
+    }
+
+    private static Vector3d[] BuildHemisphereDirections(int count)
     {
         var result = new Vector3d[count];
         var goldenAngle = Math.PI * (3 - Math.Sqrt(5));

@@ -1,5 +1,7 @@
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
+using Gsa.Core.Sensors.Fusion;
+using Gsa.Core.Sensors.Gnss;
 using Gsa.Core.Traffic;
 using Gsa.Core.World;
 using Gsa.Engine.UI;
@@ -493,16 +495,14 @@ public partial class SaoDatumCityScene
         var clockText = $"{hours:00}:{mins:00}";
         var weatherText = weather.IsRaining ? Text("hud.weather.rain") : Text("hud.weather.dry");
 
-        var skyOpenness = 0.85;
-        if (_skyCache is not null && _skyCache.TryGetOpenness(_coordinates.ToGodot(pos + Vector3d.UnitZ * 2.0), out var o))
-            skyOpenness = o;
-
-        var gnssText = mode >= LocomotionMode.Car
-            ? Text("hud.gnss.rtk_fix")
-            : (skyOpenness >= 0.45 ? Text("hud.gnss.autonomous") : Text("hud.gnss.degraded"));
-        var gnssColor = mode >= LocomotionMode.Car
-            ? new Color(0.24f, 0.94f, 0.86f)
-            : (skyOpenness >= 0.45 ? new Color(0.32f, 0.92f, 0.56f) : new Color(0.96f, 0.78f, 0.24f));
+        var gnss = _navigationRig?.LatestGnss;
+        var gnssText = Text(NavigationTelemetryPresenter.GnssStatusKey(gnss));
+        var nav = _navigationRig?.Estimator?.Current;
+        if (nav is { BlackoutAlertActive: true } || nav is { HighUncertaintyAlertActive: true })
+            gnssText += " · " + Text("navigation.badge.warning");
+        var gnssColor = gnss is not { IsAvailable: true } ? new Color(.98f, .48f, .32f)
+            : gnss.Dop > 4 || nav is { HighUncertaintyAlertActive: true } ? new Color(.96f, .78f, .24f)
+            : new Color(.32f, .92f, .56f);
 
         var blips = _radarBlips;
         blips.Clear();
@@ -611,7 +611,17 @@ public sealed partial class CityFullMapControl : Control
     private IReadOnlyList<GeodeticBenchmarkNode> _benchmarks = [];
     private IReadOnlyList<Vector3d> _waypoints = [];
     private IReadOnlyList<AttentionZoneView> _attentionZones = [];
+    private TrajectoryEstimateSample? _navigation;
+    private IReadOnlyList<NavigationTrailPoint> _navigationTrail = [];
     internal int AttentionOverlayCount => _attentionZones.Count;
+    internal int NavigationOverlayCount => _navigationTrail.Count;
+
+    public void UpdateNavigation(TrajectoryEstimateSample? estimate, IReadOnlyList<NavigationTrailPoint> trail)
+    {
+        _navigation = estimate;
+        _navigationTrail = trail;
+        QueueRedraw();
+    }
 
     public void UpdateAttention(IReadOnlyList<AttentionZoneView> zones)
     {
@@ -693,6 +703,33 @@ public sealed partial class CityFullMapControl : Control
             DrawCircle(pt, 6f, Colors.Black);
             DrawCircle(pt, 4.5f, new Color(1.0f, 0.78f, 0.16f));
             DrawString(font, pt + new Vector2(5, -4), "★", fontSize: 12);
+        }
+
+        // Estimated-only trace. Axis bars are marginal +/-1 sigma, not a confidence ellipse or measured drift.
+        Vector2 NavigationPt(Vector3d enu) => origin + new Vector2((float)((enu.X - 500000) / 2000 * span),
+            (float)((1 - (enu.Y - 7400000) / 2000) * span));
+        var mapRect = new Rect2(origin, Vector2.One * span);
+        var navColour = new Color(.25f, .88f, 1);
+        for (var i = 1; i < _navigationTrail.Count; i++)
+        {
+            var from = NavigationPt(_navigationTrail[i - 1].EstimatedPositionEnu);
+            var to = NavigationPt(_navigationTrail[i].EstimatedPositionEnu);
+            if (mapRect.HasPoint(from) && mapRect.HasPoint(to)) DrawLine(from, to, navColour, 1.5f);
+        }
+        if (_navigation is { } estimated)
+        {
+            var point = NavigationPt(estimated.PositionEnu);
+            if (mapRect.HasPoint(point))
+            {
+                var sx = (float)(estimated.PositionSigmaEnu.X / 2000 * span);
+                var sy = (float)(estimated.PositionSigmaEnu.Y / 2000 * span);
+                DrawLine(new Vector2(Math.Max(origin.X, point.X - sx), point.Y),
+                    new Vector2(Math.Min(origin.X + span, point.X + sx), point.Y), navColour, 1);
+                DrawLine(new Vector2(point.X, Math.Max(origin.Y, point.Y - sy)),
+                    new Vector2(point.X, Math.Min(origin.Y + span, point.Y + sy)), navColour, 1);
+                DrawPolyline([point + new Vector2(0, -5), point + new Vector2(5, 0), point + new Vector2(0, 5),
+                    point + new Vector2(-5, 0), point + new Vector2(0, -5)], navColour, 1.5f);
+            }
         }
 
         var here = MapPt(_player);

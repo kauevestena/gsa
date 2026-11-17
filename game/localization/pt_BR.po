@@ -1377,7 +1377,7 @@ msgid "geopedia.imu_ins.unit_effect"
 msgstr "Aceleração em m/s² e rotação em rad/s; bias e passeio aleatório acumulam deriva. Gravidade local do jogo: 9,80665 m/s²."
 
 msgid "geopedia.imu_ins.model_limit"
-msgstr "O filtro didático tem seis estados de translação e atitude complementar; não é um INS comercial completo. A prévia da cidade ainda usa poses ideais."
+msgstr "O filtro didático tem seis estados de translação e atitude complementar; não é um INS comercial completo. A cidade conecta um diagnóstico observado; fotos e nuvem ainda usam poses ideais."
 
 msgid "geopedia.dmi_zupt.title"
 msgstr "DMI e atualização de velocidade zero"
@@ -1401,7 +1401,7 @@ msgid "geopedia.base_rtk_ppk.unit_effect"
 msgstr "No modelo RTK: abertura de céu ≥0,4 permite float; ≥0,7 por 10 s e base a ≤2 km permitem fix, com perfil compatível e correções disponíveis."
 
 msgid "geopedia.base_rtk_ppk.model_limit"
-msgstr "Sem simulação de portadora RF. A base não elimina multipath local. PPK exige logs compatíveis e nunca é um estado GNSS ao vivo; o ícone da cidade é simplificado."
+msgstr "Sem simulação de portadora RF. A base não elimina multipath local. PPK exige logs compatíveis e nunca é um estado GNSS ao vivo. Sem base conectada, a cidade informa GNSS autônomo."
 
 msgid "geopedia.lidar_density.title"
 msgstr "LiDAR: densidade e cobertura"
@@ -1485,7 +1485,7 @@ msgid "geopedia.trajectory_drift.unit_effect"
 msgstr "Sigma de posição em metros; sigma 3D é a raiz da soma das variâncias das três componentes. Idade da solução GNSS em segundos."
 
 msgid "geopedia.trajectory_drift.model_limit"
-msgstr "Sigma é incerteza do modelo, não erro medido contra a verdade. Sem trajetória estimada conectada à cena, o painel informa indisponibilidade em vez de deriva zero."
+msgstr "σ é incerteza do modelo, não erro medido contra a verdade. O diagnóstico da cidade usa observações e mantém um trajeto limitado; sua trajetória não substitui o georreferenciamento do produto."
 
 msgid "geopedia.territory_attention.title"
 msgstr "Atenção territorial"
@@ -1524,7 +1524,7 @@ msgid "survey.technical.preview"
 msgstr "△ Prévia de campo — não é CQ oficial"
 
 msgid "survey.technical.ideal_pose"
-msgstr "A cidade usa poses ideais na prévia. Deriva estimada, sigma e RMSE oficial estão indisponíveis nesta cena."
+msgstr "Fotos e nuvem da cidade usam poses ideais. A navegação estimada abaixo é um diagnóstico separado, sem aprovar produtos."
 
 msgid "survey.technical.cloud_show"
 msgstr "Mostrar nuvem da prévia"
@@ -1590,7 +1590,7 @@ msgid "survey.technical.unprotected"
 msgstr "△ Proteção calma inativa; nível não indica uma ação em andamento"
 
 msgid "survey.map.legend"
-msgstr "▲ Marco · ★ Alvo · △ Posição · [n] Atenção territorial; consulte Técnico para valores. Nuvem: prévia 3D; deriva: indisponível."
+msgstr "▲ Marco · ★ Alvo · △ Veículo · ◇ Trajetória estimada; barras ±1σ por eixo (não são elipse de confiança). [n] Atenção. Prévia e trajetória não são CQ."
 
 msgid "survey.technical.surface"
 msgstr "Superfície de suporte"
@@ -1618,3 +1618,54 @@ msgstr "ORLA"
 
 msgid "survey.technical.deliverable"
 msgstr "Entregável {0} · área {1}"
+
+msgid "navigation.title"
+msgstr "Navegação estimada — diagnóstico ao vivo"
+
+msgid "navigation.status.running"
+msgstr "◇ Trajetória estimada a partir de observações"
+
+msgid "navigation.status.waiting_gnss"
+msgstr "○ Aguardando observação GNSS"
+
+msgid "navigation.status.waiting_heading"
+msgstr "○ Aguardando heading observado: avance ou use duas antenas."
+
+msgid "navigation.status.no_imu"
+msgstr "○ Plataforma sem IMU: trajetória inercial indisponível"
+
+msgid "navigation.show_trail"
+msgstr "Mostrar trajetória estimada e eixos de incerteza no mapa"
+
+msgid "navigation.preview_separate"
+msgstr "Fotos e nuvem da cidade usam poses ideais. A navegação estimada abaixo é um diagnóstico separado, sem aprovar produtos."
+
+msgid "navigation.sigma"
+msgstr "σ E/N/U: {0} / {1} / {2} m · σ 3D: {3} m"
+
+msgid "navigation.age"
+msgstr "Idade da última solução GNSS: {0} s físicos"
+
+msgid "navigation.thresholds"
+msgstr "Alertas locais: idade GNSS ≥{0} s ou σ 3D ≥{1} m"
+
+msgid "navigation.alert.blackout"
+msgstr "△ GNSS interrompido: o filtro continua propagando a trajetória"
+
+msgid "navigation.alert.gnss_recent"
+msgstr "◇ Solução GNSS recente"
+
+msgid "navigation.alert.uncertain"
+msgstr "△ Incerteza acima do limiar do filtro; não certifica precisão"
+
+msgid "navigation.alert.within_model"
+msgstr "◇ Incerteza abaixo do limiar de alerta do modelo"
+
+msgid "navigation.badge.warning"
+msgstr "△ INS"
+
+msgid "navigation.model_limit"
+msgstr "σ descreve o modelo do filtro, não o erro verdadeiro ou RMSE. Sem base conectada, o GNSS é autônomo. Checkpoints não entram no estimador. O diagnóstico reinicia ao carregar ou trocar plataforma."
+
+msgid "navigation.status.waiting_velocity"
+msgstr "○ Aguardando segunda posição GNSS para estimar velocidade"

@@ -1,0 +1,13 @@
+{
+  "scope": "SixStateTrajectoryKalmanFilter prediction only; local CPU, not whole navigation or FPS/GPU",
+  "warmup_steps": 1024,
+  "prediction_steps": 10000,
+  "history_allocated_bytes": 23680000,
+  "live_allocated_bytes": 0,
+  "history_elapsed_ms": 40.341,
+  "live_elapsed_ms": 12.303,
+  "mixed_updates_max_state_or_covariance_difference": 0.0,
+  "comparison_tolerance": 1e-09,
+  "source": "LiveNavigationTests stdout in local TRX",
+  "runs": 1
+}

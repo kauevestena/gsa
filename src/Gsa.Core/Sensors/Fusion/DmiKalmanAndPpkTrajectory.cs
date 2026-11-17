@@ -464,6 +464,7 @@ public sealed class SixStateTrajectoryKalmanFilter
 
     private readonly double[] _x = new double[6];
     private double[,] _p = new double[6, 6];
+    private double[,]? _livePredictionScratch;
 
     public double CurrentTimestampSeconds { get; private set; }
     public double GnssSolutionAgeSeconds { get; private set; }
@@ -577,6 +578,55 @@ public sealed class SixStateTrajectoryKalmanFilter
         GnssSolutionAgeSeconds += dtSeconds;
 
         return (f, MatrixOps6.CloneVec(_x), MatrixOps6.CloneMat(_p));
+    }
+
+    /// <summary>Same prediction as Predict, without allocating transition/history matrices for an online-only consumer.</summary>
+    public void PredictLive(double dtSeconds, Vector3d measuredSpecificForceBody,
+        Quaterniond estimatedBodyToMapRotation, ImuGrade imuGrade)
+    {
+        if (!double.IsFinite(dtSeconds) || dtSeconds <= 0.0)
+            throw new ArgumentOutOfRangeException(nameof(dtSeconds));
+        estimatedBodyToMapRotation.EnsureValid();
+        var q = GetProcessNoisePowerDensity(imuGrade);
+        var dt2 = dtSeconds * dtSeconds;
+        var scratch = _livePredictionScratch ??= new double[6, 6];
+
+        // F=[I dt*I; 0 I]. Expand F*P*F' directly, retaining cross-axis terms and multiplication order.
+        for (var i = 0; i < 6; i++)
+        for (var j = 0; j < 6; j++)
+        {
+            var value = _p[i, j];
+            if (i < 3) value += dtSeconds * _p[i + 3, j];
+            if (j < 3)
+            {
+                var cross = _p[i, j + 3];
+                if (i < 3) cross += dtSeconds * _p[i + 3, j + 3];
+                value += dtSeconds * cross;
+            }
+            if (i % 3 == j % 3)
+                value += i < 3 && j < 3 ? q * (dt2 * dtSeconds / 3.0)
+                    : i >= 3 && j >= 3 ? q * dtSeconds : q * (dt2 / 2.0);
+            scratch[i, j] = value;
+        }
+        for (var i = 0; i < 6; i++)
+        for (var j = i; j < 6; j++)
+        {
+            var value = 0.5 * (scratch[i, j] + scratch[j, i]);
+            if (!double.IsFinite(value)) throw new InvalidOperationException("Covariance matrix became non-finite.");
+            if (i == j) value = Math.Max(1e-12, value);
+            _p[i, j] = _p[j, i] = value;
+        }
+
+        EstimatedBodyToMapRotation = estimatedBodyToMapRotation;
+        var accel = estimatedBodyToMapRotation.Rotate(measuredSpecificForceBody) + ImuIdealKinematics.GravityEnu;
+        _x[0] += _x[3] * dtSeconds + 0.5 * dt2 * accel.X;
+        _x[1] += _x[4] * dtSeconds + 0.5 * dt2 * accel.Y;
+        _x[2] += _x[5] * dtSeconds + 0.5 * dt2 * accel.Z;
+        _x[3] += dtSeconds * accel.X;
+        _x[4] += dtSeconds * accel.Y;
+        _x[5] += dtSeconds * accel.Z;
+        CurrentTimestampSeconds += dtSeconds;
+        GnssSolutionAgeSeconds += dtSeconds;
     }
 
     public bool UpdateGnssPosition(GnssObservation observation, double? explicitSigmaOverrideMetres = null)

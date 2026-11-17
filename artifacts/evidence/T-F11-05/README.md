@@ -1,5 +1,7 @@
 # T-F11-05 — Incremento Geopédia avançada e tablet técnico
 
+Este registro descreve o incremento do PR #24. A continuação de navegação/overlay e seu estado atual estão em [navegação observada](live-navigation/README.md); as limitações abaixo preservam o estado histórico desta primeira entrega.
+
 Incremento de código de 17/11/2026, com dependências T-F11-03, T-F15-03 e T-F14-04 já aceitas. **A tarefa completa continua aberta:** a cidade ainda não fornece trajetória estimada ao overlay, e screenshots/revisão visual PT-BR/EN-US a 150% não foram executados neste ambiente sem display.
 
 ## Entrega revisada

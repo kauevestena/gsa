@@ -760,6 +760,7 @@ public partial class SaoDatumCityScene : Node3D
         StepCollectiblesAndBenchmarks(delta, activePos, activeMode);
 
         // Live LiDAR continuous rotating sweep on L4+ platforms!
+        StepCityNavigation(delta, activePos, activeHeading, activeMode, weather.IsRaining);
         StepLiveLidar(delta, activePos, activeHeading, activeMode, weather.IsRaining);
 
         // Camera capture tick
@@ -1192,6 +1193,7 @@ public partial class SaoDatumCityScene : Node3D
 
         _mobility.SetVisualPlatformMode(targetMode);
         _geopedia.UnlockAdvancedForPlatformLevel(PlatformProfile.ForMode(targetMode).Level);
+        ResetCityNavigation();
         _pendingVehiclePopup = Text($"platform.{targetMode.ToString().ToLowerInvariant()}.name");
         _audio.PlayOffloadChime();
     }

@@ -28,7 +28,8 @@ public partial class SaoDatumCityScene
         Require(_geopediaSelector.ItemCount == 30, "advanced catalog missing from actual scene");
         Require(_technicalStatus.Text.Contains("16000") && _technicalStatus.Text.Contains("4000"), "nominal/preview rates mixed");
         Require(_technicalStatus.Text.Contains("0.005"), "profile noise missing");
-        Require(_technicalStatus.Text.Contains(Text("survey.technical.ideal_pose")), "missing trajectory silently reported as precise");
+        Require(_technicalStatus.Text.Contains(Text("navigation.preview_separate")), "diagnostics confused with preview acquisition");
+        Require(_technicalStatus.Text.Contains(Text("navigation.status.waiting_gnss")), "reset trajectory silently reported as precise");
         Require(_technicalStatus.Text.Contains(Text("survey.technical.required_true")), "active contract predicate not shown");
 
         var samples = _fieldSamples.Count;
