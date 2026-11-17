@@ -8,7 +8,7 @@ O domínio de simulação chegou ao primeiro incremento de M7, com sensores, con
 
 A tela inicial permite trocar idioma e abrir o quarteirão. O exercício **Três fachadas** conecta fotos da câmera na cena, triangulação com paralaxe, descarga, processamento, CQ/recoleta, pagamento e save/load. Comece aceitando o serviço perto do escritório; use W/S/A/D para mover/frear/virar, C para fotografar, V para alternar a câmera e R para abrir o caderno com mapa, fotos, diagnóstico dos alvos, CQ e guia. Instruções e limites em [Treinamento jogável](docs/live-training.md).
 
-O treino usa poses ideais e imagens sintéticas, está marcado como **em desenvolvimento** e é separado da campanha histórica. A cidade M7 e a frota avançada ainda não são acessíveis pelo fluxo normal da cena.
+O treino usa poses ideais e imagens sintéticas, está marcado como **em desenvolvimento** e é separado da campanha histórica. A cena de cidade oferece Carreira/Modo Livre, acesso à frota e contratos simplificados. A integração de CQ avançado e campanha continua em desenvolvimento; a cobertura das bibliotecas não equivale ao aceite dessas missões na cena.
 
 ## Preparar e verificar
 

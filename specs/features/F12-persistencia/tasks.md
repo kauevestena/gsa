@@ -66,9 +66,9 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 ### T-F12-04 — Adicionar migração e compatibilidade
 
-- [ ] Aceita
+- [x] Aceita
 
-**Estado:** em implementação/revisão (17/11/2026). Conversão pura v1→v2, aliases de equipamento, versões de conteúdo/modelo/mundo, invalidação de caches derivados, bloqueio de sobrescrita de saves inválidos/futuros e recuperação explícita com cópia preservada. Integração da cena de cidade persiste fotos, contrato/prazos, frota, posição/estacionamento, Geopédia/colecionáveis e objetivos, isolando Sandbox. Testes locais e CI devem passar antes do aceite; ver [evidências T-F12-04](../../../artifacts/evidence/T-F12-04/README.md).
+**Estado:** aceita por revisão técnica delegada após CI Linux/Windows do [PR #23](https://github.com/kauevestena/gsa/pull/23), código `e0b68b21b3f9d27c997ca0d4f7ba451dcfd1b776`, execução `44013474205`, jobs Linux `133805719610` e Windows `133805719851`. Conversão v1→v2, aliases, versões de conteúdo/modelo/mundo, invalidação de referências derivadas, proteção contra sobrescrita e recuperação explícita; snapshot da cidade e isolamento do Sandbox. Foram aprovados 455 testes e os smokes nativos da cidade, incluindo captura e recuperação pelo tablet. Ver [resumo CI](../../../artifacts/evidence/T-F12-04/ci-summary.json) e [evidências T-F12-04](../../../artifacts/evidence/T-F12-04/README.md). O head final do PR continua sujeito à CI antes do merge.
 
 **Marco:** M7
 
