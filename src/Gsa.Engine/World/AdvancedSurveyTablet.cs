@@ -19,7 +19,9 @@ public partial class SaoDatumCityScene
     private Label _cityMapLegend = null!;
     private CheckButton _showCloudButton = null!;
     private CheckButton _showAttentionButton = null!;
+    private CheckButton _showNavigationButton = null!;
     private bool _showAttentionOverlay;
+    private bool _showNavigationOverlay = true;
     private readonly IReadOnlyList<TerritoryZoneDefinition> _planningZones =
         FactionCatalog.GetZonesForPlanningMap(["old_center", "port", "waterfront", "serra"]);
 
@@ -91,6 +93,13 @@ public partial class SaoDatumCityScene
             RefreshTechnicalTablet();
         };
         tab.AddChild(_showAttentionButton);
+        _showNavigationButton = new CheckButton { ButtonPressed = true };
+        _showNavigationButton.Toggled += visible =>
+        {
+            _showNavigationOverlay = visible;
+            RefreshTechnicalTablet();
+        };
+        tab.AddChild(_showNavigationButton);
         _technicalCloudHelp = TechnicalLabel();
         tab.AddChild(_technicalCloudHelp);
         _technicalStatus = TechnicalLabel();
@@ -119,7 +128,26 @@ public partial class SaoDatumCityScene
         _technicalCloudHelp.Visible = _showCloudButton.Visible;
         _technicalCloudHelp.Text = Text("survey.technical.cloud_help");
         _cityMapLegend.Text = Text("survey.map.legend");
-        var lines = new List<string> { Text("survey.technical.preview"), Text("survey.technical.ideal_pose"), "" };
+        var lines = new List<string> { Text("survey.technical.preview"), Text("navigation.preview_separate"), "" };
+        _showNavigationButton.Visible = mode >= LocomotionMode.Car;
+        _showNavigationButton.Text = Text("navigation.show_trail");
+        var estimate = _navigationRig?.Estimator?.Current;
+        var navigation = NavigationTelemetryPresenter.Build(mode >= LocomotionMode.Car, estimate,
+            _navigationRig?.Estimator?.StatusKey ?? "navigation.status.waiting_gnss", locale);
+        _cityMapLegend.Text += "\n" + Text(navigation.StatusKey);
+        lines.Add(Text("navigation.title"));
+        lines.Add(Text(navigation.StatusKey));
+        if (navigation.HasEstimate)
+        {
+            lines.Add(string.Format(Text("navigation.sigma"), navigation.SigmaEastMetres, navigation.SigmaNorthMetres,
+                navigation.SigmaUpMetres, navigation.Sigma3DMetres));
+            lines.Add(string.Format(Text("navigation.age"), navigation.GnssAgeSeconds));
+            lines.Add(string.Format(Text("navigation.thresholds"), navigation.BlackoutThresholdSeconds, navigation.HighUncertaintyThresholdMetres));
+            lines.Add(Text(navigation.BlackoutAlert ? "navigation.alert.blackout" : "navigation.alert.gnss_recent"));
+            lines.Add(Text(navigation.HighUncertaintyAlert ? "navigation.alert.uncertain" : "navigation.alert.within_model"));
+        }
+        lines.Add(Text("navigation.model_limit"));
+        lines.Add("");
         if (hasLidar)
         {
             var profile = CityLidarProfile(mode);
@@ -172,6 +200,12 @@ public partial class SaoDatumCityScene
         }
         _technicalStatus.Text = string.Join("\n", lines);
         _cityMap.UpdateAttention(_showAttentionOverlay ? zones : []);
+        if (_tabletTabs.CurrentTab == MapTabletTab || !_showNavigationOverlay)
+        {
+            _navigationTrailScratch.Clear();
+            if (_showNavigationOverlay && mode >= LocomotionMode.Car) _navigationRig?.CopyTrailTo(_navigationTrailScratch);
+            _cityMap.UpdateNavigation(_showNavigationOverlay ? estimate : null, _navigationTrailScratch);
+        }
         if (_tabletTabs.CurrentTab == MapTabletTab) RefreshCityMapSnapshot();
     }
 

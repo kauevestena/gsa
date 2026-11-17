@@ -142,6 +142,7 @@ public partial class SaoDatumCityScene
             // These are render caches, never restored as acquired scientific samples.
             _lidarPointWriteIndex = _lidarPointVisibleCount = _lidarSliceIndex = 0;
             _lidarCloudMesh.Multimesh.VisibleInstanceCount = 0;
+            ResetCityNavigation();
             _hasNearbyObstacleAnchor = false;
             RemoveChild(_collectiblesRoot);
             _collectiblesRoot.QueueFree();

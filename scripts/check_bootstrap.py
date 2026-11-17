@@ -229,6 +229,8 @@ def main() -> int:
             marker="GSA_CITY_SAVE_SMOKE_OK")
         if "GSA_ADVANCED_SURVEY_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing advanced survey tablet integration marker")
+        if "GSA_CITY_NAVIGATION_SMOKE_OK" not in city_smoke:
+            raise RuntimeError("Missing live navigation integration marker")
 
         targets = ("linux", "windows") if args.exports == "all" else (
             (host,) if args.exports == "host" else ())
@@ -278,6 +280,8 @@ def main() -> int:
                     marker="GSA_CITY_SAVE_SMOKE_OK", runtime_env=clean)
                 if "GSA_ADVANCED_SURVEY_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported advanced survey marker")
+                if "GSA_CITY_NAVIGATION_SMOKE_OK" not in city_output:
+                    raise RuntimeError(f"{target}: missing exported navigation marker")
                 if args.offline_smoke:
                     report["network_isolation"] = "linux_network_namespace"
         current_locks = {str(p.relative_to(ROOT)): sha256(p) for p in lock_paths()}

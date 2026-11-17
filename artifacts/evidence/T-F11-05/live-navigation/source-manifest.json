@@ -1,0 +1,24 @@
+{
+  "base_commit": "dbaadb383312be4ca75f6873c6b3ea61bd07f737",
+  "sha256": {
+    "game/localization/en_US.po": "b1b974abd18fddf090ba57409d8169240c077192e27140069dc20d3f9fd492b6",
+    "game/localization/pt_BR.po": "7341ba83b22f0eeaed76fcccc0d421ceccad784294ee5daf492ee20a44250eee",
+    "scripts/check_bootstrap.py": "9439a705af6a2fbe2e9163d3b42f722733480a4c28121b8c4e9d94b09346216b",
+    "src/Gsa.Core/Sensors/Fusion/DmiKalmanAndPpkTrajectory.cs": "85b0987a165ba988ed31d58484e57f547648c250de87c305f5c18734fbc584c6",
+    "src/Gsa.Core/Sensors/Fusion/LiveNavigationEstimator.cs": "5492f7091563ea80711ea1779cf685ef2e7ac83379f0319d96acbf4ed6a32c67",
+    "src/Gsa.Core/Sensors/Fusion/LiveNavigationRig.cs": "c2fdf8fa12e896c7e288d774327c1d00f509929151f2f431856d4c3697c46c45",
+    "src/Gsa.Core/Sensors/Gnss/GnssSimulator.cs": "031721ed9f42a73d2104118b21f9861e31a308744fc9bc8059a473f0e3d88ec0",
+    "src/Gsa.Core/World/SkyPrecomputer.cs": "de36afedff25732576779fb266af2412cc49a958e1a047feab081d5b5174b3ac",
+    "src/Gsa.Engine/World/AdvancedSurveyTablet.cs": "3a1770c90d4cf58dbfeec22f30029032be7f8ef77f14fb6267c529bec75e5b6a",
+    "src/Gsa.Engine/World/AdvancedSurveyTabletSmoke.cs": "0c9bac953b2e7c2589d682e69c78f8f69856c50b38629ef4cb96985c9a2ec9f2",
+    "src/Gsa.Engine/World/CityNavigation.cs": "7e43e2993d8d69db604ca38d9667a3964e6f0b8cc02fd829ba6fe07453613d7d",
+    "src/Gsa.Engine/World/CityNavigationSmoke.cs": "7e58ba3097fc3a446dc28e83879159b1d3d0ad33c20103de36776d67996a657a",
+    "src/Gsa.Engine/World/CitySaveSmoke.cs": "fdd97a2ae8bffd9f7b4cf1f01786f1a0b43b4b24c1dffda680a04eaee549bedc",
+    "src/Gsa.Engine/World/SaoDatumCityPersistence.cs": "1605b04759fa363b76ae073a87aae3d3904ff865cc44e91dc541a76b0730e570",
+    "src/Gsa.Engine/World/SaoDatumCityScene.cs": "9abd9dec00becc8fbdbb6bd462add1cf034d26198dd23a8ee7583874d58c5b25",
+    "src/Gsa.Engine/World/SaoDatumTablet.cs": "2da5e0e8e6fe4b351cc9e7334d226acd19ae003535addae77b5b6029d8e2ee8c",
+    "src/Gsa.Missions/Presentation/NavigationTelemetryPresenter.cs": "862f8d2bede22a0fde23043e28549dd3f02f133de9bd45b1c38c33cb2c107fb4",
+    "tests/Gsa.Core.Tests/LiveNavigationTests.cs": "b8517286b7ddb136e410f72c5454f846957bf4c8071a79e7dbdfe50c52824120",
+    "tests/Gsa.Missions.Tests/NavigationTelemetryPresenterTests.cs": "34d7a58634a2b0464a877d6fa313022389121da74715417ce1114b990df313db"
+  }
+}

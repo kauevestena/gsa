@@ -88,7 +88,7 @@ Estado inicial de todas as tarefas: pendente. O aceite de código segue a revis�
 
 - [ ] Aceita
 
-**Estado:** incremento de código em revisão (17/11/2026). Catálogo avançado bilíngue, leitor de verbetes com unidades/limitações, diagnóstico da prévia LiDAR, requisitos locais do contrato/entregáveis e overlay de atenção; ver [evidências](../../../artifacts/evidence/T-F11-05/README.md) e [guia do tablet](../../../docs/advanced-survey-tablet.md). A cidade ainda não fornece trajetória estimada: deriva/sigma permanecem explicitamente indisponíveis. Inspeção visual e integração da trajetória continuam pendentes; não fechar a tarefa por este incremento.
+**Estado:** incremento de código em revisão (17/11/2026). Catálogo avançado/tablet integrados pelo PR #24, seguidos por [navegação observada ao vivo](../../../docs/live-navigation.md), overlay de trajetória/incerteza e status GNSS derivado das observações. Ver [evidências iniciais](../../../artifacts/evidence/T-F11-05/README.md), [continuação de navegação](../../../artifacts/evidence/T-F11-05/live-navigation/README.md) e [guia do tablet](../../../docs/advanced-survey-tablet.md). Sigma não é erro verdadeiro ou RMSE; fotos/nuvem e CQ ainda não consomem a trajetória diagnóstica. Inspeção visual/controle e screenshots bilíngues a 150% continuam pendentes; não fechar a tarefa por testes headless.
 
 **Marco:** M7
 
