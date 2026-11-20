@@ -265,7 +265,8 @@ public partial class SaoDatumCityScene
     {
         _observedTargetIds.Clear();
         foreach (var sample in _fieldSamples.Concat(_protectedCityPhotos).Where(s => s.Quality.Passed))
-            foreach (var feature in sample.ObservedFeatures) _observedTargetIds.Add(feature.TargetId);
+            foreach (var feature in sample.ObservedFeatures)
+                if (feature.ObjectClass != CityPhotoCoverage.ObservationClass) _observedTargetIds.Add(feature.TargetId);
     }
 
     private void HandleCityVehicleLoss()

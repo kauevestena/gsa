@@ -1935,7 +1935,37 @@ msgid "city.story.drainage_brief"
 msgstr "Photograph each of the 12 drains from two separated positions. Rain arrives after three in-game hours. Upload your photos, then deliver the inventory at the office to unlock the bicycle."
 
 msgid "city.story.sidewalk_brief"
-msgstr "At each of the eight sidewalk sections, frame the three survey markers from two separated camera positions. The office will measure width and curb height from the uploaded photos. Finish the survey to unlock the scooter."
+msgstr "At each of the eight sidewalk sections, frame the three blue control marks and three measurement marks from two separated camera positions. The office will measure width and curb height from the uploaded photos. Finish the survey to unlock the scooter."
 
 msgid "city.story.capture_status"
 msgstr "Targets photographed {0}/{1} · Photos on device {2}"
+
+msgid "city.story.facades_brief"
+msgstr "Photograph the full south-facing surface of all 20 façades. Step back or take overlapping photos to cover the edges. Upload your photos and review coverage at the office."
+
+msgid "city.story.signs_brief"
+msgstr "Use the scooter to survey 12 signs along the avenue. Capture each from two separated positions and upload both views. The office checks the spacing between signs. Delivery opens the Port, Waterfront and car shop."
+
+msgid "city.story.region_locked"
+msgstr "This district opens after its campaign milestone."
+
+msgid "city.office.surface_coverage"
+msgstr "Surface coverage {0:P0} · required {1:P0}"
+
+msgid "city.office.coverage_rework"
+msgstr "Some surfaces are still uncovered. Step back or capture overlapping views of the edges, then upload again."
+
+msgid "city.office.control_adjusted"
+msgstr "Camera positions adjusted from control in {0} photos"
+
+msgid "city.office.incomplete_surfaces"
+msgstr "Surfaces to revisit · {0}"
+
+msgid "city.office.collect_surface"
+msgstr "Frame the whole south-facing surface of each target. Use overlapping photos when one frame is too narrow."
+
+msgid "city.office.collect_control"
+msgstr "Frame each section’s blue control marks and its three measurement marks from two positions. Only the blue marks constrain camera position."
+
+msgid "city.office.collect_inventory"
+msgstr "Photograph each target from two separated positions, then upload your photos."

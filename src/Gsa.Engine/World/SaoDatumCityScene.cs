@@ -366,6 +366,9 @@ public partial class SaoDatumCityScene : Node3D
                     "vegetation" => new Color(0.22f, 0.48f, 0.24f),
                     "metal" when item.ObjectClass == "sidewalk_survey_mark" => item.Id.EndsWith("_foot", StringComparison.Ordinal)
                         ? new Color(.96f, .54f, .19f) : new Color(.92f, .94f, .24f),
+                    "metal" when item.ObjectClass == "sidewalk_control_mark" => new Color(.18f, .8f, .92f),
+                    "metal" when item.ObjectClass == "traffic_sign" => new Color(.12f, .56f, .38f),
+                    "wood" => new Color(.63f, .35f, .19f),
                     "metal" => new Color(0.62f, 0.68f, 0.72f),
                     _ => new Color(0.58f, 0.60f, 0.58f),
                 });
@@ -381,6 +384,21 @@ public partial class SaoDatumCityScene : Node3D
             });
             if (item.Collision)
                 node.AddChild(new CollisionShape3D { Name = "Collision", Shape = new BoxShape3D { Size = size } });
+
+            if (item.ObjectClass == "traffic_sign")
+                node.AddChild(new MeshInstance3D
+                {
+                    Position = new Vector3(0, -1.1f, .05f),
+                    Mesh = new BoxMesh { Size = new Vector3(.07f, 1.65f, .07f) },
+                    MaterialOverride = GsaMeshBuilder.SolidMat(new Color(.34f, .36f, .38f)),
+                });
+            if (item.ObjectClass == "park_bench")
+                node.AddChild(new MeshInstance3D
+                {
+                    Position = new Vector3(0, -.25f, .25f),
+                    Mesh = new BoxMesh { Size = new Vector3(size.X, .10f, .60f) },
+                    MaterialOverride = material,
+                });
         }
 
         _manifestObstacles = ObstacleBoxEnu.FromWorldObjects(
@@ -643,6 +661,13 @@ public partial class SaoDatumCityScene : Node3D
         return "old_center";
     }
 
+    private bool CityMayEnterRegion(Vector3d current, Vector3d candidate)
+    {
+        var destination = GetRegionIdForEnu(candidate);
+        return _isSandbox || _campaignState.UnlockedRegions.Contains(destination) ||
+            GetRegionIdForEnu(current) == destination;
+    }
+
     private string GetDistrictBannerKey(Vector3d enu) => GetRegionIdForEnu(enu) switch
     {
         "port" => "district.port",
@@ -729,6 +754,13 @@ public partial class SaoDatumCityScene : Node3D
                 _carSim.StopAtExternalContact();
             }
 
+            if (!CityMayEnterRegion(prevCarPos, resolvedPos))
+            {
+                resolvedPos = prevCarPos;
+                _carSim.StopAtExternalContact();
+                _feedbackText = Text("city.story.region_locked");
+            }
+
             var terrainZ = GetTerrainElevationEnu(resolvedPos.X, resolvedPos.Y);
             var finalCarPos = new Vector3d(
                 Math.Clamp(resolvedPos.X, 500005, 501995),
@@ -759,6 +791,13 @@ public partial class SaoDatumCityScene : Node3D
                 _locomotion.StopAtExternalContact(activePos);
                 activeSpeed = 0;
                 ApplyCityTrafficImpact(trafficHit, activeMode);
+            }
+            if (!CityMayEnterRegion(previousPlayerPosition, activePos))
+            {
+                activePos = previousPlayerPosition;
+                _locomotion.StopAtExternalContact(activePos);
+                activeSpeed = 0;
+                _feedbackText = Text("city.story.region_locked");
             }
             if (step.Collided && step.ImpactDeltaVMetresPerSecond > 1.2)
                 _gimbalina.ApplyStartle(StartleEventKind.Pothole);
@@ -1199,6 +1238,13 @@ public partial class SaoDatumCityScene : Node3D
 
         var estimatedPose = CurrentActiveMode() >= LocomotionMode.Car && navigation is not null
             ? new EstimatedBodyPose(t, navigation.PositionEnu + Vector3d.UnitZ * 1.4, navigation.BodyToMapRotation) : new EstimatedBodyPose(t, origin, bodyQuat);
+        if (CurrentActiveMode() < LocomotionMode.Car && _activeContract?.AreaId == CitySurveyInventory.SidewalkArea)
+        {
+            // Reproducible heading-dependent error in the initial light-platform position.
+            var cosHeading = Math.Cos(heading);
+            var offset = new Vector3d(.55 * cosHeading, .4 * Math.Sin(heading), .24 * cosHeading);
+            estimatedPose = new(t, origin + offset, bodyQuat);
+        }
         var environment = weather.ToCameraEnvironment();
         var lensObstruction = weather.IsRaining ? weather.RainIntensity * Math.Min(.4, .12 + .04 * Math.Abs(speed)) : 0;
         environment = new CameraEnvironmentSnapshot(environment.IsNight, environment.SunAngleRadians,
@@ -1208,14 +1254,23 @@ public partial class SaoDatumCityScene : Node3D
             _tick, t, start, end, readout, estimatedPose, mount, environment,
             _liveCandidates, Occluded), _locomotion, out var sample, out _) && sample is not null)
         {
+            if (sample.Quality.Passed && _cityPhotoCoverage is { } coverage)
+            {
+                var observedCells = coverage.Observe(start, CameraSensorProfile.Initial, Occluded);
+                if (observedCells.Count > 0)
+                    sample = new(sample.SampleId, sample.SensorId, sample.Sequence, sample.TimestampSeconds, sample.EstimatedPose,
+                        sample.MountEstimate, sample.Intrinsics, sample.Quality, sample.ObservedFeatures.Concat(observedCells),
+                        sample.PrivacyMasks, sample.Thumbnail);
+            }
             _fieldSamples.Add(sample);
             _recentPhotoSeconds = .6;
             _coverageSpots.Add(pos);
-            if (sample.Quality.Passed)
-                foreach (var f in sample.ObservedFeatures) _observedTargetIds.Add(f.TargetId);
+            var visibleTargets = sample.ObservedFeatures.Where(f => f.ObjectClass != CityPhotoCoverage.ObservationClass)
+                .Select(f => f.TargetId).ToArray();
+            if (sample.Quality.Passed) _observedTargetIds.UnionWith(visibleTargets);
             _audio.PlayShutter();
-            _feedbackText = sample.ObservedFeatures.Count > 0
-                ? $"{Text("training.observed")} {string.Join(", ", sample.ObservedFeatures.Select(f => f.TargetId))}"
+            _feedbackText = visibleTargets.Length > 0
+                ? $"{Text("training.observed")} {string.Join(", ", visibleTargets)}"
                 : Text("training.nothing_visible");
         }
         _camScheduler.FlushBatchManifest("city_flush");

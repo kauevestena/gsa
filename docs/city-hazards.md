@@ -37,22 +37,25 @@ Cidade calma **ou** contrato `Calm` cancela avisos/bomba, spoofing, barreira e p
 
 Fotos de carro/Kombi/picape/van guardam pose estimada de GNSS/IMU/DMI; carro/Kombi precisam mover-se para inicializar heading. Interferência afeta a observação; o filtro aceita/rejeita por inovação, sem consultar verdade. O painel Técnico avisa quando uma correção é rejeitada. Inconsistência não comprova spoofing: viés lento pode ser absorvido, e fixes iniciais já enviesados também podem não ser detectados.
 
-Câmeras a pé e em plataformas leves ainda usam poses ideais. Envie as imagens em um ponto de descarga e selecione **Processar e entregar** no Escritório. A revisão verifica os alvos obrigatórios, a proporção de imagens válidas, a privacidade e o formato. O pagamento segue o laudo e o prazo do contrato. Em caso de retrabalho, os lotes protegidos podem ser processados junto com as novas fotos após outra descarga.
+Envie as imagens em um ponto de descarga e selecione **Processar e entregar** no Escritório. A revisão verifica os alvos obrigatórios, a proporção de imagens válidas, a privacidade e o formato. Em caso de retrabalho, os lotes protegidos entram na revisão seguinte junto com as fotos novas. O pagamento segue o laudo e o prazo do contrato.
 
-O quadro libera as três missões iniciais em sequência.
-
-| Missão | Coleta e controle de qualidade |
+| Missão | Coleta, controle de qualidade e progresso |
 | --- | --- |
-| HIST-01 · Fachadas | Fotografe as 20 fachadas marcadas no mapa. |
-| HIST-02 · Drenagem | Fotografe cada um dos 12 bueiros a partir de posições separadas. A chuva chega após três horas no relógio do jogo e afeta a qualidade das fotos. O Escritório triangula as posições e exige RMSE absoluto de até 2 m. A entrega libera a compra da bicicleta. |
-| HIST-03 · Calçadas | Equipe a bicicleta. Fotografe de posições separadas os três alvos de cada um dos oito trechos. O Escritório calcula a largura horizontal e o desnível da guia, com RMSE combinado de até 0,20 m. A entrega libera a compra da motoneta. |
+| HIST-01 · Fachadas | Fotografe as 20 fachadas marcadas no mapa. Cubra pelo menos 90% da área útil das faces sul em células de 2 m. A câmera verifica o enquadramento e a visibilidade de cada célula. O Escritório indica as superfícies a revisitar. |
+| HIST-02 · Drenagem | Fotografe cada um dos 12 bueiros de posições separadas. A chuva chega após três horas no relógio do jogo e afeta a qualidade das fotos. O Escritório triangula as posições e exige RMSE absoluto de até 2 m. A entrega libera a compra da bicicleta. |
+| HIST-03 · Calçadas | Equipe a bicicleta. Enquadre os marcos azuis de controle e os alvos de medição em duas posições separadas por trecho. O Escritório usa as coordenadas publicadas dos marcos azuis para ajustar a translação da câmera e triangula separadamente os alvos de medição. Exige RMSE combinado de até 0,20 m para largura e altura da guia. A entrega libera a compra da motoneta. |
+| HIST-04 · Placas | Equipe a motoneta e fotografe as 12 placas da avenida em duas passadas. O Escritório exige RMSE de até 0,15 m nas distâncias entre placas vizinhas. A entrega fecha o Ato 1 e libera o Porto, a Orla e a compra do carro. |
 
-Cobertura contínua de área, ajuste com controle local, contratos procedurais, entregas de nuvens e perfis e as missões a partir da HIST-04 continuam em desenvolvimento. Contratos antigos sem suporte de entrega podem ser carregados e abandonados no Escritório. A prévia LiDAR continua disponível para exploração. Base/PPK e logs de navegação persistentes continuam pendentes.
+O quadro oferece cinco contratos procedurais com duas rotas por modelo: fachadas, drenagem, calçadas, placas e parque. As ofertas usam os alvos da rota selecionada e os requisitos da frota montada. O contrato tranquilo do parque está disponível com o carrinho e sem taxa de entrada. Salvamentos preservam fotos, evidência de cobertura e desbloqueios.
+
+O ajuste das fotos de calçadas mantém a orientação da câmera fixa e corrige o erro de posição simulado a partir dos marcos visíveis. As outras câmeras leves ainda usam poses ideais. As missões a partir da HIST-05, entregas de nuvens e perfis, Base/PPK e logs persistentes de navegação continuam em desenvolvimento. A prévia LiDAR segue disponível para exploração.
 
 Perseguidor e barreira são representações básicas. O perseguidor avança para o jogador respeitando obstáculos locais, sem planejamento viário completo. Pneu/lente ainda são estados do conjunto de aquisição compartilhados entre plataformas. Arte, colocação de barreiras nas ruas, acessibilidade e balanceamento precisam de inspeção visual/playtest. Os [encontros de cães e estacionamento](city-everyday-encounters.md) agora têm integração própria. A [circulação do Centro Velho](old-center-traffic.md) integra colisões, motoristas erráticos e blitz. Concorrência narrativa da MapaFácil, patrulhas por horário e playthrough final simultâneo das cinco facções também continuam pendentes.
 
 ## Verificação
 
 `python3 scripts/verify.py --exports host` exige `GSA_CITY_HAZARDS_SMOKE_OK` na cena e executável exportado: callbacks reais de câmera/upload/serviços, warning→tinta, limpeza interrompida, movimento com pneu, colisão com barreira, marco deslocado, ambiente GNSS real/pose estimada, rejeição de salto observado, bomba retomada de save, perda/seguro e contrato tranquilo com Cidade calma desligada. O slot temporário é separado do fixture original; não é playthrough humano/inspeção visual.
+
+O smoke de entrega também executa HIST-01 a HIST-04 e as dez rotas procedurais. Exercita a reprovação por cobertura incompleta, ajuste por controle observado, liquidação sem repetição, recarga do save e abertura da frota e dos distritos.
 
 O save permanece envelope v2 com catálogo 4 para incluir encontros/estresse; builds anteriores rejeitam esse catálogo para evitar apagar o novo estado. Ver [compatibilidade](save-compatibility.md) e [evidência](../artifacts/evidence/T-F16-04/city-hazards/README.md).

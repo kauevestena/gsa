@@ -69,6 +69,7 @@ public static class OldCenterMvpWorldAssembler
     public const double MvpExtentMetres = 500.0;
     public const double SectorSizeMetres = 100.0;
     public const double DrainageSurveyNorth = 7400140.0;
+    public const double AvenueSignsNorth = 7400362.4;
     public const double SidewalkSurveyNorth = 7400310.0;
 
     public static bool OverlapsSurveyCorridor(double east, double north, double width, double depth)
@@ -77,7 +78,8 @@ public static class OldCenterMvpWorldAssembler
             return false;
         const double reserve = 9;
         return Math.Abs(north - DrainageSurveyNorth) < depth / 2 + reserve ||
-               Math.Abs(north - SidewalkSurveyNorth) < depth / 2 + reserve;
+               Math.Abs(north - SidewalkSurveyNorth) < depth / 2 + reserve ||
+               Math.Abs(north - AvenueSignsNorth) < depth / 2 + reserve;
     }
 
     public static WorldSceneManifest BuildOldCenterMvpManifest(WorldSceneManifest tutorialManifest)
@@ -134,7 +136,7 @@ public static class OldCenterMvpWorldAssembler
 
         for (var i = 1; i <= 12; i++)
         {
-            var e = 500030.0 + (i - 1) * 38.0;
+            var e = 500132.0 + (i - 1) * 28.0;
             AddObject(new WorldBoxObject(
                 $"sign_{i:00}",
                 "traffic_sign",
@@ -144,8 +146,8 @@ public static class OldCenterMvpWorldAssembler
                 ["sign", "inventory_target"],
                 dynamic: false,
                 collision: true,
-                new Vector3d(e, 7400220.0, 102.0),
-                new Vector3d(0.8, 0.2, 2.5)));
+                new Vector3d(e, AvenueSignsNorth, 101.95),
+                new Vector3d(0.85, 0.14, 0.65)));
         }
 
         for (var i = 1; i <= 8; i++)
@@ -172,6 +174,15 @@ public static class OldCenterMvpWorldAssembler
             AddMark("back", new(e, north + width / 2, pavementElevation + stepHeight + targetHeight));
             AddMark("foot", new(e + .55, edge - .25, pavementElevation + targetHeight));
 
+            // Published control coordinates are distinct from the points that are measured and checked.
+            AddControl("a", new(e - 1.25, edge, pavementElevation + .44));
+            AddControl("b", new(e + 1.55, edge - .4, pavementElevation + .38));
+            AddControl("c", new(e + .85, north + width / 2, pavementElevation + stepHeight + .68));
+
+            void AddControl(string suffix, Vector3d position) => AddObject(new WorldBoxObject(
+                segmentId + "_control_" + suffix, "sidewalk_control_mark", "metal", "old_center",
+                [], ["published_control"], dynamic: false, collision: false, position, new Vector3d(.34, .045, .34)));
+
             void AddMark(string suffix, Vector3d position) => AddObject(new WorldBoxObject(
                 segmentId + "_" + suffix, "sidewalk_survey_mark", "metal", "old_center",
                 ["commerce_sidewalk_surface"], ["sidewalk_measurement"], dynamic: false, collision: false,
@@ -189,6 +200,15 @@ public static class OldCenterMvpWorldAssembler
             collision: false,
             new Vector3d(500350.0, 7400380.0, 100.2),
             new Vector3d(120.0, 120.0, 0.4)));
+
+        for (var i = 1; i <= 8; i++)
+        {
+            var east = 500310.0 + ((i - 1) % 4) * 25;
+            var north = i <= 4 ? 7400397.0 : 7400423.0;
+            AddObject(new WorldBoxObject($"park_bench_{i:00}", "park_bench", "wood", "old_center",
+                ["central_park_planes"], ["inventory_target"], dynamic: false, collision: true,
+                new Vector3d(east, north, 100.65), new Vector3d(2, .25, .9)));
+        }
 
         AddObject(new WorldBoxObject(
             "unload_point_north",

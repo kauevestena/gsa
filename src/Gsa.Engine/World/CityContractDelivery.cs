@@ -25,38 +25,69 @@ public partial class SaoDatumCityScene
     private IReadOnlyList<SidewalkSectionMeasurement> _lastSidewalkMeasurements = [];
     private int _lastCitySurveyTargetCount;
 
-    private static IReadOnlyList<ContractRequirementSpec> CitySurveyRequirements(string missionId) => missionId switch
+    private CityPhotoCoverage? _cityPhotoCoverage;
+    private int _lastAdjustedPhotoCount;
+    private IReadOnlyList<string> _lastIncompleteSurfaces = [];
+
+    private const string FacadeArea = "commerce_street_facades";
+    private const string ParkArea = "central_park_calm";
+    private const string DrainageArea = "commerce_street_drainage";
+
+    private static IReadOnlyList<ContractRequirementSpec> CitySurveyRequirements(string area, bool story) => area switch
     {
-        "HIST-02" => [.. CityPhotoRequirements, new ThresholdRequirementSpec("absolute_rmse", "m", "max", 2, .5)],
-        "HIST-03" => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .2, .05)],
+        FacadeArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("area_coverage", "ratio", "min",
+            story ? .90 : .85, .98, "commerce_facade_planes", CityPhotoCoverage.CellSizeMetres)],
+        ParkArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("area_coverage", "ratio", "min",
+            .85, .96, "central_park_planes", CityPhotoCoverage.CellSizeMetres)],
+        DrainageArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("absolute_rmse", "m", "max", 2, .5)],
+        CitySurveyInventory.SidewalkArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .2, .05)],
+        CitySurveyInventory.SignsArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .15, .05)],
         _ => CityPhotoRequirements,
     };
 
-    private static bool SupportsCityStory(CampaignMissionFullSpec spec) => spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03";
+    private static bool SupportsCityStory(CampaignMissionFullSpec spec) =>
+        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04";
 
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
-        if (definition.RequiredFeatureIds.Count == 0 || definition.PartialPolicy.Mode != "disabled")
+        if (definition.RequiredFeatureIds.Count == 0 || definition.PartialPolicy.Mode != "disabled" ||
+            !definition.RequiredFeatureIds.All(_manifestObjectsById.ContainsKey))
             return false;
 
-        var inventory = definition.Product == "feature_inventory" && definition.Id is "HIST-02" or "HIST-03";
-        if (definition.Product != "images" && !inventory)
+        var inventory = definition.Product == "feature_inventory" &&
+            definition.AreaId is DrainageArea or CitySurveyInventory.SidewalkArea or CitySurveyInventory.SignsArea;
+        var photos = definition.Product == "images" && definition.AreaId is FacadeArea or ParkArea;
+        if (!photos && !inventory)
             return false;
         if (inventory && !CitySurveyInventory.HasReference(definition, _manifestObjectsById))
             return false;
 
-        var supported = inventory ? CitySurveyRequirements(definition.Id) : CityPhotoRequirements;
+        var supported = CitySurveyRequirements(definition.AreaId, definition.Id == "HIST-01");
         return definition.Requirements.All(requirement =>
-            supported.Any(metric => metric.Metric == requirement.Metric && metric.Kind == requirement.Kind));
+            supported.Any(metric => metric.Metric == requirement.Metric && metric.Kind == requirement.Kind &&
+                (metric is not ThresholdRequirementSpec allowed || requirement is ThresholdRequirementSpec actual &&
+                    actual.SurfaceId == allowed.SurfaceId && actual.CellSizeMetres == allowed.CellSizeMetres)) ||
+            inventory && requirement is ThresholdRequirementSpec { Metric: "feature_completeness" });
     }
+
+    private static ContractDefinition CityEffectiveDefinition(ContractDefinition definition) => definition with
+    {
+        Requirements = definition.Requirements.Concat(CitySurveyRequirements(definition.AreaId, definition.Id == "HIST-01")
+            .Where(floor => definition.Requirements.All(rule => rule.Metric != floor.Metric))).ToArray()
+    };
+
+    private void PrepareCityPhotoCoverage() =>
+        _cityPhotoCoverage = _activeContract is { } definition && SupportsCityDelivery(definition)
+            ? CityPhotoCoverage.ForContract(CityEffectiveDefinition(definition), _manifestObjectsById)
+            : null;
 
     private bool CityMissionCompleted(string missionId) =>
         _campaignState.ObjectiveStates.TryGetValue(missionId, out var state) && state == $"completed:{missionId}";
 
-    private bool CityHasSurveyPlatform(CampaignMissionFullSpec spec)
+    private bool CityHasSurveyPlatform(int minimumLevel)
     {
         var mode = _locomotion.MountedVehicleMode;
-        return _fleet.OwnedPlatforms.Contains(mode) && PlatformProfile.ForMode(mode).Level >= spec.MinimumPlatformLevel;
+        return _fleet.OwnedPlatforms.Contains(mode) && PlatformProfile.ForMode(mode).Level >= minimumLevel;
     }
 
     private bool UpdateDrainageWeather()
@@ -88,6 +119,12 @@ public partial class SaoDatumCityScene
             if (report.GetMetric(metric) is { Value: { } value, Limit: { } limit })
                 rows.Add(string.Format(culture, Text("city.office.rmse_" + labelKey), value, limit));
         }
+        if (report.GetMetric("area_coverage") is { Value: { } coverage, Limit: { } minimum })
+            rows.Add(string.Format(culture, Text("city.office.surface_coverage"), coverage, minimum));
+        if (_lastIncompleteSurfaces.Count > 0)
+            rows.Add(string.Format(culture, Text("city.office.incomplete_surfaces"), string.Join(", ", _lastIncompleteSurfaces)));
+        if (_lastAdjustedPhotoCount > 0)
+            rows.Add(string.Format(culture, Text("city.office.control_adjusted"), _lastAdjustedPhotoCount));
         foreach (var segment in _lastSidewalkMeasurements)
             rows.Add(string.Format(culture, Text("city.office.sidewalk_measurement"),
                 segment.SegmentId, segment.WidthMetres, segment.CurbHeightMetres));
@@ -171,19 +208,28 @@ public partial class SaoDatumCityScene
 
         // Older accepted jobs retain their targets and commercial terms. They also
         // need the current evidence for their product before settlement.
-        var effectiveDefinition = definition with
-        {
-            Requirements = definition.Requirements.Concat(CitySurveyRequirements(definition.Id)
-                .Where(floor => definition.Requirements.All(rule => rule.Metric != floor.Metric))).ToArray()
-        };
+        var effectiveDefinition = CityEffectiveDefinition(definition);
         var submission = product.Submission;
         _lastSidewalkMeasurements = [];
+        _lastAdjustedPhotoCount = 0;
+        _lastIncompleteSurfaces = [];
+        EvaluationReference reference;
         if (isInventory)
-            submission = CitySurveyInventory.Reconstruct(definition, submission, out _lastSidewalkMeasurements);
-        var reference = isInventory ? CitySurveyInventory.BuildReference(definition, _manifestObjectsById)
-            : new EvaluationReference(definition.Id, [], definition.RequiredFeatureIds);
+        {
+            var controls = CitySurveyInventory.PublishedControls(definition, _manifestObjectsById);
+            submission = CitySurveyInventory.Reconstruct(definition, submission, controls, out _lastSidewalkMeasurements, out _lastAdjustedPhotoCount);
+            reference = CitySurveyInventory.BuildReference(definition, _manifestObjectsById);
+        }
+        else
+        {
+            if (_cityPhotoCoverage is { } coverage)
+                submission = submission with { SampleFootprints = coverage.ReadFootprints(submission.Samples).ToArray() };
+            reference = new(definition.Id, _cityPhotoCoverage is { } grid ? [grid.Reference] : [], definition.RequiredFeatureIds);
+        }
         var report = QualityEvaluator.Evaluate(effectiveDefinition, reference, submission);
         _lastCitySurveyReview = report;
+        if (_cityPhotoCoverage is { } incomplete && report.GetMetric("area_coverage")?.Status == MetricEvaluationStatus.Failed)
+            _lastIncompleteSurfaces = incomplete.MissingTargets(submission.SampleFootprints);
         _lastCitySurveyTargetCount = definition.RequiredFeatureIds.Count;
         var result = machine.RecordQualityEvaluation(now, report.Passed, report.PassedDeliverableIds, report.FailureReasonKeys.FirstOrDefault());
         if (!result.Succeeded || !report.Passed)
@@ -193,6 +239,7 @@ public partial class SaoDatumCityScene
                 "cq.failure.privacy_redacted" => "city.office.review_privacy",
                 "cq.failure.all_required_features" when isInventory => "city.office.need_parallax",
                 "cq.failure.all_required_features" => "city.office.missing_photo_targets",
+                "cq.failure.area_coverage" => "city.office.coverage_rework",
                 "cq.failure.absolute_rmse" or "cq.failure.relative_rmse" or "cq.failure.insufficient_checkpoints" =>
                     "city.office.measurement_rework",
                 "cq.failure.valid_image_fraction" => "city.office.invalid_photos",
@@ -222,6 +269,7 @@ public partial class SaoDatumCityScene
         _gtaHud.TriggerCelebrationBanner(Text("city.mission_passed"), $"{Text(definition.TitleKey)} · {summary}");
         _feedbackText = summary;
         _activeContract = null;
+        _cityPhotoCoverage = null;
         _activeMachine = null;
         _activeStorySpec = null;
         _cityHazards.Services.ExpireInsurance();
