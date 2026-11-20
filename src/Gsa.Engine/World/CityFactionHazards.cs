@@ -222,6 +222,19 @@ public partial class SaoDatumCityScene
     {
         if (_activeContract is null || !NearCityUnload()) { _feedbackText = Text("city.hazards.upload_location"); return; }
         if (_fieldSamples.Count == 0) { _feedbackText = Text("city.hazards.nothing_to_upload"); return; }
+        var now = _calendar.CalendarTimeSeconds;
+        _activeMachine?.AdvanceClock(now);
+        if (_activeMachine?.State == ContractState.Expirado)
+        {
+            _feedbackText = Text("city.office.expired");
+            return;
+        }
+        if (_activeMachine?.State is not (ContractState.Aceito or ContractState.Coletando or ContractState.Retrabalho))
+        {
+            _feedbackText = Text("city.office.processing_failed");
+            return;
+        }
+
         var id = _cityHazards.NextEventId();
         var artifact = new SurveyBatchArtifact(1, id, _activeContract.Id, _fieldSamples.Min(s => s.TimestampSeconds),
             _fieldSamples.Max(s => s.TimestampSeconds), _fieldSamples.Count, 0, CaptureStopReason.None,

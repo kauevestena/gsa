@@ -1858,3 +1858,36 @@ msgstr "Gimbalina fled to safety. Recover her at the office before using her cam
 
 msgid "city.encounters.treated"
 msgstr "Dog pacified with a treat."
+
+msgid "city.office.unavailable"
+msgstr "In development"
+
+msgid "city.office.requires_lidar"
+msgstr "This contract needs a processed LiDAR survey. You can abandon it from the Office tab."
+
+msgid "city.office.requires_inventory"
+msgstr "This contract needs a measured feature inventory, which is still in development."
+
+msgid "city.office.requires_coverage"
+msgstr "Area coverage grading for this image contract is still in development."
+
+msgid "city.office.upload_first"
+msgstr "Upload your photos at an upload point before processing."
+
+msgid "city.office.expired"
+msgstr "The contract has expired. Close it in the Office tab to take another job."
+
+msgid "city.office.review_privacy"
+msgstr "Confirm the privacy masks in the Office tab, then process again."
+
+msgid "city.office.missing_photo_targets"
+msgstr "Some required targets are missing from the valid uploaded photos. Collect and upload them."
+
+msgid "city.office.invalid_photos"
+msgstr "Too few uploaded photos pass image quality checks. Retake blurred or obstructed shots and upload them."
+
+msgid "city.office.processing_failed"
+msgstr "The office could not complete this submission."
+
+msgid "city.office.payout"
+msgstr "{0} stars · +{1} Coords · +{2} XP"

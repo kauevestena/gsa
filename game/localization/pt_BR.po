@@ -1858,3 +1858,36 @@ msgstr "Gimbalina fugiu para um local seguro. Recupere-a no escritório antes de
 
 msgid "city.encounters.treated"
 msgstr "Cão acalmado com um petisco."
+
+msgid "city.office.unavailable"
+msgstr "Em desenvolvimento"
+
+msgid "city.office.requires_lidar"
+msgstr "Este contrato exige um levantamento LiDAR processado. Você pode abandoná-lo na aba Escritório."
+
+msgid "city.office.requires_inventory"
+msgstr "Este contrato exige um inventário de feições medidas, ainda em desenvolvimento."
+
+msgid "city.office.requires_coverage"
+msgstr "A avaliação de cobertura de área deste contrato de imagens está em desenvolvimento."
+
+msgid "city.office.upload_first"
+msgstr "Descarregue suas fotos em um ponto de envio antes de processar."
+
+msgid "city.office.expired"
+msgstr "O contrato expirou. Encerre-o na aba Escritório para aceitar outro trabalho."
+
+msgid "city.office.review_privacy"
+msgstr "Confirme as máscaras de privacidade na aba Escritório e processe novamente."
+
+msgid "city.office.missing_photo_targets"
+msgstr "Faltam alvos obrigatórios nas fotos válidas já enviadas. Colete e envie as fotos restantes."
+
+msgid "city.office.invalid_photos"
+msgstr "Poucas fotos enviadas passaram no controle de qualidade. Refaça e envie as imagens borradas ou obstruídas."
+
+msgid "city.office.processing_failed"
+msgstr "O escritório não conseguiu concluir esta entrega."
+
+msgid "city.office.payout"
+msgstr "{0} estrelas · +{1} Coords · +{2} XP"

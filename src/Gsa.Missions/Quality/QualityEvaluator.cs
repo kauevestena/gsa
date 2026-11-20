@@ -407,6 +407,16 @@ public static class QualityEvaluator
                 .Select(f => f.TargetId),
             StringComparer.Ordinal);
 
+        // An image delivery can document an object without reconstructing its 3D position.
+        // Inventory deliveries still need confirmed triangulation.
+        if (contract.Product == "images")
+        {
+            resolvedFeatureIds.UnionWith(uniqueSamples
+                .Where(s => s.Quality.Passed)
+                .SelectMany(s => s.ObservedFeatures)
+                .Select(f => f.TargetId));
+        }
+
         var uniqueCheckpoints = DeduplicateCheckpoints(submission.Checkpoints);
 
         var topEval = EvaluateRequirementSet(
