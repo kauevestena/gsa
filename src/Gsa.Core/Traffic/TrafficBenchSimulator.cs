@@ -421,7 +421,10 @@ public sealed partial class TrafficBenchSimulator
             else
                 agent.StalledSeconds = 0.0;
 
-            if (agent.StalledSeconds + 1e-9 >= DeadlockThresholdSeconds && IsOffCamera(agent.PositionEnu, cameraPos, cameraForward))
+            if (agent.StalledSeconds + 1e-9 >= DeadlockThresholdSeconds &&
+                (playerPos.HasValue
+                    ? IsOutsideCityCamera(agent.PositionEnu, cameraPos, cameraForward)
+                    : IsOffCamera(agent.PositionEnu, cameraPos, cameraForward)))
                 _deadlockRemovalScratch.Add(agent);
         }
 
@@ -469,7 +472,7 @@ public sealed partial class TrafficBenchSimulator
             var candidateDist = seg.LengthMetres * 0.5;
             var pos = seg.EvaluateEnu(candidateDist);
             if (playerPos is { } player &&
-                (RoadNetworkGraph.DistanceXy(pos, player) < 80 || !IsOffCamera(pos, cameraPos, cameraForward)))
+                (RoadNetworkGraph.DistanceXy(pos, player) < 80 || !IsOutsideCityCamera(pos, cameraPos, cameraForward)))
                 continue;
             if (IsSpacingClear(pos, isVehicle ? 8.0 : 1.5, isVehicle))
             {

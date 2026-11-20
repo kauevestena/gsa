@@ -61,6 +61,17 @@ public sealed partial class TrafficBenchSimulator
         return ErraticDriverSimulator.EvaluateDriverStep(agent.Id, age, agent.ErraticPeriodSeconds, speedDelta);
     }
 
+    private static bool IsOutsideCityCamera(Vector3d position, Vector3d? camera, Vector3d? forward)
+    {
+        if (camera is not { } origin || forward is not { } direction)
+            return IsOffCamera(position, camera, forward);
+
+        // Keep the entire forward half-plane eligible for rendering. A far-off
+        // vehicle can still be visible under the city's perspective camera.
+        var offset = position - origin;
+        return offset.X * direction.X + offset.Y * direction.Y < 0;
+    }
+
     // Sweep the player against each moving vehicle footprint in relative coordinates.
     // The expanded footprint uses the player's horizontal collision radius.
     public TrafficVehicleContact? FindVehicleContact(Vector3d from, Vector3d to, double playerRadius, double dt)

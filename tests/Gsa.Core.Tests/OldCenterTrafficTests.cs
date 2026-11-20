@@ -24,7 +24,7 @@ public sealed class OldCenterTrafficTests(ITestOutputHelper output)
         var duration = Stopwatch.StartNew();
         for (var i = 0; i < 300 * 60; i++)
         {
-            simulator.Advance(dt, office.CenterEnu, Vector3d.UnitY, weather);
+            simulator.Advance(dt, office.CenterEnu, -Vector3d.UnitY, weather);
             if (i % 60 != 0) continue;
             simulator.CopyVisualAgentsTo(agents);
             var cars = agents.Where(a => a.IsVehicle).ToArray();
@@ -43,6 +43,28 @@ public sealed class OldCenterTrafficTests(ITestOutputHelper output)
         Assert.True(minOfficeClearance >= office.RadiusMetres);
         Assert.Equal(0, stoppedIntervals);
         Assert.True(simulator.BlitzRemovals > 0);
+    }
+
+    [Fact]
+    public void CheckpointReplacementWaitsUntilAStreetIsOutOfView()
+    {
+        var simulator = new TrafficBenchSimulator(OldCenterTrafficNetwork.Create());
+        var camera = new Vector3d(500228, 7400000.7, 100);
+        var weather = new CityTrafficConditions(camera, true, true, false);
+        const double dt = TrafficBenchSimulator.FixedDtSeconds;
+        var agents = new List<TrafficVisualAgent>();
+        for (var tick = 0; tick < 300 * 60 && simulator.BlitzRemovals == 0; tick++)
+            simulator.Advance(dt, camera, Vector3d.UnitY, weather);
+        Assert.True(simulator.BlitzRemovals > 0);
+        simulator.CopyVisualAgentsTo(agents);
+        var count = agents.Count(a => a.IsVehicle);
+        Assert.True(count < TrafficBenchSimulator.TargetVehicleCount);
+        simulator.Advance(dt, camera, -Vector3d.UnitY, weather);
+        simulator.CopyVisualAgentsTo(agents);
+        Assert.Equal(count + 1, agents.Count(a => a.IsVehicle));
+        var replacement = Assert.Single(agents.Where(a => a.IsVehicle && a.Id.Contains("_respawn_", StringComparison.Ordinal)));
+        Assert.True(RoadNetworkGraph.DistanceXy(replacement.PositionEnu, camera) >= 80);
+        Assert.True(replacement.PositionEnu.Y > camera.Y);
     }
 
     [Fact]
