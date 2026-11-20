@@ -28,7 +28,7 @@ O modelo conserva erro comum correlacionado e viés horizontal por célula de 10
 
 `LiveNavigationEstimator` só aceita IMU, GNSS, heading e DMI. Integra atitude complementar e o filtro de seis estados existente, com atualização de posição, velocidade e ZUPT. Correções pertencem ao epoch corrente e cada sequência é consumida uma vez. Dados atrasados/futuros não corrigem retroativamente a trajetória. ZUPT exige os critérios observados por 2 s e DMI fresco; sem essas observações, não se injeta uma velocidade zero. A parada observada também fornece estimativa de bias do giro.
 
-Após inicializar, uma interrupção GNSS mantém a predição IMU e os auxílios DMI/ZUPT disponíveis. O painel informa sigma E/N/U, `sigma_3D = sqrt(trace(P_position))` e idade física da última solução. Os limiares locais do filtro são **5 s** de idade GNSS e **2 m** de sigma 3D. Texto/ícones distinguem os alertas, além da cor.
+Após inicializar, correções GNSS passam pelo gate de inovação (3σ por eixo e Mahalanobis 3D). Rejeição não zera a idade do último fix aceito; o painel distingue inconsistência de spoofing confirmado. Uma interrupção GNSS mantém a predição IMU e os auxílios DMI/ZUPT disponíveis. O painel informa sigma E/N/U, `sigma_3D = sqrt(trace(P_position))` e idade física da última solução. Os limiares locais do filtro são **5 s** de idade GNSS e **2 m** de sigma 3D. Texto/ícones distinguem os alertas, além da cor.
 
 Sigma descreve a incerteza **do modelo**; não é erro verdadeiro, RMSE de checagem ou certificado de precisão. Viés/multipath não modelado pode produzir erro maior que sigma. A qualidade científica oficial continua dependendo de produto e referências independentes.
 
@@ -42,7 +42,7 @@ O histórico visual usa um anel de **600 posições a 10 Hz**, aproximadamente o
 
 A trajetória é um **diagnóstico transitório**. Carregar save, trocar de plataforma, desembarcar ou um salto de posição reinicia o rig, limpa o traçado e exige nova inicialização observada. Não é replay contínuo dos sensores; RNG/história de navegação não são gravados no save v2. Fotos, contratos, dívida, prazos e observações já salvas não são alterados pelo diagnóstico.
 
-Fotos e nuvem da cidade ainda usam suas poses ideais anteriores. Esta trajetória não é fornecida silenciosamente ao georreferenciamento, processamento, CQ ou pagamento da campanha. Logs persistentes, base/PPK na cena e integração dos produtos continuam pendentes. Inspeção visual, controle e screenshots bilíngues a 150% continuam necessários ao aceite integral de T-F11-05.
+Fotos de veículos agora guardam a pose estimada disponível, após inicialização observada, conforme a [integração de perigos](city-hazards.md). Câmeras a pé/em plataformas leves e a nuvem LiDAR ainda usam poses ideais. O filtro não aprova processamento/CQ ou pagamento. Logs persistentes, base/PPK e integração científica dos produtos continuam pendentes. Inspeção visual, controle e screenshots bilíngues a 150% continuam necessários ao aceite integral de T-F11-05.
 
 ## Verificação
 

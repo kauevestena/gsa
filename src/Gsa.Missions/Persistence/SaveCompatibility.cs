@@ -4,6 +4,7 @@ using Gsa.Core.Traffic;
 using Gsa.Missions.Activities;
 using Gsa.Missions.Economy;
 using Gsa.Missions.Office;
+using Gsa.Missions.Gameplay;
 
 namespace Gsa.Missions.Persistence;
 
@@ -13,7 +14,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public static SaveContentVersions Current => new(2, 1, 1, []);
+    public static SaveContentVersions Current => new(3, 1, 1, []);
 }
 
 public sealed record SaveCampaignPresentationState(
@@ -41,7 +42,7 @@ public sealed record SaveCitySessionState(
     bool DisguiseActive,
     ulong NextContractSeed,
     long PhysicsTick,
-    long CameraNextSequence = 0);
+    long CameraNextSequence = 0, CityHazardSnapshot? Hazards = null);
 
 public sealed record SaveCompatibilityInfo(
     int SourceSchemaVersion,
@@ -81,7 +82,7 @@ public static class SaveCompatibility
             throw new ArgumentException("Required save fields are missing or invalid.", nameof(state));
 
         var content = state.Content ?? SaveContentVersions.Current;
-        if (content.CatalogVersion is < 1 or > 2 || content.ModelVersion != 1 || content.WorldVersion != 1 || content.DerivedCacheIds is null)
+        if (content.CatalogVersion is < 1 or > 3 || content.ModelVersion != 1 || content.WorldVersion != 1 || content.DerivedCacheIds is null)
             throw new ArgumentException("Unsupported content, model or world version.", nameof(state));
         var aliases = new HashSet<string>(StringComparer.Ordinal);
         string Resolve(string id)
@@ -131,18 +132,35 @@ public static class SaveCompatibility
                 if (state.Contracts.Count != 1 || state.Contracts[0].CatalogDefinition.Id != mission)
                     throw new ArgumentException("Active story and saved contract do not match.", nameof(state));
             }
+            _ = CityHazardState.Restore(city.Hazards, city.DisguiseActive);
+            new TerritoryAttentionTracker().ImportSnapshot(city.Attention);
             city = city with { Fleet = city.Fleet with { ActivePlatformId = Resolve(city.Fleet.ActivePlatformId) } };
         }
-        var invalidate = sourceSchema != SaveGameManager.CurrentSchemaVersion || content.CatalogVersion != 2 || aliases.Count > 0;
+        var invalidate = sourceSchema != SaveGameManager.CurrentSchemaVersion || content.CatalogVersion != 3 || aliases.Count > 0;
         var normalized = state with
         {
             SchemaVersion = SaveGameManager.CurrentSchemaVersion,
             Equipment = equipment,
             City = city,
-            Content = content with { CatalogVersion = 2, DerivedCacheIds = invalidate ? [] : content.DerivedCacheIds.ToArray() },
+            Content = content with { CatalogVersion = 3, DerivedCacheIds = invalidate ? [] : content.DerivedCacheIds.ToArray() },
         };
         // Exercise snapshot validation without publishing runtime objects or altering stored state.
-        _ = SaveGameManager.RestoreRuntime(normalized);
+        var runtime = SaveGameManager.RestoreRuntime(normalized);
+        if (city is not null)
+        {
+            var ids = city.CameraSamples.Select(s => s.SampleId).ToHashSet(StringComparer.Ordinal);
+            foreach (var entry in runtime.CustodyStore.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
+            {
+                var batch = System.Text.Json.JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson)
+                    ?? throw new ArgumentException("Invalid protected city batch.");
+                foreach (var sample in batch.Samples)
+                {
+                    _ = sample.ToDomain();
+                    if (!ids.Add(sample.SampleId) || sample.Sequence < 0 || sample.Sequence >= city.CameraNextSequence)
+                        throw new ArgumentException("Protected camera ID/sequence conflicts with city acquisition.");
+                }
+            }
+        }
         return (normalized, new(sourceSchema, sourceSchema != SaveGameManager.CurrentSchemaVersion,
             invalidate, aliases.Order(StringComparer.Ordinal).ToArray()));
     }

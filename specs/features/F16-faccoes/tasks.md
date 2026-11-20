@@ -79,4 +79,4 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Playthrough de território em ambos os modos.
 
-**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F16-04](../../../artifacts/evidence/T-F16-04/README.md)).
+**Estado:** Domínio implementado; primeira integração jogável em validação com [matriz e limites](../../../docs/city-hazards.md). Playthrough final e revisão visual pendentes; caixa permanece aberta (ver [evidência](../../../artifacts/evidence/T-F16-04/README.md)).

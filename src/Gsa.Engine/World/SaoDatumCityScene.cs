@@ -687,7 +687,8 @@ public partial class SaoDatumCityScene : Node3D
                 input.Steer,
                 weather.SurfaceGripMultiplier,
                 0.0,
-                _fleet.GetSkillRank(SkillTrackKind.DefensiveDriving));
+                _fleet.GetSkillRank(SkillTrackKind.DefensiveDriving),
+                speedLimitMetresPerSecond: _cityHazards.TirePunctured ? 6 : double.PositiveInfinity);
 
             var resolvedPos = ResolveObstaclePushout(prevCarPos, carStep.PositionEnu, 1.25, out var hitId);
             if (hitId is not null && carStep.SpeedMetresPerSecond > 3.2)
@@ -770,11 +771,7 @@ public partial class SaoDatumCityScene : Node3D
             CaptureCityPhoto(activePos, activeHeading, activeSpeed, weather);
         }
 
-        // Faction attention update with Pizza Delivery Disguise countermeasure!
-        var zones = FactionCatalog.FindZonesContaining(regionId, activePos.X, activePos.Y);
-        var currentZoneId = zones.FirstOrDefault()?.ZoneId;
-        var activeCapture = _activeContract is not null && activeMode != LocomotionMode.OnFoot && (_lidarEnabled && activeMode >= LocomotionMode.Kombi || _captureRequested);
-        var attn = _attention.Step(currentZoneId, activeCapture && !_disguiseActive, Math.Abs(activeSpeed), false, delta, _calmPolicy);
+        var attn = StepCityFactionHazards(delta, activePos, activeSpeed, activeMode);
 
         _chaseCamera.Update(delta, _coordinates.ToGodot(activePos), activeHeading, activeSpeed, activeMode,
             GetWorld3D().DirectSpaceState, gStep.Stress, _calendar.CalendarTimeSeconds);
@@ -807,6 +804,7 @@ public partial class SaoDatumCityScene : Node3D
                     _nearbyObstacles.Add(box);
                 }
             }
+            if (_roadblockObstacle is { } roadblock) _nearbyObstacles.Add(roadblock);
             _nearbyObstacleAnchor = pos;
             _hasNearbyObstacleAnchor = true;
         }
@@ -864,7 +862,7 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         // 2. Police Blitz speeding enforcement
-        if (!_calmPolicy.CalmCityEnabled && _hazardCooldown <= 0.0 &&
+        if (_hazardCooldown <= 0.0 &&
             Math.Abs(speedMps) > 12.0 &&
             TrainingContractSession.HorizontalDistance(pos, _landmarks.BlitzCheckpointEnu) < 10.5)
         {
@@ -875,10 +873,10 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         // 3. Absurd Urban Events (Trio Elétrico, Street Marathon, Pigeon Flock) respecting Calm City
-        _absurdEvents.ApplyCalmPolicy(_calmPolicy.CalmCityEnabled);
+        _absurdEvents.ApplyCalmPolicy(_calmPolicy.IsProtectionActive);
         _absurdEvents.StepEvents(dt);
 
-        if (!_calmPolicy.CalmCityEnabled && !_absurdEvents.Events.Values.Any(e => e.Active))
+        if (!_calmPolicy.IsProtectionActive && !_absurdEvents.Events.Values.Any(e => e.Active))
         {
             _nextAbsurdEventTimer -= dt;
             if (_nextAbsurdEventTimer <= 0.0)
@@ -1131,10 +1129,14 @@ public partial class SaoDatumCityScene : Node3D
 
     private void CaptureCityPhoto(Vector3d pos, double heading, double speed, WeatherAndTimeSnapshot weather)
     {
+        var navigation = _navigationRig?.Estimator?.Current;
+        if (CurrentActiveMode() >= LocomotionMode.Car && navigation is null)
+        { _feedbackText = Text("city.hazards.wait_navigation"); return; }
         var mount = CameraMountEstimate.ForwardFacing;
         var origin = pos + Vector3d.UnitZ * 1.4;
         var t = _calendar.CalendarTimeSeconds;
-        var bodyQuat = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
+        var bodyQuat = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading +
+            (CurrentActiveMode() >= LocomotionMode.Car ? _cityHazards.RackYawErrorRadians : 0));
         EstimatedBodyPose Pose(double dt) => new(t + dt, origin + new Vector3d(Math.Cos(heading) * speed * dt, Math.Sin(heading) * speed * dt, 0), bodyQuat);
         var start = CameraGeometry.CameraToMap(Pose(0), mount);
         var end = CameraGeometry.CameraToMap(Pose(CameraSensorProfile.Initial.DayExposureSeconds), mount);
@@ -1154,14 +1156,20 @@ public partial class SaoDatumCityScene : Node3D
             return from.DistanceTo(hit["position"].AsVector3()) < from.DistanceTo(to) - 0.01f;
         }
 
+        var estimatedPose = CurrentActiveMode() >= LocomotionMode.Car && navigation is not null
+            ? new EstimatedBodyPose(t, navigation.PositionEnu + Vector3d.UnitZ * 1.4, navigation.BodyToMapRotation) : Pose(0);
+        var environment = weather.ToCameraEnvironment();
+        environment = new CameraEnvironmentSnapshot(environment.IsNight, environment.SunAngleRadians,
+            Math.Max(environment.LensObstructionFraction, _cityHazards.Lens.ObstructionFraction), environment.BaseClippingFraction);
         if (_camScheduler.TryEnqueueSimulatedCapture(new CameraCaptureRequest(
-            _tick, t, start, end, readout, Pose(0), mount, weather.ToCameraEnvironment(),
+            _tick, t, start, end, readout, estimatedPose, mount, environment,
             _liveCandidates, Occluded), _locomotion, out var sample, out _) && sample is not null)
         {
             _fieldSamples.Add(sample);
+            _recentPhotoSeconds = .6;
             _coverageSpots.Add(pos);
-            foreach (var f in sample.ObservedFeatures)
-                _observedTargetIds.Add(f.TargetId);
+            if (sample.Quality.Passed)
+                foreach (var f in sample.ObservedFeatures) _observedTargetIds.Add(f.TargetId);
             _audio.PlayShutter();
             _feedbackText = sample.ObservedFeatures.Count > 0
                 ? $"{Text("training.observed")} {string.Join(", ", sample.ObservedFeatures.Select(f => f.TargetId))}"
@@ -1183,11 +1191,14 @@ public partial class SaoDatumCityScene : Node3D
         if (targetMode == LocomotionMode.OnFoot)
             return;
 
+        if (_cityHazards.IsVehicleDisabled(targetMode))
+        { _feedbackText = Text("city.hazards.disabled_vehicle"); return; }
         var pos = CurrentPositionEnu();
         var heading = CurrentHeadingRadians();
+        if (_carSim is not null) _cityHazards.SetVehicleDamage(_carSim.Profile.Mode, _carSim.ConditionDamage);
         _locomotion.SwitchVehiclePlatform(targetMode, refillAutonomy: true, clearStorage: false);
         if (targetMode >= LocomotionMode.Car)
-            _carSim = new CarSuspensionSimulator(pos, heading, targetMode);
+            _carSim = new CarSuspensionSimulator(pos, heading, targetMode, conditionDamage: _cityHazards.GetVehicleDamage(targetMode));
         else
             _carSim = null;
 
@@ -1239,10 +1250,12 @@ public partial class SaoDatumCityScene : Node3D
                     {
                         var curPos = CurrentPositionEnu();
                         var nearby = _worldParkedVehicles.FirstOrDefault(v =>
+                            !_cityHazards.IsVehicleDisabled(v.Mode) &&
                             TrainingContractSession.HorizontalDistance(curPos, v.PosEnu) < 4.2 &&
                             (_isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode) || _campaignState.UnlockedPlatforms.Contains(v.Mode.ToString().ToLowerInvariant())));
                         if (nearby.Root is not null)
                         {
+                            if (_carSim is not null) _cityHazards.SetVehicleDamage(_carSim.Profile.Mode, _carSim.ConditionDamage);
                             _carSim = null;
                             _locomotion.RepositionSafeAfterRecovery(nearby.PosEnu, nearby.Mode, nearby.Heading, refillAutonomy: true, clearStorage: false);
                             SwitchPlatform(nearby.Mode);
@@ -1255,7 +1268,7 @@ public partial class SaoDatumCityScene : Node3D
                     {
                         var mode = _locomotion.Mode;
                         if (mode < LocomotionMode.Car && mode != LocomotionMode.OnFoot) _carSim = null;
-                        else if (mode >= LocomotionMode.Car && _carSim is null) _carSim = new CarSuspensionSimulator(_locomotion.PositionEnu, _locomotion.HeadingRadians, mode);
+                        else if (mode >= LocomotionMode.Car && _carSim is null) _carSim = new CarSuspensionSimulator(_locomotion.PositionEnu, _locomotion.HeadingRadians, mode, conditionDamage: _cityHazards.GetVehicleDamage(mode));
                         _pendingVehiclePopup = Text(mode == LocomotionMode.OnFoot ? "vehicle.on_foot.banner" : $"platform.{mode.ToString().ToLowerInvariant()}.name");
                     }
                     GetViewport().SetInputAsHandled();

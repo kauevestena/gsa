@@ -49,7 +49,7 @@ O [protocolo de desempenho do LiDAR](docs/lidar-performance.md) mede CPU, aloca�
 
 A carreira usa [save v2 com migração e recuperação](docs/save-compatibility.md): preserva fotos, contrato, frota, estacionamento e progresso; protege saves futuros/corrompidos contra sobrescrita e isola o modo livre.
 
-O tablet da cidade inclui [Geopédia avançada e diagnóstico técnico](docs/advanced-survey-tablet.md): 30 verbetes bilíngues, limites do contrato ativo, parâmetros da prévia LiDAR e territórios de atenção. A [navegação ao vivo](docs/live-navigation.md) conecta observações GNSS/IMU/DMI, trajetória e incerteza ao mapa/HUD; fotos/nuvem e CQ da campanha continuam separados desse diagnóstico.
+O tablet da cidade inclui [Geopédia avançada e diagnóstico técnico](docs/advanced-survey-tablet.md): 30 verbetes bilíngues, limites do contrato ativo, parâmetros da prévia LiDAR e territórios de atenção. A [navegação ao vivo](docs/live-navigation.md) conecta observações GNSS/IMU/DMI, trajetória e incerteza ao mapa/HUD; fotos de veículos agora guardam a pose estimada; nuvem LiDAR e CQ científico continuam separados. A [primeira integração dos perigos](docs/city-hazards.md) conecta facções, lente, GNSS, marcos, pneus, bloqueios, perda de veículo e proteção dos dados enviados.
 
 ## Estado
 

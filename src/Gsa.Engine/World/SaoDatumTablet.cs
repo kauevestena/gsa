@@ -141,16 +141,12 @@ public partial class SaoDatumCityScene
         });
         AddOfficeBtn("city.office.calibrate_rack", () =>
         {
-            _rackMisaligned = false;
+            _rackMisaligned = false; _cityHazards.RackYawErrorRadians = 0;
             _audio.PlayOffloadChime();
             _feedbackText = Text("city.office.rack_calibrated");
         });
-        AddOfficeBtn("Disguise (-50%)", () =>
-        {
-            _disguiseActive = !_disguiseActive;
-            _audio.PlayOffloadChime();
-            _feedbackText = Text(_disguiseActive ? "city.countermeasure.disguise_on" : "city.countermeasure.disguise_off");
-        });
+        BuildCityHazardControls(officeTab);
+
         AddOfficeBtn("city.office.process_deliver", ProcessAndDeliverCityContract);
 
         // 3. Fleet & Skills Tab
@@ -179,6 +175,7 @@ public partial class SaoDatumCityScene
         _calmToggleBtn.Pressed += () =>
         {
             _calmPolicy.SetCalmCityEnabled(!_calmPolicy.CalmCityEnabled);
+            SyncCityHazardProtection();
             RefreshTabletContents();
         };
         setTab.AddChild(_calmToggleBtn);
@@ -232,7 +229,6 @@ public partial class SaoDatumCityScene
 
     private void StartStoryMission(CampaignMissionFullSpec spec)
     {
-        _activeStorySpec = spec;
         string[] featureIds = spec.MissionId switch
         {
             "HIST-01" => ["facade_18", "facade_19", "facade_20"],
@@ -267,7 +263,7 @@ public partial class SaoDatumCityScene
             DeliveryFormat: "gsa_bundle_v1",
             StoryPrerequisites: spec.Preconditions.ToArray());
 
-        AcceptCityContract(def);
+        if (!AcceptCityContract(def, spec)) return;
         var summaryKey = $"mission.{spec.MissionId.ToLowerInvariant().Replace('-', '_')}.summary";
         _gtaHud.ShowCutsceneLetterbox(
             $"{spec.MissionId} · {Text(spec.TitleKey)}",
@@ -275,21 +271,25 @@ public partial class SaoDatumCityScene
             () => _gtaHud.HideCutsceneLetterbox());
     }
 
-    private void AcceptCityContract(ContractDefinition def)
+    private bool AcceptCityContract(ContractDefinition def, CampaignMissionFullSpec? story = null)
     {
-        if (!def.Id.StartsWith("HIST-", StringComparison.Ordinal))
-            _activeStorySpec = null;
+        if (_activeContract is not null) { _feedbackText = Text("city.hazards.active_job"); return false; }
+        _activeStorySpec = story;
         _activeContract = def;
         _activeMachine = new ContractStateMachine(def);
         _activeMachine.Accept(_calendar.CalendarTimeSeconds);
         _fieldSamples.Clear();
+        _cityCustody = new BatchCustodyStore(); _protectedCityPhotos.Clear(); _cityHazards.BeginContract();
+        _cityHazards.Services.ExpireInsurance();
         _observedTargetIds.Clear();
         _coverageSpots.Clear();
         _privacyMasksApplied = _officeMode == ProcessingMode.Arcade;
         _audio.PlayOffloadChime();
         _feedbackText = $"{Text(def.TitleKey)} — {def.RequiredFeatureIds.Count} targets";
         _tabletPanel.Hide();
+        SyncCityHazardProtection();
         if (!_isSandbox) SaveCityCareerState(SaveTrigger.ContractAccepted, announce: false);
+        return true;
     }
 
     private void ProcessAndDeliverCityContract()
@@ -306,20 +306,21 @@ public partial class SaoDatumCityScene
             return;
         }
 
-        // Complete if all required features observed (or LiDAR density in port/serra)
+        RebuildCityObservedTargets();
+        // City delivery remains simplified; dirty images cannot satisfy target observations.
         var missing = _activeContract.RequiredFeatureIds.Where(id => !_observedTargetIds.Contains(id)).ToArray();
         var ratio = _activeContract.RequiredFeatureIds.Count > 0
             ? (double)(_activeContract.RequiredFeatureIds.Count - missing.Length) / _activeContract.RequiredFeatureIds.Count
             : 1.0;
 
-        if (_fieldSamples.Count == 0 && CurrentActiveMode() < LocomotionMode.Kombi)
+        if (_fieldSamples.Count + _protectedCityPhotos.Count == 0)
         {
             _feedbackText = Text("training.blocked");
             _audio.PlayAlert();
             return;
         }
 
-        if (ratio >= 0.85 || (_lidarPointVisibleCount >= 200 && CurrentActiveMode() >= LocomotionMode.Kombi))
+        if (ratio >= 0.85)
         {
             var reward = _activeContract.Reward.BaseCoords;
             var xp = _activeContract.Reward.BaseXp;
@@ -342,6 +343,7 @@ public partial class SaoDatumCityScene
             _activeContract = null;
             _activeMachine = null;
             _activeStorySpec = null;
+            _cityHazards.Services.ExpireInsurance(); SyncCityHazardProtection();
             GenerateContractOffers();
             if (!_isSandbox) SaveCityCareerState(SaveTrigger.ContractSettled, announce: false);
         }
@@ -354,6 +356,7 @@ public partial class SaoDatumCityScene
 
     private void RefreshTabletContents()
     {
+        RefreshCityHazardStatus();
         // Contracts tab: Story Campaign (HIST-01..HIST-11) + Procedural Contracts
         foreach (var c in _contractsTab.GetChildren())
             c.QueueFree();
@@ -527,7 +530,7 @@ public partial class SaoDatumCityScene
             }
         }
 
-        var promptText = Text("city.prompt.controls");
+        var promptText = string.IsNullOrEmpty(_hazardNotice) ? Text("city.prompt.controls") : _hazardNotice;
         if (mode == LocomotionMode.OnFoot && _worldParkedVehicles.Any(v => TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2))
             promptText = Text("city.board_vehicle");
 
@@ -568,7 +571,7 @@ public partial class SaoDatumCityScene
                 GimbalinaStressFraction: stress / 100.0,
                 ShowVehicleCondition: mode >= LocomotionMode.Car,
                 VehicleDamageFraction: _carSim is not null ? _carSim.ConditionDamage / 100.0 : 0.0,
-                ShowAttentionStars: !_calmPolicy.CalmCityEnabled,
+                ShowAttentionStars: !_calmPolicy.IsProtectionActive && !_citySafeZone,
                 AttentionStars: (int)attn.ThreatLevel,
                 ObjectiveTitle: objTitle,
                 ObjectiveDetails: objDetails,

@@ -353,15 +353,9 @@ public sealed class FactionSabotageAndCountermeasuresCoordinator
         ArgumentException.ThrowIfNullOrWhiteSpace(zoneId);
 
         var multiplier = ComputeEffectiveAttentionMultiplier(zoneId, calmPolicy);
-        if (multiplier <= 0.0)
-        {
-            // Advance tracker with activeCapture = false (or Calm policy) so attention stays 0 or decays and hazards cancel cleanly.
-            return tracker.Step(zoneId, activeCapture: false, playerSpeedMps, disarmInputHeld, dtSeconds, calmPolicy);
-        }
+        return tracker.Step(zoneId, activeCapture, playerSpeedMps, disarmInputHeld, dtSeconds, calmPolicy,
+            attentionGainMultiplier: multiplier, suppressThreats: multiplier <= 0);
 
-        // Scale the capture-duration equivalent monotonically by multiplier so effective gain equals 1.0 * multiplier pt/s.
-        var effectiveCaptureDt = dtSeconds * multiplier;
-        return tracker.Step(zoneId, activeCapture, playerSpeedMps, disarmInputHeld, effectiveCaptureDt, calmPolicy);
     }
 
     /// <summary>Executes idempotent parked-bomb / vehicle sabotage destroying ONLY PendingField batches while preserving ProtectedOffloaded batches.</summary>

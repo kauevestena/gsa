@@ -1524,7 +1524,7 @@ msgid "survey.technical.preview"
 msgstr "△ Prévia de campo — não é CQ oficial"
 
 msgid "survey.technical.ideal_pose"
-msgstr "Fotos e nuvem da cidade usam poses ideais. A navegação estimada abaixo é um diagnóstico separado, sem aprovar produtos."
+msgstr "Fotos de veículos usam a pose estimada da navegação. Câmeras a pé e em plataformas leves ainda usam poses ideais; a nuvem LiDAR é uma prévia visual e não aprova entregas."
 
 msgid "survey.technical.cloud_show"
 msgstr "Mostrar nuvem da prévia"
@@ -1638,7 +1638,7 @@ msgid "navigation.show_trail"
 msgstr "Mostrar trajetória estimada e eixos de incerteza no mapa"
 
 msgid "navigation.preview_separate"
-msgstr "Fotos e nuvem da cidade usam poses ideais. A navegação estimada abaixo é um diagnóstico separado, sem aprovar produtos."
+msgstr "Fotos de veículos usam a pose estimada da navegação. Câmeras a pé e em plataformas leves ainda usam poses ideais; a nuvem LiDAR é uma prévia visual e não aprova entregas."
 
 msgid "navigation.sigma"
 msgstr "σ E/N/U: {0} / {1} / {2} m · σ 3D: {3} m"
@@ -1669,3 +1669,132 @@ msgstr "σ descreve o modelo do filtro, não o erro verdadeiro ou RMSE. Sem base
 
 msgid "navigation.status.waiting_velocity"
 msgstr "○ Aguardando segunda posição GNSS para estimar velocidade"
+
+msgid "city.hazards.upload"
+msgstr "Enviar dados de câmera (escritório / descarga / Wi-Fi)"
+
+msgid "city.hazards.clean"
+msgstr "Limpar lente: pare por 3 s (ou segure E)"
+
+msgid "city.hazards.disarm"
+msgstr "Desarmar bomba: pare por 5 s (ou segure E)"
+
+msgid "city.hazards.disguise"
+msgstr "Disfarce da Kombi: 200 C$ · zona selecionada / trabalho atual"
+
+msgid "city.hazards.escort"
+msgstr "Escolta: 10% do contrato · zona selecionada / trabalho atual"
+
+msgid "city.hazards.authorize"
+msgstr "Autorização comunitária: 5% · exige Negociação 1"
+
+msgid "city.hazards.insurance"
+msgstr "Segurar veículo deste trabalho: prêmio de 2% / franquia de 10%"
+
+msgid "city.hazards.repair"
+msgstr "Reparar pneu (50 C$) / repor veículo perdido (custo abaixo)"
+
+msgid "city.hazards.abandon"
+msgstr "Abandonar trabalho atual"
+
+msgid "city.hazards.status"
+msgstr "Fotos: {0} a bordo / {1} enviadas · obstrução da lente: {2}% · pneu: {3}"
+
+msgid "city.hazards.tyre_bad"
+msgstr "furado (limite de 6 m/s)"
+
+msgid "city.hazards.tyre_ok"
+msgstr "OK"
+
+msgid "city.hazards.replacement_cost"
+msgstr "Repor {0}: {1} C$ (franquia do seguro, quando aplicável). Dados perdidos não são recuperados."
+
+msgid "city.hazards.wait_navigation"
+msgstr "Aguardando posição, orientação e velocidade observadas para fotografar com o veículo."
+
+msgid "city.hazards.disabled_vehicle"
+msgstr "Este veículo foi perdido. Reponha-o no escritório ou ponto de descarga."
+
+msgid "city.hazards.bomb_warning"
+msgstr "Bomba no veículo: {0} s! Saia do território ou pare e desarme por 5 s (E / tablet)."
+
+msgid "city.hazards.faction_warning"
+msgstr "A atenção da facção está aumentando. Interrompa a coleta ou saia do território."
+
+msgid "city.hazards.disarmed"
+msgstr "Bomba desarmada. Fotos enviadas e a bordo estão preservadas."
+
+msgid "city.hazards.cleaned"
+msgstr "Lente limpa. Fotos contaminadas anteriores precisam ser refeitas."
+
+msgid "city.hazards.spoofing"
+msgstr "Interferência GNSS relatada neste território. Confira observações e incertezas."
+
+msgid "city.hazards.benchmark_moved"
+msgstr "Um marco físico foi deslocado. As coordenadas publicadas não mudaram."
+
+msgid "city.hazards.paint"
+msgstr "Tinta atingiu a lente. Pare e limpe por 3 s (E / tablet)."
+
+msgid "city.hazards.puncture"
+msgstr "Pneu furado: velocidade limitada a 6 m/s. Pare para reparar (50 C$)."
+
+msgid "city.hazards.pursuit"
+msgstr "Veículo da facção se aproximando. Saia do território ou alcance uma zona segura."
+
+msgid "city.hazards.roadblock"
+msgstr "Bloqueio e perseguição à frente. Procure outra rota ou uma zona segura."
+
+msgid "city.hazards.upload_location"
+msgstr "Aceite um trabalho e vá ao escritório, ponto de descarga ou Wi-Fi para enviar dados."
+
+msgid "city.hazards.nothing_to_upload"
+msgstr "Nenhuma foto a bordo para enviar."
+
+msgid "city.hazards.upload_failed"
+msgstr "Falha no envio. As fotos a bordo foram mantidas."
+
+msgid "city.hazards.uploaded"
+msgstr "Dados de câmera enviados e protegidos contra perda do veículo."
+
+msgid "city.hazards.vehicle_lost"
+msgstr "Veículo perdido: {0} fotos a bordo perdidas; {1} fotos enviadas preservadas. Carrinho disponível no escritório."
+
+msgid "city.hazards.no_protection_fee"
+msgstr "Proteção tranquila ativa; não é necessário comprar contramedidas."
+
+msgid "city.hazards.protection_active"
+msgstr "Contramedida selecionada ativa nesta zona e trabalho."
+
+msgid "city.hazards.kombi_required"
+msgstr "O disfarce de veículo exige uma Kombi."
+
+msgid "city.hazards.authorization_failed"
+msgstr "A autorização exige Negociação 1, saldo suficiente e uma associação comunitária."
+
+msgid "city.hazards.insufficient"
+msgstr "Saldo insuficiente para este serviço."
+
+msgid "city.hazards.insurance_unavailable"
+msgstr "Aceite um trabalho e utilize um veículo motorizado disponível antes de segurá-lo."
+
+msgid "city.hazards.insured"
+msgstr "Veículo segurado para este trabalho."
+
+msgid "city.hazards.recover_location"
+msgstr "Vá ao escritório ou ponto de descarga para repor o veículo perdido."
+
+msgid "city.hazards.stop_first"
+msgstr "Pare o veículo antes de reparar o pneu."
+
+msgid "city.hazards.repaired"
+msgstr "Veículo pronto. Reparos não recuperam observações perdidas ou contaminadas."
+
+msgid "city.hazards.abandoned"
+msgstr "Trabalho abandonado. Você pode aceitar outro com a plataforma disponível."
+
+msgid "city.hazards.active_job"
+msgstr "Conclua ou abandone o trabalho atual antes de aceitar outro."
+
+msgid "navigation.alert.inconsistent_fix"
+msgstr "Observação GNSS rejeitada: incompatível com a trajetória prevista. Isso não comprova falsificação."

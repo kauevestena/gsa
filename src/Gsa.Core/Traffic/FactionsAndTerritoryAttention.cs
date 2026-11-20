@@ -207,9 +207,13 @@ public sealed record TerritoryZoneSnapshot(
     double CooldownRemainingSeconds,
     double IdleCaptureSeconds);
 
+public sealed record TerritoryPendingThreatSnapshot(string? WarningZoneId, TerritoryThreatLevel WarningLevel,
+    double WarningElapsedSeconds, string? BombZoneId, double StationarySeconds, bool BombActive,
+    double BombCountdownSeconds, double DisarmProgressSeconds);
+
 public sealed record TerritoryAttentionSnapshot(
     int SchemaVersion,
-    IReadOnlyList<TerritoryZoneSnapshot> Zones);
+    IReadOnlyList<TerritoryZoneSnapshot> Zones, TerritoryPendingThreatSnapshot? Pending = null);
 
 public sealed record TerritoryEscalationOutcome(
     string? ZoneId,
@@ -294,8 +298,10 @@ public sealed class TerritoryAttentionTracker
         double playerSpeedMps,
         bool disarmInputHeld,
         double dtSeconds,
-        CalmPolicyCoordinator? calmPolicy = null)
+        CalmPolicyCoordinator? calmPolicy = null, double attentionGainMultiplier = 1.0, bool suppressThreats = false)
     {
+        if (!double.IsFinite(attentionGainMultiplier) || attentionGainMultiplier < 0 || attentionGainMultiplier > 1)
+            throw new ArgumentOutOfRangeException(nameof(attentionGainMultiplier));
         if (!double.IsFinite(playerSpeedMps) || playerSpeedMps < 0.0)
             throw new ArgumentOutOfRangeException(nameof(playerSpeedMps));
         if (!double.IsFinite(dtSeconds) || dtSeconds <= 0.0)
@@ -323,7 +329,7 @@ public sealed class TerritoryAttentionTracker
         }
 
         // Calm City suppresses and cancels all active warnings, pursuits, roadblocks, and bombs immediately.
-        if (calmPolicy is { IsProtectionActive: true })
+        if (calmPolicy is { IsProtectionActive: true } || suppressThreats)
         {
             var wasBombActive = _bombWarningActive;
             ClearPendingThreatState();
@@ -386,7 +392,7 @@ public sealed class TerritoryAttentionTracker
         if (activeCapture)
         {
             _idleSinceCaptureByZone[currentZoneId] = 0.0;
-            _attentionByZone[currentZoneId] = Math.Min(100.0, _attentionByZone[currentZoneId] + GainRatePerSecondActiveCapture * dtSeconds);
+            _attentionByZone[currentZoneId] = Math.Min(100.0, _attentionByZone[currentZoneId] + GainRatePerSecondActiveCapture * dtSeconds * attentionGainMultiplier);
         }
         else
         {
@@ -631,20 +637,44 @@ public sealed class TerritoryAttentionTracker
             .OrderBy(k => k, StringComparer.Ordinal)
             .Select(z => new TerritoryZoneSnapshot(z, _attentionByZone[z], _cooldownByZone[z], _idleSinceCaptureByZone[z]))
             .ToArray();
-        return new TerritoryAttentionSnapshot(SchemaVersion: 1, Zones: zones);
+        return new TerritoryAttentionSnapshot(1, zones, new(_warningZoneId, _warningLevel, _warningElapsedSeconds,
+            _bombZoneId, _stationaryAtLevel5Seconds, _bombWarningActive, _bombCountdownSeconds, _bombDisarmProgressSeconds));
     }
 
     public void ImportSnapshot(TerritoryAttentionSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
+        if (snapshot.SchemaVersion != 1 || snapshot.Zones is null ||
+            snapshot.Zones.Select(z => z.ZoneId).Distinct(StringComparer.Ordinal).Count() != snapshot.Zones.Count)
+            throw new ArgumentException("Invalid attention snapshot.", nameof(snapshot));
+        static bool Timer(double value) => double.IsFinite(value) && value >= 0;
+        foreach (var z in snapshot.Zones)
+            if (string.IsNullOrWhiteSpace(z.ZoneId) || !Timer(z.AttentionScore) || z.AttentionScore > 100 ||
+                !Timer(z.CooldownRemainingSeconds) || !Timer(z.IdleCaptureSeconds)) throw new ArgumentException("Invalid territory state.");
+        if (snapshot.Pending is { } pending && (!Enum.IsDefined(pending.WarningLevel) ||
+            !Timer(pending.WarningElapsedSeconds) || !Timer(pending.StationarySeconds) || !Timer(pending.BombCountdownSeconds) ||
+            pending.BombCountdownSeconds > BombWarningCountdownSeconds || !Timer(pending.DisarmProgressSeconds) ||
+            pending.DisarmProgressSeconds > BombDisarmInteractionSeconds ||
+            (pending.WarningZoneId is { } w && !snapshot.Zones.Any(z => z.ZoneId == w)) ||
+            (pending.BombZoneId is { } b && !snapshot.Zones.Any(z => z.ZoneId == b)) ||
+            (pending.BombActive && (pending.BombZoneId is null || pending.BombCountdownSeconds <= 0))))
+            throw new ArgumentException("Invalid pending threat.", nameof(snapshot));
         foreach (var entry in snapshot.Zones)
         {
-            _attentionByZone[entry.ZoneId] = Math.Clamp(entry.AttentionScore, 0.0, 100.0);
-            _cooldownByZone[entry.ZoneId] = Math.Max(0.0, entry.CooldownRemainingSeconds);
-            _idleSinceCaptureByZone[entry.ZoneId] = Math.Max(0.0, entry.IdleCaptureSeconds);
+            _attentionByZone[entry.ZoneId] = entry.AttentionScore;
+            _cooldownByZone[entry.ZoneId] = entry.CooldownRemainingSeconds;
+            _idleSinceCaptureByZone[entry.ZoneId] = entry.IdleCaptureSeconds;
         }
         ClearPendingThreatState();
+        if (snapshot.Pending is { } p)
+        {
+            _warningZoneId = p.WarningZoneId; _warningLevel = p.WarningLevel; _warningElapsedSeconds = p.WarningElapsedSeconds;
+            _bombZoneId = p.BombZoneId; _stationaryAtLevel5Seconds = p.StationarySeconds; _bombWarningActive = p.BombActive;
+            _bombCountdownSeconds = p.BombCountdownSeconds; _bombDisarmProgressSeconds = p.DisarmProgressSeconds;
+        }
     }
+
+    public void CancelPendingThreats() => ClearPendingThreatState();
 
     private void ResetPreActionWarning()
     {

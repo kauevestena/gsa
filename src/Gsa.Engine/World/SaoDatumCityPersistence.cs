@@ -32,7 +32,7 @@ public partial class SaoDatumCityScene
         Progression: _progression.ExportSnapshot(),
         Equipment: new(_fleet.ActivePlatform.Id, _fleet.OwnedPlatforms.Select(m => PlatformProfile.ForMode(m).Id).ToArray(),
             new Dictionary<string, string>()),
-        CustodyStore: new BatchCustodyStore().ExportSnapshot(),
+        CustodyStore: _cityCustody.ExportSnapshot(),
         Contracts: _activeMachine is null ? [] : [_activeMachine.ExportSnapshot()],
         Content: SaveContentVersions.Current,
         City: new(
@@ -43,7 +43,7 @@ public partial class SaoDatumCityScene
                 _campaignState.UnlockedEquipment.ToArray(), _campaignState.AppliedCutsceneIds.ToArray(),
                 _campaignState.SkippedCutsceneIds.ToArray(), new Dictionary<string, string>(_campaignState.ObjectiveStates)),
             _attention.ExportSnapshot(), _activeStorySpec?.MissionId, _officeMode, _privacyMasksApplied, _rackMisaligned,
-            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, _camScheduler.NextCaptureSequence));
+            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, _camScheduler.NextCaptureSequence, _cityHazards.Export()));
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
     {
@@ -98,6 +98,7 @@ public partial class SaoDatumCityScene
             var mobility = city is not null ? LocomotionSimulator.FromSaveSnapshot(city.Mobility, CitySaveBounds)
                 : new LocomotionSimulator(_locomotion.PositionEnu, _locomotion.HeadingRadians, fleet.ActivePlatform.Mode, _fullManifest.Bounds);
             var samples = city?.CameraSamples.Select(s => s.ToDomain()).ToArray() ?? [];
+            var hazards = Gsa.Missions.Gameplay.CityHazardState.Restore(city?.Hazards, city?.DisguiseActive ?? false);
             var geopedia = new GeopediaCatalogCoordinator(city?.GeopediaEntryIds);
             var collectibles = new MvpCollectiblesCoordinator(city?.Collectibles);
             var story = city?.ActiveStoryMissionId is { } id ? FullCampaignCatalog.GetMission(id) : null;
@@ -111,11 +112,13 @@ public partial class SaoDatumCityScene
             _fleet = fleet;
             _locomotion = mobility;
             _carSim = mobility.Mode >= LocomotionMode.Car
-                ? new CarSuspensionSimulator(mobility.PositionEnu, mobility.HeadingRadians, mobility.Mode) : null;
+                ? new CarSuspensionSimulator(mobility.PositionEnu, mobility.HeadingRadians, mobility.Mode, conditionDamage: hazards.GetVehicleDamage(mobility.Mode)) : null;
             _lastSpeedMps = 0;
             _geopedia = geopedia;
             _collectibles = collectibles;
             _attention = attention;
+            _cityHazards = hazards; _cityCustody = runtime.CustodyStore;
+            RestoreCityProtectedPhotos();
             _fieldSamples.Clear(); _fieldSamples.AddRange(samples);
             _coverageSpots.Clear(); _coverageSpots.AddRange(city?.CoverageSpots ?? []);
             _observedTargetIds.Clear(); _observedTargetIds.UnionWith(city?.ObservedTargetIds ?? []);
@@ -124,6 +127,7 @@ public partial class SaoDatumCityScene
             _activeStorySpec = story;
             _camScheduler = new CameraCaptureScheduler("city_cam", initialSequence: city?.CameraNextSequence ?? 0);
             _captureRequested = false;
+            _recentPhotoSeconds = 0; _cleanLensRequested = _disarmRequested = false; _hazardNotice = ""; _lastHazardWarning = null;
             _gtaHud.HideCutsceneLetterbox();
             _officeMode = city?.OfficeMode ?? Gsa.Missions.Office.ProcessingMode.Arcade;
             _privacyMasksApplied = city?.PrivacyMasksApplied ?? true;
@@ -151,6 +155,7 @@ public partial class SaoDatumCityScene
             RefreshCollectibleNodesAfterLoad();
             _mobility.SetVisualPlatformMode(mobility.Mode);
             UpdateSectorStreaming(mobility.PositionEnu);
+            RestoreCityHazardWorld();
             SnapCamera();
             _citySaveBlocked = false;
             _feedbackText = _citySaveNotice = Text(recover ? "save.ui.recovered" :

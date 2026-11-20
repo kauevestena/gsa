@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M4–M7. Origem: Perigos e antagonistas; Missões; Loop de jogo e estrutura. Estado: especificado; não implementado.
+Marcos: M4–M7. Origem: Perigos e antagonistas; Missões; Loop de jogo e estrutura. Estado: domínio integrado; primeira integração jogável em validação. Playthrough completo e revisão visual pendentes.
 
 ## Requisitos
 
@@ -59,3 +59,7 @@ Dada bomba com dados pendentes/protegidos, então ação/contramedida e perda ob
 ### AC-F16-04
 
 Dada Cidade calma ou autorização válida, então eventos hostis são cancelados/suspensos conforme política e missão continua concluível.
+
+## Integração jogável incremental
+
+A [matriz de cidade](../../../docs/city-hazards.md) delimita efeitos por facção/nível, captura/custódia, pose estimada e proteção por contrato. Spoofing/marco substituem a tinta no nível 2 dessas facções; Cartel/Máfia/MapaFácil usam tinta. Os demais encontros originais e a pressão simultânea final continuam pendentes. Testes de domínio anteriores não demonstram playthrough visual.

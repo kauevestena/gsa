@@ -145,6 +145,7 @@ public partial class SaoDatumCityScene
             lines.Add(string.Format(Text("navigation.thresholds"), navigation.BlackoutThresholdSeconds, navigation.HighUncertaintyThresholdMetres));
             lines.Add(Text(navigation.BlackoutAlert ? "navigation.alert.blackout" : "navigation.alert.gnss_recent"));
             lines.Add(Text(navigation.HighUncertaintyAlert ? "navigation.alert.uncertain" : "navigation.alert.within_model"));
+            if (_navigationRig?.Estimator?.LastGnssCorrectionRejected == true) lines.Add(Text("navigation.alert.inconsistent_fix"));
         }
         lines.Add(Text("navigation.model_limit"));
         lines.Add("");
@@ -214,6 +215,7 @@ public partial class SaoDatumCityScene
         if (what != NotificationTranslationChanged || _technicalStatus is null || !IsInsideTree()) return;
         RefreshAdvancedGeopedia();
         RefreshTechnicalTablet();
+        RefreshCityHazardLocale();
         string[] tabKeys = ["city.tab.contracts", "city.tab.office", "city.tab.fleet", "notebook.tab.map",
             "city.tab.geopedia", "city.tab.settings", "city.tab.technical"];
         for (var i = 0; i < tabKeys.Length; i++) _tabletTabs.SetTabTitle(i, Text(tabKeys[i]));

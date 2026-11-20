@@ -11,5 +11,5 @@ Coordenação simultânea das 5 facções fictícias nas 4 regiões completas da
 - [M7Wave1PavementCqAndFullCityFactionsTests.cs](../../../tests/Gsa.Missions.Tests/M7Wave1PavementCqAndFullCityFactionsTests.cs) (`T_F16_04_ProtectedSafeZonesFourRegionsFiveFactionsNonViolentPlaythroughAndCalmCityParity`)
 
 ## Estado
-Implementada nesta branch; em revisão delegada à CI.
+O registro acima descreve domínio/fixtures, sem demonstrar ligação de todos os encontros à cena. A [primeira integração jogável](../../../docs/city-hazards.md) tem evidência em [city-hazards](city-hazards/README.md). Playthrough final e revisão visual permanecem pendentes.
 

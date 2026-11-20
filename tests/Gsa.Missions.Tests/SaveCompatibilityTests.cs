@@ -9,6 +9,7 @@ using Gsa.Core.Traffic;
 using Gsa.Missions.Activities;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Economy;
+using Gsa.Missions.Gameplay;
 using Gsa.Missions.Office;
 using Gsa.Missions.Persistence;
 using Xunit;
@@ -55,6 +56,54 @@ public sealed class SaveCompatibilityTests : IDisposable
         node.AsObject().Remove(nameof(SaveGameState.Content));
         node.AsObject().Remove(nameof(SaveGameState.City));
         return node;
+    }
+
+    private static SaveCitySessionState MinimalCity(SerializableCameraSample sample) => new(
+        new LocomotionSimulator(new(500010, 7400020, 100)).ExportSaveSnapshot(), new FleetProgressionManager().ExportSnapshot(),
+        new WorldCalendarAndWeatherController(45000).ExportSnapshot(), [sample], [], [], [], new(1, [], [], []),
+        new([], [], [], [], [], new Dictionary<string, string>()), new TerritoryAttentionTracker().ExportSnapshot(),
+        null, ProcessingMode.Technical, true, false, false, false, 1, 1, CameraNextSequence: sample.Sequence + 1);
+
+    private static SerializableCameraSample Photo() => SerializableCameraSample.FromDomain(new CameraObservationSample(
+        "city_photo", "city_cam", 0, 130, new(130, new(500010, 7400020, 101.4), Quaterniond.Identity),
+        CameraMountEstimate.ForwardFacing, CameraIntrinsics.Initial,
+        new(.002, 0, 0, 0, .5, false, false, false, false, true), [], [],
+        CameraThumbnail.FromRgbBytes(256, 144, new byte[256 * 144 * 3])));
+
+    [Fact]
+    public void PreviousCatalogMigratesWithoutChangingRawPhotosOrTheSaveFile()
+    {
+        var manager = new SaveGameManager(_directory); var photo = Photo();
+        var state = LegacyState() with { SchemaVersion = 2, Content = new(2, 1, 1, ["old_preview"]), City = MinimalCity(photo) };
+        var original = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, original);
+        var result = manager.LoadCurrent(); Assert.True(result.Succeeded, result.DiagnosticDetail);
+        Assert.True(result.Compatibility!.DerivedCachesInvalidated); Assert.Equal(3, result.State!.Content!.CatalogVersion);
+        Assert.Equal(JsonSerializer.Serialize(photo), JsonSerializer.Serialize(result.State.City!.CameraSamples.Single()));
+        Assert.Null(result.State.City.Hazards); Assert.Equal(original, File.ReadAllText(manager.CurrentSavePath));
+    }
+
+    [Fact]
+    public void ProtectedCameraIdsAndSequencesCannotCollideWithPendingAcquisition()
+    {
+        var photo = Photo(); var custody = new BatchCustodyStore();
+        custody.RegisterBufferedBatch(new(1, "city_batch", "job", 130, 130, 1, 0, CaptureStopReason.None, ["city_cam"], [photo], [], [], []), 130);
+        custody.OffloadAtomic("city_batch", 131);
+        var state = LegacyState() with { City = MinimalCity(photo), CustodyStore = custody.ExportSnapshot() };
+        Assert.Throws<ArgumentException>(() => SaveCompatibility.Normalize(state, 1));
+        var valid = state with { City = state.City! with { CameraSamples = [] } };
+        Assert.Single(SaveCompatibility.Normalize(valid, 1).State.CustodyStore.Entries);
+        Assert.Throws<ArgumentException>(() => SaveCompatibility.Normalize(valid with { City = valid.City! with { CameraNextSequence = 0 } }, 1));
+    }
+
+    [Fact]
+    public void FutureNestedHazardsBlockOverwriteWhileKeepingTheOriginalSave()
+    {
+        var manager = new SaveGameManager(_directory);
+        var state = LegacyState() with { SchemaVersion = 2, Content = SaveContentVersions.Current,
+            City = MinimalCity(Photo()) with { Hazards = new CityHazardState().Export() with { SchemaVersion = 99 } } };
+        var raw = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, raw);
+        Assert.False(manager.LoadCurrent().Succeeded); Assert.False(manager.Save(LegacyState(), SaveTrigger.Manual).Succeeded);
+        Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));
     }
 
     [Fact]
@@ -168,7 +217,7 @@ public sealed class SaveCompatibilityTests : IDisposable
         Assert.True(result.Compatibility!.DerivedCachesInvalidated);
         Assert.Empty(result.State!.Content!.DerivedCacheIds);
         Assert.Equal(JsonSerializer.Serialize(old.CustodyStore), JsonSerializer.Serialize(result.State.CustodyStore));
-        Assert.True(manager.Save(canonical with { Content = new(2, 1, 1, ["current_octree"]) }, SaveTrigger.Manual).Succeeded);
+        Assert.True(manager.Save(canonical with { Content = SaveContentVersions.Current with { DerivedCacheIds = ["current_octree"] } }, SaveTrigger.Manual).Succeeded);
         Assert.False(manager.LoadCurrent().Compatibility!.DerivedCachesInvalidated);
         Assert.Equal("current_octree", Assert.Single(manager.LoadCurrent().State!.Content!.DerivedCacheIds));
     }

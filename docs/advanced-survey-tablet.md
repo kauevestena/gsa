@@ -27,7 +27,7 @@ São taxas programadas, não medição de FPS, retornos úteis ou densidade. A p
 
 ## Limites desta integração
 
-A cidade usa poses ideais na prévia de fotos/nuvem e uma trajetória estimada separada para diagnóstico. Sigma do filtro é incerteza do modelo, não deriva verdadeira medida ou RMSE oficial. Sigma de distância do perfil é apenas um parâmetro do simulador. PPK pertence ao produto processado e não vira um estado GNSS ao vivo. Limites e reinicialização do diagnóstico estão em [navegação ao vivo](live-navigation.md).
+Fotos de veículos guardam pose estimada; câmeras a pé/em plataformas leves e nuvem LiDAR ainda usam poses ideais, conforme a [integração dos perigos](city-hazards.md). Sigma do filtro é incerteza do modelo, não deriva verdadeira medida ou RMSE oficial. Sigma de distância do perfil é apenas um parâmetro do simulador. PPK pertence ao produto processado e não vira um estado GNSS ao vivo. Limites e reinicialização do diagnóstico estão em [navegação ao vivo](live-navigation.md).
 
 O escritório e os contratos da cidade ainda são simplificados. O painel mostra as exigências efetivamente presentes no contrato aceito; não inventa exigências do roteiro ou promove a prévia a aprovação oficial. O [treinamento separado](live-training.md) já usa o fluxo integrado de produto/CQ. Conectar a trajetória aos produtos e ao CQ avançado da campanha continua pendente.
 
