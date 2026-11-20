@@ -232,6 +232,9 @@ def main() -> int:
         if "GSA_CITY_NAVIGATION_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing live navigation integration marker")
 
+        if "GSA_CITY_HAZARDS_SMOKE_OK" not in city_smoke:
+            raise RuntimeError("Missing playable city hazards integration marker")
+
         targets = ("linux", "windows") if args.exports == "all" else (
             (host,) if args.exports == "host" else ())
         for target in targets:
@@ -282,6 +285,8 @@ def main() -> int:
                     raise RuntimeError(f"{target}: missing exported advanced survey marker")
                 if "GSA_CITY_NAVIGATION_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported navigation marker")
+                if "GSA_CITY_HAZARDS_SMOKE_OK" not in city_output:
+                    raise RuntimeError(f"{target}: missing exported city hazards marker")
                 if args.offline_smoke:
                     report["network_isolation"] = "linux_network_namespace"
         current_locks = {str(p.relative_to(ROOT)): sha256(p) for p in lock_paths()}

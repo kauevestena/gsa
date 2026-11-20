@@ -1,0 +1,10 @@
+  Gsa.Core -> /workspace/scratch/62d42d4c19d4/gsa/src/Gsa.Core/bin/Debug/net10.0/Gsa.Core.dll
+  Gsa.Missions -> /workspace/scratch/62d42d4c19d4/gsa/src/Gsa.Missions/bin/Debug/net10.0/Gsa.Missions.dll
+  Gsa.Engine -> /workspace/scratch/62d42d4c19d4/gsa/src/Gsa.Engine/.godot/mono/temp/bin/Debug/Gsa.Engine.dll
+  Gsa -> /workspace/scratch/62d42d4c19d4/gsa/game/.godot/mono/temp/bin/Debug/Gsa.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.33

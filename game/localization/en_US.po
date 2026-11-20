@@ -1524,7 +1524,7 @@ msgid "survey.technical.preview"
 msgstr "△ Field preview — not official QC"
 
 msgid "survey.technical.ideal_pose"
-msgstr "City photos and cloud use ideal poses. Estimated navigation below is a separate diagnostic and does not approve products."
+msgstr "Vehicle camera observations use the estimated navigation pose. Walking and light-platform cameras still use ideal poses; the LiDAR cloud remains a visual preview and cannot approve delivery."
 
 msgid "survey.technical.cloud_show"
 msgstr "Show preview cloud"
@@ -1638,7 +1638,7 @@ msgid "navigation.show_trail"
 msgstr "Show estimated trajectory and uncertainty axes on map"
 
 msgid "navigation.preview_separate"
-msgstr "City photos and cloud use ideal poses. Estimated navigation below is a separate diagnostic and does not approve products."
+msgstr "Vehicle camera observations use the estimated navigation pose. Walking and light-platform cameras still use ideal poses; the LiDAR cloud remains a visual preview and cannot approve delivery."
 
 msgid "navigation.sigma"
 msgstr "σ E/N/U: {0} / {1} / {2} m · 3D σ: {3} m"
@@ -1669,3 +1669,132 @@ msgstr "σ describes the filter model, not true error or RMSE. Without a connect
 
 msgid "navigation.status.waiting_velocity"
 msgstr "○ Waiting for a second GNSS position to estimate velocity"
+
+msgid "city.hazards.upload"
+msgstr "Upload camera data (office / unload / Wi-Fi)"
+
+msgid "city.hazards.clean"
+msgstr "Clean lens: stop for 3 s (or hold E)"
+
+msgid "city.hazards.disarm"
+msgstr "Disarm bomb: stop for 5 s (or hold E)"
+
+msgid "city.hazards.disguise"
+msgstr "Kombi disguise: 200 C$ · selected zone / current job"
+
+msgid "city.hazards.escort"
+msgstr "Escort: 10% of job value · selected zone / current job"
+
+msgid "city.hazards.authorize"
+msgstr "Community authorization: 5% · requires Negotiation 1"
+
+msgid "city.hazards.insurance"
+msgstr "Insure mounted vehicle for this job: 2% premium / 10% deductible"
+
+msgid "city.hazards.repair"
+msgstr "Repair tyre (50 C$) / replace lost vehicle (cost below)"
+
+msgid "city.hazards.abandon"
+msgstr "Abandon current job"
+
+msgid "city.hazards.status"
+msgstr "Camera photos: {0} on board / {1} uploaded · lens obstruction: {2}% · tyre: {3}"
+
+msgid "city.hazards.tyre_bad"
+msgstr "punctured (6 m/s limit)"
+
+msgid "city.hazards.tyre_ok"
+msgstr "OK"
+
+msgid "city.hazards.replacement_cost"
+msgstr "Replace {0}: {1} C$ (insurance deductible when eligible). Lost data stays lost."
+
+msgid "city.hazards.wait_navigation"
+msgstr "Waiting for observed position, heading and velocity before vehicle camera capture."
+
+msgid "city.hazards.disabled_vehicle"
+msgstr "This vehicle was lost. Replace it at an office or unload point."
+
+msgid "city.hazards.bomb_warning"
+msgstr "Parked bomb: {0} s! Leave the territory or stop and disarm for 5 s (E / tablet)."
+
+msgid "city.hazards.faction_warning"
+msgstr "Faction attention rising. Stop capturing or leave this territory."
+
+msgid "city.hazards.disarmed"
+msgstr "Bomb disarmed. Uploaded and on-board photos are safe."
+
+msgid "city.hazards.cleaned"
+msgstr "Lens cleaned. Earlier contaminated photos still need to be captured again."
+
+msgid "city.hazards.spoofing"
+msgstr "GNSS interference reported in this territory. Check observations and uncertainty."
+
+msgid "city.hazards.benchmark_moved"
+msgstr "A physical benchmark was displaced. Published coordinates did not change."
+
+msgid "city.hazards.paint"
+msgstr "Paint hit the lens. Stop and clean for 3 s (E / tablet)."
+
+msgid "city.hazards.puncture"
+msgstr "Tyre punctured: speed limited to 6 m/s. Stop to repair (50 C$)."
+
+msgid "city.hazards.pursuit"
+msgstr "Faction vehicle approaching. Leave the territory or reach a safe zone."
+
+msgid "city.hazards.roadblock"
+msgstr "Roadblock and pursuit ahead. Seek another route or a safe zone."
+
+msgid "city.hazards.upload_location"
+msgstr "Accept a job and visit an office, unload point or Wi-Fi hotspot to upload."
+
+msgid "city.hazards.nothing_to_upload"
+msgstr "No on-board camera photos to upload."
+
+msgid "city.hazards.upload_failed"
+msgstr "Upload failed. On-board photos have been retained."
+
+msgid "city.hazards.uploaded"
+msgstr "Camera data uploaded and protected against vehicle loss."
+
+msgid "city.hazards.vehicle_lost"
+msgstr "Vehicle lost: {0} on-board photos lost; {1} uploaded photos preserved. Handcart available at the office."
+
+msgid "city.hazards.no_protection_fee"
+msgstr "Calm protection is active; no countermeasure purchase is needed."
+
+msgid "city.hazards.protection_active"
+msgstr "Selected countermeasure is active for this zone and job."
+
+msgid "city.hazards.kombi_required"
+msgstr "Vehicle disguise requires a Kombi."
+
+msgid "city.hazards.authorization_failed"
+msgstr "Authorization requires Negotiation 1, sufficient funds and a community association."
+
+msgid "city.hazards.insufficient"
+msgstr "Insufficient funds for this service."
+
+msgid "city.hazards.insurance_unavailable"
+msgstr "Accept a job and mount an available motor vehicle before insuring it."
+
+msgid "city.hazards.insured"
+msgstr "Mounted vehicle is insured for this job."
+
+msgid "city.hazards.recover_location"
+msgstr "Visit an office or unload point to replace the lost vehicle."
+
+msgid "city.hazards.stop_first"
+msgstr "Stop the vehicle before repairing the tyre."
+
+msgid "city.hazards.repaired"
+msgstr "Vehicle ready. Repairs do not restore lost or contaminated observations."
+
+msgid "city.hazards.abandoned"
+msgstr "Job abandoned. You may accept another job with the available platform."
+
+msgid "city.hazards.active_job"
+msgstr "Finish or abandon the current job before accepting another."
+
+msgid "navigation.alert.inconsistent_fix"
+msgstr "GNSS observation rejected: inconsistent with the predicted trajectory. This is not proof of spoofing."

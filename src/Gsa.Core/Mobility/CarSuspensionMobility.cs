@@ -76,7 +76,7 @@ public sealed class CarSuspensionSimulator
         Vector3d initialPositionEnu,
         double initialHeadingRadians = 0.0,
         LocomotionMode mode = LocomotionMode.Car,
-        int usedStorageUnits = 0)
+        int usedStorageUnits = 0, double conditionDamage = 0)
     {
         if (mode < LocomotionMode.Car)
             throw new ArgumentOutOfRangeException(nameof(mode), mode, "Automotive suspension simulator requires Level 3+ platform.");
@@ -85,6 +85,9 @@ public sealed class CarSuspensionSimulator
         if (usedStorageUnits < 0)
             throw new ArgumentOutOfRangeException(nameof(usedStorageUnits));
 
+        if (!double.IsFinite(conditionDamage) || conditionDamage < 0 || conditionDamage > DestroyedThreshold)
+            throw new ArgumentOutOfRangeException(nameof(conditionDamage));
+        _conditionDamage = conditionDamage;
         _profile = PlatformProfile.ForMode(mode);
         _positionEnu = initialPositionEnu;
         _headingRadians = initialHeadingRadians;
@@ -99,8 +102,10 @@ public sealed class CarSuspensionSimulator
         double steerInput,
         double surfaceGripMultiplier = 1.0,
         double bumpHeightMetres = 0.0,
-        int defensiveDrivingRank = 0)
+        int defensiveDrivingRank = 0, double speedLimitMetresPerSecond = double.PositiveInfinity)
     {
+        if (double.IsNaN(speedLimitMetresPerSecond) || speedLimitMetresPerSecond < 0)
+            throw new ArgumentOutOfRangeException(nameof(speedLimitMetresPerSecond));
         if (!double.IsFinite(dtSeconds) || dtSeconds <= 0.0)
             throw new ArgumentOutOfRangeException(nameof(dtSeconds));
         if (!double.IsFinite(surfaceGripMultiplier) || surfaceGripMultiplier <= 0.0)
@@ -123,7 +128,7 @@ public sealed class CarSuspensionSimulator
         var accel = throttleInput * _profile.AccelerationMetresPerSecondSquared * grip
                   - brakeInput * _profile.DecelerationMetresPerSecondSquared * grip;
         var drag = _speedMetresPerSecond * 0.12;
-        _speedMetresPerSecond = Math.Clamp(_speedMetresPerSecond + (accel - drag) * dtSeconds, 0.0, _profile.MaxSpeedMetresPerSecond);
+        _speedMetresPerSecond = Math.Clamp(_speedMetresPerSecond + (accel - drag) * dtSeconds, 0.0, Math.Min(_profile.MaxSpeedMetresPerSecond, speedLimitMetresPerSecond));
         if (brakeInput > 0.5 && _speedMetresPerSecond < 0.05)
             _speedMetresPerSecond = 0.0;
 

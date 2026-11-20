@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+GSA_ADVANCED_SURVEY_SMOKE_OK articles=30 locales=2 preview=bounded trajectory=unavailable overlays=tracker capture=unchanged
+GSA_CITY_NAVIGATION_SMOKE_OK imu_hz=100 dmi_hz=20 gnss_hz=5 initialization=observed outage=propagated trail=bounded save=unchanged
+GSA_CITY_HAZARDS_SMOKE_OK paint=quality_failure clean=3s puncture=motion roadblock=collision spoof=observed_pose bomb=loss upload=preserved insurance=deductible calm=cancelled save=persistent locale=live
+GSA_CITY_SAVE_SMOKE_OK schema=2 photos=1 debt=73 parked=van recovery=preserved sandbox=isolated

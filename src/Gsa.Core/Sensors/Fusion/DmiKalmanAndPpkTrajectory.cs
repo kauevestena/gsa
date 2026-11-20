@@ -629,7 +629,7 @@ public sealed class SixStateTrajectoryKalmanFilter
         GnssSolutionAgeSeconds += dtSeconds;
     }
 
-    public bool UpdateGnssPosition(GnssObservation observation, double? explicitSigmaOverrideMetres = null)
+    public bool UpdateGnssPosition(GnssObservation observation, double? explicitSigmaOverrideMetres = null, bool rejectOutliers = false)
     {
         ArgumentNullException.ThrowIfNull(observation);
         if (!observation.IsAvailable || observation.MeasuredPositionEnu is null)
@@ -638,6 +638,12 @@ public sealed class SixStateTrajectoryKalmanFilter
         var baseSigma = explicitSigmaOverrideMetres
             ?? (observation.IndependentSigmaMetres ?? 2.5) * Math.Max(1.0, observation.Dop * 0.5);
         var sigma = Math.Max(0.015, baseSigma);
+        if (rejectOutliers)
+        {
+            if (!UpdatePositionControlPoint(observation.MeasuredPositionEnu.Value, sigma, out _)) return false;
+            GnssSolutionAgeSeconds = 0;
+            return true;
+        }
         var r = MatrixOps6.Identity(3);
         var v = sigma * sigma;
         r[0, 0] = v;

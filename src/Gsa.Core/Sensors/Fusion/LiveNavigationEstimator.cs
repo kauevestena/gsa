@@ -29,6 +29,8 @@ public sealed class LiveNavigationEstimator
     public int GnssUpdatesApplied { get; private set; }
     public int DmiUpdatesApplied { get; private set; }
     public int ZuptUpdatesApplied { get; private set; }
+    public int RejectedGnssCorrections { get; private set; }
+    public bool LastGnssCorrectionRejected { get; private set; }
     public string StatusKey => IsInitialized ? "navigation.status.running" : _waitingStatus;
 
     public void Step(ImuObservation imu, GnssObservation? gnss = null,
@@ -93,7 +95,11 @@ public sealed class LiveNavigationEstimator
             var corrected = _gyroBias == Vector3d.Zero ? imu : imu with { AngularVelocityBody = imu.AngularVelocityBody - _gyroBias };
             var attitude = _attitude!.Step(corrected, stationary, heading);
             _filter.PredictLive(imu.DtSeconds, imu.SpecificForceBody, attitude.EstimatedBodyToMap, _grade);
-            if (gnss is not null && _filter.UpdateGnssPosition(gnss)) GnssUpdatesApplied++;
+            if (gnss is { IsAvailable: true })
+            {
+                LastGnssCorrectionRejected = !_filter.UpdateGnssPosition(gnss, rejectOutliers: true);
+                if (LastGnssCorrectionRejected) RejectedGnssCorrections++; else GnssUpdatesApplied++;
+            }
         }
 
         if (dmi is not null)

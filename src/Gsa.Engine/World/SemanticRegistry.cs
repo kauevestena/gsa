@@ -29,6 +29,11 @@ public sealed class SemanticRegistry
         node.SetMeta("dynamic", definition.Dynamic);
     }
 
+    public void UpdatePhysicalPosition(string id, Gsa.Core.Geometry.Vector3d position)
+    {
+        if (_objects.TryGetValue(id, out var item)) _objects[id] = item.WithPhysicalPosition(position);
+    }
+
     public void Clear()
     {
         _objects.Clear();

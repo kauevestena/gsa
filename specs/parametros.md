@@ -88,3 +88,19 @@ Cidade calma suprime bêbados, cães perseguidores, sabotagem, bombas, persegui�
 60 fps em 1920×1080; benchmark mede frame CPU/GPU, p95/p99, física, captura, filas e RAM. Referência inicial: GPU integrada de classe Radeon Vega 7, CPU 6 núcleos, 16 GiB RAM dual-channel, SSD, sem GPU dedicada; registrar modelo/driver/OS reais antes do aceite. Comparar máquinas diferentes não substitui a medição de referência.
 
 Veículo: 1500–4000 triângulos; personagem: 1000–2500; objeto urbano: 50–500; texturas: 128–512 px. Neblina 300–600 m, iluminação por vértice + sol simples, sombras em mancha para NPCs. Memória total alvo ≤2 GiB; orçamento inicial de pontos desenhados 250 mil, reduzível por LOD sem alterar CQ.
+
+## Primeiro incremento jogável de perigos na cidade
+
+Complementa F16 sem alterar seus limiares/tempos físicos originais.
+
+| Parâmetro | Valor inicial | Limite |
+| --- | --- | --- |
+| Atividade após foto | 0,6 s | Prévia LiDAR não vira dado científico |
+| Tinta | +45% obstrução | Limpeza 3 s; sem reescrever fotos |
+| Pneu furado | Máximo 6 m/s; reparo 50 C$ | Reparo parado |
+| Marco deslocado | +0,8 m E / −0,3 m N | Referência publicada imutável |
+| Spoofing | Até 20 s | Rampa original 10 m em 5 s |
+| Perseguidor | 20 s, 14 m/s, impacto Δv 4 m/s, intervalo 3 s | Direção local com obstáculos |
+| Barreira | 30 s, 22 m à frente, caixa 4 × 1,2 × 1,2 m | Sem área protegida |
+| Envio de fotos | Raio 10 m de escritório/descarga/Wi-Fi | Custódia com checksum, sem autonomia extra |
+| Autorização inicial | Negociação 1 | Zona/trabalho selecionados |

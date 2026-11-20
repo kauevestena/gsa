@@ -58,7 +58,7 @@ public partial class SaoDatumCityScene
         var expected = JsonSerializer.Serialize(BuildCitySaveState().City);
         var contract = JsonSerializer.Serialize(_activeMachine!.ExportSnapshot());
         SaveCareer();
-        Require(_saveManager.LoadCurrent().Succeeded, "save failed");
+        Require(_saveManager.LoadCurrent().Succeeded, "save failed: " + _saveManager.LoadCurrent().DiagnosticDetail);
         SaveCareer(); // establish a recoverable generation containing the full fixture
         _fieldSamples.Clear(); _coverageSpots.Clear(); _observedTargetIds.Clear();
         _ledger = new CareerLedger(0);
@@ -98,6 +98,7 @@ public partial class SaoDatumCityScene
         Require(JsonSerializer.Serialize(BuildCitySaveState().City) == expected, "recovered session differs");
         RunAdvancedSurveyTabletSmoke();
         RunCityNavigationSmoke();
+        RunCityHazardSmoke();
         TryLoadCareer(); // The tablet fixture changes presentation/platform inputs without writing a save.
         Require(JsonSerializer.Serialize(BuildCitySaveState().City) == expected, "tablet checks changed saved session");
         var current = File.ReadAllBytes(_saveManager.CurrentSavePath);

@@ -84,6 +84,7 @@ public sealed class FleetServiceAndInsuranceCoordinator
     private readonly List<InsuranceClaimRecord> _claims = [];
 
     public bool InsuranceActive { get; private set; }
+    public void ExpireInsurance() => InsuranceActive = false;
     public string? InsuredPlatformId { get; private set; }
     public IReadOnlyList<string> InsuredSensorIds => _insuredSensorIds;
     public int InsuredValueCoords { get; private set; }
@@ -145,11 +146,11 @@ public sealed class FleetServiceAndInsuranceCoordinator
 
             ServiceKind.InsuranceClaim => BuildQuote(
                 kind,
-                eligible: InsuranceActive && InsuredValueCoords > 0,
-                baseFee: InsuranceActive ? RoundPercent(InsuredValueCoords, InsuranceDeductibleRate, minWhenPositive: 1) : 0,
+                eligible: InsuranceActive && InsuredValueCoords > 0 && InsuredPlatformId == platform.Id,
+                baseFee: InsuranceActive && InsuredPlatformId == platform.Id ? RoundPercent(InsuredValueCoords, InsuranceDeductibleRate, minWhenPositive: 1) : 0,
                 discountFraction: 0.0,
                 "service.formula.insurance_deductible_10pct",
-                InsuranceActive && InsuredValueCoords > 0 ? null : "service.error.insurance_not_active"),
+                InsuranceActive && InsuredValueCoords > 0 && InsuredPlatformId == platform.Id ? null : "service.error.insurance_not_active"),
 
             ServiceKind.FieldBaseStationSetup => BuildQuote(
                 kind,

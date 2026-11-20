@@ -68,6 +68,8 @@ public partial class SaoDatumCityScene
         }
         var cell = $"city_nav:{(int)Math.Floor(position.X / 10)}:{(int)Math.Floor(position.Y / 10)}";
         var bias = CellMultipathBias.ForCell(71117, cell, .5, reflective ? 2.5 : 1);
+        if (_cityHazards.SpoofRemaining > 0 && !_calmPolicy.IsProtectionActive && !_citySafeZone)
+            bias += Gsa.Missions.Economy.ProgressiveGnssSpoofingDetector.ComputeSpoofingOffsetEnu(_cityHazards.SpoofElapsed);
         return new GnssEnvironment((double)open / NavigationSkyDirections.Count, bias);
     }
 }

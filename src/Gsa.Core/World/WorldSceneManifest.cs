@@ -43,6 +43,9 @@ public sealed class WorldBoxObject
     public Vector3d PositionEnu { get; }
     public Vector3d SizeEnu { get; }
 
+    public WorldBoxObject WithPhysicalPosition(Vector3d position) => new(Id, ObjectClass, Material, RegionId,
+        SurfaceIds, Tags, Dynamic, Collision, position, SizeEnu);
+
     internal WorldBoxObject(string id, string objectClass, string material, string regionId,
         IEnumerable<string> surfaceIds, IEnumerable<string> tags, bool dynamic, bool collision,
         Vector3d positionEnu, Vector3d sizeEnu)
