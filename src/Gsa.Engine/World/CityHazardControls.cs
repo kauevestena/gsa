@@ -135,6 +135,8 @@ public partial class SaoDatumCityScene
         if (_activeContract is null) return;
         _activeMachine?.Abandon(_calendar.CalendarTimeSeconds);
         _activeContract = null; _activeMachine = null; _activeStorySpec = null;
+        _lastCitySurveyReview = null;
+        _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();
         _feedbackText = Text("city.hazards.abandoned"); SaveHazardChange();
     }

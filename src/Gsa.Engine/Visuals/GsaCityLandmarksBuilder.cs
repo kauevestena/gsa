@@ -1,5 +1,6 @@
 using Gsa.Core.Geometry;
 using Gsa.Core.Traffic;
+using Gsa.Core.World;
 using Godot;
 
 namespace Gsa.Engine.Visuals;
@@ -96,6 +97,11 @@ public sealed class GsaCityLandmarksBuilder
             foreach (var n in new[] { 7400116.0, 7400236.0 })
                 roadBatch.AddBoxNormalizedUv(crosswalkMat, coords.ToGodot(new Vector3d(e + 8.5, n, 99.67)), new Vector3(3.6f, 0.05f, 12.0f));
         }
+
+        // Walkable inspection approaches along the old drainage and sidewalk targets.
+        foreach (var north in new[] { OldCenterMvpWorldAssembler.DrainageSurveyNorth, OldCenterMvpWorldAssembler.SidewalkSurveyNorth })
+            roadBatch.AddBox(roadAsphaltMat, coords.ToGodot(new Vector3d(500214, north - 3.5, 99.75)),
+                new Vector3(412, .08f, 10), uvScale: .14f);
 
         // 2. Old Center Landmark: Municipal City Hall Monumental Plaza (E=500450, N=7400450)
         BuildCityHall(structureBatch, roadBatch, coords, concMat, sidewalkMat);

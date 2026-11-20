@@ -1,3 +1,7 @@
+using System.Globalization;
+using Gsa.Missions.Gameplay;
+using Gsa.Core.Mobility;
+using Godot;
 using Gsa.Missions.Campaign;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Office;
@@ -16,11 +20,79 @@ public partial class SaoDatumCityScene
         new PredicateRequirementSpec("format_valid", true),
     ]);
 
-    private static bool SupportsCityDelivery(ContractDefinition contract) =>
-        contract.Product == "images" && contract.RequiredFeatureIds.Count > 0 &&
-        contract.PartialPolicy.Mode == "disabled" &&
-        contract.Requirements.All(requirement => CityPhotoRequirements.Any(supported =>
-            supported.Metric == requirement.Metric && supported.Kind == requirement.Kind));
+    private const double DrainageRainDelaySeconds = 3 * 3600;
+    private QualityReport? _lastCitySurveyReview;
+    private IReadOnlyList<SidewalkSectionMeasurement> _lastSidewalkMeasurements = [];
+    private int _lastCitySurveyTargetCount;
+
+    private static IReadOnlyList<ContractRequirementSpec> CitySurveyRequirements(string missionId) => missionId switch
+    {
+        "HIST-02" => [.. CityPhotoRequirements, new ThresholdRequirementSpec("absolute_rmse", "m", "max", 2, .5)],
+        "HIST-03" => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .2, .05)],
+        _ => CityPhotoRequirements,
+    };
+
+    private static bool SupportsCityStory(CampaignMissionFullSpec spec) => spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03";
+
+    private bool SupportsCityDelivery(ContractDefinition definition)
+    {
+        if (definition.RequiredFeatureIds.Count == 0 || definition.PartialPolicy.Mode != "disabled")
+            return false;
+
+        var inventory = definition.Product == "feature_inventory" && definition.Id is "HIST-02" or "HIST-03";
+        if (definition.Product != "images" && !inventory)
+            return false;
+        if (inventory && !CitySurveyInventory.HasReference(definition, _manifestObjectsById))
+            return false;
+
+        var supported = inventory ? CitySurveyRequirements(definition.Id) : CityPhotoRequirements;
+        return definition.Requirements.All(requirement =>
+            supported.Any(metric => metric.Metric == requirement.Metric && metric.Kind == requirement.Kind));
+    }
+
+    private bool CityMissionCompleted(string missionId) =>
+        _campaignState.ObjectiveStates.TryGetValue(missionId, out var state) && state == $"completed:{missionId}";
+
+    private bool CityHasSurveyPlatform(CampaignMissionFullSpec spec)
+    {
+        var mode = _locomotion.MountedVehicleMode;
+        return _fleet.OwnedPlatforms.Contains(mode) && PlatformProfile.ForMode(mode).Level >= spec.MinimumPlatformLevel;
+    }
+
+    private bool UpdateDrainageWeather()
+    {
+        if (_activeStorySpec?.MissionId != "HIST-02" || _activeMachine is not { IsActiveState: true, Snapshot: { } job } ||
+            _calendar.IsRaining || _calendar.CalendarTimeSeconds < job.AcceptedAtSeconds + DrainageRainDelaySeconds ||
+            _calendar.CalendarTimeSeconds > job.ExpiresAtSeconds)
+            return false;
+
+        _calendar.SetWeather(true, .8);
+        _feedbackText = Text("city.office.rain_arrived");
+        return true;
+    }
+
+    private string CitySurveyReviewText()
+    {
+        if (_lastCitySurveyReview is not { } report)
+            return "";
+
+        var locale = TranslationServer.GetLocale().Split('_')[0];
+        var culture = CultureInfo.GetCultureInfo(locale == "pt" ? "pt-BR" : "en-US");
+        var rows = new List<string>
+        {
+            string.Format(culture, Text("city.office.survey_review"), report.MatchedFeatureCount,
+                _lastCitySurveyTargetCount, report.ValidSampleCount, report.UniqueSampleCount)
+        };
+        foreach (var (metric, labelKey) in new[] { ("absolute_rmse", "absolute"), ("relative_rmse", "relative") })
+        {
+            if (report.GetMetric(metric) is { Value: { } value, Limit: { } limit })
+                rows.Add(string.Format(culture, Text("city.office.rmse_" + labelKey), value, limit));
+        }
+        foreach (var segment in _lastSidewalkMeasurements)
+            rows.Add(string.Format(culture, Text("city.office.sidewalk_measurement"),
+                segment.SegmentId, segment.WidthMetres, segment.CurbHeightMetres));
+        return string.Join("\n", rows);
+    }
 
     private static string CityOfficeUnavailableKey(string product) => product switch
     {
@@ -69,8 +141,10 @@ public partial class SaoDatumCityScene
             return;
         }
 
+        var isInventory = definition.Product == "feature_inventory";
+        var recipeId = isInventory ? "city_inventory" : "city_images";
         var recipe = new ProcessingRecipe(
-            1, "city_images", definition.Id, _officeMode,
+            1, recipeId, definition.Id, _officeMode,
             artifacts.Select(batch => batch.BatchId).ToArray(),
             samples.Select(sample => sample.SampleId).Distinct(StringComparer.Ordinal).ToArray(),
             [], new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal), 0, 0);
@@ -88,29 +162,39 @@ public partial class SaoDatumCityScene
         }
 
         // Processing is synchronous in the city. Only protected, selected samples enter the product.
-        var job = new OfficeProcessingQueue().StartOrResumeJob("city_images", machine, _cityCustody, _ledger, recipe, now);
+        var job = new OfficeProcessingQueue().StartOrResumeJob(recipeId, machine, _cityCustody, _ledger, recipe, now);
         if (job.Product is not { } product)
         {
             _feedbackText = Text("city.office.processing_failed");
             return;
         }
 
-        // Pre-upgrade story saves only specified a delivery format. Apply the photo evidence
-        // floor at the office without rewriting their accepted terms or batch payloads.
+        // Older accepted jobs retain their targets and commercial terms. They also
+        // need the current evidence for their product before settlement.
         var effectiveDefinition = definition with
         {
-            Requirements = definition.Requirements.Concat(CityPhotoRequirements
+            Requirements = definition.Requirements.Concat(CitySurveyRequirements(definition.Id)
                 .Where(floor => definition.Requirements.All(rule => rule.Metric != floor.Metric))).ToArray()
         };
-        var reference = new EvaluationReference(definition.Id, [], definition.RequiredFeatureIds);
-        var report = QualityEvaluator.Evaluate(effectiveDefinition, reference, product.Submission);
+        var submission = product.Submission;
+        _lastSidewalkMeasurements = [];
+        if (isInventory)
+            submission = CitySurveyInventory.Reconstruct(definition, submission, out _lastSidewalkMeasurements);
+        var reference = isInventory ? CitySurveyInventory.BuildReference(definition, _manifestObjectsById)
+            : new EvaluationReference(definition.Id, [], definition.RequiredFeatureIds);
+        var report = QualityEvaluator.Evaluate(effectiveDefinition, reference, submission);
+        _lastCitySurveyReview = report;
+        _lastCitySurveyTargetCount = definition.RequiredFeatureIds.Count;
         var result = machine.RecordQualityEvaluation(now, report.Passed, report.PassedDeliverableIds, report.FailureReasonKeys.FirstOrDefault());
         if (!result.Succeeded || !report.Passed)
         {
             var reason = report.FailureReasonKeys.FirstOrDefault() switch
             {
                 "cq.failure.privacy_redacted" => "city.office.review_privacy",
+                "cq.failure.all_required_features" when isInventory => "city.office.need_parallax",
                 "cq.failure.all_required_features" => "city.office.missing_photo_targets",
+                "cq.failure.absolute_rmse" or "cq.failure.relative_rmse" or "cq.failure.insufficient_checkpoints" =>
+                    "city.office.measurement_rework",
                 "cq.failure.valid_image_fraction" => "city.office.invalid_photos",
                 _ => "city.office.processing_failed",
             };

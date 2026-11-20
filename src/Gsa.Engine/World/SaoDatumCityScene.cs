@@ -364,6 +364,8 @@ public partial class SaoDatumCityScene : Node3D
                     "glass" => new Color(0.24f, 0.68f, 0.82f, 0.52f),
                     "water" => new Color(0.10f, 0.42f, 0.68f, 0.72f),
                     "vegetation" => new Color(0.22f, 0.48f, 0.24f),
+                    "metal" when item.ObjectClass == "sidewalk_survey_mark" => item.Id.EndsWith("_foot", StringComparison.Ordinal)
+                        ? new Color(.96f, .54f, .19f) : new Color(.92f, .94f, .24f),
                     "metal" => new Color(0.62f, 0.68f, 0.72f),
                     _ => new Color(0.58f, 0.60f, 0.58f),
                 });
@@ -550,7 +552,8 @@ public partial class SaoDatumCityScene : Node3D
                   : 10f + (float)rng.NextDouble() * 16f;
             // City sectors are 100 m wide and the painted avenues repeat every
             // 120 m, so sector-edge setbacks alone do not keep this grid clear.
-            if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d))
+            if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
+                OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d))
                 continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
@@ -671,6 +674,7 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         var weather = _calendar.StepPhysical(delta);
+        if (UpdateDrainageWeather()) weather = _calendar.ExportSnapshot();
         var activePos = CurrentPositionEnu();
         var activeHeading = CurrentHeadingRadians();
         var previousPlayerPosition = activePos;
@@ -1196,8 +1200,10 @@ public partial class SaoDatumCityScene : Node3D
         var estimatedPose = CurrentActiveMode() >= LocomotionMode.Car && navigation is not null
             ? new EstimatedBodyPose(t, navigation.PositionEnu + Vector3d.UnitZ * 1.4, navigation.BodyToMapRotation) : new EstimatedBodyPose(t, origin, bodyQuat);
         var environment = weather.ToCameraEnvironment();
+        var lensObstruction = weather.IsRaining ? weather.RainIntensity * Math.Min(.4, .12 + .04 * Math.Abs(speed)) : 0;
         environment = new CameraEnvironmentSnapshot(environment.IsNight, environment.SunAngleRadians,
-            Math.Max(environment.LensObstructionFraction, _cityHazards.Lens.ObstructionFraction), environment.BaseClippingFraction);
+            Math.Min(1, Math.Max(environment.LensObstructionFraction, _cityHazards.Lens.ObstructionFraction) + lensObstruction),
+            environment.BaseClippingFraction);
         if (_camScheduler.TryEnqueueSimulatedCapture(new CameraCaptureRequest(
             _tick, t, start, end, readout, estimatedPose, mount, environment,
             _liveCandidates, Occluded), _locomotion, out var sample, out _) && sample is not null)
@@ -1294,7 +1300,7 @@ public partial class SaoDatumCityScene : Node3D
                         var nearby = _worldParkedVehicles.FirstOrDefault(v =>
                             !_cityHazards.IsVehicleDisabled(v.Mode) &&
                             TrainingContractSession.HorizontalDistance(curPos, v.PosEnu) < 4.2 &&
-                            (_isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode) || _campaignState.UnlockedPlatforms.Contains(v.Mode.ToString().ToLowerInvariant())));
+                            (_isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode)));
                         if (nearby.Root is not null)
                         {
                             if (_carSim is not null) _cityHazards.SetVehicleDamage(_carSim.Profile.Mode, _carSim.ConditionDamage);
