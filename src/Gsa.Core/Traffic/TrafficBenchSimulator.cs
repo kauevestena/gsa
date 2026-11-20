@@ -8,7 +8,8 @@ public readonly record struct TrafficVisualAgent(
     bool IsVehicle,
     Vector3d PositionEnu,
     double HeadingRadians,
-    double SpeedMetresPerSecond);
+    double SpeedMetresPerSecond,
+    bool IsErratic = false);
 
 public sealed record TrafficAgentSnapshot(
     string Id,
@@ -35,7 +36,7 @@ public sealed record TrafficStepSummary(
     bool PlayerBlocked);
 
 /// <summary>Deterministic 60 Hz bench traffic simulator with 50 cars, 30 pedestrians, signals, and 20 s deadlock eviction.</summary>
-public sealed class TrafficBenchSimulator
+public sealed partial class TrafficBenchSimulator
 {
     public const int TargetVehicleCount = 50;
     public const int TargetPedestrianCount = 30;
@@ -58,10 +59,16 @@ public sealed class TrafficBenchSimulator
         public double StalledSeconds { get; set; }
         public bool WaitingAtSignal { get; set; }
         public bool ForcedStall { get; set; }
+        public Vector3d PreviousPositionEnu { get; set; }
+        public bool CitySpawnClassified { get; set; }
+        public double? ErraticAgeSeconds { get; set; }
+        public double ErraticPeriodSeconds { get; set; }
+        public bool? IgnoreSignalThisApproach { get; set; }
     }
 
     private readonly RoadNetworkGraph _graph;
     private readonly GaussianRandom _rng;
+    private readonly GaussianRandom _hazardRng;
     private readonly List<AgentState> _agents = [];
     private readonly List<AgentState> _deadlockRemovalScratch = [];
     private readonly List<string> _viableSegmentScratch = [];
@@ -82,6 +89,7 @@ public sealed class TrafficBenchSimulator
         _graph = graph ?? RoadNetworkGraph.CreateTutorialBlockGraph();
         _rng = new GaussianRandom(seed);
         _respawnAfterDeadlockRemoval = respawnAfterDeadlockRemoval;
+        _hazardRng = new GaussianRandom(seed ^ 0xBD384227UL);
         SeedInitialAgents();
     }
 
@@ -113,7 +121,7 @@ public sealed class TrafficBenchSimulator
         for (var i = 0; i < _agents.Count; i++)
         {
             var a = _agents[i];
-            destination.Add(new TrafficVisualAgent(a.Id, a.IsVehicle, a.PositionEnu, a.HeadingRadians, a.Speed));
+            destination.Add(new TrafficVisualAgent(a.Id, a.IsVehicle, a.PositionEnu, a.HeadingRadians, a.Speed, a.ErraticAgeSeconds.HasValue));
         }
     }
 
@@ -146,23 +154,15 @@ public sealed class TrafficBenchSimulator
         Vector3d? cameraForwardEnu = null,
         Vector3d? playerPositionEnu = null)
     {
-        if (!double.IsFinite(dtSeconds) || dtSeconds <= 0)
-            throw new ArgumentOutOfRangeException(nameof(dtSeconds));
+        Advance(dtSeconds, cameraPositionEnu, cameraForwardEnu);
 
-        Tick++;
         var stoppedAtSignal = 0;
         var pedCrossing = 0;
-
         foreach (var agent in _agents)
         {
-            StepSingleAgent(agent, dtSeconds);
-            if (agent.WaitingAtSignal)
-                stoppedAtSignal++;
-            if (!agent.IsVehicle && _graph.Segments[agent.SegmentId].IsCrosswalk)
-                pedCrossing++;
+            if (agent.WaitingAtSignal) stoppedAtSignal++;
+            if (!agent.IsVehicle && _graph.Segments[agent.SegmentId].IsCrosswalk) pedCrossing++;
         }
-
-        HandleOffCameraDeadlocks(dtSeconds, cameraPositionEnu, cameraForwardEnu);
         UpdateOfficeClearance();
 
         var minSpacing = ComputeMinimumVehicleSpacing();
@@ -189,7 +189,46 @@ public sealed class TrafficBenchSimulator
             playerBlocked);
     }
 
-    private void StepSingleAgent(AgentState agent, double dt)
+    public void Advance(double dtSeconds, Vector3d? cameraPositionEnu = null,
+        Vector3d? cameraForwardEnu = null, CityTrafficConditions? city = null)
+    {
+        if (!double.IsFinite(dtSeconds) || dtSeconds <= 0)
+            throw new ArgumentOutOfRangeException(nameof(dtSeconds));
+
+        Tick++;
+        _blitzRemovalScratch.Clear();
+        foreach (var agent in _agents)
+        {
+            if (city is { } conditions && agent.IsVehicle)
+                UpdateCityDriver(agent, dtSeconds, conditions);
+
+            agent.PreviousPositionEnu = agent.PositionEnu;
+            StepSingleAgent(agent, dtSeconds, city?.CruiseSpeedMultiplier ?? 1);
+            if (agent.ErraticAgeSeconds.HasValue && city is not null &&
+                RoadNetworkGraph.DistancePointToSegmentXy(OldCenterTrafficNetwork.CheckpointEnu,
+                    agent.PreviousPositionEnu, agent.PositionEnu) <= CityBlitzRadiusMetres)
+                _blitzRemovalScratch.Add(agent);
+        }
+
+        foreach (var agent in _blitzRemovalScratch)
+        {
+            _agents.Remove(agent);
+            BlitzRemovals++;
+            _vacantVehicleSlots++;
+        }
+
+        HandleOffCameraDeadlocks(dtSeconds, cameraPositionEnu, cameraForwardEnu, city?.PlayerPositionEnu);
+        if (city is { } live)
+        {
+            // Retry a vacancy when an off-screen stretch is blocked by other cars.
+            if (_vacantVehicleSlots > 0 && RespawnCleanly(true, cameraPositionEnu, cameraForwardEnu, live.PlayerPositionEnu))
+                _vacantVehicleSlots--;
+            if (_vacantPedestrianSlots > 0 && RespawnCleanly(false, cameraPositionEnu, cameraForwardEnu, live.PlayerPositionEnu))
+                _vacantPedestrianSlots--;
+        }
+    }
+
+    private void StepSingleAgent(AgentState agent, double dt, double cruiseMultiplier)
     {
         if (agent.ForcedStall)
         {
@@ -203,11 +242,22 @@ public sealed class TrafficBenchSimulator
         var waitingAtSignal = false;
 
         var remainingOnSegment = segment.LengthMetres - agent.DistanceAlongSegment;
+        ErraticDriverSample? erratic = agent.ErraticAgeSeconds is >= ErraticWarningSeconds
+            ? GetErraticMotion(agent) : null;
+        if (agent.IsVehicle)
+            desiredSpeed *= cruiseMultiplier;
+        if (erratic is { } motion)
+            desiredSpeed *= motion.SpeedMultiplier;
         if (agent.IsVehicle)
         {
             if (segment.SignalGroup != SignalGroup.AlwaysGreen && remainingOnSegment < 5.0)
             {
-                if (GetSignalAspect(segment.SignalGroup) != SignalAspect.Green)
+                if (erratic.HasValue && !agent.IgnoreSignalThisApproach.HasValue)
+                {
+                    agent.IgnoreSignalThisApproach = ErraticDriverSimulator.EvaluateDriverStep(agent.Id, 0,
+                        atIntersection: true, infractionRoll01: _hazardRng.NextUniformOpenUnit()).CommittedIntersectionInfraction;
+                }
+                if (GetSignalAspect(segment.SignalGroup) != SignalAspect.Green && agent.IgnoreSignalThisApproach != true)
                 {
                     desiredSpeed = 0.0;
                     waitingAtSignal = true;
@@ -259,6 +309,7 @@ public sealed class TrafficBenchSimulator
                 break;
             }
             agent.SegmentId = nextSegId;
+            agent.IgnoreSignalThisApproach = null;
             segment = _graph.Segments[nextSegId];
             nextDistance = overflow;
         }
@@ -266,6 +317,14 @@ public sealed class TrafficBenchSimulator
         agent.DistanceAlongSegment = Math.Max(0.0, nextDistance);
         agent.PositionEnu = segment.EvaluateEnu(agent.DistanceAlongSegment);
         agent.HeadingRadians = segment.HeadingRadians;
+        if (erratic is { } unstable)
+        {
+            var turn = unstable.SteeringPerturbationRadians;
+            var blend = Math.Clamp((agent.ErraticAgeSeconds!.Value - ErraticWarningSeconds) / .75, 0, 1);
+            var lateral = new Vector3d(-segment.TangentXy.Y, segment.TangentXy.X, 0);
+            agent.PositionEnu += lateral * (turn * 3 * blend);
+            agent.HeadingRadians += turn * blend;
+        }
     }
 
     private string ChooseNextSegment(RoadLaneSegment current, AgentState agent)
@@ -351,7 +410,7 @@ public sealed class TrafficBenchSimulator
         return false;
     }
 
-    private void HandleOffCameraDeadlocks(double dt, Vector3d? cameraPos, Vector3d? cameraForward)
+    private void HandleOffCameraDeadlocks(double dt, Vector3d? cameraPos, Vector3d? cameraForward, Vector3d? playerPos)
     {
         _deadlockRemovalScratch.Clear();
         for (var i = 0; i < _agents.Count; i++)
@@ -372,7 +431,11 @@ public sealed class TrafficBenchSimulator
             _agents.Remove(dead);
             DeadlockRemovals++;
             if (_respawnAfterDeadlockRemoval)
-                RespawnCleanly(dead.IsVehicle);
+            {
+                if (!playerPos.HasValue) RespawnCleanly(dead.IsVehicle);
+                else if (dead.IsVehicle) _vacantVehicleSlots++;
+                else _vacantPedestrianSlots++;
+            }
         }
     }
 
@@ -396,7 +459,7 @@ public sealed class TrafficBenchSimulator
         return Vector3d.Dot(forwardNorm.Normalized(), dirXy) < 0.25;
     }
 
-    private void RespawnCleanly(bool isVehicle)
+    private bool RespawnCleanly(bool isVehicle, Vector3d? cameraPos = null, Vector3d? cameraForward = null, Vector3d? playerPos = null)
     {
         var pool = isVehicle ? _graph.VehicleSegments : _graph.PedestrianSegments;
         foreach (var seg in pool)
@@ -405,6 +468,9 @@ public sealed class TrafficBenchSimulator
                 continue;
             var candidateDist = seg.LengthMetres * 0.5;
             var pos = seg.EvaluateEnu(candidateDist);
+            if (playerPos is { } player &&
+                (RoadNetworkGraph.DistanceXy(pos, player) < 80 || !IsOffCamera(pos, cameraPos, cameraForward)))
+                continue;
             if (IsSpacingClear(pos, isVehicle ? 8.0 : 1.5, isVehicle))
             {
                 _nextSpawnSerial++;
@@ -417,11 +483,13 @@ public sealed class TrafficBenchSimulator
                     Speed = isVehicle ? seg.SpeedLimitMetresPerSecond * 0.5 : 1.3,
                     NominalSpeedScale = 0.9,
                     PositionEnu = pos,
+                    PreviousPositionEnu = pos,
                     HeadingRadians = seg.HeadingRadians,
                 });
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     private bool IsSpacingClear(Vector3d pos, double minRadius, bool vehiclesOnly)

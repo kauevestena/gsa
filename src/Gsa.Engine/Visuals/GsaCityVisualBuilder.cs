@@ -356,6 +356,17 @@ public sealed class GsaCityVisualBuilder
         SpinningBeacons.Add(beacon);
     }
 
+    public void AddOldCenterTrafficSignals(Node3D parent, GodotCoordinateAdapter coords, RoadNetworkGraph roads)
+    {
+        foreach (var lane in roads.VehicleSegments)
+        {
+            var approach = lane.EndEnu - lane.TangentXy * 8;
+            var right = new Vector3d(lane.TangentXy.Y, -lane.TangentXy.X, 0);
+            AddSignal(parent, coords, "Signal_" + lane.Id, approach + right * 4.7,
+                (float)(lane.HeadingRadians * 180 / Math.PI), lane.SignalGroup);
+        }
+    }
+
     private void AddSignal(Node3D parent, GodotCoordinateAdapter coords, string name, Vector3d posEnu, float yawDeg, SignalGroup group)
     {
         var (node, red, amber, green) = GsaMeshBuilder.BuildTrafficSignal(name);

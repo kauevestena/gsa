@@ -41,7 +41,7 @@ Câmeras a pé e em plataformas leves ainda usam poses ideais. Para entregar o c
 
 Inventários, cobertura de área, nuvens e perfis aparecem como em desenvolvimento no quadro. Contratos antigos desses tipos podem ser carregados e abandonados no Escritório. A prévia LiDAR continua disponível para exploração. Base/PPK e logs de navegação persistentes continuam pendentes.
 
-Perseguidor e barreira são representações básicas. O perseguidor avança para o jogador respeitando obstáculos locais, sem planejamento viário completo. Pneu/lente ainda são estados do conjunto de aquisição compartilhados entre plataformas. Arte, colocação de barreiras nas ruas, acessibilidade e balanceamento precisam de inspeção visual/playtest. Os [encontros de cães e estacionamento](city-everyday-encounters.md) agora têm integração própria. Motoristas bêbados e colisões com tráfego regular continuam sem encontro jogável na cidade. Concorrência narrativa da MapaFácil, patrulhas por horário e playthrough final simultâneo das cinco facções também continuam pendentes.
+Perseguidor e barreira são representações básicas. O perseguidor avança para o jogador respeitando obstáculos locais, sem planejamento viário completo. Pneu/lente ainda são estados do conjunto de aquisição compartilhados entre plataformas. Arte, colocação de barreiras nas ruas, acessibilidade e balanceamento precisam de inspeção visual/playtest. Os [encontros de cães e estacionamento](city-everyday-encounters.md) agora têm integração própria. A [circulação do Centro Velho](old-center-traffic.md) integra colisões, motoristas erráticos e blitz. Concorrência narrativa da MapaFácil, patrulhas por horário e playthrough final simultâneo das cinco facções também continuam pendentes.
 
 ## Verificação
 

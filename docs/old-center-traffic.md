@@ -1,0 +1,11 @@
+# Tráfego do Centro Velho
+
+Os carros usam dois trajetos, um para cada sentido, nas avenidas entre E 500120 e 500480 m e N 7400116 e 7400356 m. Os sinais de trânsito ficam nas aproximações do circuito. Os pedestres conservam as calçadas e travessias do quarteirão de treinamento. Os edifícios gerados no Centro Velho deixam o espaço das avenidas livre.
+
+O contato com um carro em circulação interrompe o deslocamento do jogador. A velocidade de aproximação na direção do contato determina o impacto. O carro do jogador recebe 65% dessa velocidade como variação de velocidade, usando a regra de dano e o limiar de descalibração já associados à habilidade de pilotagem defensiva. Um contato contínuo aplica dano uma vez. O impacto atualiza a condição do veículo e o desvio do rack usados na coleta seguinte. O personagem a pé para no contato, sem dano.
+
+A chance de surgir um motorista errático é de 2% durante o dia, 8% à noite e 12% perto do Bar Musical no fim de semana. Faróis intermitentes, buzina e aviso no HUD ajudam a reconhecer a aproximação. Os faróis começam 2,5 s antes da variação de direção e velocidade. O motorista pode infringir um sinal, com decisão única por aproximação, e continua respeitando pedestres e distância dos outros carros. A blitz está no cruzamento E 500360 m, N 7400116 m e retira os motoristas erráticos ao cruzarem seu perímetro. Veículos de reposição entram a pelo menos 80 m do jogador e fora da câmera. A chuva reduz a velocidade de cruzeiro.
+
+Cidade calma e contratos tranquilos cancelam a direção errática na próxima atualização da simulação. O aviso e os faróis somem e o carro volta a seguir o trajeto normal. Trânsito, sinais e fiscalização de velocidade continuam ativos.
+
+O teste de domínio roda 18.000 atualizações, o equivalente a cinco minutos da simulação. Ele verifica o movimento, a lotação, a saída do escritório e a retirada pela blitz. Na cena, o teste verifica a avenida contra a geometria carregada, contato e descalibração, aviso antes da oscilação e proteção tranquila. O marcador `GSA_CITY_TRAFFIC_SMOKE_OK` é exigido nos executáveis exportados. O teste mede a simulação. O playtest visual e a medição de quadros em Vega 7 seguem o [protocolo](../specs/validacao.md#benchmark-de-desempenho).

@@ -36,9 +36,11 @@ public sealed class TrafficBenchAdapter
     private readonly System.Collections.Generic.Dictionary<string, (int Pool, int Hash, Color Tint)> _agentVisualCache = new(StringComparer.Ordinal);
     private MultiMeshInstance3D? _pedestrianMeshNode;
     private MultiMeshInstance3D? _shadowPool;
+    private MultiMesh? _warningLamps;
     private double _walkTime;
 
     public TrafficBenchSimulator Simulator => _simulator;
+    public IReadOnlyList<TrafficVisualAgent> VisualAgents => _visualBuffer;
 
     public TrafficBenchAdapter(GodotCoordinateAdapter coordinates, TrafficBenchSimulator? simulator = null)
     {
@@ -47,14 +49,14 @@ public sealed class TrafficBenchAdapter
         _simulator = simulator ?? new TrafficBenchSimulator();
     }
 
-    public void AttachBenchMeshes(Node3D benchRoot)
+    public void AttachBenchMeshes(Node3D benchRoot, bool warnForErraticDrivers = false)
     {
         ArgumentNullException.ThrowIfNull(benchRoot);
         var root = new Node3D { Name = "TrafficBench" };
         benchRoot.AddChild(root);
 
-        // Split 50 vehicles across 4 distinct GTA III low-poly silhouettes
-        int[] counts = [22, 10, 10, 8]; // Sedan, Taxi, Van, Pickup
+        // A respawn can shift the mix. Every simulated car must have a visible slot.
+        // Unused slots are excluded via VisibleInstanceCount.
         for (var v = 0; v < 4; v++)
         {
             var mesh = GsaMeshBuilder.BuildTrafficCarMesh(v);
@@ -64,7 +66,7 @@ public sealed class TrafficBenchAdapter
                 TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
                 UseColors = true,
                 Mesh = mesh,
-                InstanceCount = counts[v],
+                InstanceCount = TrafficBenchSimulator.TargetVehicleCount,
             };
             var mmi = new MultiMeshInstance3D { Name = $"TrafficVehicles_V{v}", Multimesh = mm };
             root.AddChild(mmi);
@@ -104,13 +106,29 @@ public sealed class TrafficBenchAdapter
         };
         root.AddChild(_shadowPool);
 
+        if (warnForErraticDrivers)
+        {
+            var lamp = new BoxMesh { Size = new Vector3(.06f, .18f, .25f),
+                Material = GsaMeshBuilder.SolidMat(new Color(1f, .92f, .67f), emit: true, emissionEnergy: 2f) };
+            _warningLamps = new MultiMesh
+            {
+                TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                Mesh = lamp,
+                InstanceCount = 2 * TrafficBenchSimulator.TargetVehicleCount,
+                VisibleInstanceCount = 0,
+            };
+            root.AddChild(new MultiMeshInstance3D { Name = "ErraticHeadlamps", Multimesh = _warningLamps,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off });
+        }
+
         SyncVisuals();
     }
 
-    public void StepAndSync(double dtSeconds, Vector3d? playerEnu = null)
+    public void StepAndSync(double dtSeconds, Vector3d? playerEnu = null,
+        Vector3d? cameraPosition = null, Vector3d? cameraForward = null, CityTrafficConditions? city = null)
     {
         _walkTime += dtSeconds;
-        _simulator.Step(dtSeconds, playerPositionEnu: playerEnu);
+        _simulator.Advance(dtSeconds, cameraPosition ?? (city.HasValue ? playerEnu : null), cameraForward, city);
         SyncVisuals();
     }
 
@@ -121,6 +139,10 @@ public sealed class TrafficBenchAdapter
 
         _simulator.CopyVisualAgentsTo(_visualBuffer);
         Span<int> vehicleIndices = stackalloc int[4];
+        if (_agentVisualCache.Count > 2 * _visualBuffer.Count)
+            _agentVisualCache.Clear();
+        var warnedCars = 0;
+        var flashOn = _walkTime % .8 < .45;
         var pedIndex = 0;
         var shadowIndex = 0;
         var pedShadowBasis = new Basis(new Vector3(0.85f, 0f, 0f), new Vector3(0f, 0f, -0.85f), Vector3.Up);
@@ -151,26 +173,24 @@ public sealed class TrafficBenchAdapter
             {
                 var pool = vis.Pool;
                 var mm = _vehiclePools[pool].Multimesh;
-                if (vehicleIndices[pool] >= mm.InstanceCount)
-                {
-                    pool = 0;
-                    mm = _vehiclePools[0].Multimesh;
-                }
-                if (vehicleIndices[pool] < mm.InstanceCount)
-                {
-                    var idx = vehicleIndices[pool]++;
-                    mm.SetInstanceTransform(idx, new Transform3D(basis, godotPos));
-                    mm.SetInstanceColor(idx, vis.Tint);
+                var idx = vehicleIndices[pool]++;
+                mm.SetInstanceTransform(idx, new Transform3D(basis, godotPos));
+                mm.SetInstanceColor(idx, vis.Tint);
 
-                    if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)
-                    {
-                        var shBasis = new Basis(
-                            new Vector3(cosH * 4.5f, 0f, -sinH * 4.5f),
-                            new Vector3(-sinH * 2.2f, 0f, -cosH * 2.2f),
-                            Vector3.Up);
-                        _shadowPool.Multimesh.SetInstanceTransform(shadowIndex++,
-                            new Transform3D(shBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
-                    }
+                if (agent.IsErratic && flashOn && _warningLamps is { } lamps)
+                {
+                    lamps.SetInstanceTransform(warnedCars++, new Transform3D(basis, godotPos + basis * new Vector3(2.24f, .57f, .65f)));
+                    lamps.SetInstanceTransform(warnedCars++, new Transform3D(basis, godotPos + basis * new Vector3(2.24f, .57f, -.65f)));
+                }
+
+                if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)
+                {
+                    var shBasis = new Basis(
+                        new Vector3(cosH * 4.5f, 0f, -sinH * 4.5f),
+                        new Vector3(-sinH * 2.2f, 0f, -cosH * 2.2f),
+                        Vector3.Up);
+                    _shadowPool.Multimesh.SetInstanceTransform(shadowIndex++,
+                        new Transform3D(shBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
                 }
             }
             else if (pedIndex < _pedestrianMeshNode.Multimesh.InstanceCount)
@@ -192,7 +212,9 @@ public sealed class TrafficBenchAdapter
             }
         }
 
-        // Hide unused pool slots cleanly below ground if distribution shifts
+        if (_warningLamps is not null)
+            _warningLamps.VisibleInstanceCount = warnedCars;
+        // Hide unused slots if the model mix changes.
         for (var v = 0; v < 4; v++)
             _vehiclePools[v].Multimesh.VisibleInstanceCount = vehicleIndices[v];
         _pedestrianMeshNode.Multimesh.VisibleInstanceCount = pedIndex;
@@ -207,7 +229,7 @@ public sealed class TrafficBenchAdapter
             var h = 17;
             foreach (var c in id)
                 h = h * 31 + c;
-            return Math.Abs(h);
+            return h & int.MaxValue;
         }
     }
 

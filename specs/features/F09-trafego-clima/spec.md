@@ -2,7 +2,7 @@
 
 [Índice](../../README.md) · [Plano](plan.md) · [Tarefas](tasks.md)
 
-Marcos: M1–M4. Origem: Loop de jogo e estrutura; Perigos e antagonistas; Missões. Estado: domínio implementado; cães/estacionamento integrados à cena com testes automatizados. Tráfego errático e playtest visual da cidade pendentes.
+Marcos: M1–M4. Origem: Loop de jogo e estrutura; Perigos e antagonistas; Missões. Estado: domínio implementado; cães/estacionamento integrados à cena com testes automatizados. Tráfego errático e colisões integrados no Centro Velho. Playtest visual e benchmark em GPU de referência pendentes.
 
 ## Requisitos
 
@@ -60,4 +60,4 @@ Dado contrato tranquilo ou Cidade calma ativada durante perseguição, então pe
 
 ## Integração jogável incremental — 20/11/2026
 
-A [matriz de cães/estacionamento](../../../docs/city-everyday-encounters.md) fixa aviso de 2 s e frenagem de 2 s no contato, raio de estacionamento de 8 m, aviso de recusa de 3 s e cooldown de 30 s. São parâmetros iniciais de apresentação, mantendo 30/40 m e 10 s do cão, tarifa de 10 e dano cosmético de 5. A oscilação existente de Gimbalina passa à exposição da câmera; arranhões não afetam dados. Testes antigos de domínio não comprovam que tráfego errático/colisões já estejam ligados à cidade.
+A [matriz de cães/estacionamento](../../../docs/city-everyday-encounters.md) fixa aviso de 2 s e frenagem de 2 s no contato, raio de estacionamento de 8 m, aviso de recusa de 3 s e cooldown de 30 s. São parâmetros iniciais de apresentação, mantendo 30/40 m e 10 s do cão, tarifa de 10 e dano cosmético de 5. A oscilação existente de Gimbalina passa à exposição da câmera; arranhões não afetam dados. O incremento de [tráfego do Centro Velho](../../../docs/old-center-traffic.md) usa as avenidas desenhadas e verifica os contatos na cena.

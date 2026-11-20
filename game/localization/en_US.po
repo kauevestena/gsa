@@ -1891,3 +1891,15 @@ msgstr "The office could not complete this submission."
 
 msgid "city.office.payout"
 msgstr "{0} stars · +{1} Coords · +{2} XP"
+
+msgid "city.traffic.erratic_warning"
+msgstr "Unsteady driver nearby. Slow down and give them room."
+
+msgid "city.traffic.blitz_removed"
+msgstr "The checkpoint stopped an erratic driver."
+
+msgid "city.traffic.contact"
+msgstr "Traffic impact. Check vehicle condition."
+
+msgid "city.traffic.music_bar"
+msgstr "Old Center Music Bar"

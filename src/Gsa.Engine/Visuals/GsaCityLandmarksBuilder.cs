@@ -1,4 +1,5 @@
 using Gsa.Core.Geometry;
+using Gsa.Core.Traffic;
 using Godot;
 
 namespace Gsa.Engine.Visuals;
@@ -7,7 +8,7 @@ namespace Gsa.Engine.Visuals;
 public sealed class GsaCityLandmarksBuilder
 {
     public IReadOnlyList<Vector3d> PotholeCentersEnu { get; private set; } = [];
-    public Vector3d BlitzCheckpointEnu { get; } = new(500360.0, 7400116.0, 100.0);
+    public Vector3d BlitzCheckpointEnu => OldCenterTrafficNetwork.CheckpointEnu;
     public Vector3d ChickenChallengeStartEnu { get; } = new(500288.0, 7400350.0, 100.1);
     public Vector3d ChickenChallengeEndEnu { get; } = new(500488.0, 7400350.0, 100.1);
 
@@ -137,7 +138,7 @@ public sealed class GsaCityLandmarksBuilder
         }
 
         var blitz = GsaMeshBuilder.BuildPoliceBlitzUnit("PoliceBlitzCheckpoint");
-        blitz.Position = coords.ToGodot(BlitzCheckpointEnu);
+        blitz.Position = coords.ToGodot(BlitzCheckpointEnu + new Vector3d(1, 10.0, 0));
         visualBase.AddChild(blitz);
 
         // Absurd urban event dynamic nodes (hidden until spawned by AbsurdUrbanEventsCoordinator!)
