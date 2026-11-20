@@ -102,3 +102,7 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Tabela de perigos executada e logs de montagem.
 **Estado:** Aceita por revisão técnica delegada após CI Linux/Windows do [PR #14](https://github.com/kauevestena/gsa/pull/14) (`dd96152`, merge `ecc1b7c`, execução `43685741329`); ver [resumo CI](../../../artifacts/evidence/M4-wave2-ci/summary.json) e [evidência T-F09-05](../../../artifacts/evidence/T-F09-05/README.md).
+
+## Integração na cena da cidade — 20/11/2026
+
+Os aceites acima referem-se aos incrementos de domínio e bancada registrados. A ligação jogável de cães/estacionamento, estresse da câmera e persistência foi verificada por testes automatizados em Linux, com [evidência separada](../../../artifacts/evidence/T-F09-05/city-encounters/README.md). Tráfego errático/colisões na cidade, arte final e playthrough visual não são declarados aceitos por esses testes.

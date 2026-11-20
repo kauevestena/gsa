@@ -1798,3 +1798,63 @@ msgstr "Finish or abandon the current job before accepting another."
 
 msgid "navigation.alert.inconsistent_fix"
 msgstr "GNSS observation rejected: inconsistent with the predicted trajectory. This is not proof of spoofing."
+
+msgid "city.encounters.dog_label"
+msgstr "Dog · bicycle encounters"
+
+msgid "city.encounters.parking_label"
+msgstr "Parking service · 10 C$"
+
+msgid "city.encounters.dog_warning"
+msgstr "Dog barking! Pedal away or offer a treat (E / tablet)."
+
+msgid "city.encounters.dog_active"
+msgstr "Dog pursuit: up to {0} s · pedal away or offer a treat (E)."
+
+msgid "city.encounters.stumble"
+msgstr "Bicycle stumbled. Brief braking; Gimbalina is uninjured."
+
+msgid "city.encounters.parking_offer"
+msgstr "Parking offer: 10 C$ · E/tablet to pay or refuse. Refusal can cause 5 cosmetic scratch points. Driving away cancels the offer."
+
+msgid "city.encounters.refusal_warning"
+msgstr "Refusal recorded: 3 s warning. Move the vehicle away to avoid cosmetic scratches."
+
+msgid "city.encounters.refusal_countdown"
+msgstr "Parking retaliation: {0} s · move the vehicle more than 8 m away to avoid cosmetic scratches."
+
+msgid "city.encounters.scratched"
+msgstr "Vehicle scratched: +5 cosmetic points. Mechanical condition and recorded data are unaffected."
+
+msgid "city.encounters.parking_paid"
+msgstr "Parking service paid: 10 C$."
+
+msgid "city.encounters.payment_failed"
+msgstr "No payable offer or insufficient funds. You can refuse or move the vehicle away."
+
+msgid "city.encounters.cosmetic"
+msgstr "Mounted vehicle scratches: {0}/100 cosmetic points."
+
+msgid "city.encounters.treat"
+msgstr "Offer dog a treat (E) · free"
+
+msgid "city.encounters.pay"
+msgstr "Pay parking service · 10 C$"
+
+msgid "city.encounters.refuse"
+msgstr "Refuse parking · possible +5 cosmetic points after 3 s"
+
+msgid "city.encounters.recover"
+msgstr "Recover / calm Gimbalina at the office or unload point · free"
+
+msgid "city.encounters.recover_location"
+msgstr "Visit the office or an unload point to recover Gimbalina."
+
+msgid "city.encounters.recovered"
+msgstr "Gimbalina recovered safely. Stored observations are unchanged."
+
+msgid "city.encounters.chicken_safe"
+msgstr "Gimbalina fled to safety. Recover her at the office before using her camera again."
+
+msgid "city.encounters.treated"
+msgstr "Dog pacified with a treat."

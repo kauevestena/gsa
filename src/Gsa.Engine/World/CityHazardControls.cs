@@ -27,6 +27,7 @@ public partial class SaoDatumCityScene
         Button("city.hazards.insurance", BuyCityInsurance);
         Button("city.hazards.repair", RepairCityVehicle);
         Button("city.hazards.abandon", AbandonCityContract);
+        BuildCityEverydayControls(tab);
         RefreshCityHazardLocale();
     }
 
@@ -37,10 +38,12 @@ public partial class SaoDatumCityScene
         foreach (var zone in _planningZones)
             _protectionZone.AddItem(Text(FactionCatalog.GetFaction(zone.ControllingFaction).NameKey) + " · " + Text("city.map." + zone.RegionId));
         _protectionZone.Select(Math.Min(selected, _planningZones.Count - 1)); RefreshCityHazardStatus();
+        RefreshCityEverydayLocale();
     }
 
     private void RefreshCityHazardStatus()
     {
+        RefreshCityEverydayStatus();
         if (_hazardStatus is null) return;
         _hazardStatus.Text = string.Format(Text("city.hazards.status"), _fieldSamples.Count, _protectedCityPhotos.Count,
             TechnicalNumber(_cityHazards.Lens.ObstructionFraction * 100, 0),
@@ -112,6 +115,7 @@ public partial class SaoDatumCityScene
                     "replacement", "city.hazards.replacement_cost").Succeeded;
             if (!paid) { _feedbackText = Text("city.hazards.insufficient"); return; }
             _cityHazards.DisabledVehicle = null; _cityHazards.Services.ExpireInsurance();
+            _everyday.ClearCosmeticDamage(mode);
             _rackMisaligned = false; _cityHazards.RackYawErrorRadians = 0; SwitchPlatform(mode);
         }
         else if (_cityHazards.TirePunctured)

@@ -123,3 +123,9 @@ Evolução de save (T-F12-04, 17/11/2026): o envelope e `SaveGameState` passam �
 `City` é um snapshot neutro opcional: locomoção e estacionamento, frota/habilidades, calendário/clima, fotos brutas com miniaturas, cobertura provisória, IDs observados, Geopédia/colecionáveis, objetivos/cutscenes, atenção e opções de processamento. Contrato ativo e seu prazo usam `Contracts`. Movimento retoma parado; índices e nuvem visual são reconstruídos. Saves v1 sem `City` não podem recuperar dados que nunca foram gravados. Sandbox usa outro diretório e não salva/carrega a carreira. Recuperação explícita mantém o backup e arquiva os bytes do arquivo substituído antes de restaurar a geração anterior.
 
 Leitor aceita a versão atual e migra a imediatamente anterior em cópia; original permanece intacto. Versão futura ou checksum inválido oferece recuperar geração anterior; nunca sobrescreve automaticamente o único arquivo. Conteúdo removido deve manter alias/migração para IDs salvos. Alterações de fórmula invalidam caches derivados, mas preservam brutos.
+
+## Encontros cotidianos e estado da câmera viva
+
+`CityEverydaySnapshot` (schema 1) conserva relógio físico, próxima sequência, cão/posição/contato, cambaleio, oferta de estacionamento, cooldowns por local e dano cosmético por veículo. `GimbalinaSaveSnapshot` (schema 1) conserva estresse, fase de oscilação, milho e retirada segura. São componentes opcionais de `SaveCitySessionState`; o escritor usa catálogo 4 e envelope v2. Modelos e mundo mantêm versão 1.
+
+A cena fornece posições/modos e proteção à coordenação neutra; resolve o movimento proposto do cão contra obstáculos na janela de física. Arranhões não alimentam a condição mecânica ou o CQ. O pagamento usa ID persistido da oferta e `CareerLedger`. Poses verdadeiras da câmera recebem a oscilação física; poses estimadas/observações anteriores não recebem correção pelo estado verdadeiro. Ver [matriz da integração](../docs/city-everyday-encounters.md).

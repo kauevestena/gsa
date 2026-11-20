@@ -99,6 +99,7 @@ public partial class SaoDatumCityScene
         RunAdvancedSurveyTabletSmoke();
         RunCityNavigationSmoke();
         RunCityHazardSmoke();
+        RunCityEverydaySmoke();
         TryLoadCareer(); // The tablet fixture changes presentation/platform inputs without writing a save.
         Require(JsonSerializer.Serialize(BuildCitySaveState().City) == expected, "tablet checks changed saved session");
         var current = File.ReadAllBytes(_saveManager.CurrentSavePath);

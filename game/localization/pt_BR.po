@@ -1798,3 +1798,63 @@ msgstr "Conclua ou abandone o trabalho atual antes de aceitar outro."
 
 msgid "navigation.alert.inconsistent_fix"
 msgstr "Observação GNSS rejeitada: incompatível com a trajetória prevista. Isso não comprova falsificação."
+
+msgid "city.encounters.dog_label"
+msgstr "Cão · encontros de bicicleta"
+
+msgid "city.encounters.parking_label"
+msgstr "Serviço de estacionamento · 10 C$"
+
+msgid "city.encounters.dog_warning"
+msgstr "Cão latindo! Pedale para longe ou ofereça um petisco (E / tablet)."
+
+msgid "city.encounters.dog_active"
+msgstr "Perseguição do cão: até {0} s · pedale para longe ou ofereça petisco (E)."
+
+msgid "city.encounters.stumble"
+msgstr "A bicicleta desequilibrou. Frenagem breve; Gimbalina está ilesa."
+
+msgid "city.encounters.parking_offer"
+msgstr "Estacionamento: 10 C$ · E/tablet para pagar ou recusar. Recusa pode causar 5 pontos de arranhões cosméticos. Afastar o veículo cancela a oferta."
+
+msgid "city.encounters.refusal_warning"
+msgstr "Recusa registrada: aviso de 3 s. Afaste o veículo para evitar arranhões cosméticos."
+
+msgid "city.encounters.refusal_countdown"
+msgstr "Retaliação no estacionamento: {0} s · afaste o veículo mais de 8 m para evitar arranhões cosméticos."
+
+msgid "city.encounters.scratched"
+msgstr "Veículo arranhado: +5 pontos cosméticos. Condição mecânica e dados gravados preservados."
+
+msgid "city.encounters.parking_paid"
+msgstr "Serviço de estacionamento pago: 10 C$."
+
+msgid "city.encounters.payment_failed"
+msgstr "Sem oferta para pagar ou saldo insuficiente. Você pode recusar ou afastar o veículo."
+
+msgid "city.encounters.cosmetic"
+msgstr "Arranhões do veículo: {0}/100 pontos cosméticos."
+
+msgid "city.encounters.treat"
+msgstr "Oferecer petisco ao cão (E) · gratuito"
+
+msgid "city.encounters.pay"
+msgstr "Pagar estacionamento · 10 C$"
+
+msgid "city.encounters.refuse"
+msgstr "Recusar estacionamento · possíveis +5 pontos cosméticos após 3 s"
+
+msgid "city.encounters.recover"
+msgstr "Recuperar / acalmar Gimbalina no escritório ou descarga · gratuito"
+
+msgid "city.encounters.recover_location"
+msgstr "Vá ao escritório ou ponto de descarga para recuperar Gimbalina."
+
+msgid "city.encounters.recovered"
+msgstr "Gimbalina recuperada em segurança. Observações gravadas preservadas."
+
+msgid "city.encounters.chicken_safe"
+msgstr "Gimbalina fugiu para um local seguro. Recupere-a no escritório antes de usar sua câmera."
+
+msgid "city.encounters.treated"
+msgstr "Cão acalmado com um petisco."

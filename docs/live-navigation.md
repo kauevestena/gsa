@@ -47,3 +47,5 @@ Fotos de veículos agora guardam a pose estimada disponível, após inicializaç
 ## Verificação
 
 `python3 scripts/verify.py --exports host` executa os testes de filtros/sensores e exige `GSA_CITY_NAVIGATION_SMOKE_OK` no editor e no export nativo. O fixture mede céu real da cena, inicializa a van com observações, injeta um ambiente sem sinal reproduzível, verifica o HUD/painel/mapa bilíngue, esconde o overlay mantendo sensores e recarrega a carreira sem reutilizar o traçado. Usa o slot temporário do smoke de saves.
+
+Nas plataformas iniciais, a [integração de Gimbalina](city-everyday-encounters.md) perturba apenas poses verdadeiras de imagem/exposição; não fornece a oscilação verdadeira ao estimador ou à pose estimada registrada. A trajetória de navegação de veículos continua transitória.

@@ -14,7 +14,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public static SaveContentVersions Current => new(3, 1, 1, []);
+    public static SaveContentVersions Current => new(4, 1, 1, []);
 }
 
 public sealed record SaveCampaignPresentationState(
@@ -42,7 +42,8 @@ public sealed record SaveCitySessionState(
     bool DisguiseActive,
     ulong NextContractSeed,
     long PhysicsTick,
-    long CameraNextSequence = 0, CityHazardSnapshot? Hazards = null);
+    long CameraNextSequence = 0, CityHazardSnapshot? Hazards = null,
+    CityEverydaySnapshot? Encounters = null, GimbalinaSaveSnapshot? Gimbalina = null);
 
 public sealed record SaveCompatibilityInfo(
     int SourceSchemaVersion,
@@ -82,7 +83,7 @@ public static class SaveCompatibility
             throw new ArgumentException("Required save fields are missing or invalid.", nameof(state));
 
         var content = state.Content ?? SaveContentVersions.Current;
-        if (content.CatalogVersion is < 1 or > 3 || content.ModelVersion != 1 || content.WorldVersion != 1 || content.DerivedCacheIds is null)
+        if (content.CatalogVersion is < 1 or > 4 || content.ModelVersion != 1 || content.WorldVersion != 1 || content.DerivedCacheIds is null)
             throw new ArgumentException("Unsupported content, model or world version.", nameof(state));
         var aliases = new HashSet<string>(StringComparer.Ordinal);
         string Resolve(string id)
@@ -133,16 +134,18 @@ public static class SaveCompatibility
                     throw new ArgumentException("Active story and saved contract do not match.", nameof(state));
             }
             _ = CityHazardState.Restore(city.Hazards, city.DisguiseActive);
+            _ = CityEverydayEncounters.Restore(city.Encounters);
+            if (city.Gimbalina is not null) _ = GimbalinaStabilizer.FromSaveSnapshot(city.Gimbalina);
             new TerritoryAttentionTracker().ImportSnapshot(city.Attention);
             city = city with { Fleet = city.Fleet with { ActivePlatformId = Resolve(city.Fleet.ActivePlatformId) } };
         }
-        var invalidate = sourceSchema != SaveGameManager.CurrentSchemaVersion || content.CatalogVersion != 3 || aliases.Count > 0;
+        var invalidate = sourceSchema != SaveGameManager.CurrentSchemaVersion || content.CatalogVersion != 4 || aliases.Count > 0;
         var normalized = state with
         {
             SchemaVersion = SaveGameManager.CurrentSchemaVersion,
             Equipment = equipment,
             City = city,
-            Content = content with { CatalogVersion = 3, DerivedCacheIds = invalidate ? [] : content.DerivedCacheIds.ToArray() },
+            Content = content with { CatalogVersion = 4, DerivedCacheIds = invalidate ? [] : content.DerivedCacheIds.ToArray() },
         };
         // Exercise snapshot validation without publishing runtime objects or altering stored state.
         var runtime = SaveGameManager.RestoreRuntime(normalized);

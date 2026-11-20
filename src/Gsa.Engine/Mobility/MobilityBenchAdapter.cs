@@ -15,6 +15,7 @@ public sealed class MobilityBenchAdapter
     private readonly GodotCoordinateAdapter _coordinates;
     private CharacterBody3D? _avatarBody;
     private PlayerVisualRig? _activeRig;
+    private bool _gimbalinaPresent = true;
     private LocomotionMode _visualMode = LocomotionMode.Handcart;
     private Node3D? _parkedVehicleNode;
     private LocomotionMode? _parkedVehicleMode;
@@ -64,6 +65,14 @@ public sealed class MobilityBenchAdapter
         }
         _activeRig = GsaMeshBuilder.BuildPlayerRig(mode);
         _avatarBody.AddChild(_activeRig.Root);
+        if (_activeRig.GimbalinaBody is { } body) body.Visible = _gimbalinaPresent;
+    }
+
+    public void SetGimbalinaPresent(bool present)
+    {
+        if (_gimbalinaPresent == present) return;
+        _gimbalinaPresent = present;
+        if (_activeRig?.GimbalinaBody is { } body) body.Visible = present;
     }
 
     public void SyncParkedVehicle(Node3D parent, LocomotionMode? parkedMode, Vector3d parkedPosEnu, double parkedHeadingRadians)

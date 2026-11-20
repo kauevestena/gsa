@@ -22,6 +22,10 @@ public sealed record GimbalinaStepResult(
     double OscillationAngularRatePitchRadPerSec,
     double OscillationAngularRateRollRadPerSec);
 
+public sealed record GimbalinaSaveSnapshot(int SchemaVersion, double Stress, double CornCooldownRemainingSeconds,
+    double ContinuousMaxStressSeconds, bool HasFledToSafety, int SafeEscapeCount, double OscillationPhaseRadians,
+    double LastBodyPitchRadians, double LastBodyRollRadians);
+
 /// <summary>Gimbalina stabilization, stress meter [0,100], corn recovery, and non-injurious safe escape.</summary>
 public sealed class GimbalinaStabilizer
 {
@@ -52,6 +56,26 @@ public sealed class GimbalinaStabilizer
         if (!double.IsFinite(initialStress) || initialStress < MinStress || initialStress > MaxStress)
             throw new ArgumentOutOfRangeException(nameof(initialStress), "Initial stress must be in [0, 100].");
         Stress = initialStress;
+    }
+
+    public GimbalinaSaveSnapshot ExportSaveSnapshot() => new(1, Stress, CornCooldownRemainingSeconds,
+        ContinuousMaxStressSeconds, HasFledToSafety, SafeEscapeCount, _oscillationPhaseRadians,
+        LastBodyPitchRadians, LastBodyRollRadians);
+
+    public static GimbalinaStabilizer FromSaveSnapshot(GimbalinaSaveSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        if (snapshot.SchemaVersion != 1 || !double.IsFinite(snapshot.Stress) || snapshot.Stress < 0 || snapshot.Stress > 100 ||
+            !double.IsFinite(snapshot.CornCooldownRemainingSeconds) || snapshot.CornCooldownRemainingSeconds < 0 || snapshot.CornCooldownRemainingSeconds > CornCooldownSeconds ||
+            !double.IsFinite(snapshot.ContinuousMaxStressSeconds) || snapshot.ContinuousMaxStressSeconds < 0 || snapshot.SafeEscapeCount < 0 ||
+            !double.IsFinite(snapshot.OscillationPhaseRadians) || snapshot.OscillationPhaseRadians < 0 || snapshot.OscillationPhaseRadians >= 2 * Math.PI ||
+            !double.IsFinite(snapshot.LastBodyPitchRadians) || !double.IsFinite(snapshot.LastBodyRollRadians) ||
+            (snapshot.HasFledToSafety && (snapshot.SafeEscapeCount < 1 || snapshot.ContinuousMaxStressSeconds < SafeEscapeHoldSeconds - 1e-9 || snapshot.Stress < MaxStress)))
+            throw new ArgumentException("Invalid Gimbalina snapshot.");
+        return new(snapshot.Stress) { CornCooldownRemainingSeconds = snapshot.CornCooldownRemainingSeconds,
+            ContinuousMaxStressSeconds = snapshot.ContinuousMaxStressSeconds, HasFledToSafety = snapshot.HasFledToSafety,
+            SafeEscapeCount = snapshot.SafeEscapeCount, _oscillationPhaseRadians = snapshot.OscillationPhaseRadians,
+            LastBodyPitchRadians = snapshot.LastBodyPitchRadians, LastBodyRollRadians = snapshot.LastBodyRollRadians };
     }
 
     public double OscillationAmplitudeDegrees =>

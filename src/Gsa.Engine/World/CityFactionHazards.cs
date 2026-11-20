@@ -49,7 +49,7 @@ public partial class SaoDatumCityScene
         {
             _cityHazards.CancelActiveThreats(); _attention.CancelPendingThreats(); _disarmRequested = false;
             if (_lastHazardWarning is not null) _hazardNotice = Text("hud.calm_protection.active");
-            _lastHazardWarning = null; ClearCityThreatVisuals();
+            _lastHazardWarning = null; ClearCityThreatVisuals(); CancelCityEverydayThreats();
         }
     }
 
@@ -234,6 +234,7 @@ public partial class SaoDatumCityScene
         _activeMachine?.ProtectBatchAtUnloadPoint(_calendar.CalendarTimeSeconds, id);
         _protectedCityPhotos.AddRange(_fieldSamples); _fieldSamples.Clear();
         _locomotion.RefillHandcartResources(refillAutonomy: false, clearStorage: true);
+        if (_gimbalina.HasFledToSafety) _locomotion.MarkGimbalinaFled();
         _audio.PlayOffloadChime(); _feedbackText = _hazardNotice = Text("city.hazards.uploaded"); SaveHazardChange();
     }
 
@@ -265,7 +266,7 @@ public partial class SaoDatumCityScene
         _lidarPointWriteIndex = _lidarPointVisibleCount = _lidarSliceIndex = 0; _lidarCloudMesh.Multimesh.VisibleInstanceCount = 0;
         _cityHazards.CancelActiveThreats(); _attention.CancelPendingThreats(); ClearCityThreatVisuals();
         _cleanLensRequested = _disarmRequested = false; _recentPhotoSeconds = 0;
-        _cityHazards.TirePunctured = false; _carSim = null;
+        _cityHazards.TirePunctured = false; _carSim = null; CancelCityEverydayThreats();
         var office = _manifestObjectsById["office_entry"].PositionEnu + new Vector3d(0, -4, 0);
         _locomotion.RepositionSafeAfterRecovery(office, LocomotionMode.Handcart, 0, true, true);
         _mobility.SetVisualPlatformMode(LocomotionMode.Handcart); ResetCityNavigation(); SnapCamera();

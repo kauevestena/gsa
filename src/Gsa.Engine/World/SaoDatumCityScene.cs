@@ -162,6 +162,7 @@ public partial class SaoDatumCityScene : Node3D
             BuildSemanticWorld();
             BuildCollectiblesAndLandmarks();
             BuildPlayerAndTraffic();
+            BuildCityEverydayActors();
             BuildLidarPointCloudOverlay();
             BuildHudAndTablet();
 
@@ -669,6 +670,7 @@ public partial class SaoDatumCityScene : Node3D
         var activeRoll = 0.0;
 
         var input = _mobility.SampleLiveInput(_carSim?.SpeedMetresPerSecond ?? _locomotion.ForwardSpeedMetresPerSecond);
+        input = ApplyCityEverydayInput(input, activeMode);
         var regionId = GetRegionIdForEnu(activePos);
         if (regionId != _lastRegionId)
         {
@@ -735,7 +737,11 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         _lastSpeedMps = activeSpeed;
-        var gStep = _gimbalina.Step(delta, isResting: Math.Abs(activeSpeed) < 0.1);
+        StepCityEverydayEncounters(delta, activePos, activeSpeed, activeMode);
+        var gStep = _gimbalina.Step(delta, isResting: Math.Abs(activeSpeed) < 0.1,
+            bodyPitchRadians: activePitch, bodyRollRadians: activeRoll);
+        if (gStep.HasFledToSafety) _locomotion.MarkGimbalinaFled();
+        _mobility.SetGimbalinaPresent(!gStep.HasFledToSafety);
 
         _mobility.SetVisualPlatformMode(activeMode);
         _mobility.SyncAvatarPose(activePos, activeHeading, delta, activeSpeed, input.Steer, activePitch, activeRoll,
@@ -1130,6 +1136,9 @@ public partial class SaoDatumCityScene : Node3D
 
     private void CaptureCityPhoto(Vector3d pos, double heading, double speed, WeatherAndTimeSnapshot weather)
     {
+        var usesGimbalina = CurrentActiveMode() is LocomotionMode.Handcart or LocomotionMode.Bicycle ||
+            (CurrentActiveMode() == LocomotionMode.OnFoot && _locomotion.MountedVehicleMode <= LocomotionMode.Bicycle);
+        if (_gimbalina.HasFledToSafety) { _feedbackText = Text("city.encounters.chicken_safe"); return; }
         var navigation = _navigationRig?.Estimator?.Current;
         if (CurrentActiveMode() >= LocomotionMode.Car && navigation is null)
         { _feedbackText = Text("city.hazards.wait_navigation"); return; }
@@ -1138,9 +1147,10 @@ public partial class SaoDatumCityScene : Node3D
         var t = _calendar.CalendarTimeSeconds;
         var bodyQuat = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading +
             (CurrentActiveMode() >= LocomotionMode.Car ? _cityHazards.RackYawErrorRadians : 0));
-        EstimatedBodyPose Pose(double dt) => new(t + dt, origin + new Vector3d(Math.Cos(heading) * speed * dt, Math.Sin(heading) * speed * dt, 0), bodyQuat);
+        EstimatedBodyPose Pose(double dt) => new(t + dt, origin + new Vector3d(Math.Cos(heading) * speed * dt, Math.Sin(heading) * speed * dt, 0),
+            usesGimbalina ? _gimbalina.ComputeEffectiveBodyToMap(bodyQuat, dt, _gimbalina.LastBodyPitchRadians, _gimbalina.LastBodyRollRadians) : bodyQuat);
         var start = CameraGeometry.CameraToMap(Pose(0), mount);
-        var end = CameraGeometry.CameraToMap(Pose(CameraSensorProfile.Initial.DayExposureSeconds), mount);
+        var end = CameraGeometry.CameraToMap(Pose(weather.IsNight ? CameraSensorProfile.Initial.NightExposureSeconds : CameraSensorProfile.Initial.DayExposureSeconds), mount);
         var readout = CameraGeometry.CameraToMap(Pose(CameraSensorProfile.Initial.ReadoutTimeSeconds), mount);
 
         bool Occluded(Vector3d fromEnu, Vector3d toEnu, string targetId)
@@ -1158,7 +1168,7 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         var estimatedPose = CurrentActiveMode() >= LocomotionMode.Car && navigation is not null
-            ? new EstimatedBodyPose(t, navigation.PositionEnu + Vector3d.UnitZ * 1.4, navigation.BodyToMapRotation) : Pose(0);
+            ? new EstimatedBodyPose(t, navigation.PositionEnu + Vector3d.UnitZ * 1.4, navigation.BodyToMapRotation) : new EstimatedBodyPose(t, origin, bodyQuat);
         var environment = weather.ToCameraEnvironment();
         environment = new CameraEnvironmentSnapshot(environment.IsNight, environment.SunAngleRadians,
             Math.Max(environment.LensObstructionFraction, _cityHazards.Lens.ObstructionFraction), environment.BaseClippingFraction);
@@ -1226,6 +1236,11 @@ public partial class SaoDatumCityScene : Node3D
         {
             switch (key.PhysicalKeycode)
             {
+                case Key.E when _everyday.DogActive:
+                    GiveCityDogTreat(); GetViewport().SetInputAsHandled(); return;
+                case Key.E when _everyday.Parking is not null:
+                    _tabletPanel.Show(); _tabletTabs.CurrentTab = 1; RefreshTabletContents();
+                    GetViewport().SetInputAsHandled(); return;
                 case Key.R or Key.Tab or Key.M:
                     ToggleTablet();
                     GetViewport().SetInputAsHandled();

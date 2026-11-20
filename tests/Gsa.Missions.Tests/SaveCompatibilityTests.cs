@@ -77,7 +77,7 @@ public sealed class SaveCompatibilityTests : IDisposable
         var state = LegacyState() with { SchemaVersion = 2, Content = new(2, 1, 1, ["old_preview"]), City = MinimalCity(photo) };
         var original = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, original);
         var result = manager.LoadCurrent(); Assert.True(result.Succeeded, result.DiagnosticDetail);
-        Assert.True(result.Compatibility!.DerivedCachesInvalidated); Assert.Equal(3, result.State!.Content!.CatalogVersion);
+        Assert.True(result.Compatibility!.DerivedCachesInvalidated); Assert.Equal(SaveContentVersions.Current.CatalogVersion, result.State!.Content!.CatalogVersion);
         Assert.Equal(JsonSerializer.Serialize(photo), JsonSerializer.Serialize(result.State.City!.CameraSamples.Single()));
         Assert.Null(result.State.City.Hazards); Assert.Equal(original, File.ReadAllText(manager.CurrentSavePath));
     }
@@ -101,6 +101,34 @@ public sealed class SaveCompatibilityTests : IDisposable
         var manager = new SaveGameManager(_directory);
         var state = LegacyState() with { SchemaVersion = 2, Content = SaveContentVersions.Current,
             City = MinimalCity(Photo()) with { Hazards = new CityHazardState().Export() with { SchemaVersion = 99 } } };
+        var raw = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, raw);
+        Assert.False(manager.LoadCurrent().Succeeded); Assert.False(manager.Save(LegacyState(), SaveTrigger.Manual).Succeeded);
+        Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));
+    }
+
+    [Fact]
+    public void CatalogThreeMigrationKeepsHazardDamageAndRawPhotosWithoutInventingEncounterHistory()
+    {
+        var manager = new SaveGameManager(_directory); var hazard = new CityHazardState(); hazard.Lens.ApplySplatter(.45);
+        var photo = Photo(); var state = LegacyState() with { SchemaVersion = 2, Content = new(3, 1, 1, ["preview"]),
+            City = MinimalCity(photo) with { Hazards = hazard.Export() } };
+        var raw = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, raw);
+        var result = manager.LoadCurrent(); Assert.True(result.Succeeded, result.DiagnosticDetail);
+        Assert.Equal(4, result.State!.Content!.CatalogVersion); Assert.True(result.Compatibility!.DerivedCachesInvalidated);
+        Assert.Equal(.45, result.State.City!.Hazards!.LensObstruction); Assert.Null(result.State.City.Encounters); Assert.Null(result.State.City.Gimbalina);
+        Assert.Equal(JsonSerializer.Serialize(photo), JsonSerializer.Serialize(result.State.City.CameraSamples.Single()));
+        Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UnsupportedEncounterOrChickenSnapshotCannotBeOverwritten(bool badChicken)
+    {
+        var manager = new SaveGameManager(_directory); var city = MinimalCity(Photo());
+        city = badChicken ? city with { Gimbalina = new GimbalinaStabilizer().ExportSaveSnapshot() with { SchemaVersion = 99 } }
+            : city with { Encounters = new CityEverydayEncounters().Export() with { SchemaVersion = 99 } };
+        var state = LegacyState() with { SchemaVersion = 2, Content = SaveContentVersions.Current, City = city };
         var raw = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, raw);
         Assert.False(manager.LoadCurrent().Succeeded); Assert.False(manager.Save(LegacyState(), SaveTrigger.Manual).Succeeded);
         Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));

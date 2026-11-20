@@ -128,6 +128,18 @@ public sealed class DogPursuitTracker
         }
     }
 
+    public static DogPursuitTracker FromState(DogPursuitState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        if (string.IsNullOrWhiteSpace(state.DogId) || !double.IsFinite(state.ElapsedSeconds) || state.ElapsedSeconds < 0 ||
+            !double.IsFinite(state.DistanceMetres) || state.DistanceMetres < 0 ||
+            (state.Active && (state.ElapsedSeconds >= MaxPursuitDurationSeconds || state.DistanceMetres > DisengageDistanceMetres ||
+                state.PacifiedByTreat || state.SuppressedByCalmPolicy))) throw new ArgumentException("Invalid dog pursuit snapshot.");
+        return new(state.DogId, 0, false) { Active = state.Active, ElapsedSeconds = state.ElapsedSeconds,
+            DistanceMetres = state.DistanceMetres, PacifiedByTreat = state.PacifiedByTreat,
+            SuppressedByCalmPolicy = state.SuppressedByCalmPolicy, EndReasonKey = state.EndReasonKey };
+    }
+
     public DogPursuitState Step(double dtSeconds, double currentDistanceMetres)
     {
         if (!double.IsFinite(dtSeconds) || dtSeconds < 0.0)
@@ -151,6 +163,13 @@ public sealed class DogPursuitTracker
             EndReasonKey = "hazard.dog.timeout";
         }
 
+        return ExportState();
+    }
+
+    public DogPursuitState StopFollowingBicycle()
+    {
+        Active = false;
+        EndReasonKey = "hazard.dog.no_bicycle";
         return ExportState();
     }
 
