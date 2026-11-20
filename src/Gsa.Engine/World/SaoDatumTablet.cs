@@ -31,7 +31,7 @@ public partial class SaoDatumCityScene
     private Button _daguerreotypeBtn = null!;
     private readonly List<RadarBlip> _radarBlips = new(32);
     private ulong _contractSeed = 101;
-    private readonly List<ContractDefinition> _offeredContracts = [];
+    private readonly List<GeneratedContractOffer> _offeredContracts = [];
 
     private void BuildHudAndTablet()
     {
@@ -217,14 +217,40 @@ public partial class SaoDatumCityScene
             RefreshTabletContents();
     }
 
+    private GeneratedContractOffer BuildCityContractOffer(string templateId, ulong seed)
+    {
+        var offer = MvpProceduralContractGenerator.GenerateFromTemplate(templateId, seed);
+        var definition = offer.Contract;
+        // The city clock runs 60×. Allow for returning to an upload point between passes.
+        var due = Math.Max(definition.Deadline.DueAfterSeconds, 28800);
+        return offer with { Contract = definition with
+        {
+            Requirements = CitySurveyRequirements(definition.AreaId, story: false),
+            Deadline = definition.Deadline with { DueAfterSeconds = due, ExpiresAfterSeconds = due + 14400 },
+        }};
+    }
+
     private void GenerateContractOffers()
     {
         _offeredContracts.Clear();
         foreach (var template in MvpProceduralContractGenerator.Templates)
         {
-            var offer = MvpProceduralContractGenerator.GenerateFromTemplate(template.TemplateId, _contractSeed++);
-            _offeredContracts.Add(offer.Contract);
+            var offer = BuildCityContractOffer(template.TemplateId, _contractSeed++);
+            if (!CityHasSurveyPlatform(offer.WitnessCertificate.RequiredPlatformLevel))
+                offer = BuildCityContractOffer(template.TemplateId, _contractSeed++);
+            if (CityHasSurveyPlatform(offer.WitnessCertificate.RequiredPlatformLevel))
+                _offeredContracts.Add(offer);
         }
+    }
+
+    private bool TryAcceptCityProceduralOffer(GeneratedContractOffer offer)
+    {
+        if (!CityHasSurveyPlatform(offer.WitnessCertificate.RequiredPlatformLevel))
+        {
+            _feedbackText = Text("city.story.requires_platform");
+            return false;
+        }
+        return AcceptCityContract(offer.Contract);
     }
 
     private void StartStoryMission(CampaignMissionFullSpec spec)
@@ -239,7 +265,7 @@ public partial class SaoDatumCityScene
             _feedbackText = Text("city.story.locked");
             return;
         }
-        if (!CityHasSurveyPlatform(spec))
+        if (!CityHasSurveyPlatform(spec.MinimumPlatformLevel))
         {
             _feedbackText = Text("city.story.requires_platform");
             return;
@@ -247,9 +273,10 @@ public partial class SaoDatumCityScene
 
         var (prefix, count, area, client) = spec.MissionId switch
         {
-            "HIST-01" => ("facade", 20, "commerce_street_facades", "city_hall"),
-            "HIST-02" => ("manhole", 12, "commerce_street_drainage", "city_hall"),
-            _ => ("sidewalk_seg", 8, "commerce_street_sidewalks", "university"),
+            "HIST-01" => ("facade", 20, FacadeArea, "city_hall"),
+            "HIST-02" => ("manhole", 12, DrainageArea, "city_hall"),
+            "HIST-03" => ("sidewalk_seg", 8, CitySurveyInventory.SidewalkArea, "university"),
+            _ => ("sign", 12, CitySurveyInventory.SignsArea, "city_hall"),
         };
         var featureIds = Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray();
         var def = new ContractDefinition(
@@ -261,11 +288,11 @@ public partial class SaoDatumCityScene
             AreaId: area,
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: CitySurveyRequirements(spec.MissionId),
+            Requirements: CitySurveyRequirements(area, story: true),
             RequiredCapabilities: ["camera"],
             Risk: "easy",
             Calm: true,
-            Deadline: new ContractDeadlineSpec(21600, 27000, 0.05, 0.5),
+            Deadline: spec.MissionId == "HIST-04" ? new(25200, 32400, .05, .5) : new(21600, 27000, .05, .5),
             Reward: new ContractRewardSpec(spec.RewardCoords, 120 + spec.Act * 60, spec.ReputationDelta, spec.UnlockedPlatforms.ToArray()),
             PartialPolicy: new ContractPartialPolicySpec("disabled", []),
             DeliveryFormat: "gsa_bundle_v1",
@@ -276,7 +303,8 @@ public partial class SaoDatumCityScene
         {
             "HIST-02" => "city.story.drainage_brief",
             "HIST-03" => "city.story.sidewalk_brief",
-            _ => "mission.hist_01.summary",
+            "HIST-04" => "city.story.signs_brief",
+            _ => "city.story.facades_brief",
         };
         _gtaHud.ShowCutsceneLetterbox(
             $"{spec.MissionId} · {Text(spec.TitleKey)}",
@@ -295,8 +323,10 @@ public partial class SaoDatumCityScene
         }
         _lastCitySurveyReview = null;
         _lastSidewalkMeasurements = [];
+        _lastAdjustedPhotoCount = 0;
         _activeStorySpec = story;
         _activeContract = def;
+        PrepareCityPhotoCoverage();
         _activeMachine = new ContractStateMachine(def);
         _activeMachine.Accept(_calendar.CalendarTimeSeconds);
         _fieldSamples.Clear();
@@ -313,8 +343,16 @@ public partial class SaoDatumCityScene
         return true;
     }
 
+    private bool CityPlatformStoryUnlocked(LocomotionMode mode) =>
+        _isSandbox || mode < LocomotionMode.Car || CityMissionCompleted("HIST-04");
+
     private bool TryPurchaseCityPlatform(LocomotionMode mode)
     {
+        if (!CityPlatformStoryUnlocked(mode))
+        {
+            _feedbackText = Text("city.story.locked");
+            return false;
+        }
         var completed = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
         if (!_fleet.TryPurchasePlatform($"buy_{mode}_{_tick}", _calendar.CalendarTimeSeconds, mode, _ledger,
                 _progression, completed, out _, out var quote))
@@ -345,7 +383,7 @@ public partial class SaoDatumCityScene
             var done = CityMissionCompleted(spec.MissionId);
             var supported = SupportsCityStory(spec);
             var prereqsMet = _isSandbox || spec.Preconditions.All(CityMissionCompleted);
-            var equipped = CityHasSurveyPlatform(spec);
+            var equipped = CityHasSurveyPlatform(spec.MinimumPlatformLevel);
             var row = new HBoxContainer();
             var info = new Label
             {
@@ -372,8 +410,9 @@ public partial class SaoDatumCityScene
         refreshBtn.Pressed += () => { GenerateContractOffers(); RefreshTabletContents(); };
         _contractsTab.AddChild(refreshBtn);
 
-        foreach (var def in _offeredContracts)
+        foreach (var offer in _offeredContracts)
         {
+            var def = offer.Contract;
             var card = BoardOfficeAndReportPresenter.BuildContractBoardCard(def, TranslationServer.GetLocale().ToString());
             var row = new HBoxContainer();
             var info = new Label
@@ -382,16 +421,16 @@ public partial class SaoDatumCityScene
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
                 AutowrapMode = TextServer.AutowrapMode.WordSmart,
             };
-            var supported = SupportsCityDelivery(def);
+            var compatible = CityHasSurveyPlatform(offer.WitnessCertificate.RequiredPlatformLevel);
+            var supported = compatible && SupportsCityDelivery(def);
             var accept = new Button
             {
-                Text = Text(supported ? "city.contracts.accept" : "city.office.unavailable"),
+                Text = Text(supported ? "city.contracts.accept" : compatible ? "city.office.unavailable" : "city.story.requires_platform"),
                 Disabled = !supported,
                 FocusMode = Control.FocusModeEnum.None,
                 TooltipText = supported ? "" : Text(CityOfficeUnavailableKey(def.Product)),
             };
-            var capturedDef = def;
-            accept.Pressed += () => AcceptCityContract(capturedDef);
+            accept.Pressed += () => TryAcceptCityProceduralOffer(offer);
             row.AddChild(info);
             row.AddChild(accept);
             _contractsTab.AddChild(row);
@@ -409,6 +448,16 @@ public partial class SaoDatumCityScene
             $"Mode: {Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical")}\n" +
             $"Rack Calibration: {(_rackMisaligned ? Text("city.rack.misaligned") : Text("city.rack.ok"))}";
 
+        if (_activeContract is { } survey && SupportsCityDelivery(survey))
+        {
+            var instruction = survey.AreaId switch
+            {
+                FacadeArea or ParkArea => "city.office.collect_surface",
+                CitySurveyInventory.SidewalkArea => "city.office.collect_control",
+                _ => "city.office.collect_inventory",
+            };
+            _officeStatusLabel.Text += "\n" + Text(instruction);
+        }
         var review = CitySurveyReviewText();
         if (review.Length > 0) _officeStatusLabel.Text += "\n" + review;
         if (_activeStorySpec?.MissionId == "HIST-02" && _activeMachine?.Snapshot is { } drainage && !_calendar.IsRaining)
@@ -427,6 +476,7 @@ public partial class SaoDatumCityScene
             var owned = _fleet.OwnedPlatforms.Contains(mode);
             var isCurrent = _locomotion.MountedVehicleMode == mode;
             var quote = _fleet.QuotePlatformPurchase(mode, _progression, completedMissions);
+            var unlocked = quote.Unlocked && CityPlatformStoryUnlocked(mode);
             var row = new HBoxContainer();
             var lbl = new Label
             {
@@ -435,8 +485,8 @@ public partial class SaoDatumCityScene
             };
             var actionBtn = new Button
             {
-                Text = isCurrent ? Text("city.fleet.active") : (owned ? Text("city.fleet.drive") : Text("city.fleet.buy")),
-                Disabled = isCurrent,
+                Text = Text(isCurrent ? "city.fleet.active" : owned ? "city.fleet.drive" : unlocked ? "city.fleet.buy" : "city.story.locked"),
+                Disabled = isCurrent || !owned && !unlocked,
                 FocusMode = Control.FocusModeEnum.None,
             };
             actionBtn.Pressed += () =>

@@ -3,6 +3,7 @@ using Gsa.Core.Mobility;
 using Gsa.Missions.Campaign;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Economy;
+using Gsa.Missions.Gameplay;
 using Gsa.Missions.Office;
 using Gsa.Missions.Persistence;
 using Gsa.Missions.Quality;
@@ -37,6 +38,8 @@ public partial class SaoDatumCityScene
         _campaignState.ObjectiveStates.Clear();
         _campaignState.UnlockedPlatforms.Clear();
         _campaignState.UnlockedPlatforms.Add("cart");
+        _campaignState.UnlockedRegions.Clear();
+        _campaignState.UnlockedRegions.Add("old_center");
         _campaignState.AppliedCutsceneIds.Clear();
         _campaignState.SkippedCutsceneIds.Clear();
 
@@ -55,6 +58,16 @@ public partial class SaoDatumCityScene
         var story = FullCampaignCatalog.GetMission("HIST-01");
         var drainage = FullCampaignCatalog.GetMission("HIST-02");
         var sidewalks = FullCampaignCatalog.GetMission("HIST-03");
+        var signs = FullCampaignCatalog.GetMission("HIST-04");
+        var parkEdge = new Vector3d(500600, 7400999, 100);
+        var portEdge = parkEdge + Vector3d.UnitY * 2;
+        var waterfrontEdge = new Vector3d(501001, 7400500, 100);
+        Require(!CityMayEnterRegion(parkEdge, portEdge) && !CityMayEnterRegion(parkEdge, waterfrontEdge) &&
+            !CityPlatformStoryUnlocked(LocomotionMode.Car), "Act 2 access was open at the start");
+        GenerateContractOffers();
+        Require(_offeredContracts.Count == 5 && _offeredContracts.All(offer => offer.ExecutableWithStarterKit && SupportsCityDelivery(offer.Contract)) &&
+            _offeredContracts.Any(offer => offer.TemplateId == "PROC-PARQUE" && offer.Contract.Calm),
+            "the starter board did not offer all compatible templates and a calm job");
         StartStoryMission(drainage);
         Require(_activeContract is null && _feedbackText == Text("city.story.locked"), "drainage opened before the façade job");
         StartStoryMission(story);
@@ -62,7 +75,7 @@ public partial class SaoDatumCityScene
         Require(facadeJob.RequiredFeatureIds.Count == 20, "the façade contract did not require 20 targets");
         ProcessAndDeliverCityContract();
         Require(_feedbackText == Text("city.office.upload_first") && _ledger.BalanceCoords == initialBalance, "an empty submission passed");
-        PositionAndCapture(new(500190, 7400000.7, 100), Math.PI / 2);
+        PositionAndCapture(new(500190, 7400001.8, 100), Math.PI / 2);
         Require(_fieldSamples.Any(s => s.Quality.Passed && s.ObservedFeatures.Any(f => f.TargetId == "facade_18")), "scene photo missed its facade");
         ProcessAndDeliverCityContract();
         Require(_feedbackText == Text("city.office.upload_first"), "the office read photos still in the field");
@@ -81,7 +94,7 @@ public partial class SaoDatumCityScene
         for (var i = 1; i <= 20; i++)
         {
             if (i == 18) continue;
-            PositionAndCapture(new(500010 + i * 10, 7400000.7, 100), Math.PI / 2);
+            PositionAndCapture(new(500010 + i * 10, 7400001.8, 100), Math.PI / 2);
         }
         ProcessAndDeliverCityContract();
         Require(_activeMachine?.State == ContractState.Retrabalho && _ledger.BalanceCoords == initialBalance, "unuploaded rework contributed");
@@ -89,6 +102,16 @@ public partial class SaoDatumCityScene
         SaveCareer();
         TryLoadCareer();
         Require(_activeMachine?.State == ContractState.Retrabalho, "rework did not survive reload");
+        ProcessAndDeliverCityContract();
+        Require(_lastCitySurveyReview is { MatchedFeatureCount: 20 } &&
+            _lastCitySurveyReview.GetMetric("area_coverage")?.Status == MetricEvaluationStatus.Failed &&
+            _feedbackText == Text("city.office.coverage_rework"), "cropped photos passed coverage: " + CitySurveyReviewText());
+        foreach (var id in facadeJob.RequiredFeatureIds)
+        {
+            var target = _manifestObjectsById[id].PositionEnu;
+            PositionAndCapture(new(target.X, target.Y - 9, 100), Math.PI / 2);
+        }
+        Upload();
 
         _calendar.AdvanceCalendarSeconds(_activeMachine!.Snapshot!.DueAtSeconds + 3600 - _calendar.CalendarTimeSeconds);
         ProcessAndDeliverCityContract();
@@ -142,6 +165,11 @@ public partial class SaoDatumCityScene
         Require(sidewalkJob.RequiredFeatureIds.Count == 8, "the sidewalk contract did not require eight segments");
         CaptureSurveyPass(sidewalkJob, -1.5, 6, LocomotionMode.Bicycle);
         CaptureSurveyPass(sidewalkJob, 1.5, 6, LocomotionMode.Bicycle);
+        var controls = CitySurveyInventory.PublishedControls(sidewalkJob, _manifestObjectsById);
+        var adjusted = CityLocalControlAdjustment.Adjust(_fieldSamples[0], controls);
+        Require(adjusted is not null && (adjusted.PositionEnu - _fieldSamples[0].EstimatedPose.PositionEnu).Length > .3 &&
+            CityLocalControlAdjustment.Adjust(_fieldSamples[0], new Dictionary<string, Vector3d>()) is null,
+            "the adjustment did not correct the biased pose or required no control");
         Upload(LocomotionMode.Bicycle);
         ProcessAndDeliverCityContract();
         Require(_activeContract is null && CityMissionCompleted(sidewalks.MissionId) &&
@@ -153,9 +181,68 @@ public partial class SaoDatumCityScene
             Require(Math.Abs(measurement.WidthMetres - size.Y) < .03 && Math.Abs(measurement.CurbHeightMetres - size.Z) < .03,
                 "sidewalk width or curb height differed from the modeled surfaces");
         }
+        Require(_lastAdjustedPhotoCount == 16, "the sidewalk job bypassed the camera control adjustment");
         TryLoadCareer();
+        StartStoryMission(signs);
+        Require(_activeContract is null && _feedbackText == Text("city.story.requires_platform"), "the bicycle could accept HIST-04");
         Require(TryPurchaseCityPlatform(LocomotionMode.Scooter) &&
             _locomotion.MountedVehicleMode == LocomotionMode.Scooter, "the completed sidewalk job did not unlock the scooter");
+
+        _calendar.SetWeather(false);
+        StartStoryMission(signs);
+        var signsJob = _activeContract ?? throw new InvalidOperationException("Sign contract was not available.");
+        Require(signsJob.RequiredFeatureIds.Count == 12, "the sign contract did not require 12 signs");
+        CaptureSurveyPass(signsJob, -1.5, 8, LocomotionMode.Scooter);
+        Upload(LocomotionMode.Scooter);
+        ProcessAndDeliverCityContract();
+        Require(_activeMachine?.State == ContractState.Retrabalho && !CityPlatformStoryUnlocked(LocomotionMode.Car),
+            "the sign survey unlocked the car with only one pass");
+        CaptureSurveyPass(signsJob, 1.5, 8, LocomotionMode.Scooter);
+        Upload(LocomotionMode.Scooter);
+        ProcessAndDeliverCityContract();
+        Require(_activeContract is null && CityMissionCompleted(signs.MissionId) &&
+            _lastCitySurveyReview?.GetMetric("relative_rmse") is { SampleCount: 11, Status: MetricEvaluationStatus.Passed },
+            "the avenue inventory did not close Act 1: " + _feedbackText + " " + CitySurveyReviewText());
+        TryLoadCareer();
+        Require(CityMayEnterRegion(parkEdge, portEdge) && CityMayEnterRegion(parkEdge, waterfrontEdge) &&
+            !CityMayEnterRegion(portEdge, new(501001, 7401001, 100)) && CityPlatformStoryUnlocked(LocomotionMode.Car) &&
+            _fleet.QuotePlatformPurchase(LocomotionMode.Car, _progression, new HashSet<string> { signs.MissionId }).Unlocked,
+            "Act 1 closure access did not survive loading");
+
+        foreach (var seed in new[] { 1000UL, 1001UL })
+        {
+            foreach (var template in MvpProceduralContractGenerator.Templates)
+            {
+                var offer = BuildCityContractOffer(template.TemplateId, seed);
+                var mode = offer.WitnessCertificate.RequiredPlatformLevel switch
+                {
+                    0 => LocomotionMode.Handcart,
+                    1 => LocomotionMode.Bicycle,
+                    _ => LocomotionMode.Scooter,
+                };
+                SwitchPlatform(mode);
+                Require(TryAcceptCityProceduralOffer(offer), $"{offer.VariantId} could not be accepted with {mode}");
+                var job = offer.Contract;
+                if (job.Product == "images")
+                {
+                    foreach (var id in job.RequiredFeatureIds)
+                    {
+                        var target = _manifestObjectsById[id].PositionEnu;
+                        PositionAndCapture(new(target.X, target.Y - 9, 100), Math.PI / 2, mode);
+                    }
+                }
+                else
+                {
+                    var distance = job.AreaId == CitySurveyInventory.SidewalkArea ? 6 : 8;
+                    CaptureSurveyPass(job, -1.5, distance, mode);
+                    CaptureSurveyPass(job, 1.5, distance, mode);
+                }
+                Upload(mode);
+                ProcessAndDeliverCityContract();
+                Require(_activeContract is null && _progression.SettledContractIds.Contains(job.Id),
+                    $"{offer.VariantId} failed delivery: " + _feedbackText + " " + CitySurveyReviewText());
+            }
+        }
         paid = _ledger.BalanceCoords;
 
         // A previously accepted tunnel contract still opens and retains its observations.
@@ -190,6 +277,6 @@ public partial class SaoDatumCityScene
         _citySaveBlocked = false;
         TryLoadCareer();
         Require(original.SequenceEqual(File.ReadAllBytes(previous.CurrentSavePath)), "delivery fixture modified the career save");
-        GD.Print("GSA_CITY_DELIVERY_SMOKE_OK protected_only=true rework=true late_quote=true replay=once tunnel_photo=rejected facades=20 drains=12 sidewalks=8 bicycle=true scooter=true");
+        GD.Print("GSA_CITY_DELIVERY_SMOKE_OK protected_only=true rework=true late_quote=true replay=once tunnel_photo=rejected facades=20 area_coverage=true drains=12 sidewalks=8 local_control=true signs=12 procedural_variants=10 act1_closure=true bicycle=true scooter=true");
     }
 }

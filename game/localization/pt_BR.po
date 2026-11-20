@@ -1935,7 +1935,37 @@ msgid "city.story.drainage_brief"
 msgstr "Fotografe cada um dos 12 bueiros de duas posições separadas. A chuva chega após três horas de jogo. Descarregue as fotos e entregue o inventário no escritório para liberar a bicicleta."
 
 msgid "city.story.sidewalk_brief"
-msgstr "Em cada um dos oito trechos de calçada, enquadre os três alvos de duas posições separadas. O escritório calcula a largura e a altura da guia usando as fotos descarregadas. Conclua o levantamento para liberar a motoneta."
+msgstr "Em cada um dos oito trechos de calçada, enquadre os três marcos azuis de controle e os três alvos de medição de duas posições separadas. O escritório calcula a largura e a altura da guia usando as fotos descarregadas. Conclua o levantamento para liberar a motoneta."
 
 msgid "city.story.capture_status"
 msgstr "Alvos fotografados {0}/{1} · Fotos no dispositivo {2}"
+
+msgid "city.story.facades_brief"
+msgstr "Fotografe toda a face sul das 20 fachadas. Afaste-se ou faça fotos sobrepostas para cobrir as bordas. Descarregue as fotos e confira a cobertura no escritório."
+
+msgid "city.story.signs_brief"
+msgstr "Use a motoneta para levantar 12 placas ao longo da avenida. Fotografe cada placa de duas posições separadas e descarregue as fotos. O escritório confere as distâncias entre placas. A entrega libera o Porto, a Orla e a compra do carro."
+
+msgid "city.story.region_locked"
+msgstr "Este distrito será liberado em uma missão da campanha."
+
+msgid "city.office.surface_coverage"
+msgstr "Cobertura da superfície {0:P0} · mínimo {1:P0}"
+
+msgid "city.office.coverage_rework"
+msgstr "Ainda há superfícies sem cobertura. Afaste-se ou faça fotos sobrepostas das bordas e descarregue novamente."
+
+msgid "city.office.control_adjusted"
+msgstr "Posições de câmera ajustadas com controle em {0} fotos"
+
+msgid "city.office.incomplete_surfaces"
+msgstr "Superfícies a revisitar · {0}"
+
+msgid "city.office.collect_surface"
+msgstr "Enquadre toda a face sul de cada alvo. Faça fotos sobrepostas quando uma só for insuficiente."
+
+msgid "city.office.collect_control"
+msgstr "Enquadre os marcos azuis de controle e os três alvos de medição de cada trecho de duas posições. Apenas os marcos azuis ajustam a posição da câmera."
+
+msgid "city.office.collect_inventory"
+msgstr "Fotografe cada alvo de duas posições separadas e descarregue as fotos."

@@ -1,3 +1,4 @@
+using Gsa.Core.Geometry;
 using Gsa.Core.Sensors.Camera;
 using Gsa.Core.World;
 using Gsa.Missions.Contracts;
@@ -7,31 +8,51 @@ namespace Gsa.Missions.Gameplay;
 
 public sealed record SidewalkSectionMeasurement(string SegmentId, double WidthMetres, double CurbHeightMetres);
 
-/// <summary>Office reconstruction uses only the calibrated image observations. The manifest is used later by CQ.</summary>
+/// <summary>Reconstructs requested features from image rays and optional published controls.</summary>
 public static class CitySurveyInventory
 {
-    private static bool IsSidewalkJob(ContractDefinition definition) => definition.Id == "HIST-03";
+    public const string SidewalkArea = "commerce_street_sidewalks";
+    public const string SignsArea = "commerce_street_signs";
+
+    private static bool IsSidewalkJob(ContractDefinition definition) => definition.AreaId == SidewalkArea;
 
     private static IEnumerable<string> Marks(string id) => [id + "_curb", id + "_back", id + "_foot"];
+
+    private static IEnumerable<string> ControlIds(string id) => [id + "_control_a", id + "_control_b", id + "_control_c"];
+
+    public static IReadOnlyDictionary<string, Vector3d> PublishedControls(
+        ContractDefinition definition, IReadOnlyDictionary<string, WorldBoxObject> manifest) =>
+        IsSidewalkJob(definition)
+            ? definition.RequiredFeatureIds.SelectMany(ControlIds).ToDictionary(id => id, id => manifest[id].PositionEnu, StringComparer.Ordinal)
+            : new Dictionary<string, Vector3d>(StringComparer.Ordinal);
 
     private static IEnumerable<string> CheckpointIds(ContractDefinition definition) =>
         IsSidewalkJob(definition) ? definition.RequiredFeatureIds.SelectMany(Marks) : definition.RequiredFeatureIds;
 
     public static bool HasReference(ContractDefinition definition, IReadOnlyDictionary<string, WorldBoxObject> manifest) =>
-        CheckpointIds(definition).All(manifest.ContainsKey);
+        CheckpointIds(definition).All(manifest.ContainsKey) &&
+        (!IsSidewalkJob(definition) || definition.RequiredFeatureIds.SelectMany(ControlIds).All(manifest.ContainsKey));
 
     public static QualitySubmission Reconstruct(ContractDefinition definition, QualitySubmission submission,
-        out IReadOnlyList<SidewalkSectionMeasurement> widthsAndSteps)
+        IReadOnlyDictionary<string, Vector3d> controls, out IReadOnlyList<SidewalkSectionMeasurement> widthsAndSteps,
+        out int adjustedPhotoCount)
     {
         var sides = IsSidewalkJob(definition);
         var wanted = CheckpointIds(definition).ToHashSet(StringComparer.Ordinal);
         // Bound reconstruction to this contract's targets. Other buildings in the images are not
         // survey results, and the immutable originals remain in custody.
-        var scopedSamples = submission.Samples.Select(sample =>
-            new CameraObservationSample(sample.SampleId, sample.SensorId, sample.Sequence,
-                sample.TimestampSeconds, sample.EstimatedPose, sample.MountEstimate, sample.Intrinsics, sample.Quality,
-                sample.ObservedFeatures.Where(feature => wanted.Contains(feature.TargetId)).ToArray(),
-                sample.PrivacyMasks, sample.Thumbnail));
+        var scopedSamples = new List<CameraObservationSample>();
+        foreach (var sample in submission.Samples)
+        {
+            if (!sample.Quality.Passed) continue;
+            var observations = sample.ObservedFeatures.Where(feature => wanted.Contains(feature.TargetId)).ToArray();
+            if (observations.Length == 0) continue;
+            var pose = sides ? CityLocalControlAdjustment.Adjust(sample, controls) : sample.EstimatedPose;
+            if (pose is null) continue;
+            scopedSamples.Add(new(sample.SampleId, sample.SensorId, sample.Sequence, sample.TimestampSeconds, pose,
+                sample.MountEstimate, sample.Intrinsics, sample.Quality, observations, sample.PrivacyMasks, sample.Thumbnail));
+        }
+        adjustedPhotoCount = sides ? scopedSamples.Count : 0;
 
         var estimated = FeatureInventoryTriangulator.BuildInventory(scopedSamples, FeatureConfirmationMode.Arcade)
             .ResolvedConfirmedFeatures.ToDictionary(feature => feature.TargetId, StringComparer.Ordinal);
@@ -78,7 +99,9 @@ public static class CitySurveyInventory
         {
             new RelativeCheckpointPairReference(id + "_curb", id + "_back", RelativeCheckpointMeasure.HorizontalDistance),
             new RelativeCheckpointPairReference(id + "_foot", id + "_curb", RelativeCheckpointMeasure.HeightDifference),
-        }) : null;
+        }) : definition.AreaId == SignsArea
+            ? ids.Zip(ids.Skip(1), (first, second) => new RelativeCheckpointPairReference(first, second))
+            : null;
         return new EvaluationReference(definition.Id, [], ids, refs, pairs);
     }
 }

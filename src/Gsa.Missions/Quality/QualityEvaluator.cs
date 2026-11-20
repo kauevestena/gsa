@@ -496,7 +496,7 @@ public static class QualityEvaluator
         QualitySubmission submission,
         IReadOnlyList<CameraObservationSample> uniqueSamples,
         HashSet<string> validSampleIds,
-        Dictionary<string, Dictionary<string, Bounds2DEnu>> uniqueFootprintsBySurface,
+        Dictionary<string, HashSet<Bounds2DEnu>> uniqueFootprintsBySurface,
         HashSet<string> resolvedFeatureIds,
         Dictionary<string, Vector3d> uniqueCheckpoints,
         bool collectRecollection)
@@ -569,7 +569,7 @@ public static class QualityEvaluator
         EvaluationReference reference,
         int uniqueSampleCount,
         int validSampleCount,
-        Dictionary<string, Dictionary<string, Bounds2DEnu>> footprintsBySurface,
+        Dictionary<string, HashSet<Bounds2DEnu>> footprintsBySurface,
         HashSet<string> resolvedFeatureIds,
         Dictionary<string, Vector3d> uniqueCheckpoints,
         List<RecollectionArea>? recollections)
@@ -591,7 +591,7 @@ public static class QualityEvaluator
                 foreach (var cell in cells)
                 {
                     var isCovered = surfaceFootprints is not null &&
-                                    surfaceFootprints.Values.Any(fp => fp.IntersectionArea(cell.ClippedBounds) > 1e-9);
+                                    surfaceFootprints.Any(fp => fp.IntersectionArea(cell.ClippedBounds) > 1e-9);
                     if (isCovered)
                     {
                         coveredUsefulArea += cell.UsefulAreaM2;
@@ -854,21 +854,21 @@ public static class QualityEvaluator
         return Array.AsReadOnly(list.ToArray());
     }
 
-    private static Dictionary<string, Dictionary<string, Bounds2DEnu>> GroupUniqueValidFootprints(
+    private static Dictionary<string, HashSet<Bounds2DEnu>> GroupUniqueValidFootprints(
         IReadOnlyList<SampleFootprintObservation> footprints,
         HashSet<string> validSampleIds)
     {
-        var map = new Dictionary<string, Dictionary<string, Bounds2DEnu>>(StringComparer.Ordinal);
+        var map = new Dictionary<string, HashSet<Bounds2DEnu>>(StringComparer.Ordinal);
         foreach (var fp in footprints)
         {
             if (!validSampleIds.Contains(fp.SampleId))
                 continue;
-            if (!map.TryGetValue(fp.SurfaceId, out var bySample))
+            if (!map.TryGetValue(fp.SurfaceId, out var surfaceFootprints))
             {
-                bySample = new Dictionary<string, Bounds2DEnu>(StringComparer.Ordinal);
-                map[fp.SurfaceId] = bySample;
+                surfaceFootprints = [];
+                map[fp.SurfaceId] = surfaceFootprints;
             }
-            bySample.TryAdd(fp.SampleId, fp.CoveredFootprint);
+            surfaceFootprints.Add(fp.CoveredFootprint);
         }
         return map;
     }

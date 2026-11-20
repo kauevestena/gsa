@@ -407,8 +407,8 @@ public static class MvpProceduralContractGenerator
             CalmByDefault: false,
             "proc.template.facades.title",
             [
-                new("facades_south", "commerce_street_facades", "commerce_facade_planes", 0, ["camera", "gnss_basic"], 1800.0, 20, DefaultOldCenterMapSha256, CurrentProfileVersion),
-                new("facades_north", "commerce_street_facades", "commerce_facade_planes", 0, ["camera", "gnss_basic"], 2400.0, 24, DefaultOldCenterMapSha256, CurrentProfileVersion),
+                new("facades_west", "commerce_street_facades", "commerce_facade_planes", 0, ["camera", "gnss_basic"], 1800.0, 20, DefaultOldCenterMapSha256, CurrentProfileVersion),
+                new("facades_east", "commerce_street_facades", "commerce_facade_planes", 0, ["camera", "gnss_basic"], 2400.0, 24, DefaultOldCenterMapSha256, CurrentProfileVersion),
             ],
             Enumerable.Range(1, 20).Select(i => $"facade_{i:00}").ToArray()),
         new(
@@ -441,7 +441,7 @@ public static class MvpProceduralContractGenerator
             "proc.template.signs.title",
             [
                 new("signs_corridor_west", "commerce_street_signs", "commerce_sign_planes", 2, ["camera", "gnss_basic"], 1600.0, 20, DefaultOldCenterMapSha256, CurrentProfileVersion),
-                new("signs_corridor_all", "commerce_street_signs", "commerce_sign_planes", 0, ["camera", "gnss_basic"], 2700.0, 24, DefaultOldCenterMapSha256, CurrentProfileVersion),
+                new("signs_corridor_east", "commerce_street_signs", "commerce_sign_planes", 0, ["camera", "gnss_basic"], 2700.0, 24, DefaultOldCenterMapSha256, CurrentProfileVersion),
             ],
             Enumerable.Range(1, 12).Select(i => $"sign_{i:00}").ToArray()),
         new(
@@ -454,7 +454,7 @@ public static class MvpProceduralContractGenerator
                 new("park_calm_inner", "central_park_calm", "central_park_planes", 0, ["camera", "gnss_basic"], 900.0, 10, DefaultOldCenterMapSha256, CurrentProfileVersion),
                 new("park_calm_perimeter", "central_park_calm", "central_park_planes", 0, ["camera", "gnss_basic"], 1200.0, 12, DefaultOldCenterMapSha256, CurrentProfileVersion),
             ],
-            ["park_bench_01", "park_bench_02", "park_bench_03", "park_bench_04"]),
+            Enumerable.Range(1, 8).Select(i => $"park_bench_{i:00}").ToArray()),
     ];
 
     public static GeneratedContractOffer GenerateFromTemplate(
@@ -473,11 +473,14 @@ public static class MvpProceduralContractGenerator
         if (!witness.IsValidFor(currentMapSha256, currentProfileVersion))
             throw new InvalidOperationException($"Route witness certificate '{witness.VariantId}' is invalidated for current map/profile hash.");
 
-        var minCount = Math.Min(4, spec.CandidateFeatureIds.Count);
-        var maxCount = spec.CandidateFeatureIds.Count;
+        var split = spec.CandidateFeatureIds.Count / 2;
+        var routeTargets = variantIndex == 0 ? spec.CandidateFeatureIds.Take(split).ToArray()
+            : spec.CandidateFeatureIds.Skip(split).ToArray();
+        var minCount = Math.Min(3, routeTargets.Length);
+        var maxCount = routeTargets.Length;
         var span = Math.Max(1, maxCount - minCount + 1);
         var count = minCount + (int)((seed / 7UL) % (ulong)span);
-        var selectedFeatures = spec.CandidateFeatureIds
+        var selectedFeatures = routeTargets
             .Select((id, idx) => (id, key: HashStep(seed, idx)))
             .OrderBy(x => x.key)
             .ThenBy(x => x.id, StringComparer.Ordinal)

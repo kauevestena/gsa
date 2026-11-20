@@ -136,6 +136,7 @@ public partial class SaoDatumCityScene
             _activeMachine = runtime.Contracts.SingleOrDefault();
             _activeContract = result.State.Contracts.SingleOrDefault()?.CatalogDefinition;
             _activeStorySpec = story;
+            PrepareCityPhotoCoverage();
             _camScheduler = new CameraCaptureScheduler("city_cam", initialSequence: city?.CameraNextSequence ?? 0);
             _captureRequested = false;
             _recentPhotoSeconds = 0; _cleanLensRequested = _disarmRequested = false; _hazardNotice = ""; _lastHazardWarning = null;

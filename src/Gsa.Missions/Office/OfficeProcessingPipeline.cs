@@ -380,7 +380,7 @@ public sealed class OfficeProcessingQueue
         var rawSamples = new List<CameraObservationSample>();
         var seenSamples = new HashSet<string>(StringComparer.Ordinal);
         var footprints = new List<SampleFootprintObservation>();
-        var seenFootprints = new HashSet<string>(StringComparer.Ordinal);
+        var seenFootprints = new HashSet<SampleFootprintObservation>();
         var featuresByTarget = new Dictionary<string, TriangulatedFeatureEntry>(StringComparer.Ordinal);
         var checkpointsById = new Dictionary<string, SubmittedCheckpointEstimate>(StringComparer.Ordinal);
 
@@ -400,7 +400,7 @@ public sealed class OfficeProcessingQueue
             {
                 if (!selectedSet.Contains(fp.SampleId))
                     continue;
-                if (seenFootprints.Add($"{fp.SampleId}\0{fp.SurfaceId}"))
+                if (seenFootprints.Add(fp))
                     footprints.Add(fp);
             }
 
