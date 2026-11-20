@@ -37,9 +37,17 @@ Cidade calma **ou** contrato `Calm` cancela avisos/bomba, spoofing, barreira e p
 
 Fotos de carro/Kombi/picape/van guardam pose estimada de GNSS/IMU/DMI; carro/Kombi precisam mover-se para inicializar heading. Interferência afeta a observação; o filtro aceita/rejeita por inovação, sem consultar verdade. O painel Técnico avisa quando uma correção é rejeitada. Inconsistência não comprova spoofing: viés lento pode ser absorvido, e fixes iniciais já enviesados também podem não ser detectados.
 
-Câmeras a pé e em plataformas leves ainda usam poses ideais. Para entregar o contrato de fotos de fachadas, envie as imagens em um ponto de descarga e selecione **Processar e entregar** no Escritório. A revisão verifica os alvos obrigatórios, a proporção de imagens válidas, a privacidade e o formato. O pagamento segue o laudo e o prazo do contrato. Em caso de retrabalho, os lotes protegidos podem ser processados junto com as novas fotos após outra descarga.
+Câmeras a pé e em plataformas leves ainda usam poses ideais. Envie as imagens em um ponto de descarga e selecione **Processar e entregar** no Escritório. A revisão verifica os alvos obrigatórios, a proporção de imagens válidas, a privacidade e o formato. O pagamento segue o laudo e o prazo do contrato. Em caso de retrabalho, os lotes protegidos podem ser processados junto com as novas fotos após outra descarga.
 
-Inventários, cobertura de área, nuvens e perfis aparecem como em desenvolvimento no quadro. Contratos antigos desses tipos podem ser carregados e abandonados no Escritório. A prévia LiDAR continua disponível para exploração. Base/PPK e logs de navegação persistentes continuam pendentes.
+O quadro libera as três missões iniciais em sequência.
+
+| Missão | Coleta e controle de qualidade |
+| --- | --- |
+| HIST-01 · Fachadas | Fotografe as 20 fachadas marcadas no mapa. |
+| HIST-02 · Drenagem | Fotografe cada um dos 12 bueiros a partir de posições separadas. A chuva chega após três horas no relógio do jogo e afeta a qualidade das fotos. O Escritório triangula as posições e exige RMSE absoluto de até 2 m. A entrega libera a compra da bicicleta. |
+| HIST-03 · Calçadas | Equipe a bicicleta. Fotografe de posições separadas os três alvos de cada um dos oito trechos. O Escritório calcula a largura horizontal e o desnível da guia, com RMSE combinado de até 0,20 m. A entrega libera a compra da motoneta. |
+
+Cobertura contínua de área, ajuste com controle local, contratos procedurais, entregas de nuvens e perfis e as missões a partir da HIST-04 continuam em desenvolvimento. Contratos antigos sem suporte de entrega podem ser carregados e abandonados no Escritório. A prévia LiDAR continua disponível para exploração. Base/PPK e logs de navegação persistentes continuam pendentes.
 
 Perseguidor e barreira são representações básicas. O perseguidor avança para o jogador respeitando obstáculos locais, sem planejamento viário completo. Pneu/lente ainda são estados do conjunto de aquisição compartilhados entre plataformas. Arte, colocação de barreiras nas ruas, acessibilidade e balanceamento precisam de inspeção visual/playtest. Os [encontros de cães e estacionamento](city-everyday-encounters.md) agora têm integração própria. A [circulação do Centro Velho](old-center-traffic.md) integra colisões, motoristas erráticos e blitz. Concorrência narrativa da MapaFácil, patrulhas por horário e playthrough final simultâneo das cinco facções também continuam pendentes.
 

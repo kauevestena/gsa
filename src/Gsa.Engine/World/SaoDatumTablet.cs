@@ -229,40 +229,42 @@ public partial class SaoDatumCityScene
 
     private void StartStoryMission(CampaignMissionFullSpec spec)
     {
-        if (spec.ProductType != "images")
+        if (!SupportsCityStory(spec))
         {
             _feedbackText = Text(CityOfficeUnavailableKey(spec.ProductType));
             return;
         }
-
-        string[] featureIds = spec.MissionId switch
+        if (!_isSandbox && spec.Preconditions.Any(id => !CityMissionCompleted(id)))
         {
-            "HIST-01" => ["facade_18", "facade_19", "facade_20"],
-            "HIST-02" => ["manhole_01", "manhole_02", "manhole_03", "manhole_04"],
-            "HIST-03" => ["sidewalk_seg_01", "sidewalk_seg_02", "sidewalk_seg_03"],
-            "HIST-04" => ["sign_01", "sign_02", "sign_03", "sign_04"],
-            "HIST-05" => ["control_old_center_02", "survey_control_waterfront_plaza"],
-            "HIST-06" => ["survey_control_port_tunnel"],
-            "HIST-07" => ["survey_control_port_viaduct", "control_old_center_01"],
-            "HIST-08" => ["survey_control_waterfront_pier", "survey_control_serra_foothill"],
-            "HIST-09" => ["survey_control_serra_foothill", "survey_control_serra_summit"],
-            "HIST-10" => ["survey_control_port_viaduct", "survey_control_serra_summit"],
-            _ => ["control_old_center_01", "survey_control_port_viaduct", "survey_control_waterfront_pier", "survey_control_serra_summit"],
+            _feedbackText = Text("city.story.locked");
+            return;
+        }
+        if (!CityHasSurveyPlatform(spec))
+        {
+            _feedbackText = Text("city.story.requires_platform");
+            return;
+        }
+
+        var (prefix, count, area, client) = spec.MissionId switch
+        {
+            "HIST-01" => ("facade", 20, "commerce_street_facades", "city_hall"),
+            "HIST-02" => ("manhole", 12, "commerce_street_drainage", "city_hall"),
+            _ => ("sidewalk_seg", 8, "commerce_street_sidewalks", "university"),
         };
-        var calm = _calmPolicy.CalmCityEnabled && spec.HasHostileOrDynamicHazards;
+        var featureIds = Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray();
         var def = new ContractDefinition(
             SchemaVersion: 1,
             Id: spec.MissionId,
             TitleKey: spec.TitleKey,
-            ClientId: "city_hall",
+            ClientId: client,
             RegionId: spec.RegionIds[0],
-            AreaId: spec.RegionIds[0],
+            AreaId: area,
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: CityPhotoRequirements,
+            Requirements: CitySurveyRequirements(spec.MissionId),
             RequiredCapabilities: ["camera"],
-            Risk: calm ? "easy" : "moderate",
-            Calm: calm,
+            Risk: "easy",
+            Calm: true,
             Deadline: new ContractDeadlineSpec(21600, 27000, 0.05, 0.5),
             Reward: new ContractRewardSpec(spec.RewardCoords, 120 + spec.Act * 60, spec.ReputationDelta, spec.UnlockedPlatforms.ToArray()),
             PartialPolicy: new ContractPartialPolicySpec("disabled", []),
@@ -270,7 +272,12 @@ public partial class SaoDatumCityScene
             StoryPrerequisites: spec.Preconditions.ToArray());
 
         if (!AcceptCityContract(def, spec)) return;
-        var summaryKey = $"mission.{spec.MissionId.ToLowerInvariant().Replace('-', '_')}.summary";
+        var summaryKey = spec.MissionId switch
+        {
+            "HIST-02" => "city.story.drainage_brief",
+            "HIST-03" => "city.story.sidewalk_brief",
+            _ => "mission.hist_01.summary",
+        };
         _gtaHud.ShowCutsceneLetterbox(
             $"{spec.MissionId} · {Text(spec.TitleKey)}",
             Text(summaryKey),
@@ -281,11 +288,13 @@ public partial class SaoDatumCityScene
     {
         if (_activeContract is not null) { _feedbackText = Text("city.hazards.active_job"); return false; }
         if (!SupportsCityDelivery(def)) { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
-        if (_progression.SettledContractIds.Contains(def.Id) || (story is not null && _campaignState.ObjectiveStates.ContainsKey(story.MissionId)))
+        if (_progression.SettledContractIds.Contains(def.Id) || (story is not null && CityMissionCompleted(story.MissionId)))
         {
             _feedbackText = Text("city.story.completed");
             return false;
         }
+        _lastCitySurveyReview = null;
+        _lastSidewalkMeasurements = [];
         _activeStorySpec = story;
         _activeContract = def;
         _activeMachine = new ContractStateMachine(def);
@@ -304,6 +313,21 @@ public partial class SaoDatumCityScene
         return true;
     }
 
+    private bool TryPurchaseCityPlatform(LocomotionMode mode)
+    {
+        var completed = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
+        if (!_fleet.TryPurchasePlatform($"buy_{mode}_{_tick}", _calendar.CalendarTimeSeconds, mode, _ledger,
+                _progression, completed, out _, out var quote))
+        {
+            _feedbackText = Text(quote.Unlocked ? "city.fleet.insufficient_funds" : "city.story.locked");
+            _audio.PlayAlert();
+            return false;
+        }
+        SwitchPlatform(mode);
+        SaveHazardChange();
+        return true;
+    }
+
     private void RefreshTabletContents()
     {
         RefreshCityHazardStatus();
@@ -318,9 +342,10 @@ public partial class SaoDatumCityScene
 
         foreach (var spec in FullCampaignCatalog.AllMissions)
         {
-            var done = _campaignState.ObjectiveStates.ContainsKey(spec.MissionId);
-            var supported = spec.ProductType == "images";
-            var prereqsMet = _isSandbox || spec.Preconditions.All(p => _campaignState.ObjectiveStates.ContainsKey(p));
+            var done = CityMissionCompleted(spec.MissionId);
+            var supported = SupportsCityStory(spec);
+            var prereqsMet = _isSandbox || spec.Preconditions.All(CityMissionCompleted);
+            var equipped = CityHasSurveyPlatform(spec);
             var row = new HBoxContainer();
             var info = new Label
             {
@@ -330,8 +355,9 @@ public partial class SaoDatumCityScene
             };
             var btn = new Button
             {
-                Text = Text(done ? "city.story.completed" : !supported ? "city.office.unavailable" : prereqsMet ? "city.story.start" : "city.story.locked"),
-                Disabled = done || !prereqsMet || !supported,
+                Text = Text(done ? "city.story.completed" : !supported ? "city.office.unavailable" : !prereqsMet ? "city.story.locked" :
+                    equipped ? "city.story.start" : "city.story.requires_platform"),
+                Disabled = done || !prereqsMet || !supported || !equipped,
                 TooltipText = supported ? "" : Text(CityOfficeUnavailableKey(spec.ProductType)),
                 FocusMode = Control.FocusModeEnum.None,
             };
@@ -374,7 +400,7 @@ public partial class SaoDatumCityScene
         // Office status
         var contractName = _activeContract is null ? Text("city.office.no_contract") : Text(_activeContract.TitleKey);
         var targetCount = _activeContract?.RequiredFeatureIds.Count ?? 0;
-        var foundCount = _activeContract?.RequiredFeatureIds.Count(id => _observedTargetIds.Contains(id)) ?? 0;
+        var foundCount = _activeContract?.RequiredFeatureIds.Count(_observedTargetIds.Contains) ?? 0;
         _officeStatusLabel.Text =
             $"{Text("city.office.active")}: {contractName}\n" +
             $"{Text("training.targets")}: {foundCount}/{targetCount} · Samples: {_fieldSamples.Count} · LiDAR pts: {_lidarPointVisibleCount}\n" +
@@ -383,18 +409,28 @@ public partial class SaoDatumCityScene
             $"Mode: {Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical")}\n" +
             $"Rack Calibration: {(_rackMisaligned ? Text("city.rack.misaligned") : Text("city.rack.ok"))}";
 
+        var review = CitySurveyReviewText();
+        if (review.Length > 0) _officeStatusLabel.Text += "\n" + review;
+        if (_activeStorySpec?.MissionId == "HIST-02" && _activeMachine?.Snapshot is { } drainage && !_calendar.IsRaining)
+        {
+            var minutes = Math.Max(0, (drainage.AcceptedAtSeconds + DrainageRainDelaySeconds - _calendar.CalendarTimeSeconds) / 60);
+            _officeStatusLabel.Text += "\n" + string.Format(Text("city.office.rain_forecast"), Math.Ceiling(minutes));
+        }
+
         // Fleet & Skills tab
         foreach (var c in _fleetTab.GetChildren())
             c.QueueFree();
+        var completedMissions = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
         foreach (var entry in FleetShopCatalog.Platforms)
         {
             var mode = entry.Profile.Mode;
             var owned = _fleet.OwnedPlatforms.Contains(mode);
             var isCurrent = _locomotion.MountedVehicleMode == mode;
+            var quote = _fleet.QuotePlatformPurchase(mode, _progression, completedMissions);
             var row = new HBoxContainer();
             var lbl = new Label
             {
-                Text = $"L{entry.Profile.Level} · {Text($"platform.{mode.ToString().ToLowerInvariant()}.name")} ({entry.Profile.MaxSpeedMetresPerSecond:F0} m/s · {entry.Profile.PriceCoords} C$)",
+                Text = $"L{entry.Profile.Level} · {Text($"platform.{mode.ToString().ToLowerInvariant()}.name")} ({entry.Profile.MaxSpeedMetresPerSecond:F0} m/s · {quote.FinalPriceCoords} C$)",
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
             };
             var actionBtn = new Button
@@ -409,20 +445,9 @@ public partial class SaoDatumCityScene
                 {
                     SwitchPlatform(mode);
                 }
-                else if (_ledger.BalanceCoords >= entry.Profile.PriceCoords)
-                {
-                    var unlockedAll = new HashSet<string>(["HIST-01", "HIST-02", "HIST-03", "HIST-04", "HIST-05", "HIST-07", "HIST-10"]);
-                    var repProg = CareerProgressionState.FromSnapshot(new CareerProgressionSnapshot(1, 50000,
-                        new Dictionary<string, int> { ["city_hall"] = 100 },
-                        new Dictionary<string, int> { ["old_center"] = 100 },
-                        unlockedAll.ToArray(), []));
-                    if (_fleet.TryPurchasePlatform($"buy_{mode}_{_tick}", _calendar.CalendarTimeSeconds, mode, _ledger, repProg, unlockedAll, out _, out _))
-                        SwitchPlatform(mode);
-                }
                 else
                 {
-                    _audio.PlayAlert();
-                    _feedbackText = Text("city.fleet.insufficient_funds");
+                    TryPurchaseCityPlatform(mode);
                 }
                 RefreshTabletContents();
             };
@@ -469,6 +494,7 @@ public partial class SaoDatumCityScene
             : new Color(.32f, .92f, .56f);
 
         var blips = _radarBlips;
+        var foundTargets = 0;
         blips.Clear();
         foreach (var bm in _geodeticNetwork.Benchmarks.Values)
             blips.Add(new RadarBlip(bm.BenchmarkId, bm.PhysicalPositionEnu, new Color(0.35f, 0.92f, 0.48f), "▲", ClampToRim: false));
@@ -480,14 +506,15 @@ public partial class SaoDatumCityScene
 
         if (_activeContract is not null)
         {
-            foreach (var fid in _activeContract.RequiredFeatureIds.Take(8))
+            foreach (var fid in _activeContract.RequiredFeatureIds)
             {
                 Vector3d? tPos = _manifestObjectsById.TryGetValue(fid, out var fo) ? fo.PositionEnu : null;
                 if (tPos is null && _geodeticNetwork.Benchmarks.TryGetValue(fid, out var bmNode))
                     tPos = bmNode.PhysicalPositionEnu;
                 if (tPos is null) continue;
                 var done = _observedTargetIds.Contains(fid);
-                blips.Add(new RadarBlip(fid, tPos.Value, done ? new Color(0.3f, 0.9f, 0.5f) : new Color(1.0f, 0.82f, 0.22f), "★", ClampToRim: true));
+                if (done) foundTargets++;
+                blips.Add(new RadarBlip(fid, tPos.Value, done ? new Color(0.3f, 0.9f, 0.5f) : new Color(1.0f, 0.82f, 0.22f), "★", ClampToRim: !done));
             }
         }
 
@@ -502,7 +529,7 @@ public partial class SaoDatumCityScene
         var objTitle = _activeContract is not null ? Text(_activeContract.TitleKey)
             : (_isSandbox ? Text("city.sandbox.title") : Text("city.freeroam.title"));
         var objDetails = _activeContract is not null
-            ? $"{_observedTargetIds.Count}/{_activeContract.RequiredFeatureIds.Count} targets · Samples: {_fieldSamples.Count}"
+            ? string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count)
             : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
 
         var radioTitle = _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";

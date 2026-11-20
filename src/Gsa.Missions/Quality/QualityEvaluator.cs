@@ -181,7 +181,18 @@ public sealed record ControlCheckpointReference(string CheckpointId, Vector3d Tr
     }
 }
 
-public sealed record RelativeCheckpointPairReference(string FirstCheckpointId, string SecondCheckpointId);
+public enum RelativeCheckpointMeasure { Distance, HorizontalDistance, HeightDifference }
+
+public sealed record RelativeCheckpointPairReference(string FirstCheckpointId, string SecondCheckpointId,
+    RelativeCheckpointMeasure Measure = RelativeCheckpointMeasure.Distance)
+{
+    public double Evaluate(Vector3d difference) => Measure switch
+    {
+        RelativeCheckpointMeasure.HorizontalDistance => Math.Sqrt(difference.X * difference.X + difference.Y * difference.Y),
+        RelativeCheckpointMeasure.HeightDifference => difference.Z,
+        _ => difference.Length,
+    };
+}
 
 /// <summary>Authoritative mission-evaluation truth kept strictly isolated in Gsa.Missions.Quality.</summary>
 public sealed class EvaluationReference
@@ -708,8 +719,8 @@ public static class QualityEvaluator
                     if (!IsFiniteVector(estA) || !IsFiniteVector(estB))
                         continue;
 
-                    var trueDist = (refB.TruePositionEnu - refA.TruePositionEnu).Length;
-                    var estDist = (estB - estA).Length;
+                    var trueDist = pair.Evaluate(refB.TruePositionEnu - refA.TruePositionEnu);
+                    var estDist = pair.Evaluate(estB - estA);
                     var err = estDist - trueDist;
                     squaredPairErrors.Add(err * err);
                 }

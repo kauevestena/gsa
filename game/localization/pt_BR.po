@@ -1903,3 +1903,39 @@ msgstr "Impacto no trânsito. Confira a condição do veículo."
 
 msgid "city.traffic.music_bar"
 msgstr "Bar Musical do Centro Velho"
+
+msgid "city.office.survey_review"
+msgstr "Revisão do escritório · {0}/{1} alvos obrigatórios · {2}/{3} fotos válidas"
+
+msgid "city.office.rmse_absolute"
+msgstr "RMSE de posição {0:F3} m (limite {1:F2} m)"
+
+msgid "city.office.rmse_relative"
+msgstr "RMSE de largura e altura da guia {0:F3} m (limite {1:F2} m)"
+
+msgid "city.office.sidewalk_measurement"
+msgstr "{0} · largura {1:F2} m · altura da guia {2:F2} m"
+
+msgid "city.office.need_parallax"
+msgstr "Alguns alvos ainda não foram medidos. Fotografe cada um de duas posições diferentes e descarregue novamente."
+
+msgid "city.office.measurement_rework"
+msgstr "As medições ficaram fora da tolerância. Aumente a distância entre as posições das fotos e descarregue novamente."
+
+msgid "city.office.rain_forecast"
+msgstr "Chuva prevista em {0} minutos de jogo."
+
+msgid "city.office.rain_arrived"
+msgstr "A chuva chegou. Reduza a velocidade ou pare para fotografar com mais nitidez."
+
+msgid "city.story.requires_platform"
+msgstr "Equipe o veículo exigido"
+
+msgid "city.story.drainage_brief"
+msgstr "Fotografe cada um dos 12 bueiros de duas posições separadas. A chuva chega após três horas de jogo. Descarregue as fotos e entregue o inventário no escritório para liberar a bicicleta."
+
+msgid "city.story.sidewalk_brief"
+msgstr "Em cada um dos oito trechos de calçada, enquadre os três alvos de duas posições separadas. O escritório calcula a largura e a altura da guia usando as fotos descarregadas. Conclua o levantamento para liberar a motoneta."
+
+msgid "city.story.capture_status"
+msgstr "Alvos fotografados {0}/{1} · Fotos no dispositivo {2}"

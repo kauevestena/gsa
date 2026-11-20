@@ -1903,3 +1903,39 @@ msgstr "Traffic impact. Check vehicle condition."
 
 msgid "city.traffic.music_bar"
 msgstr "Old Center Music Bar"
+
+msgid "city.office.survey_review"
+msgstr "Office review · {0}/{1} required targets · {2}/{3} valid photos"
+
+msgid "city.office.rmse_absolute"
+msgstr "Position RMSE {0:F3} m (limit {1:F2} m)"
+
+msgid "city.office.rmse_relative"
+msgstr "Width and curb RMSE {0:F3} m (limit {1:F2} m)"
+
+msgid "city.office.sidewalk_measurement"
+msgstr "{0} · width {1:F2} m · curb height {2:F2} m"
+
+msgid "city.office.need_parallax"
+msgstr "Some targets could not be measured. Photograph each from two different positions, then upload again."
+
+msgid "city.office.measurement_rework"
+msgstr "Measurements missed the quality limit. Try wider separation between camera positions and upload again."
+
+msgid "city.office.rain_forecast"
+msgstr "Rain expected in {0} game minutes."
+
+msgid "city.office.rain_arrived"
+msgstr "Rain has arrived. Slow down or stop for clearer photos."
+
+msgid "city.story.requires_platform"
+msgstr "Equip the required vehicle"
+
+msgid "city.story.drainage_brief"
+msgstr "Photograph each of the 12 drains from two separated positions. Rain arrives after three in-game hours. Upload your photos, then deliver the inventory at the office to unlock the bicycle."
+
+msgid "city.story.sidewalk_brief"
+msgstr "At each of the eight sidewalk sections, frame the three survey markers from two separated camera positions. The office will measure width and curb height from the uploaded photos. Finish the survey to unlock the scooter."
+
+msgid "city.story.capture_status"
+msgstr "Targets photographed {0}/{1} · Photos on device {2}"
