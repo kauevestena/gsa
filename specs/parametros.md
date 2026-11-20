@@ -104,3 +104,18 @@ Complementa F16 sem alterar seus limiares/tempos físicos originais.
 | Barreira | 30 s, 22 m à frente, caixa 4 × 1,2 × 1,2 m | Sem área protegida |
 | Envio de fotos | Raio 10 m de escritório/descarga/Wi-Fi | Custódia com checksum, sem autonomia extra |
 | Autorização inicial | Negociação 1 | Zona/trabalho selecionados |
+
+## Encontros cotidianos na cidade
+
+Complemento inicial de F09, com timers físicos, independente do calendário acelerado.
+
+| Parâmetro | Valor | Observação |
+| --- | --- | --- |
+| Aviso do cão | 2 s | Incluído no máximo original de 10 s |
+| Velocidade do cão | 4,5 m/s | Bicicleta: até 6 m/s |
+| Contato do cão | Raio 1,2 m; frenagem 2 s | Um cambaleio por encontro, sem ferimentos |
+| Locais ativos | 4 cães e 4 atendentes | Próximos aos veículos estacionados, chão livre |
+| Petisco | Ação gratuita | Inventário de consumíveis ainda não integrado |
+| Oferta de estacionamento | Veículo parado (<0,1 m/s), raio 8 m; dono a até 12 m | Tarifa original 10 Coords, escolha explícita |
+| Recusa | Aviso 3 s, depois +5 pontos cosméticos | Afastar o veículo cancela; teto visual 100 por veículo |
+| Cooldown por local | 30 s após encerramento | Persistido; zero ameaças/cobranças sob proteção calma |

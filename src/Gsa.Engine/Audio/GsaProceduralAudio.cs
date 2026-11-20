@@ -135,6 +135,12 @@ public sealed class GsaProceduralAudio
         }
     }
 
+    public void PlayDogBark()
+    {
+        _voices.Add(new SynthVoice { FreqStart = 210f, FreqEnd = 95f, Duration = .15f, Gain = .23f, Wave = 3 });
+        _voices.Add(new SynthVoice { FreqStart = 900f, FreqEnd = 270f, Duration = .08f, Gain = .12f, Wave = 2 });
+    }
+
     public void PlayOffloadChime()
     {
         _voices.Add(new SynthVoice { FreqStart = 587f, FreqEnd = 880f, Duration = 0.16f, Gain = 0.28f, Wave = 0 });

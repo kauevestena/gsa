@@ -13,3 +13,7 @@ Coordenação unificada dos perigos urbanos (`UrbanHazardEncounterCoordinator`) 
 ## Estado
 Aceita via revisão técnica delegada pelo proprietário do repositório após aprovação na CI do [PR #14](https://github.com/kauevestena/gsa/pull/14) (SHA testado `dd961522960f09c6cea723c086f9fa6fdb8c2e92`, merge `ecc1b7c2b3c52202c734c91f124c5443131936c3`, execução [43685741329](https://github.com/kauevestena/gsa/actions/runs/43685741329), jobs Linux `132725728029` e Windows `132725728185`); ver [resumo CI](../M4-wave2-ci/summary.json).
 
+
+## Incremento na cena da cidade
+
+A [evidência de cães/estacionamento](city-encounters/README.md) registra a integração jogável de 20/11/2026; o aceite histórico acima é de domínio/bancada e não encerra os gates visuais da cidade.

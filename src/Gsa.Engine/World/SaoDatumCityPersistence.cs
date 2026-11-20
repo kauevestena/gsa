@@ -5,6 +5,7 @@ using Gsa.Core.Traffic;
 using Gsa.Missions.Activities;
 using Gsa.Missions.Campaign;
 using Gsa.Missions.Economy;
+using Gsa.Missions.Gameplay;
 using Gsa.Missions.Persistence;
 using Gsa.Missions.Presentation;
 using Godot;
@@ -43,7 +44,7 @@ public partial class SaoDatumCityScene
                 _campaignState.UnlockedEquipment.ToArray(), _campaignState.AppliedCutsceneIds.ToArray(),
                 _campaignState.SkippedCutsceneIds.ToArray(), new Dictionary<string, string>(_campaignState.ObjectiveStates)),
             _attention.ExportSnapshot(), _activeStorySpec?.MissionId, _officeMode, _privacyMasksApplied, _rackMisaligned,
-            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, _camScheduler.NextCaptureSequence, _cityHazards.Export()));
+            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, _camScheduler.NextCaptureSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot()));
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
     {
@@ -99,6 +100,10 @@ public partial class SaoDatumCityScene
                 : new LocomotionSimulator(_locomotion.PositionEnu, _locomotion.HeadingRadians, fleet.ActivePlatform.Mode, _fullManifest.Bounds);
             var samples = city?.CameraSamples.Select(s => s.ToDomain()).ToArray() ?? [];
             var hazards = Gsa.Missions.Gameplay.CityHazardState.Restore(city?.Hazards, city?.DisguiseActive ?? false);
+            var everyday = CityEverydayEncounters.Restore(city?.Encounters);
+            var gimbalina = city?.Gimbalina is { } g ? GimbalinaStabilizer.FromSaveSnapshot(g) : new GimbalinaStabilizer();
+            if (city?.Encounters?.Dog is { } dog && !_cityDogs.ContainsKey(dog.SiteId)) throw new ArgumentException("Unknown dog site.");
+            if (everyday.Parking is { } parking && !_cityParking.ContainsKey(parking.SiteId)) throw new ArgumentException("Unknown parking site.");
             var geopedia = new GeopediaCatalogCoordinator(city?.GeopediaEntryIds);
             var collectibles = new MvpCollectiblesCoordinator(city?.Collectibles);
             var story = city?.ActiveStoryMissionId is { } id ? FullCampaignCatalog.GetMission(id) : null;
@@ -118,6 +123,8 @@ public partial class SaoDatumCityScene
             _collectibles = collectibles;
             _attention = attention;
             _cityHazards = hazards; _cityCustody = runtime.CustodyStore;
+            _everyday = everyday; _gimbalina = gimbalina;
+            _mobility.SetGimbalinaPresent(!gimbalina.HasFledToSafety);
             RestoreCityProtectedPhotos();
             _fieldSamples.Clear(); _fieldSamples.AddRange(samples);
             _coverageSpots.Clear(); _coverageSpots.AddRange(city?.CoverageSpots ?? []);
@@ -155,7 +162,7 @@ public partial class SaoDatumCityScene
             RefreshCollectibleNodesAfterLoad();
             _mobility.SetVisualPlatformMode(mobility.Mode);
             UpdateSectorStreaming(mobility.PositionEnu);
-            RestoreCityHazardWorld();
+            RestoreCityHazardWorld(); SyncCityEverydayActors();
             SnapCamera();
             _citySaveBlocked = false;
             _feedbackText = _citySaveNotice = Text(recover ? "save.ui.recovered" :

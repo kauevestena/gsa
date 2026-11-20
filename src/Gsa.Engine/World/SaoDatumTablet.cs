@@ -531,7 +531,8 @@ public partial class SaoDatumCityScene
         }
 
         var promptText = string.IsNullOrEmpty(_hazardNotice) ? Text("city.prompt.controls") : _hazardNotice;
-        if (string.IsNullOrEmpty(_hazardNotice) && mode == LocomotionMode.OnFoot &&
+        if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
+        if (string.IsNullOrEmpty(_hazardNotice) && !_everyday.DogActive && _everyday.Parking is null && mode == LocomotionMode.OnFoot &&
             _worldParkedVehicles.Any(v => TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2))
             promptText = Text("city.board_vehicle");
 

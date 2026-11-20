@@ -327,7 +327,7 @@ public sealed class SaveGameManager
             var state = JsonSerializer.Deserialize<SaveGameState>(envelope.PayloadJson);
             if (state is null || (sourceVersion == 2 && state.Content is null))
                 return new(SaveLoadStatus.CorruptedPayload, null, false, "save.error.invalid_state");
-            if (state.Content is { } content && (content.CatalogVersion is < 1 or > 3 || content.ModelVersion != 1 || content.WorldVersion != 1))
+            if (state.Content is { } content && (content.CatalogVersion is < 1 or > 4 || content.ModelVersion != 1 || content.WorldVersion != 1))
                 return new(SaveLoadStatus.IncompatibleVersion, null, false, "save.error.content_version");
             var (normalized, info) = SaveCompatibility.Normalize(state, sourceVersion);
             return new(SaveLoadStatus.Loaded, normalized, false, Compatibility: info);

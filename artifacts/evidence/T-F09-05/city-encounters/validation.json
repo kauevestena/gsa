@@ -1,0 +1,174 @@
+{
+  "date": "2026-11-20",
+  "base_commit": "59a68733a6fe1383bbd6b9d1339a09962de7caf4",
+  "host": "Linux x86_64",
+  "command": "DOTNET_PROCESSOR_COUNT=1 python3 scripts/verify.py --exports host",
+  "checks": [
+    {
+      "name": "dotnet-version",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "godot-version",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "specs",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "installer-tests",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "architecture",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "domain-restore",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "domain-tests",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "validate-content",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "invalid-content",
+      "status": "passed",
+      "exit_code": 2
+    },
+    {
+      "name": "precompute-sky",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "validate-art-kit",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "restore",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "import",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m1-benchmark",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m2-gate",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "run-m3-gate",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "editor-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "world-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "city-save-smoke",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-world-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "export-city-save-smoke-linux",
+      "status": "passed",
+      "exit_code": 0
+    }
+  ],
+  "domain_tests": {
+    "total": 508,
+    "passed": 508,
+    "failed": 0,
+    "notExecuted": 0
+  },
+  "final_engine_recheck": {
+    "build": "passed (0 warnings, 0 errors)",
+    "editor_city_save_smoke": "passed",
+    "native_export": "passed",
+    "native_city_save_smoke": "passed",
+    "reason": "Skip redundant visibility writes in the physics loop; repeat editor/export integration checks after this change."
+  },
+  "logs": {
+    "editor-city-save-smoke.log": "05c72a93709af4d08a7e225ddaa6ad5893f408129557270fcff2f13edba394c4",
+    "export-city-save-smoke-linux.log": "05c72a93709af4d08a7e225ddaa6ad5893f408129557270fcff2f13edba394c4"
+  },
+  "changed_source_sha256": {
+    "game/localization/en_US.po": "2f98cf362ae28191d7d7ed45af911161e7b43277f1a333dc87802c421d5463cd",
+    "game/localization/pt_BR.po": "a6888a1dae00506ed4fbd85b5539eb5e937eeaf40f0ae367d197b498c63cfa2e",
+    "scripts/check_bootstrap.py": "7de7428ad71205102f8feda9f2215d2e9c25229f417d79f4581f2d32c3f4d153",
+    "src/Gsa.Core/Mobility/GimbalinaStabilizer.cs": "c52e6ff28e0b0dcafa4dd99c0c88313dc64fe1f82c98ad07d345565c8ae126e7",
+    "src/Gsa.Core/Traffic/UrbanHazardsAndCalmPolicy.cs": "4817dda29b3d783da84416abf695b757aa06f7ca44d3005b30e64a6ccf2823bd",
+    "src/Gsa.Engine/Audio/GsaProceduralAudio.cs": "f0dd0df93a14961982998e6d2451ffb3005579f730e6d858737ce644978daac6",
+    "src/Gsa.Engine/Mobility/MobilityBenchAdapter.cs": "4cc3dda44c9295b26931b5c0f870497bd642fdb66ab5762ee8aa2a166ee6fb40",
+    "src/Gsa.Engine/World/CityEverydayEncounters.cs": "45cd197ececee563e200165a24ef3d0463221c20028a71a5c7f3835edeb68a04",
+    "src/Gsa.Engine/World/CityEverydaySmoke.cs": "f0c452c74f37a15b8f73c3adb253750e784a8d1ad85ee1a83561589dfeb682eb",
+    "src/Gsa.Engine/World/CityFactionHazards.cs": "f7bf3e25fa3c2ceeb41f1801f39bdf135052cc492fd8823c4a91f46b4d0c256e",
+    "src/Gsa.Engine/World/CityHazardControls.cs": "0ccaf5109244d686cfe8e04fedb1eac4276ac25a83a47b69b72c4c0f31fd8cbc",
+    "src/Gsa.Engine/World/CitySaveSmoke.cs": "00db968528c882437d5e010eebb194b9585b0d8912edf993d06b6b96a0ed0141",
+    "src/Gsa.Engine/World/SaoDatumCityPersistence.cs": "46d7569ada0c89b60d7e03a2a581e1c67b4be8c9285ceed1ddd5e7ab739a2484",
+    "src/Gsa.Engine/World/SaoDatumCityScene.cs": "e181872e7fb01b13ce5c4338f0fbe8eed254d45419372c898729e6d7cc95626a",
+    "src/Gsa.Engine/World/SaoDatumTablet.cs": "737e53b2b6f2a4058bb88ebb9f7f13523119fe967ce215792034a4892b5fd85d",
+    "src/Gsa.Missions/Gameplay/CityEverydayEncounters.cs": "fe033c9b91b2b55a98c79e37484d59608f1bf50bf85bc2d70a8ac6b2ae5e282c",
+    "src/Gsa.Missions/Persistence/SaveCompatibility.cs": "14978ceeac3fa021221bd97ded7ca68e6d95c1044501773bc7591b62b74c2430",
+    "src/Gsa.Missions/Persistence/SaveGameManager.cs": "d44e7e7262be32aa2f5aa147cd65f064e72389a4f1f51a1e3f46716c0f7faea7",
+    "tests/Gsa.Core.Tests/GimbalinaPersistenceTests.cs": "41d7af3c31d4e2b9a1cf683ece995e392e7cc9bf3d0fc9fcc598259a103ceeec",
+    "tests/Gsa.Missions.Tests/CityEverydayEncountersTests.cs": "2e7bc30f896b790ea17da1e695efd56cd142b86204967d96f5dbe6d75860e23e",
+    "tests/Gsa.Missions.Tests/SaveCompatibilityTests.cs": "92858b787cb07c49ef20d804f3c8ee8bda28277d8e7c5032a160018e52592c43"
+  },
+  "limits": [
+    "Visual/accessibility playthrough pending",
+    "Reference-hardware FPS benchmark pending",
+    "Erratic drivers and city traffic collisions remain unintegrated",
+    "City LiDAR remains a preview"
+  ]
+}

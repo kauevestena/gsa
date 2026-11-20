@@ -56,3 +56,5 @@ O tablet da cidade inclui [Geopédia avançada e diagnóstico técnico](docs/adv
 Consulte o [roadmap](specs/roadmap.md) e as evidências por tarefa para o estado técnico das bibliotecas. A integração jogável atual está documentada separadamente; aceite técnico e testes automatizados não equivalem à aprovação humana de um marco.
 
 Os gates humanos M2/M3 seguem em `pending_human_playtest_cohort`. O desempenho na GPU de referência continua em `pending_reference_hardware`. Inspeção gráfica e isolamento de rede Windows permanecem separados da CI headless. A licença do jogo ainda está pendente conforme EXT-02.
+
+Os [encontros de cães e estacionamento](docs/city-everyday-encounters.md) ligam perseguição, petisco, cambaleio, pagamento/recusa e dano cosmético à cidade. Estresse e fase de Gimbalina são salvos e afetam a exposição das câmeras iniciais.
