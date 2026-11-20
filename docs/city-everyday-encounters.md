@@ -42,4 +42,4 @@ São persistidos IDs/sequência, relógio físico, cooldowns por local, cão/pos
 
 Testes de domínio cobrem limites de distância/tempo, movimento durante o aviso, cooldown, pagamento sem saldo, saída por veículo, calma, snapshots inválidos e continuidade da oscilação após save. As [evidências](../artifacts/evidence/T-F09-05/city-encounters/README.md) distinguem verificações executadas de gates visuais.
 
-Motoristas bêbados, colisões do jogador com tráfego regular, navegação viária completa de perseguidores, queda animada, vozes finais e playthrough visual/acessível continuam pendentes. A circulação atual ainda usa o grafo de bancada do Centro Velho. O LiDAR da cidade permanece uma prévia; os encontros não transformam o gate simplificado da cidade em CQ científico completo.
+Motoristas bêbados, colisões do jogador com tráfego regular, navegação viária completa de perseguidores, queda animada, vozes finais e playthrough visual/acessível continuam pendentes. A circulação atual ainda usa o grafo de bancada do Centro Velho. O LiDAR da cidade permanece uma prévia. A entrega de fotos de fachadas segue o CQ e a custódia descritos na [integração de perigos](city-hazards.md).

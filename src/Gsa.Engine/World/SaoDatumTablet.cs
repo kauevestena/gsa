@@ -229,6 +229,12 @@ public partial class SaoDatumCityScene
 
     private void StartStoryMission(CampaignMissionFullSpec spec)
     {
+        if (spec.ProductType != "images")
+        {
+            _feedbackText = Text(CityOfficeUnavailableKey(spec.ProductType));
+            return;
+        }
+
         string[] featureIds = spec.MissionId switch
         {
             "HIST-01" => ["facade_18", "facade_19", "facade_20"],
@@ -253,7 +259,7 @@ public partial class SaoDatumCityScene
             AreaId: spec.RegionIds[0],
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: [new PredicateRequirementSpec("format_valid", true)],
+            Requirements: CityPhotoRequirements,
             RequiredCapabilities: ["camera"],
             Risk: calm ? "easy" : "moderate",
             Calm: calm,
@@ -274,6 +280,12 @@ public partial class SaoDatumCityScene
     private bool AcceptCityContract(ContractDefinition def, CampaignMissionFullSpec? story = null)
     {
         if (_activeContract is not null) { _feedbackText = Text("city.hazards.active_job"); return false; }
+        if (!SupportsCityDelivery(def)) { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
+        if (_progression.SettledContractIds.Contains(def.Id) || (story is not null && _campaignState.ObjectiveStates.ContainsKey(story.MissionId)))
+        {
+            _feedbackText = Text("city.story.completed");
+            return false;
+        }
         _activeStorySpec = story;
         _activeContract = def;
         _activeMachine = new ContractStateMachine(def);
@@ -292,68 +304,6 @@ public partial class SaoDatumCityScene
         return true;
     }
 
-    private void ProcessAndDeliverCityContract()
-    {
-        if (_activeContract is null || _activeMachine is null)
-        {
-            _feedbackText = Text("city.office.no_contract");
-            return;
-        }
-        if (_rackMisaligned)
-        {
-            _feedbackText = Text("city.rack.misaligned");
-            _audio.PlayAlert(critical: true);
-            return;
-        }
-
-        RebuildCityObservedTargets();
-        // City delivery remains simplified; dirty images cannot satisfy target observations.
-        var missing = _activeContract.RequiredFeatureIds.Where(id => !_observedTargetIds.Contains(id)).ToArray();
-        var ratio = _activeContract.RequiredFeatureIds.Count > 0
-            ? (double)(_activeContract.RequiredFeatureIds.Count - missing.Length) / _activeContract.RequiredFeatureIds.Count
-            : 1.0;
-
-        if (_fieldSamples.Count + _protectedCityPhotos.Count == 0)
-        {
-            _feedbackText = Text("training.blocked");
-            _audio.PlayAlert();
-            return;
-        }
-
-        if (ratio >= 0.85)
-        {
-            var reward = _activeContract.Reward.BaseCoords;
-            var xp = _activeContract.Reward.BaseXp;
-            var quote = new PaymentQuote(
-                _activeContract.Id, true, false, false, 5, 1.0, 1.0, 0.0, 0.0,
-                reward, reward, reward, xp, _activeContract.Reward.Reputation,
-                _activeContract.RequiredFeatureIds, _activeContract.Reward.StoryUnlocks);
-            _ledger.RecordContractSettlement("settle_" + _activeContract.Id + "_" + _tick, _activeContract.Id, _calendar.CalendarTimeSeconds, quote, _activeContract.Calm);
-            _progression.ApplySettlement(_activeContract, quote);
-            _geopedia.UnlockForMilestone("M2");
-
-            if (_activeStorySpec is not null)
-                CutsceneSkipAndStateCoordinator.ExecuteFull(_activeStorySpec.Cutscene, _campaignState);
-
-            _audio.PlayMissionPassedFanfare();
-            _gtaHud.TriggerCelebrationBanner(
-                Text("city.mission_passed"),
-                $"{Text(_activeContract.TitleKey)}  +{reward} C$  +{xp} XP");
-            _feedbackText = $"{Text("training.done.deliver")} (+{reward} C$, +{xp} XP)";
-            _activeContract = null;
-            _activeMachine = null;
-            _activeStorySpec = null;
-            _cityHazards.Services.ExpireInsurance(); SyncCityHazardProtection();
-            GenerateContractOffers();
-            if (!_isSandbox) SaveCityCareerState(SaveTrigger.ContractSettled, announce: false);
-        }
-        else
-        {
-            _audio.PlayAlert();
-            _feedbackText = $"{Text("training.qc_rework")} ({missing.Length} missing)";
-        }
-    }
-
     private void RefreshTabletContents()
     {
         RefreshCityHazardStatus();
@@ -369,6 +319,7 @@ public partial class SaoDatumCityScene
         foreach (var spec in FullCampaignCatalog.AllMissions)
         {
             var done = _campaignState.ObjectiveStates.ContainsKey(spec.MissionId);
+            var supported = spec.ProductType == "images";
             var prereqsMet = _isSandbox || spec.Preconditions.All(p => _campaignState.ObjectiveStates.ContainsKey(p));
             var row = new HBoxContainer();
             var info = new Label
@@ -379,8 +330,9 @@ public partial class SaoDatumCityScene
             };
             var btn = new Button
             {
-                Text = done ? Text("city.story.completed") : (prereqsMet ? Text("city.story.start") : Text("city.story.locked")),
-                Disabled = done || !prereqsMet,
+                Text = Text(done ? "city.story.completed" : !supported ? "city.office.unavailable" : prereqsMet ? "city.story.start" : "city.story.locked"),
+                Disabled = done || !prereqsMet || !supported,
+                TooltipText = supported ? "" : Text(CityOfficeUnavailableKey(spec.ProductType)),
                 FocusMode = Control.FocusModeEnum.None,
             };
             var capturedSpec = spec;
@@ -404,7 +356,14 @@ public partial class SaoDatumCityScene
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
                 AutowrapMode = TextServer.AutowrapMode.WordSmart,
             };
-            var accept = new Button { Text = Text("city.contracts.accept"), FocusMode = Control.FocusModeEnum.None };
+            var supported = SupportsCityDelivery(def);
+            var accept = new Button
+            {
+                Text = Text(supported ? "city.contracts.accept" : "city.office.unavailable"),
+                Disabled = !supported,
+                FocusMode = Control.FocusModeEnum.None,
+                TooltipText = supported ? "" : Text(CityOfficeUnavailableKey(def.Product)),
+            };
             var capturedDef = def;
             accept.Pressed += () => AcceptCityContract(capturedDef);
             row.AddChild(info);
@@ -419,6 +378,8 @@ public partial class SaoDatumCityScene
         _officeStatusLabel.Text =
             $"{Text("city.office.active")}: {contractName}\n" +
             $"{Text("training.targets")}: {foundCount}/{targetCount} · Samples: {_fieldSamples.Count} · LiDAR pts: {_lidarPointVisibleCount}\n" +
+            (_activeContract is { } active && !SupportsCityDelivery(active)
+                ? Text(CityOfficeUnavailableKey(active.Product)) + "\n" : "") +
             $"Mode: {Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical")}\n" +
             $"Rack Calibration: {(_rackMisaligned ? Text("city.rack.misaligned") : Text("city.rack.ok"))}";
 
