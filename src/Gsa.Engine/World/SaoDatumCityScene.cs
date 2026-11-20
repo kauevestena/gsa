@@ -422,8 +422,13 @@ public partial class SaoDatumCityScene : Node3D
         _mobility.AttachAvatar(_benchRoot, spawn, LocomotionMode.Handcart);
         _locomotion = new LocomotionSimulator(spawn, Math.PI, LocomotionMode.Handcart, _fullManifest.Bounds);
 
-        _traffic = new TrafficBenchAdapter(_coordinates);
-        _traffic.AttachBenchMeshes(_benchRoot);
+        _traffic = new TrafficBenchAdapter(_coordinates, new TrafficBenchSimulator(OldCenterTrafficNetwork.Create()));
+        _traffic.AttachBenchMeshes(_benchRoot, warnForErraticDrivers: true);
+        _cityVisuals.AddOldCenterTrafficSignals(_benchRoot, _coordinates, _traffic.Simulator.Graph);
+        var venue = new Label3D { Name = "OldCenterMusicBar", Text = Text("city.traffic.music_bar"),
+            Position = _coordinates.ToGodot(OldCenterTrafficNetwork.MusicBarEnu + Vector3d.UnitZ * 2.6),
+            FontSize = 42, PixelSize = .009f, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled };
+        _benchRoot.AddChild(venue);
         _audio = new GsaProceduralAudio(this);
     }
 
@@ -543,6 +548,10 @@ public partial class SaoDatumCityScene : Node3D
             var h = isWaterfront ? 18f + (float)rng.NextDouble() * 28f
                   : isPort ? 8f + (float)rng.NextDouble() * 10f
                   : 10f + (float)rng.NextDouble() * 16f;
+            // City sectors are 100 m wide and the painted avenues repeat every
+            // 120 m, so sector-edge setbacks alone do not keep this grid clear.
+            if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d))
+                continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
             var localPos = _coordinates.ToGodot(centerEnu) - sectorOriginG;
@@ -664,10 +673,13 @@ public partial class SaoDatumCityScene : Node3D
         var weather = _calendar.StepPhysical(delta);
         var activePos = CurrentPositionEnu();
         var activeHeading = CurrentHeadingRadians();
+        var previousPlayerPosition = activePos;
         var activeMode = CurrentActiveMode();
         var activeSpeed = 0.0;
         var activePitch = 0.0;
         var activeRoll = 0.0;
+        var saveTrafficImpact = false;
+        StepCityTraffic(delta, activePos, weather);
 
         var input = _mobility.SampleLiveInput(_carSim?.SpeedMetresPerSecond ?? _locomotion.ForwardSpeedMetresPerSecond);
         input = ApplyCityEverydayInput(input, activeMode);
@@ -706,6 +718,13 @@ public partial class SaoDatumCityScene : Node3D
                 }
             }
 
+            var trafficContact = ResolveCityTrafficContact(delta, activeMode, prevCarPos, ref resolvedPos);
+            if (trafficContact is { } vehicleHit)
+            {
+                saveTrafficImpact = ApplyCityTrafficImpact(vehicleHit, activeMode);
+                _carSim.StopAtExternalContact();
+            }
+
             var terrainZ = GetTerrainElevationEnu(resolvedPos.X, resolvedPos.Y);
             var finalCarPos = new Vector3d(
                 Math.Clamp(resolvedPos.X, 500005, 501995),
@@ -718,24 +737,32 @@ public partial class SaoDatumCityScene : Node3D
             // Update car's internal position back if clamped/elevated
             activePos = finalCarPos;
             activeHeading = carStep.HeadingRadians;
-            activeSpeed = carStep.SpeedMetresPerSecond;
+            activeSpeed = _carSim.SpeedMetresPerSecond;
             activePitch = carStep.PitchRadians + Math.Clamp((terrainZ - terrainZBefore) * 0.4, -0.25, 0.25);
             activeRoll = carStep.RollRadians;
         }
         else
         {
-            var prevHeading = _locomotion.HeadingRadians;
             var step = _locomotion.Step(delta, input, 0.0, weather.SurfaceGripMultiplier, GetNearbyObstacles(activePos),
                 p => GetTerrainElevationEnu(p.X, p.Y));
             activePos = step.PositionEnu;
             activeHeading = step.HeadingRadians;
             activeSpeed = step.ForwardSpeedMetresPerSecond;
+            var contact = ResolveCityTrafficContact(delta, activeMode, previousPlayerPosition, ref activePos);
+            if (contact is { } trafficHit)
+            {
+                activePos = new Vector3d(activePos.X, activePos.Y, GetTerrainElevationEnu(activePos.X, activePos.Y));
+                _locomotion.StopAtExternalContact(activePos);
+                activeSpeed = 0;
+                ApplyCityTrafficImpact(trafficHit, activeMode);
+            }
             if (step.Collided && step.ImpactDeltaVMetresPerSecond > 1.2)
                 _gimbalina.ApplyStartle(StartleEventKind.Pothole);
             activePitch = Math.Clamp((_lastSpeedMps - activeSpeed) * 0.04, -0.14, 0.14);
             activeRoll = Math.Clamp(input.Steer * Math.Abs(activeSpeed) * 0.03, -0.14, 0.14);
         }
 
+        if (saveTrafficImpact) SaveHazardChange();
         _lastSpeedMps = activeSpeed;
         StepCityEverydayEncounters(delta, activePos, activeSpeed, activeMode);
         var gStep = _gimbalina.Step(delta, isResting: Math.Abs(activeSpeed) < 0.1,
@@ -755,7 +782,6 @@ public partial class SaoDatumCityScene : Node3D
         if (_lastStreamingSector != GetStreamingSectorCell(activePos))
             UpdateSectorStreaming(activePos);
 
-        _traffic.StepAndSync(delta, activePos);
         _cityVisuals.UpdateAnimatedProps(delta, _traffic.Simulator);
         _atmosphere.Update(weather, _coordinates.ToGodot(activePos), delta);
         _audio.Step(delta, gStep.Stress, activeMode <= LocomotionMode.Bicycle, weather.IsRaining, activeSpeed, activeMode, input.Brake > 0.1);

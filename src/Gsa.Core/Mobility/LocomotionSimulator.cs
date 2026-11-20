@@ -228,6 +228,15 @@ public sealed class LocomotionSimulator
         RefillHandcartResources(refillAutonomy, clearStorage);
     }
 
+    public void StopAtExternalContact(Vector3d positionEnu)
+    {
+        PositionEnu = positionEnu;
+        ForwardSpeedMetresPerSecond = 0;
+        VelocityEnu = Vector3d.Zero;
+        if (Mode != LocomotionMode.OnFoot)
+            HandcartPositionEnu = positionEnu;
+    }
+
     public LocomotionStepResult Step(
         double dtSeconds,
         LocomotionInput input,

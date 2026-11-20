@@ -239,6 +239,8 @@ def main() -> int:
             raise RuntimeError("Missing everyday city encounter integration marker")
         if "GSA_CITY_DELIVERY_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing city contract delivery integration marker")
+        if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_smoke:
+            raise RuntimeError("Missing live Old Center traffic integration marker")
 
         targets = ("linux", "windows") if args.exports == "all" else (
             (host,) if args.exports == "host" else ())
@@ -296,6 +298,8 @@ def main() -> int:
                     raise RuntimeError(f"{target}: missing exported everyday encounters marker")
                 if "GSA_CITY_DELIVERY_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported city contract delivery marker")
+                if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_output:
+                    raise RuntimeError(f"{target}: missing exported live Old Center traffic marker")
                 if args.offline_smoke:
                     report["network_isolation"] = "linux_network_namespace"
         current_locks = {str(p.relative_to(ROOT)): sha256(p) for p in lock_paths()}

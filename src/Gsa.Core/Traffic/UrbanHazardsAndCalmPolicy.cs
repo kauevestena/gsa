@@ -4,13 +4,13 @@ using Gsa.Core.Sensors.Camera;
 
 namespace Gsa.Core.Traffic;
 
-public sealed record ErraticSpawnContext(
+public readonly record struct ErraticSpawnContext(
     bool IsNight,
     bool NearBarOnWeekend,
     bool IsCalmContract,
     bool CalmCityEnabled);
 
-public sealed record ErraticDriverSample(
+public readonly record struct ErraticDriverSample(
     string AgentId,
     double TimeSeconds,
     double SteeringPerturbationRadians,
@@ -33,7 +33,6 @@ public static class ErraticDriverSimulator
 
     public static double ComputeSpawnProbability(ErraticSpawnContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
         if (context.IsCalmContract || context.CalmCityEnabled)
             return 0.0;
 

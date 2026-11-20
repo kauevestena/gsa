@@ -493,7 +493,9 @@ public partial class SaoDatumCityScene
 
         var promptText = string.IsNullOrEmpty(_hazardNotice) ? Text("city.prompt.controls") : _hazardNotice;
         if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
-        if (string.IsNullOrEmpty(_hazardNotice) && !_everyday.DogActive && _everyday.Parking is null && mode == LocomotionMode.OnFoot &&
+        if (!attn.BombWarningActive && !_everyday.DogActive && _everyday.Parking is null && _cityTrafficWarningId is not null)
+            promptText = Text("city.traffic.erratic_warning");
+        if (string.IsNullOrEmpty(_hazardNotice) && _cityTrafficWarningId is null && !_everyday.DogActive && _everyday.Parking is null && mode == LocomotionMode.OnFoot &&
             _worldParkedVehicles.Any(v => TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2))
             promptText = Text("city.board_vehicle");
 

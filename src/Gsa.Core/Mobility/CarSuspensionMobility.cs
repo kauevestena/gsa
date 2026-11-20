@@ -72,6 +72,8 @@ public sealed class CarSuspensionSimulator
         _positionEnu = positionEnu;
     }
 
+    public void StopAtExternalContact() => _speedMetresPerSecond = 0;
+
     public CarSuspensionSimulator(
         Vector3d initialPositionEnu,
         double initialHeadingRadians = 0.0,
