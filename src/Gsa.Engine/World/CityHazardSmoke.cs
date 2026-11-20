@@ -135,8 +135,25 @@ public partial class SaoDatumCityScene
             "calm contract did not suppress threats/fees");
         Require(_cityHazards.Sabotage.MovedBenchmarks.Records.Count == 1, "job erased physical sabotage");
         _lidarPointVisibleCount = 500; ProcessAndDeliverCityContract(); Require(_activeContract is not null, "preview approved empty delivery");
+        AbandonCityContract(); Require(AcceptCityContract(definition), "standard job rejected after calm job");
+        Position(Center(mafia), LocomotionMode.Kombi);
+        _cityHazards.Step(.1, mafia.ZoneId, false); _cityHazards.LegacyDisguise = true;
+        ApplyCityFactionAction(TerritoryThreatLevel.Level4RoadblockOrPursuit, mafia, CurrentPositionEnu());
+        StepCityThreatVisuals(.1, CurrentPositionEnu(), 0);
+        _cityHazards.LegacyDisguise = true;
+        _protectionZone.Select(_planningZones.ToList().FindIndex(z => z.ZoneId == mafia.ZoneId));
+        balance = _ledger.BalanceCoords;
+        var authorizationFee = _cityHazards.Services.QuoteService(ServiceKind.ControlledZoneAuthorization, PlatformProfile.Kombi,
+            contractOrCargoValueCoords: definition.Reward.BaseCoords).FinalFeeCoords;
+        BuyCityProtection(ServiceKind.ControlledZoneAuthorization); BuyCityProtection(ServiceKind.ControlledZoneAuthorization);
+        Require(_ledger.BalanceCoords == balance - authorizationFee && _roadblockVisual is null && _pursuerVisual is null,
+            "authorization did not cancel actors or charged twice");
+        _attention.ImportSnapshot(new(1, [new(mafia.ZoneId, 100, 0, 0)], new(null, TerritoryThreatLevel.None, 0, mafia.ZoneId, 15, true, 1, 0)));
+        var authorized = StepCityFactionHazards(2, CurrentPositionEnu(), 0, CurrentActiveMode());
+        Require(authorized.SuppressedByCalmCity && !authorized.BombDetonated && _cityHazards.PursuitRemaining == 0,
+            "legacy disguise floor overrode zero-attention authorization");
         ClearCityThreatVisuals(); _saveManager = manager; _citySaveBlocked = false; TryLoadCareer(); TranslationServer.SetLocale(locale);
         Require(originalBytes.SequenceEqual(File.ReadAllBytes(manager.CurrentSavePath)), "fixture wrote original career");
-        GD.Print("GSA_CITY_HAZARDS_SMOKE_OK paint=quality_failure clean=3s puncture=motion roadblock=collision spoof=observed_pose bomb=loss upload=preserved insurance=deductible calm=cancelled save=persistent locale=live");
+        GD.Print("GSA_CITY_HAZARDS_SMOKE_OK paint=quality_failure clean=3s puncture=motion roadblock=collision spoof=observed_pose bomb=loss upload=preserved insurance=deductible calm=cancelled authorization=cancelled save=persistent locale=live");
     }
 }

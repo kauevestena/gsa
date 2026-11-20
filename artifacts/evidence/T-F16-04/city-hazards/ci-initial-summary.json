@@ -1,0 +1,10 @@
+{
+  "commit": "2f75ee9e5ef58133164724a4e38a08b81b3aff55",
+  "pull_request": "https://github.com/kauevestena/gsa/pull/26",
+  "workflow_run": 44649286288,
+  "url": "https://github.com/kauevestena/gsa/actions/runs/44649286288",
+  "conclusion": "success",
+  "linux_job": 135999814260,
+  "windows_job": 135999813880,
+  "scope": "Initial integration; follow-up cache/HUD review and authorization smoke require a new exact-head CI run before merge."
+}

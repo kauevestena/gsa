@@ -781,6 +781,7 @@ public partial class SaoDatumCityScene : Node3D
         {
             _hudElapsed = 0;
             RefreshCityHud(0.1, activePos, activeHeading, activeMode, weather, gStep.Stress, attn);
+            if (_tabletPanel.Visible) RefreshCityHazardStatus();
             if (_tabletPanel.Visible && _tabletTabs.CurrentTab is MapTabletTab or TechnicalTabletTab)
                 RefreshTechnicalTablet();
         }

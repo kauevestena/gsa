@@ -27,12 +27,18 @@ public partial class SaoDatumCityScene
     private Node3D? _roadblockVisual, _pursuerVisual;
     private ObstacleBoxEnu? _roadblockObstacle;
     private double _pursuitCollisionCooldown;
+    private Vector3d[]? _cityUnloadPositions;
 
     private bool NearCityUnload() => NearCityUnload(CurrentPositionEnu());
-    private bool NearCityUnload(Vector3d p) => _fullManifest.Objects.Any(o =>
-        (o.ObjectClass is "office_entry" or "unload_point" or "wifi_hotspot" ||
-         o.Id is "office_entry" or "unload_point" or "unload_point_north") &&
-        TrainingContractSession.HorizontalDistance(p, o.PositionEnu) <= 10);
+    private bool NearCityUnload(Vector3d p)
+    {
+        _cityUnloadPositions ??= _fullManifest.Objects.Where(o =>
+            o.ObjectClass is "office_entry" or "unload_point" or "wifi_hotspot" ||
+            o.Id is "office_entry" or "unload_point" or "unload_point_north").Select(o => o.PositionEnu).ToArray();
+        foreach (var unload in _cityUnloadPositions)
+            if (TrainingContractSession.HorizontalDistance(p, unload) <= 10) return true;
+        return false;
+    }
 
     private void SyncCityHazardProtection()
     {
@@ -169,7 +175,8 @@ public partial class SaoDatumCityScene
 
     private void ClearCityThreatVisuals()
     {
-        _roadblockObstacle = null; _hasNearbyObstacleAnchor = false;
+        if (_roadblockObstacle is not null)
+        { _roadblockObstacle = null; _hasNearbyObstacleAnchor = false; }
         if (_roadblockVisual is not null) { RemoveChild(_roadblockVisual); _roadblockVisual.QueueFree(); _roadblockVisual = null; }
         if (_pursuerVisual is not null) { RemoveChild(_pursuerVisual); _pursuerVisual.QueueFree(); _pursuerVisual = null; }
     }
