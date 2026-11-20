@@ -1,6 +1,6 @@
 # GSA — Especificação de implementação v1.0
 
-Baseline documental: 13/11/2026. Estado: M0 integrado com aceite técnico delegado e [CI Linux/Windows](../artifacts/evidence/M0-ci/summary.json); primeiros incrementos M1 em implementação. O [bootstrap](../artifacts/evidence/T-F01-01/README.md) e suas [evidências locais](../artifacts/evidence/T-F01-02/README.md) são registros históricos.
+O pacote de especificação foi estabelecido em 13/11/2026. Consulte a [avaliação da cidade em 20/11/2026](roadmap.md#integração-jogável-atual) e as [prioridades de desenvolvimento](roadmap.md#prioridades-de-desenvolvimento). O [bootstrap](../artifacts/evidence/T-F01-01/README.md), suas [evidências locais](../artifacts/evidence/T-F01-02/README.md) e a [CI inicial](../artifacts/evidence/M0-ci/summary.json) documentam a fundação do projeto.
 
 Continuação autorizada pelo usuário em 14/11/2026: o desenvolvimento dos incrementos M0 prossegue enquanto a verificação nativa Windows e o aceite formal permanecem pendentes. Essa autorização permite avançar no código; não transforma testes não realizados em sucesso nem marca gates ou tarefas como aceitos. Evidências e revisão humana continuam obrigatórias.
 
@@ -16,7 +16,7 @@ Este pacote transforma a [especificação inicial](../spec_inicial.md) em requis
 
 1. Ler [visão e escopo](visao.md), [decisões](decisoes.md) e [arquitetura](arquitetura.md).
 2. Consultar [roadmap](roadmap.md) e o [índice de funcionalidades](features/README.md).
-3. Consultar o estado dos incrementos M0 em [tarefas de fundação](features/F01-fundacao/tasks.md). A continuação autorizada acima preserva as pendências de plataforma e revisão. Não é necessário desenvolver os sensores avançados para começar.
+3. Para escolher o próximo incremento da cidade, consultar as [prioridades de integração](roadmap.md#prioridades-de-desenvolvimento) e o critério de aceite da funcionalidade correspondente.
 4. Executar o ciclo de trabalho abaixo, usando [interfaces](interfaces.md), [modelos](modelos.md) e [parâmetros](parametros.md) como contratos compartilhados.
 5. Verificar este pacote com `python3 specs/validate.py`, executado da raiz do projeto.
 
