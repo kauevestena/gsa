@@ -124,6 +124,7 @@ public partial class SaoDatumCityScene
                 ? new CarSuspensionSimulator(mobility.PositionEnu, mobility.HeadingRadians, mobility.Mode, conditionDamage: hazards.GetVehicleDamage(mobility.Mode)) : null;
             _lastSpeedMps = 0;
             _lastCitySurveyReview = null;
+            _lastTunnelReview = null;
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;

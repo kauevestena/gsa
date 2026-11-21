@@ -285,7 +285,7 @@ public partial class SaoDatumCityScene
         var featureIds = spec.MissionId switch
         {
             BusSurveyCorridor.MissionId => BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray(),
-            TunnelMissionId => ["survey_control_port_tunnel"],
+            TunnelMissionId => [],
             _ => Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray(),
         };
         var calm = !isBusSurvey || _calmPolicy.CalmCityEnabled;
@@ -298,7 +298,7 @@ public partial class SaoDatumCityScene
             AreaId: area,
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: isTunnel ? [new PredicateRequirementSpec("format_valid", true)] : CitySurveyRequirements(area, story: true),
+            Requirements: isTunnel ? PortTunnelQuality.Requirements : CitySurveyRequirements(area, story: true),
             RequiredCapabilities: isTunnel ? ["lidar_l4"] : ["camera"],
             Risk: calm ? "easy" : "moderate",
             Calm: calm,
@@ -339,6 +339,7 @@ public partial class SaoDatumCityScene
             return false;
         }
         _lastCitySurveyReview = null;
+        _lastTunnelReview = null;
         _lastSidewalkMeasurements = [];
         _lastAdjustedPhotoCount = 0;
         _activeStorySpec = story;
@@ -419,7 +420,7 @@ public partial class SaoDatumCityScene
             var btn = new Button
             {
                 Text = Text(done ? "city.story.completed" : !supported ? "city.office.unavailable" : !prereqsMet ? "city.story.locked" :
-                    !equipped ? "city.story.requires_platform" : spec.MissionId == TunnelMissionId ? "city.lidar.start_field" : "city.story.start"),
+                    !equipped ? "city.story.requires_platform" : "city.story.start"),
                 Disabled = done || !prereqsMet || !supported || !equipped,
                 TooltipText = supported ? "" : Text(CityOfficeUnavailableKey(spec.ProductType)),
                 FocusMode = Control.FocusModeEnum.None,
@@ -486,6 +487,8 @@ public partial class SaoDatumCityScene
         }
         if (IsTunnelCollection(_activeContract))
             _officeStatusLabel.Text += "\n" + Text("city.lidar.field_brief") + "\n" + CityLidarCollectionStatus();
+        var tunnelReview = TunnelReviewText();
+        if (tunnelReview.Length > 0) _officeStatusLabel.Text += "\n" + tunnelReview;
         var review = CitySurveyReviewText();
         if (review.Length > 0) _officeStatusLabel.Text += "\n" + review;
         if (_activeStorySpec?.MissionId == "HIST-02" && _activeMachine?.Snapshot is { } drainage && !_calendar.IsRaining)
@@ -610,6 +613,11 @@ public partial class SaoDatumCityScene
             ? string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count)
             : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
         if (IsTunnelCollection(_activeContract)) objDetails = CityLidarCollectionStatus();
+        if (IsTunnelCollection(_activeContract))
+        {
+            blips.Add(new RadarBlip("tunnel_west", PortTunnelSurvey.WestStop, Colors.Orange, "W", ClampToRim: true));
+            blips.Add(new RadarBlip("tunnel_east", PortTunnelSurvey.EastStop, Colors.Orange, "E", ClampToRim: true));
+        }
 
         var radioTitle = _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
         var radioSub = !string.IsNullOrEmpty(_audio.CurrentRadioSubtitleKey) ? Text(_audio.CurrentRadioSubtitleKey) : "";
@@ -672,6 +680,8 @@ public partial class SaoDatumCityScene
             if (_manifestObjectsById.TryGetValue(id, out var obj)) targets.Add(obj.PositionEnu);
             else if (_geodeticNetwork.Benchmarks.TryGetValue(id, out var mark)) targets.Add(mark.PhysicalPositionEnu);
         }
+        if (IsTunnelCollection(_activeContract))
+            targets.AddRange([PortTunnelSurvey.WestStop, PortTunnelSurvey.MiddleUpload, PortTunnelSurvey.EastStop]);
         _cityMap.UpdateMap(CurrentPositionEnu(), CurrentHeadingRadians(), _geodeticNetwork.Benchmarks.Values.ToArray(), targets);
     }
 

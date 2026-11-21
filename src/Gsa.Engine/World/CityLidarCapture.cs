@@ -2,6 +2,7 @@ using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 using Gsa.Core.Sensors.Camera;
 using Gsa.Core.Sensors.Lidar;
+using Gsa.Core.World;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Persistence;
 using Godot;
@@ -33,7 +34,7 @@ public partial class SaoDatumCityScene
         _calendar.CalendarTimeSeconds <= accepted.ExpiresAtSeconds &&
         _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode) && GetRegionIdForEnu(position) == "port";
 
-    private void RecordCityLidarSlice(string profileId, EstimatedBodyPose pose, LidarMountEstimate mount)
+    private void RecordCityLidarSlice(string profileId, EstimatedBodyPose pose, LidarMountEstimate mount, TunnelRangeObservation? ranges)
     {
         if (_lidarSliceScratch.Count == 0) return;
         var nextCount = _pendingLidarReturns + _lidarSliceScratch.Count;
@@ -46,7 +47,10 @@ public partial class SaoDatumCityScene
             return;
         }
 
-        _pendingLidar.Add(CityLidarSlice.Capture(_tick, profileId, pose, mount, _rackMisaligned, _lidarSliceScratch));
+        if (ranges?.ZuptPortal is { } portal && !_rackMisaligned && !_pendingLidar.Any(slice =>
+            !slice.RackNeedsCalibration && slice.TunnelRanges?.ZuptPortal == portal))
+            _feedbackText = Text("city.tunnel.portal_observed");
+        _pendingLidar.Add(CityLidarSlice.Capture(_tick, profileId, pose, mount, _rackMisaligned, _lidarSliceScratch) with { TunnelRanges = ranges });
         _pendingLidarReturns = nextCount;
     }
 
@@ -68,14 +72,21 @@ public partial class SaoDatumCityScene
     private string CityLidarCollectionStatus() => string.Format(Text("city.lidar.capture_status"), _pendingLidarReturns,
         _protectedLidarReturns, _lidarTicksWithoutPose, _lidarTicksWithoutCapacity);
 
-    private PointCloudOctreeAndChunkStore BuildProtectedCityCloud()
+    private SurveyBatchArtifact[] ReadProtectedCityLidarBatches()
+    {
+        if (_activeMachine is not { } machine) return [];
+        var protectedIds = machine.ProtectedBatches.Select(batch => batch.BatchId).ToHashSet(StringComparer.Ordinal);
+        return _cityCustody.GetProtectedArtifactsForContract(machine.ContractId)
+            .Where(batch => protectedIds.Contains(batch.BatchId) && batch.LidarSlices is { Count: > 0 }).ToArray();
+    }
+
+    private static PointCloudOctreeAndChunkStore BuildProtectedCityCloud(IEnumerable<CityLidarSlice> slices)
     {
         var store = new PointCloudOctreeAndChunkStore();
-        if (_activeMachine is not { } machine) return store;
-        var protectedIds = machine.ProtectedBatches.Select(batch => batch.BatchId).ToHashSet(StringComparer.Ordinal);
-        var slices = _cityCustody.GetProtectedArtifactsForContract(machine.ContractId)
-            .Where(batch => protectedIds.Contains(batch.BatchId)).SelectMany(batch => batch.LidarSlices ?? []);
         store.IngestRevision(slices.OrderBy(slice => slice.PhysicsTick).SelectMany(slice => slice.Georeference()));
         return store;
     }
+
+    private PointCloudOctreeAndChunkStore BuildProtectedCityCloud() =>
+        BuildProtectedCityCloud(ReadProtectedCityLidarBatches().SelectMany(batch => batch.LidarSlices!));
 }

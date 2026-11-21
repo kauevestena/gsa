@@ -255,6 +255,7 @@ public partial class SaoDatumCityScene : Node3D
         };
         visualBase.AddChild(cityGround);
         BuildPortLidarDeck(visualBase);
+        BuildPortTunnel(visualBase);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
@@ -405,7 +406,8 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         _manifestObstacles = ObstacleBoxEnu.FromWorldObjects(
-            _fullManifest.Objects.Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot"))).ToArray();
+            _fullManifest.Objects.Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot")))
+            .Concat(PortTunnelWalls()).ToArray();
         _liveCandidates = _fullManifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
     }
 
@@ -575,7 +577,7 @@ public partial class SaoDatumCityScene : Node3D
             // 120 m, so sector-edge setbacks alone do not keep this grid clear.
             if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
                 OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d) ||
-                BusSurveyCorridor.OverlapsBuildings(e, n, w, d))
+                BusSurveyCorridor.OverlapsBuildings(e, n, w, d) || PortTunnelSurvey.OverlapsBuilding(e, n, w, d))
                 continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
@@ -727,6 +729,9 @@ public partial class SaoDatumCityScene : Node3D
         {
             var terrainZBefore = GetTerrainElevationEnu(_carSim.PositionEnu.X, _carSim.PositionEnu.Y);
             var prevCarPos = _carSim.PositionEnu;
+            var speedLimit = _cityHazards.TirePunctured ? 6 : double.PositiveInfinity;
+            if (_lidarEnabled && activeMode >= LocomotionMode.Kombi && IsTunnelCollection(_activeContract) && PortTunnelSurvey.IsSurveyLane(prevCarPos))
+                speedLimit = Math.Min(speedLimit, PortTunnelSurvey.SurveySpeed);
             var carStep = _carSim.StepMotion(
                 delta,
                 Math.Max(0.0, input.Throttle),
@@ -735,7 +740,7 @@ public partial class SaoDatumCityScene : Node3D
                 weather.SurfaceGripMultiplier,
                 0.0,
                 _fleet.GetSkillRank(SkillTrackKind.DefensiveDriving),
-                speedLimitMetresPerSecond: _cityHazards.TirePunctured ? 6 : double.PositiveInfinity);
+                speedLimitMetresPerSecond: speedLimit);
 
             var resolvedPos = ResolveObstaclePushout(prevCarPos, carStep.PositionEnu, 1.25, out var hitId);
             if (hitId is not null && carStep.SpeedMetresPerSecond > 3.2)
@@ -1162,8 +1167,9 @@ public partial class SaoDatumCityScene : Node3D
         _lidarSliceIndex++;
 
         var scientific = ShouldRecordCityLidar(pos, mode);
-        var navigation = _navigationRig?.Estimator?.Current;
-        if (scientific && navigation is null)
+        var ranges = scientific ? ObserveTunnelRanges(pos, heading) : null;
+        var navigation = scientific && ranges is null ? _navigationRig?.Estimator?.Current : null;
+        if (scientific && navigation is null && ranges is null)
         {
             _lidarTicksWithoutPose++;
             return;
@@ -1171,12 +1177,15 @@ public partial class SaoDatumCityScene : Node3D
 
         var time = _tick / (double)CameraCaptureScheduler.PhysicsTicksPerSecond;
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
-        var mount = new LidarMountEstimate(new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0), Quaterniond.Identity);
+        // On the tunnel route the Kombi's single-channel scanner is pitched down as a transverse profiler.
+        var scannerRotation = ranges is not null && profile.Grade == 4
+            ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2) : Quaterniond.Identity;
+        var mount = new LidarMountEstimate(new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0), scannerRotation);
         var physicalMount = scientific ? mount with
         {
-            LidarToBodyRotation = Quaterniond.FromAxisAngle(Vector3d.UnitZ, _cityHazards.RackYawErrorRadians),
+            LidarToBodyRotation = Quaterniond.FromAxisAngle(Vector3d.UnitZ, _cityHazards.RackYawErrorRadians) * scannerRotation,
         } : mount;
-        var pose = scientific && navigation is not null
+        var pose = ranges is not null ? PortTunnelSurvey.Solve(ranges, time) : navigation is not null
             ? new EstimatedBodyPose(time, navigation.PositionEnu, navigation.BodyToMapRotation)
             : new EstimatedBodyPose(time, pos, yaw);
         var traj = new EstimatedBodyTrajectory([pose]);
@@ -1206,9 +1215,9 @@ public partial class SaoDatumCityScene : Node3D
 
         var channelStep = scientific ? 1 : CityLidarChannelStep(profile);
         if (_lidarSim.TrySimulateScanSlice(time, lidarToMap, traj, mount,
-            isRaining, CastRay, scientific ? (int)(_tick % sliceCount) : sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
+            isRaining && !PortTunnelSurvey.IsUnderRoof(pos), CastRay, scientific ? (int)(_tick % sliceCount) : sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
-            if (scientific) RecordCityLidarSlice(profile.Id, pose, mount);
+            if (scientific) RecordCityLidarSlice(profile.Id, pose, mount, ranges);
             if (!_lidarCloudMesh.Visible) return;
             var mm = _lidarCloudMesh.Multimesh;
             var maxPointsPerSlice = Math.Max(1, 480 / sliceCount);

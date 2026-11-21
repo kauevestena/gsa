@@ -15,7 +15,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public const int CurrentCatalogVersion = 5;
+    public const int CurrentCatalogVersion = 6;
     public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 

@@ -241,6 +241,8 @@ def main() -> int:
             raise RuntimeError("Missing city contract delivery integration marker")
         if "GSA_CITY_LIDAR_CAPTURE_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing city LiDAR capture and custody integration marker")
+        if "GSA_PORT_TUNNEL_DELIVERY_SMOKE_OK" not in city_smoke:
+            raise RuntimeError("Missing Port tunnel delivery integration marker")
         if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing live Old Center traffic integration marker")
 
@@ -302,6 +304,8 @@ def main() -> int:
                     raise RuntimeError(f"{target}: missing exported city contract delivery marker")
                 if "GSA_CITY_LIDAR_CAPTURE_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported city LiDAR capture and custody marker")
+                if "GSA_PORT_TUNNEL_DELIVERY_SMOKE_OK" not in city_output:
+                    raise RuntimeError(f"{target}: missing exported Port tunnel delivery marker")
                 if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported live Old Center traffic marker")
                 if args.offline_smoke:

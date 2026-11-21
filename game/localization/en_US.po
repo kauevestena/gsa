@@ -1992,7 +1992,7 @@ msgid "city.lidar.start_field"
 msgstr "Begin field collection"
 
 msgid "city.lidar.field_brief"
-msgstr "Field collection is available. Drive to the Port, let navigation initialize and press L to record. Upload at an unload point. The Office can rebuild the protected cloud. Delivery and payment are in development."
+msgstr "Drive to the west Port tunnel pad with the Kombi. Turn LiDAR on and hold still on both orange pads for a zero-velocity update. Scan the 200 m marked lane at about 3 m/s. Upload at the portals or the blue middle pad and deliver at the Office."
 
 msgid "city.lidar.capture_status"
 msgstr "Returns aboard {0} · Protected {1} · Skipped ticks (no pose {2}, no storage or power {3})"
@@ -2002,3 +2002,18 @@ msgstr "Protected cloud rebuilt from {0} returns in {1} chunks. Delivery and pay
 
 msgid "city.lidar.vehicle_lost"
 msgstr "LiDAR returns lost: {0}. Uploaded LiDAR returns preserved: {1}."
+
+msgid "city.tunnel.portal_rework"
+msgstr "Collect and upload a stationary observation at each orange portal pad, then process again."
+
+msgid "city.tunnel.road_rework"
+msgstr "Survey the missing road sections and check panels in the office report, then upload and process again."
+
+msgid "city.tunnel.report"
+msgstr "Portal stops {0}/2 · Cells at target density {1}/{2} ({3:P1}, target 90%)\nRoad density {4:F1} pts/m² · Worst check panel RMSE {5} m (≤0.20 m) · Relative height RMSE {6} m (≤0.10 m)"
+
+msgid "city.tunnel.gaps"
+msgstr "Road sections to revisit, measured from the west mouth: {0}"
+
+msgid "city.tunnel.portal_observed"
+msgstr "Zero-velocity portal observation recorded. Upload it with your scan."

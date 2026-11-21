@@ -1992,7 +1992,7 @@ msgid "city.lidar.start_field"
 msgstr "Iniciar coleta de campo"
 
 msgid "city.lidar.field_brief"
-msgstr "A coleta de campo está disponível. Dirija até o Porto, aguarde a inicialização da navegação e pressione L para gravar. Envie em um ponto de descarga. O Escritório pode reconstruir a nuvem protegida. Entrega e pagamento estão em desenvolvimento."
+msgstr "Leve a Kombi à plataforma oeste do túnel do Porto. Ligue o LiDAR e pare sobre as duas plataformas laranja para obter a atualização de velocidade zero. Varra os 200 m da faixa demarcada a cerca de 3 m/s. Descarregue nos portais ou na plataforma azul central e entregue no Escritório."
 
 msgid "city.lidar.capture_status"
 msgstr "Retornos a bordo {0} · Protegidos {1} · Passos ignorados (sem pose {2}, sem espaço ou energia {3})"
@@ -2002,3 +2002,18 @@ msgstr "Nuvem protegida reconstruída de {0} retornos em {1} blocos. Entrega e p
 
 msgid "city.lidar.vehicle_lost"
 msgstr "Retornos LiDAR perdidos: {0}. Retornos LiDAR enviados preservados: {1}."
+
+msgid "city.tunnel.portal_rework"
+msgstr "Colete e descarregue uma observação parada em cada plataforma laranja. Em seguida, processe novamente."
+
+msgid "city.tunnel.road_rework"
+msgstr "Recolete os trechos e as placas de checagem indicados no relatório. Descarregue e processe novamente."
+
+msgid "city.tunnel.report"
+msgstr "Paradas nos portais {0}/2 · Células na densidade exigida {1}/{2} ({3:P1}, meta 90%)\nDensidade da pista {4:F1} pts/m² · Pior RMSE das placas {5} m (≤0,20 m) · RMSE altimétrico relativo {6} m (≤0,10 m)"
+
+msgid "city.tunnel.gaps"
+msgstr "Trechos para recoletar, medidos a partir da boca oeste: {0}"
+
+msgid "city.tunnel.portal_observed"
+msgstr "Observação de velocidade zero registrada no portal. Descarregue com a varredura."
