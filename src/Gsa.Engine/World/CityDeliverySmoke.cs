@@ -1,5 +1,6 @@
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
+using Gsa.Core.World;
 using Gsa.Missions.Campaign;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Economy;
@@ -82,6 +83,7 @@ public partial class SaoDatumCityScene
         void Upload(LocomotionMode mode = LocomotionMode.Handcart)
         {
             var office = _manifestObjectsById["office_entry"].PositionEnu + new Vector3d(0, -4, -1.5);
+            _carSim = null;
             _locomotion.RepositionSafeAfterRecovery(office, mode, 0, false, false);
             OffloadCityData();
             Require(_fieldSamples.Count == 0 && _protectedCityPhotos.Count > 0, "upload did not protect photos");
@@ -243,7 +245,115 @@ public partial class SaoDatumCityScene
                     $"{offer.VariantId} failed delivery: " + _feedbackText + " " + CitySurveyReviewText());
             }
         }
+
+        var bus = FullCampaignCatalog.GetMission(BusSurveyCorridor.MissionId);
+        StartStoryMission(bus);
+        Require(_activeContract is null && _feedbackText == Text("city.story.requires_platform"), "a starter platform could start the bus survey");
+        Require(TryPurchaseCityPlatform(LocomotionMode.Car), $"Act 1 and ten paying jobs could not fund a car (balance {_ledger.BalanceCoords})");
+        TryLoadCareer();
+        Require(_fleet.OwnedPlatforms.Contains(LocomotionMode.Car) && _locomotion.MountedVehicleMode == LocomotionMode.Car,
+            "purchased car was lost on reload");
+        Require(!CityPlatformStoryUnlocked(LocomotionMode.Kombi), "Kombi shop access did not require HIST-05");
+
+        void AdvanceToHour(double hour)
+        {
+            var hoursToAdvance = (hour - _calendar.HourOfDay + 24) % 24;
+            _calendar.AdvanceCalendarSeconds(hoursToAdvance * 3600);
+        }
+
+        AdvanceToHour(17);
+        _calendar.SetWeather(false);
+        Require(BusSurveyCorridor.IsSurveyWindow(10) && !BusSurveyCorridor.IsSurveyWindow(16),
+            "the lane window did not include its opening and exclude its closing time");
+        StartStoryMission(bus);
+        var busContract = _activeContract ?? throw new InvalidOperationException("Bus corridor was not available.");
+        var initialBusBalance = _ledger.BalanceCoords;
+        var firstLane = BusSurveyCorridor.Legs[0].Start;
+        var nextToLane = firstLane - Vector3d.UnitX * 4;
+        Require(!CityMayEnterBusLane(nextToLane, firstLane, _calendar.ExportSnapshot()), "lane admitted a car at 17:00");
+        PositionAndCapture(firstLane, -Math.PI / 2, LocomotionMode.Car);
+        Require(_fieldSamples.Count == 0 && _feedbackText == Text("city.bus.window_closed"), "closed lane produced a panorama");
+        AdvanceToHour(11);
+        Require(CityMayEnterBusLane(nextToLane, firstLane, _calendar.ExportSnapshot()), "lane did not open at 11:00");
+        PositionAndCapture(nextToLane, -Math.PI / 2, LocomotionMode.Car);
+        Require(_fieldSamples.Count == 0 && _feedbackText == Text("city.bus.use_lane"), "out-of-lane capture produced a panorama");
+        PositionAndCapture(firstLane, -Math.PI / 2, LocomotionMode.Car);
+        Require(_fieldSamples.Count == 0 && _feedbackText == Text("city.hazards.wait_navigation"), "panorama used ideal pose before initialization");
+
+        void CaptureBusLeg(Vector3d start, Vector3d end)
+        {
+            const double step = .10;
+            var length = (end - start).Length;
+            var direction = (end - start) / length;
+            var heading = Math.Atan2(direction.Y, direction.X);
+            var region = GetRegionIdForEnu(end);
+            _carSim = null;
+            _navigationEnvironmentAt = ResolveCityNavigationEnvironment;
+            ResetCityNavigation();
+            for (var index = 0; index <= Math.Round(length / step); index++)
+            {
+                var position = start + direction * (index * step);
+                _locomotion.RepositionSafeAfterRecovery(position, LocomotionMode.Car, heading, false, false);
+                _tick++;
+                var weather = _calendar.StepPhysical(1.0 / 60);
+                StepCityNavigation(1.0 / 60, position, heading, LocomotionMode.Car, false);
+                if (!_camScheduler.IsCaptureTick(_tick) || GetRegionIdForEnu(position) != region ||
+                    _navigationRig?.Estimator?.Current is not { } estimate)
+                    continue;
+
+                var before = _fieldSamples.Count;
+                CaptureCityPhoto(position, heading, step * 60, weather);
+                Require(_fieldSamples.Count - before == 6 && _fieldSamples.Skip(before).All(s => s.EstimatedPose.PositionEnu == estimate.PositionEnu),
+                    "expected six synchronized faces registered with the observed trajectory");
+            }
+        }
+
+        var portLane = BusSurveyCorridor.Legs[0];
+        var waterfrontLane = BusSurveyCorridor.Legs[1];
+        // Enter each survey leg from the neighborhood side to warm up the estimator before the first stop.
+        CaptureBusLeg(new(portLane.Start.X, 7400997, 100), portLane.Start);
+        Require(_fieldSamples.Count > 0 && _fieldSamples.Select(photo => photo.SensorId).Distinct().Count() == 6,
+            "Port sweep had missing faces");
+        ProcessAndDeliverCityContract();
+        Require(_feedbackText == Text("city.office.upload_first"), "the office processed unprotected panoramas");
+        Upload(LocomotionMode.Car);
+        ProcessAndDeliverCityContract();
+        Require(_activeMachine?.State == ContractState.Retrabalho && _ledger.BalanceCoords == initialBusBalance &&
+            _lastCitySurveyReview?.MatchedFeatureCount == 3, "Port-only delivery did not request the other district: " + CitySurveyReviewText());
+
+        CaptureBusLeg(new(500997, waterfrontLane.End.Y, 100), waterfrontLane.End);
+        var pendingBusSamples = _fieldSamples.Select(photo => photo.SampleId).ToArray();
+        SaveCareer();
+        TryLoadCareer();
+        Require(pendingBusSamples.Length > 0 && pendingBusSamples.SequenceEqual(_fieldSamples.Select(photo => photo.SampleId)),
+            "pending panorama faces did not survive reload");
+        CaptureBusLeg(new(501095, waterfrontLane.End.Y, 100), waterfrontLane.End);
+        Require(_fieldSamples.Concat(_protectedCityPhotos).Select(photo => photo.SampleId).Distinct().Count() ==
+            _fieldSamples.Count + _protectedCityPhotos.Count, "a reloaded sweep reused existing face IDs");
+        Upload(LocomotionMode.Car);
+        SaveCareer();
+
+        _calendar.AdvanceCalendarSeconds(_activeMachine!.Snapshot!.ExpiresAtSeconds + 1 - _calendar.CalendarTimeSeconds);
+        ProcessAndDeliverCityContract();
+        Require(_activeMachine.State == ContractState.Expirado && _ledger.BalanceCoords == initialBusBalance,
+            "the expired bus survey paid");
+        LoadCityCareerState(recover: true);
+        var busAcceptedAt = _activeMachine!.Snapshot!.AcceptedAtSeconds;
+        _calendar.AdvanceCalendarSeconds(_activeMachine!.Snapshot!.DueAtSeconds + 3600 - _calendar.CalendarTimeSeconds);
+        ProcessAndDeliverCityContract();
         paid = _ledger.BalanceCoords;
+        var busQuote = _lastCitySurveyReview is { } busReview ? DeliveryQuoteCalculator.Calculate(busContract, busReview, busAcceptedAt, _calendar.CalendarTimeSeconds) : null;
+        Require(CityMissionCompleted(bus.MissionId) && _lastCitySurveyReview?.GetMetric("absolute_rmse") is { SampleCount: 6, Status: MetricEvaluationStatus.Passed } &&
+            busQuote is { Eligible: true, LatePenaltyFraction: .05 } && paid == initialBusBalance + busQuote.NetCoords,
+            "the protected bus inventory did not settle on the late quote: " + _feedbackText + " " + CitySurveyReviewText());
+        var busMeasuredRmse = _lastCitySurveyReview!.GetMetric("absolute_rmse")!.Value;
+        TryLoadCareer();
+        Require(CityPlatformStoryUnlocked(LocomotionMode.Kombi) &&
+            _fleet.QuotePlatformPurchase(LocomotionMode.Kombi, _progression, new HashSet<string> { bus.MissionId }).Unlocked,
+            "HIST-05 completion or city-hall reputation did not unlock the Kombi shop");
+        StartStoryMission(bus);
+        ProcessAndDeliverCityContract();
+        Require(_activeContract is null && _ledger.BalanceCoords == paid, "the bus survey could pay twice after reload");
 
         // A previously accepted tunnel contract still opens and retains its observations.
         var tunnel = FullCampaignCatalog.GetMission("HIST-06");
@@ -277,6 +387,6 @@ public partial class SaoDatumCityScene
         _citySaveBlocked = false;
         TryLoadCareer();
         Require(original.SequenceEqual(File.ReadAllBytes(previous.CurrentSavePath)), "delivery fixture modified the career save");
-        GD.Print("GSA_CITY_DELIVERY_SMOKE_OK protected_only=true rework=true late_quote=true replay=once tunnel_photo=rejected facades=20 area_coverage=true drains=12 sidewalks=8 local_control=true signs=12 procedural_variants=10 act1_closure=true bicycle=true scooter=true");
+        GD.Print(FormattableString.Invariant($"GSA_CITY_DELIVERY_SMOKE_OK protected_only=true rework=true late_quote=true replay=once tunnel_photo=rejected facades=20 area_coverage=true drains=12 sidewalks=8 local_control=true signs=12 procedural_variants=10 act1_closure=true bicycle=true scooter=true car=true bus_360=true bus_rmse_m={busMeasuredRmse:F3} kombi_unlock=true"));
     }
 }

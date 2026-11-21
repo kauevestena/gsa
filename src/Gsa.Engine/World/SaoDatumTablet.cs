@@ -276,9 +276,13 @@ public partial class SaoDatumCityScene
             "HIST-01" => ("facade", 20, FacadeArea, "city_hall"),
             "HIST-02" => ("manhole", 12, DrainageArea, "city_hall"),
             "HIST-03" => ("sidewalk_seg", 8, CitySurveyInventory.SidewalkArea, "university"),
-            _ => ("sign", 12, CitySurveyInventory.SignsArea, "city_hall"),
+            "HIST-04" => ("sign", 12, CitySurveyInventory.SignsArea, "city_hall"),
+            _ => ("", 0, BusSurveyCorridor.AreaId, "city_hall"),
         };
-        var featureIds = Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray();
+        var isBusSurvey = area == BusSurveyCorridor.AreaId;
+        var featureIds = isBusSurvey ? BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray()
+            : Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray();
+        var calm = !isBusSurvey || _calmPolicy.CalmCityEnabled;
         var def = new ContractDefinition(
             SchemaVersion: 1,
             Id: spec.MissionId,
@@ -290,9 +294,14 @@ public partial class SaoDatumCityScene
             RequiredFeatureIds: featureIds,
             Requirements: CitySurveyRequirements(area, story: true),
             RequiredCapabilities: ["camera"],
-            Risk: "easy",
-            Calm: true,
-            Deadline: spec.MissionId == "HIST-04" ? new(25200, 32400, .05, .5) : new(21600, 27000, .05, .5),
+            Risk: calm ? "easy" : "moderate",
+            Calm: calm,
+            Deadline: spec.MissionId switch
+            {
+                "HIST-04" => new(25200, 32400, .05, .5),
+                BusSurveyCorridor.MissionId => new(30 * 3600, 36 * 3600, .05, .5),
+                _ => new(21600, 27000, .05, .5),
+            },
             Reward: new ContractRewardSpec(spec.RewardCoords, 120 + spec.Act * 60, spec.ReputationDelta, spec.UnlockedPlatforms.ToArray()),
             PartialPolicy: new ContractPartialPolicySpec("disabled", []),
             DeliveryFormat: "gsa_bundle_v1",
@@ -304,6 +313,7 @@ public partial class SaoDatumCityScene
             "HIST-02" => "city.story.drainage_brief",
             "HIST-03" => "city.story.sidewalk_brief",
             "HIST-04" => "city.story.signs_brief",
+            BusSurveyCorridor.MissionId => "city.story.bus_corridor_brief",
             _ => "city.story.facades_brief",
         };
         _gtaHud.ShowCutsceneLetterbox(
@@ -343,8 +353,13 @@ public partial class SaoDatumCityScene
         return true;
     }
 
-    private bool CityPlatformStoryUnlocked(LocomotionMode mode) =>
-        _isSandbox || mode < LocomotionMode.Car || CityMissionCompleted("HIST-04");
+    private bool CityPlatformStoryUnlocked(LocomotionMode mode) => _isSandbox || mode switch
+    {
+        LocomotionMode.Car => CityMissionCompleted("HIST-04"),
+        LocomotionMode.Kombi => CityMissionCompleted(BusSurveyCorridor.MissionId),
+        LocomotionMode.Pickup or LocomotionMode.Van => CityMissionCompleted("HIST-04"),
+        _ => true,
+    };
 
     private bool TryPurchaseCityPlatform(LocomotionMode mode)
     {
@@ -454,6 +469,7 @@ public partial class SaoDatumCityScene
             {
                 FacadeArea or ParkArea => "city.office.collect_surface",
                 CitySurveyInventory.SidewalkArea => "city.office.collect_control",
+                BusSurveyCorridor.AreaId => "city.story.bus_corridor_brief",
                 _ => "city.office.collect_inventory",
             };
             _officeStatusLabel.Text += "\n" + Text(instruction);

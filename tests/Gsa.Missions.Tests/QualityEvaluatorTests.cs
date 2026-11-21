@@ -71,6 +71,24 @@ public sealed class QualityEvaluatorTests
     }
 
     [Fact]
+    public void ImageQualityScopeStillChecksPrivacyOnEveryFace()
+    {
+        var contract = LoadContract("inventory.json");
+        var reference = new EvaluationReference(contract.Id, [], contract.RequiredFeatureIds);
+        var submission = new QualitySubmission(contract.Id, ["b1"], "gsa_bundle_v1", 1, false,
+            [MakeSample("target_face", 1), MakeSample("other_face", 1, qualityPassed: false, privacyUnredacted: true)], [], [], [])
+        {
+            ImageQualitySampleIds = new HashSet<string> { "target_face" },
+        };
+
+        var report = QualityEvaluator.Evaluate(contract, reference, submission);
+
+        Assert.Equal(2, report.UniqueSampleCount);
+        Assert.Equal(1.0, report.GetMetric("valid_image_fraction")!.Value);
+        Assert.Contains("cq.failure.privacy_redacted", report.FailureReasonKeys);
+    }
+
+    [Fact]
     public void ExclusionZonesClipUsefulCellAreaAccuratelyAndRejectEmptyUsefulSurface()
     {
         var emptySurface = new SurveySurfaceReference(

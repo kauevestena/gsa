@@ -1,6 +1,7 @@
 using System.Globalization;
 using Gsa.Missions.Gameplay;
 using Gsa.Core.Mobility;
+using Gsa.Core.World;
 using Godot;
 using Gsa.Missions.Campaign;
 using Gsa.Missions.Contracts;
@@ -42,11 +43,19 @@ public partial class SaoDatumCityScene
         DrainageArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("absolute_rmse", "m", "max", 2, .5)],
         CitySurveyInventory.SidewalkArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .2, .05)],
         CitySurveyInventory.SignsArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .15, .05)],
+        BusSurveyCorridor.AreaId =>
+        [
+            new PredicateRequirementSpec("all_required_features", true),
+            new ThresholdRequirementSpec("valid_image_fraction", "ratio", "min", .9, .99),
+            new PredicateRequirementSpec("privacy_redacted", true),
+            new PredicateRequirementSpec("format_valid", true),
+            new ThresholdRequirementSpec("absolute_rmse", "m", "max", 6, .5),
+        ],
         _ => CityPhotoRequirements,
     };
 
     private static bool SupportsCityStory(CampaignMissionFullSpec spec) =>
-        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04";
+        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId;
 
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
@@ -55,7 +64,7 @@ public partial class SaoDatumCityScene
             return false;
 
         var inventory = definition.Product == "feature_inventory" &&
-            definition.AreaId is DrainageArea or CitySurveyInventory.SidewalkArea or CitySurveyInventory.SignsArea;
+            definition.AreaId is DrainageArea or CitySurveyInventory.SidewalkArea or CitySurveyInventory.SignsArea or BusSurveyCorridor.AreaId;
         var photos = definition.Product == "images" && definition.AreaId is FacadeArea or ParkArea;
         if (!photos && !inventory)
             return false;
@@ -109,10 +118,13 @@ public partial class SaoDatumCityScene
 
         var locale = TranslationServer.GetLocale().Split('_')[0];
         var culture = CultureInfo.GetCultureInfo(locale == "pt" ? "pt-BR" : "en-US");
+        var imageMetric = report.GetMetric("valid_image_fraction");
+        var reviewedImages = imageMetric?.SampleCount ?? report.UniqueSampleCount;
+        var validImages = imageMetric?.Value is { } fraction ? (int)Math.Round(fraction * reviewedImages) : report.ValidSampleCount;
         var rows = new List<string>
         {
             string.Format(culture, Text("city.office.survey_review"), report.MatchedFeatureCount,
-                _lastCitySurveyTargetCount, report.ValidSampleCount, report.UniqueSampleCount)
+                _lastCitySurveyTargetCount, validImages, reviewedImages)
         };
         foreach (var (metric, labelKey) in new[] { ("absolute_rmse", "absolute"), ("relative_rmse", "relative") })
         {
@@ -123,6 +135,12 @@ public partial class SaoDatumCityScene
             rows.Add(string.Format(culture, Text("city.office.surface_coverage"), coverage, minimum));
         if (_lastIncompleteSurfaces.Count > 0)
             rows.Add(string.Format(culture, Text("city.office.incomplete_surfaces"), string.Join(", ", _lastIncompleteSurfaces)));
+        if (report.ContractId == BusSurveyCorridor.MissionId)
+        {
+            var missingStops = report.RecollectionAreas.SelectMany(area => area.MissingFeatureIds).Distinct(StringComparer.Ordinal).ToArray();
+            if (missingStops.Length > 0)
+                rows.Add(string.Format(culture, Text("city.bus.missing_stops"), string.Join(", ", missingStops)));
+        }
         if (_lastAdjustedPhotoCount > 0)
             rows.Add(string.Format(culture, Text("city.office.control_adjusted"), _lastAdjustedPhotoCount));
         foreach (var segment in _lastSidewalkMeasurements)
@@ -216,8 +234,23 @@ public partial class SaoDatumCityScene
         EvaluationReference reference;
         if (isInventory)
         {
+            var allSamples = submission.Samples;
+            if (definition.AreaId == BusSurveyCorridor.AreaId)
+            {
+                var targets = definition.RequiredFeatureIds.ToHashSet(StringComparer.Ordinal);
+                submission = submission with { Samples = submission.Samples.Where(sample =>
+                    sample.SensorId.StartsWith("camera-360-", StringComparison.Ordinal) &&
+                    BusSurveyCorridor.IsSurveyWindowAt(sample.TimestampSeconds) &&
+                    sample.ObservedFeatures.Any(feature => targets.Contains(feature.TargetId))).ToArray() };
+            }
             var controls = CitySurveyInventory.PublishedControls(definition, _manifestObjectsById);
+            var inventorySamples = submission.Samples;
             submission = CitySurveyInventory.Reconstruct(definition, submission, controls, out _lastSidewalkMeasurements, out _lastAdjustedPhotoCount);
+            if (definition.AreaId == BusSurveyCorridor.AreaId)
+            {
+                // Scope the image fraction to useful faces, and check privacy and format across the full sweep.
+                submission = submission with { Samples = allSamples, ImageQualitySampleIds = inventorySamples.Select(sample => sample.SampleId).ToHashSet(StringComparer.Ordinal) };
+            }
             reference = CitySurveyInventory.BuildReference(definition, _manifestObjectsById);
         }
         else

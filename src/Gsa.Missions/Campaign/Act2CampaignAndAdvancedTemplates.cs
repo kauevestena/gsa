@@ -136,7 +136,7 @@ public static class Act2CampaignRunner
 
         // HIST-05: Bus corridor 360 during 10-16h window (Car L3) -> unlocks Kombi
         var hist05 = FullCampaignCatalog.GetMission("HIST-05");
-        var windowOpenAt11h = true;
+        var windowOpenAt11h = BusSurveyCorridor.IsSurveyWindow(11);
         var busPassed = CanExecuteMissionWithPlatform("HIST-05", LocomotionMode.Car) && windowOpenAt11h;
         CutsceneSkipAndStateCoordinator.SkipCutscene(hist05.Cutscene, progressState);
         completedMissions.Add("HIST-05");

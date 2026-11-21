@@ -167,7 +167,7 @@ public static class RegionalSectorCatalog
             new("survey_control_waterfront_plaza", "survey_control", "concrete", "waterfront", ["waterfront_glass_planes"], ["control", "landmark"], false, true, new Vector3d(501610.0, 7400520.0, 100.2), new Vector3d(0.8, 0.8, 0.5)),
         ];
 
-        foreach (var obj in extraObjects)
+        foreach (var obj in extraObjects.Concat(BusSurveyCorridor.Stops))
         {
             if (seenIds.Add(obj.Id))
                 objects.Add(obj);

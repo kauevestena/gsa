@@ -44,7 +44,7 @@ public partial class SaoDatumCityScene
                 _campaignState.UnlockedEquipment.ToArray(), _campaignState.AppliedCutsceneIds.ToArray(),
                 _campaignState.SkippedCutsceneIds.ToArray(), new Dictionary<string, string>(_campaignState.ObjectiveStates)),
             _attention.ExportSnapshot(), _activeStorySpec?.MissionId, _officeMode, _privacyMasksApplied, _rackMisaligned,
-            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, _camScheduler.NextCaptureSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot()));
+            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, NextCityCameraSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot()));
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
     {
@@ -138,6 +138,7 @@ public partial class SaoDatumCityScene
             _activeStorySpec = story;
             PrepareCityPhotoCoverage();
             _camScheduler = new CameraCaptureScheduler("city_cam", initialSequence: city?.CameraNextSequence ?? 0);
+            _panoramicCameras = [];
             _captureRequested = false;
             _recentPhotoSeconds = 0; _cleanLensRequested = _disarmRequested = false; _hazardNotice = ""; _lastHazardWarning = null;
             _gtaHud.HideCutsceneLetterbox();
