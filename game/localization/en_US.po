@@ -2017,3 +2017,39 @@ msgstr "Road sections to revisit, measured from the west mouth: {0}"
 
 msgid "city.tunnel.portal_observed"
 msgstr "Zero-velocity portal observation recorded. Upload it with your scan."
+
+msgid "city.viaduct.field_brief"
+msgstr "Drive a Kombi with LiDAR enabled along the orange lane under the 100 m Port viaduct. Upload at a blue pad and enter the vertical control heights in the office."
+
+msgid "city.viaduct.height_instructions"
+msgstr "Vertical controls in metres. The field sheet supplies ellipsoidal height h and geoid separation N. Report both h and orthometric height H using H = h − N."
+
+msgid "city.viaduct.control"
+msgstr "{0} · h {1:F3} m · N {2:F3} m"
+
+msgid "city.viaduct.h"
+msgstr "Ellipsoidal h"
+
+msgid "city.viaduct.big_h"
+msgstr "Orthometric H"
+
+msgid "city.viaduct.incomplete_heights"
+msgstr "Enter both heights for all three controls."
+
+msgid "city.viaduct.cloud_rework"
+msgstr "Revisit the missing underside sections or check panels, then upload and process again."
+
+msgid "city.viaduct.report"
+msgstr "Deck cells at target density {0}/{1} ({2:P1}, target 90%) · Mean density {3:F1} pts/m²\nWorst check panel RMSE {4} m (≤0.20 m) · Relative height RMSE {5} m (≤0.10 m)\nVertical reference · {6}"
+
+msgid "city.viaduct.gaps"
+msgstr "Underside sections to revisit, measured from the west end: {0}"
+
+msgid "cq.error.vertical_reference_h_and_orthometric_H_swapped"
+msgstr "Ellipsoidal h and orthometric H are swapped. Correct the report and process the same upload again."
+
+msgid "cq.error.vertical_reference_tolerance_exceeded"
+msgstr "At least one height differs by more than 0.02 m. Check the height labels and the h − N calculation."
+
+msgid "cq.viaduct_height_reference_valid"
+msgstr "Both heights match for all three controls."

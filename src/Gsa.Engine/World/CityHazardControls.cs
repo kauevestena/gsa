@@ -140,6 +140,7 @@ public partial class SaoDatumCityScene
         ClearPendingCityLidar();
         _lastCitySurveyReview = null;
         _lastTunnelReview = null;
+        RestoreViaductDraft(null);
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();
         _feedbackText = Text("city.hazards.abandoned"); SaveHazardChange();

@@ -46,8 +46,9 @@ public partial class SaoDatumCityScene
             _attention.ExportSnapshot(), _activeStorySpec?.MissionId, _officeMode, _privacyMasksApplied, _rackMisaligned,
             _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, NextCityCameraSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot())
         {
-            LidarBuffer = IsTunnelCollection(_activeContract) && _activeStorySpec?.MissionId == TunnelMissionId
+            LidarBuffer = IsCityLidarCollection(_activeContract) && _activeStorySpec?.MissionId == _activeContract?.Id
                 ? new(_pendingLidar.ToArray(), _lidarTicksWithoutPose, _lidarTicksWithoutCapacity) : null,
+            ViaductHeights = IsViaductCollection(_activeContract) ? _viaductHeightFields.Select(field => field.Text).ToArray() : null,
         });
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
@@ -125,6 +126,7 @@ public partial class SaoDatumCityScene
             _lastSpeedMps = 0;
             _lastCitySurveyReview = null;
             _lastTunnelReview = null;
+            RestoreViaductDraft(city?.ViaductHeights);
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;
@@ -142,7 +144,7 @@ public partial class SaoDatumCityScene
             _activeContract = result.State.Contracts.SingleOrDefault()?.CatalogDefinition;
             _activeStorySpec = story;
             RestorePendingCityLidar(city?.LidarBuffer);
-            if (IsTunnelCollection(_activeContract)) _lidarEnabled = false;
+            if (IsCityLidarCollection(_activeContract)) _lidarEnabled = false;
             PrepareCityPhotoCoverage();
             _camScheduler = new CameraCaptureScheduler("city_cam", initialSequence: city?.CameraNextSequence ?? 0);
             _panoramicCameras = [];

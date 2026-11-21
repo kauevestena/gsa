@@ -2,6 +2,7 @@ using Gsa.Core.Geometry;
 using System.Text.Json.Serialization;
 using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
+using Gsa.Core.World;
 using Gsa.Missions.Activities;
 using Gsa.Missions.Economy;
 using Gsa.Missions.Office;
@@ -15,7 +16,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public const int CurrentCatalogVersion = 6;
+    public const int CurrentCatalogVersion = 7;
     public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 
@@ -49,6 +50,9 @@ public sealed record SaveCitySessionState(
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public CityLidarBufferSnapshot? LidarBuffer { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<string>? ViaductHeights { get; init; }
 }
 
 public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);
@@ -163,33 +167,40 @@ public static class SaveCompatibility
             var ids = city.CameraSamples.Select(s => s.SampleId).ToHashSet(StringComparer.Ordinal);
             var lidarTicks = new HashSet<long>();
             var lidarReturns = 0;
-            void CheckLidar(IEnumerable<CityLidarSlice> slices, int limit)
+            void CheckLidar(IEnumerable<CityLidarSlice> slices, int limit, string? missionId)
             {
                 foreach (var slice in slices)
                 {
                     if (slice is null || !lidarTicks.Add(slice.PhysicsTick))
                         throw new ArgumentException("Duplicate or missing LiDAR slice.");
                     slice.Validate(city.PhysicsTick);
+                    if (missionId == PortViaductSurvey.MissionId
+                        ? slice.TunnelRanges?.Corridor != PortViaductSurvey.AreaId
+                        : missionId != "HIST-06" || slice.TunnelRanges?.Corridor is not null)
+                        throw new ArgumentException("City LiDAR observations do not match the contract.");
                     lidarReturns += slice.Returns.Count;
                     if (lidarReturns > limit) throw new ArgumentException("City LiDAR storage exceeds its limit.");
                 }
             }
             if (city.LidarBuffer is { } lidar)
             {
-                if (lidar.Pending is null || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 || city.ActiveStoryMissionId != "HIST-06")
+                if (lidar.Pending is null || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 ||
+                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId))
                     throw new ArgumentException("Invalid pending city LiDAR buffer.");
-                CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns);
+                CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns, city.ActiveStoryMissionId);
                 if (CityLidarSlice.StorageUnits(lidarReturns) > city.Mobility.UsedVirtualStorageUnits)
                     throw new ArgumentException("Pending city LiDAR storage is unaccounted for.");
             }
+            if (city.ViaductHeights is { } heights && (city.ActiveStoryMissionId != PortViaductSurvey.MissionId ||
+                heights.Count != 2 * PortViaductSurvey.VerticalControls.Count || heights.Any(value => value is null || value.Length > 16)))
+                throw new ArgumentException("Invalid viaduct height draft.");
             foreach (var entry in runtime.CustodyStore.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
             {
                 var batch = System.Text.Json.JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson)
                     ?? throw new ArgumentException("Invalid protected city batch.");
                 if (batch.LidarSlices is { } slices)
                 {
-                    if (batch.ContractId != "HIST-06") throw new ArgumentException("Invalid city LiDAR contract.");
-                    CheckLidar(slices, CityLidarSlice.MaxContractReturns);
+                    CheckLidar(slices, CityLidarSlice.MaxContractReturns, batch.ContractId);
                 }
                 foreach (var sample in batch.Samples)
                 {

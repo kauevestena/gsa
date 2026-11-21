@@ -20,6 +20,12 @@ public partial class SaoDatumCityScene
     private static bool IsTunnelCollection(ContractDefinition? definition) =>
         definition is { Id: TunnelMissionId, Product: "point_cloud" };
 
+    private static bool IsViaductCollection(ContractDefinition? definition) =>
+        definition is { Id: PortViaductSurvey.MissionId, Product: "point_cloud" };
+
+    private static bool IsCityLidarCollection(ContractDefinition? definition) =>
+        IsTunnelCollection(definition) || IsViaductCollection(definition);
+
     private void BuildPortLidarDeck(Node3D parent)
     {
         // Match the flat asphalt deck's rendered upper surface in the Port.
@@ -29,10 +35,12 @@ public partial class SaoDatumCityScene
         parent.AddChild(deck);
     }
 
-    private bool ShouldRecordCityLidar(Vector3d position, LocomotionMode mode) => IsTunnelCollection(_activeContract) &&
+    private bool ShouldRecordCityLidar(Vector3d position, LocomotionMode mode) =>
+        (IsTunnelCollection(_activeContract) && GetRegionIdForEnu(position) == "port" ||
+            IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(position)) &&
         _activeMachine is { IsActiveState: true, Snapshot: { } accepted } &&
         _calendar.CalendarTimeSeconds <= accepted.ExpiresAtSeconds &&
-        _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode) && GetRegionIdForEnu(position) == "port";
+        _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode);
 
     private void RecordCityLidarSlice(string profileId, EstimatedBodyPose pose, LidarMountEstimate mount, TunnelRangeObservation? ranges)
     {

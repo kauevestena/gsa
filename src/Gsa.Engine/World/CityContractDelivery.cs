@@ -55,7 +55,7 @@ public partial class SaoDatumCityScene
     };
 
     private static bool SupportsCityStory(CampaignMissionFullSpec spec) =>
-        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId or TunnelMissionId;
+        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId or TunnelMissionId or PortViaductSurvey.MissionId;
 
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
@@ -176,6 +176,12 @@ public partial class SaoDatumCityScene
         if (IsTunnelCollection(definition))
         {
             ProcessTunnelDelivery(machine, now);
+            return;
+        }
+
+        if (IsViaductCollection(definition))
+        {
+            ProcessViaductDelivery(machine, now);
             return;
         }
 

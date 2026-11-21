@@ -256,6 +256,7 @@ public partial class SaoDatumCityScene : Node3D
         visualBase.AddChild(cityGround);
         BuildPortLidarDeck(visualBase);
         BuildPortTunnel(visualBase);
+        BuildPortViaduct(visualBase);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
@@ -407,7 +408,7 @@ public partial class SaoDatumCityScene : Node3D
 
         _manifestObstacles = ObstacleBoxEnu.FromWorldObjects(
             _fullManifest.Objects.Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot")))
-            .Concat(PortTunnelWalls()).ToArray();
+            .Concat(PortTunnelWalls()).Concat(PortViaductPiers()).ToArray();
         _liveCandidates = _fullManifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
     }
 
@@ -577,7 +578,8 @@ public partial class SaoDatumCityScene : Node3D
             // 120 m, so sector-edge setbacks alone do not keep this grid clear.
             if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
                 OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d) ||
-                BusSurveyCorridor.OverlapsBuildings(e, n, w, d) || PortTunnelSurvey.OverlapsBuilding(e, n, w, d))
+                BusSurveyCorridor.OverlapsBuildings(e, n, w, d) || PortTunnelSurvey.OverlapsBuilding(e, n, w, d) ||
+                PortViaductSurvey.OverlapsBuilding(e, n, w, d))
                 continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
@@ -732,6 +734,8 @@ public partial class SaoDatumCityScene : Node3D
             var speedLimit = _cityHazards.TirePunctured ? 6 : double.PositiveInfinity;
             if (_lidarEnabled && activeMode >= LocomotionMode.Kombi && IsTunnelCollection(_activeContract) && PortTunnelSurvey.IsSurveyLane(prevCarPos))
                 speedLimit = Math.Min(speedLimit, PortTunnelSurvey.SurveySpeed);
+            if (_lidarEnabled && activeMode >= LocomotionMode.Kombi && IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(prevCarPos))
+                speedLimit = Math.Min(speedLimit, PortViaductSurvey.SurveySpeed);
             var carStep = _carSim.StepMotion(
                 delta,
                 Math.Max(0.0, input.Throttle),
@@ -1167,7 +1171,9 @@ public partial class SaoDatumCityScene : Node3D
         _lidarSliceIndex++;
 
         var scientific = ShouldRecordCityLidar(pos, mode);
-        var ranges = scientific ? ObserveTunnelRanges(pos, heading) : null;
+        var viaduct = scientific && IsViaductCollection(_activeContract);
+        var ranges = viaduct ? PortViaductSurvey.Observe(pos, heading, _tick)
+            : scientific ? ObserveTunnelRanges(pos, heading) : null;
         var navigation = scientific && ranges is null ? _navigationRig?.Estimator?.Current : null;
         if (scientific && navigation is null && ranges is null)
         {
@@ -1177,9 +1183,10 @@ public partial class SaoDatumCityScene : Node3D
 
         var time = _tick / (double)CameraCaptureScheduler.PhysicsTicksPerSecond;
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
-        // On the tunnel route the Kombi's single-channel scanner is pitched down as a transverse profiler.
-        var scannerRotation = ranges is not null && profile.Grade == 4
-            ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2) : Quaterniond.Identity;
+        // Point the transverse profiler at the viaduct deck underside or at the tunnel floor.
+        var scannerRotation = viaduct ? Quaterniond.FromAxisAngle(Vector3d.UnitY, -Math.PI / 2)
+            : ranges is not null && profile.Grade == 4 ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2)
+            : Quaterniond.Identity;
         var mount = new LidarMountEstimate(new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0), scannerRotation);
         var physicalMount = scientific ? mount with
         {

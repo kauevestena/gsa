@@ -40,6 +40,8 @@ public partial class SaoDatumCityScene
         if (IsTunnelCollection(_activeContract))
             return (p - PortTunnelSurvey.WestStop).Length <= 8 || (p - PortTunnelSurvey.MiddleUpload).Length <= 8 ||
                 (p - PortTunnelSurvey.EastStop).Length <= 8;
+        if (IsViaductCollection(_activeContract))
+            return (p - PortViaductSurvey.WestPad).Length <= 8 || (p - PortViaductSurvey.EastPad).Length <= 8;
         return false;
     }
 
@@ -301,7 +303,7 @@ public partial class SaoDatumCityScene
         _mobility.SetVisualPlatformMode(LocomotionMode.Handcart); ResetCityNavigation(); SnapCamera();
         _audio.PlayAlert(critical: true);
         _feedbackText = _hazardNotice = string.Format(Text("city.hazards.vehicle_lost"), lost, _protectedCityPhotos.Count);
-        if (IsTunnelCollection(_activeContract))
+        if (IsCityLidarCollection(_activeContract))
             _feedbackText = _hazardNotice = $"{_hazardNotice} {string.Format(Text("city.lidar.vehicle_lost"), lostLidar, _protectedLidarReturns)}";
         SaveHazardChange();
     }
