@@ -277,11 +277,17 @@ public partial class SaoDatumCityScene
             "HIST-02" => ("manhole", 12, DrainageArea, "city_hall"),
             "HIST-03" => ("sidewalk_seg", 8, CitySurveyInventory.SidewalkArea, "university"),
             "HIST-04" => ("sign", 12, CitySurveyInventory.SignsArea, "city_hall"),
-            _ => ("", 0, BusSurveyCorridor.AreaId, "city_hall"),
+            BusSurveyCorridor.MissionId => ("", 0, BusSurveyCorridor.AreaId, "city_hall"),
+            _ => ("", 0, "port_tunnel", "university"),
         };
         var isBusSurvey = area == BusSurveyCorridor.AreaId;
-        var featureIds = isBusSurvey ? BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray()
-            : Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray();
+        var isTunnel = spec.MissionId == TunnelMissionId;
+        var featureIds = spec.MissionId switch
+        {
+            BusSurveyCorridor.MissionId => BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray(),
+            TunnelMissionId => ["survey_control_port_tunnel"],
+            _ => Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray(),
+        };
         var calm = !isBusSurvey || _calmPolicy.CalmCityEnabled;
         var def = new ContractDefinition(
             SchemaVersion: 1,
@@ -292,8 +298,8 @@ public partial class SaoDatumCityScene
             AreaId: area,
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: CitySurveyRequirements(area, story: true),
-            RequiredCapabilities: ["camera"],
+            Requirements: isTunnel ? [new PredicateRequirementSpec("format_valid", true)] : CitySurveyRequirements(area, story: true),
+            RequiredCapabilities: isTunnel ? ["lidar_l4"] : ["camera"],
             Risk: calm ? "easy" : "moderate",
             Calm: calm,
             Deadline: spec.MissionId switch
@@ -314,6 +320,7 @@ public partial class SaoDatumCityScene
             "HIST-03" => "city.story.sidewalk_brief",
             "HIST-04" => "city.story.signs_brief",
             BusSurveyCorridor.MissionId => "city.story.bus_corridor_brief",
+            TunnelMissionId => "city.lidar.field_brief",
             _ => "city.story.facades_brief",
         };
         _gtaHud.ShowCutsceneLetterbox(
@@ -325,7 +332,7 @@ public partial class SaoDatumCityScene
     private bool AcceptCityContract(ContractDefinition def, CampaignMissionFullSpec? story = null)
     {
         if (_activeContract is not null) { _feedbackText = Text("city.hazards.active_job"); return false; }
-        if (!SupportsCityDelivery(def)) { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
+        if (!SupportsCityDelivery(def) && !IsTunnelCollection(def)) { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
         if (_progression.SettledContractIds.Contains(def.Id) || (story is not null && CityMissionCompleted(story.MissionId)))
         {
             _feedbackText = Text("city.story.completed");
@@ -340,6 +347,9 @@ public partial class SaoDatumCityScene
         _activeMachine = new ContractStateMachine(def);
         _activeMachine.Accept(_calendar.CalendarTimeSeconds);
         _fieldSamples.Clear();
+        RestorePendingCityLidar(null);
+        _protectedLidarReturns = 0;
+        if (IsTunnelCollection(def)) _lidarEnabled = false;
         _cityCustody = new BatchCustodyStore(); _protectedCityPhotos.Clear(); _cityHazards.BeginContract();
         _cityHazards.Services.ExpireInsurance();
         _observedTargetIds.Clear();
@@ -409,7 +419,7 @@ public partial class SaoDatumCityScene
             var btn = new Button
             {
                 Text = Text(done ? "city.story.completed" : !supported ? "city.office.unavailable" : !prereqsMet ? "city.story.locked" :
-                    equipped ? "city.story.start" : "city.story.requires_platform"),
+                    !equipped ? "city.story.requires_platform" : spec.MissionId == TunnelMissionId ? "city.lidar.start_field" : "city.story.start"),
                 Disabled = done || !prereqsMet || !supported || !equipped,
                 TooltipText = supported ? "" : Text(CityOfficeUnavailableKey(spec.ProductType)),
                 FocusMode = Control.FocusModeEnum.None,
@@ -458,7 +468,7 @@ public partial class SaoDatumCityScene
         _officeStatusLabel.Text =
             $"{Text("city.office.active")}: {contractName}\n" +
             $"{Text("training.targets")}: {foundCount}/{targetCount} · Samples: {_fieldSamples.Count} · LiDAR pts: {_lidarPointVisibleCount}\n" +
-            (_activeContract is { } active && !SupportsCityDelivery(active)
+            (_activeContract is { } active && !SupportsCityDelivery(active) && !IsTunnelCollection(active)
                 ? Text(CityOfficeUnavailableKey(active.Product)) + "\n" : "") +
             $"Mode: {Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical")}\n" +
             $"Rack Calibration: {(_rackMisaligned ? Text("city.rack.misaligned") : Text("city.rack.ok"))}";
@@ -474,6 +484,8 @@ public partial class SaoDatumCityScene
             };
             _officeStatusLabel.Text += "\n" + Text(instruction);
         }
+        if (IsTunnelCollection(_activeContract))
+            _officeStatusLabel.Text += "\n" + Text("city.lidar.field_brief") + "\n" + CityLidarCollectionStatus();
         var review = CitySurveyReviewText();
         if (review.Length > 0) _officeStatusLabel.Text += "\n" + review;
         if (_activeStorySpec?.MissionId == "HIST-02" && _activeMachine?.Snapshot is { } drainage && !_calendar.IsRaining)
@@ -597,6 +609,7 @@ public partial class SaoDatumCityScene
         var objDetails = _activeContract is not null
             ? string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count)
             : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
+        if (IsTunnelCollection(_activeContract)) objDetails = CityLidarCollectionStatus();
 
         var radioTitle = _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
         var radioSub = !string.IsNullOrEmpty(_audio.CurrentRadioSubtitleKey) ? Text(_audio.CurrentRadioSubtitleKey) : "";

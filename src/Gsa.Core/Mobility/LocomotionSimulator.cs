@@ -183,6 +183,13 @@ public sealed class LocomotionSimulator
         return true;
     }
 
+    public void ReleaseCaptureUnits(int units)
+    {
+        if (units < 0 || units > UsedVirtualStorageUnits)
+            throw new ArgumentOutOfRangeException(nameof(units));
+        UsedVirtualStorageUnits -= units;
+    }
+
     public void MarkGimbalinaFled() => GimbalinaFled = true;
 
     public void SwitchVehiclePlatform(LocomotionMode vehicleMode, bool refillAutonomy = true, bool clearStorage = false)

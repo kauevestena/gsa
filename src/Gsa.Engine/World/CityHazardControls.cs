@@ -1,6 +1,7 @@
 using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
 using Gsa.Missions.Economy;
+using Gsa.Missions.Persistence;
 using Godot;
 
 namespace Gsa.Engine.World;
@@ -135,6 +136,8 @@ public partial class SaoDatumCityScene
         if (_activeContract is null) return;
         _activeMachine?.Abandon(_calendar.CalendarTimeSeconds);
         _activeContract = null; _cityPhotoCoverage = null; _activeMachine = null; _activeStorySpec = null;
+        _locomotion.ReleaseCaptureUnits(CityLidarSlice.StorageUnits(_pendingLidarReturns));
+        ClearPendingCityLidar();
         _lastCitySurveyReview = null;
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();

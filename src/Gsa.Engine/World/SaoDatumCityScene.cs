@@ -254,6 +254,7 @@ public partial class SaoDatumCityScene : Node3D
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         };
         visualBase.AddChild(cityGround);
+        BuildPortLidarDeck(visualBase);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
@@ -1160,13 +1161,29 @@ public partial class SaoDatumCityScene : Node3D
         var sliceIdx = _lidarSliceIndex % sliceCount;
         _lidarSliceIndex++;
 
-        var lidarOrigin = pos + new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0);
+        var scientific = ShouldRecordCityLidar(pos, mode);
+        var navigation = _navigationRig?.Estimator?.Current;
+        if (scientific && navigation is null)
+        {
+            _lidarTicksWithoutPose++;
+            return;
+        }
+
+        var time = _tick / (double)CameraCaptureScheduler.PhysicsTicksPerSecond;
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
-        var pose = new EstimatedBodyPose(_calendar.CalendarTimeSeconds, lidarOrigin, yaw);
-        var traj = new EstimatedBodyTrajectory([pose, new EstimatedBodyPose(_calendar.CalendarTimeSeconds + 1.0, lidarOrigin, yaw)]);
-        var lidarToMap = LidarBenchSimulator.ComposeLidarToMap(new RigidTransform(yaw, lidarOrigin), LidarMountEstimate.Zero);
+        var mount = new LidarMountEstimate(new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0), Quaterniond.Identity);
+        var physicalMount = scientific ? mount with
+        {
+            LidarToBodyRotation = Quaterniond.FromAxisAngle(Vector3d.UnitZ, _cityHazards.RackYawErrorRadians),
+        } : mount;
+        var pose = scientific && navigation is not null
+            ? new EstimatedBodyPose(time, navigation.PositionEnu, navigation.BodyToMapRotation)
+            : new EstimatedBodyPose(time, pos, yaw);
+        var traj = new EstimatedBodyTrajectory([pose]);
+        var lidarToMap = LidarBenchSimulator.ComposeLidarToMap(new RigidTransform(yaw, pos), physicalMount);
         var space = GetWorld3D().DirectSpaceState;
         _lidarRayQuery ??= new PhysicsRayQueryParameters3D { CollisionMask = 1 };
+        _lidarRayQuery.CollisionMask = scientific ? 1 | PortLidarDeckLayer : 1;
 
         LidarRayHit? CastRay(Vector3d startEnu, Vector3d dirEnu, double maxRange)
         {
@@ -1187,10 +1204,12 @@ public partial class SaoDatumCityScene : Node3D
             return new LidarRayHit(dist, new Vector3d(hitNormG.X, -hitNormG.Z, hitNormG.Y), mat, id);
         }
 
-        var channelStep = CityLidarChannelStep(profile);
-        if (_lidarSim.TrySimulateScanSlice(_calendar.CalendarTimeSeconds, lidarToMap, traj, LidarMountEstimate.Zero,
-            isRaining, CastRay, sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
+        var channelStep = scientific ? 1 : CityLidarChannelStep(profile);
+        if (_lidarSim.TrySimulateScanSlice(time, lidarToMap, traj, mount,
+            isRaining, CastRay, scientific ? (int)(_tick % sliceCount) : sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
+            if (scientific) RecordCityLidarSlice(profile.Id, pose, mount);
+            if (!_lidarCloudMesh.Visible) return;
             var mm = _lidarCloudMesh.Multimesh;
             var maxPointsPerSlice = Math.Max(1, 480 / sliceCount);
             var stepStride = Math.Max(1, _lidarSliceScratch.Count / maxPointsPerSlice);

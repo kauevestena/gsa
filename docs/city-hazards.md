@@ -51,7 +51,9 @@ O quadro oferece cinco contratos procedurais com duas rotas por modelo: fachadas
 
 O ajuste das fotos de calçadas mantém a orientação da câmera fixa e corrige o erro de posição simulado a partir dos marcos visíveis. As outras câmeras leves ainda usam poses ideais. O corredor de ônibus guarda as seis faces de cada panorama no lote. No CQ do inventário, o Escritório avalia a qualidade das faces que observaram alvos do contrato e reconstrói posições com as poses estimadas. O prazo recomendado é de 30 h e o final de 36 h, permitindo aguardar a próxima abertura da faixa. Os contratos procedurais fornecem renda adicional para comprar veículos.
 
-As missões a partir da HIST-06, entregas de nuvens e perfis, Base/PPK e logs persistentes de navegação continuam em desenvolvimento. A prévia LiDAR segue disponível para exploração.
+HIST-06 já permite iniciar a coleta de campo com a Kombi após HIST-05. No Porto, aguarde a inicialização da navegação e pressione **L** para gravar. Use um ponto de descarga para proteger os retornos. O Escritório reconstrói os lotes enviados usando a pose e a montagem registradas e informa o número de retornos e blocos. A missão de 200 m, seu CQ e pagamento seguem em desenvolvimento, assim como HIST-07 em diante, perfis e Base/PPK.
+
+A aquisição usa a agenda física de 60 Hz e conserva alcance, intensidade, ângulos e ordem de retorno com uma pose estimada por fatia. A compensação de movimento dentro da fatia permanece pendente. A proteção independe da nuvem exibida. Ticks sem pose ou capacidade aparecem no HUD. O scanner inicia pausado após recarregar. O limite é de 32 mil retornos a bordo e 160 mil por contrato, com uma unidade virtual por mil retornos armazenados, arredondada para cima por lote. Fora do Porto e fora da coleta ativa, o scanner exibe a prévia visual.
 
 O circuito de HIST-05 valida seis alvos de inventário. A cobertura contínua do corredor e o limite de 0,5 m do produto 360° de [parâmetros](../specs/parametros.md#sensores-e-qualidade) seguem pendentes da integração de controle ou posicionamento corrigido. O limite provisório reflete a navegação autônoma disponível na cena.
 

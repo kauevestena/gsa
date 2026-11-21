@@ -358,7 +358,7 @@ public partial class SaoDatumCityScene
         // A previously accepted tunnel contract still opens and retains its observations.
         var tunnel = FullCampaignCatalog.GetMission("HIST-06");
         StartStoryMission(tunnel);
-        Require(_activeContract is null && _feedbackText == Text("city.office.requires_lidar"), "new tunnel job was offered without LiDAR acquisition");
+        Require(_activeContract is null && _feedbackText == Text("city.story.requires_platform"), "new tunnel job was offered without a LiDAR platform");
         _activeContract = facadeJob with
         {
             Id = tunnel.MissionId, TitleKey = tunnel.TitleKey, Product = tunnel.ProductType,
@@ -383,6 +383,7 @@ public partial class SaoDatumCityScene
         Require(_feedbackText == Text("city.office.requires_lidar"), "the office did not identify LiDAR as the missing product");
         AbandonCityContract();
         Require(_activeContract is null, "unsupported saved job could not be closed");
+        RunCityLidarCaptureSmoke();
         _saveManager = previous;
         _citySaveBlocked = false;
         TryLoadCareer();

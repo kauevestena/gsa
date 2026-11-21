@@ -55,7 +55,7 @@ public partial class SaoDatumCityScene
     };
 
     private static bool SupportsCityStory(CampaignMissionFullSpec spec) =>
-        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId;
+        spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId or TunnelMissionId;
 
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
@@ -175,7 +175,13 @@ public partial class SaoDatumCityScene
 
         if (!SupportsCityDelivery(definition))
         {
-            _feedbackText = Text(CityOfficeUnavailableKey(definition.Product));
+            if (IsTunnelCollection(definition) && _protectedLidarReturns > 0)
+            {
+                var cloud = BuildProtectedCityCloud().GetMetrics();
+                _feedbackText = string.Format(Text("city.lidar.protected_cloud"), cloud.TotalSamples, cloud.ChunkCount);
+            }
+            else
+                _feedbackText = Text(CityOfficeUnavailableKey(definition.Product));
             return;
         }
 

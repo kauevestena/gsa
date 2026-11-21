@@ -129,6 +129,7 @@ public partial class SaoDatumCityScene
         _technicalCloudHelp.Text = Text("survey.technical.cloud_help");
         _cityMapLegend.Text = Text("survey.map.legend");
         var lines = new List<string> { Text("survey.technical.preview"), Text("navigation.preview_separate"), "" };
+        if (IsTunnelCollection(_activeContract)) lines.Add(CityLidarCollectionStatus());
         _showNavigationButton.Visible = mode >= LocomotionMode.Car;
         _showNavigationButton.Text = Text("navigation.show_trail");
         var estimate = _navigationRig?.Estimator?.Current;
@@ -152,7 +153,8 @@ public partial class SaoDatumCityScene
         if (hasLidar)
         {
             var profile = CityLidarProfile(mode);
-            var preview = AdvancedSurveyPresenter.BuildLidarPreview(profile, _lidarEnabled, CityLidarChannelStep(profile),
+            var channelStep = ShouldRecordCityLidar(CurrentPositionEnu(), mode) ? 1 : CityLidarChannelStep(profile);
+            var preview = AdvancedSurveyPresenter.BuildLidarPreview(profile, _lidarEnabled, channelStep,
                 _lidarPointVisibleCount, MaxLidarDisplayPoints, locale);
             lines.Add(Text(preview.StatusKey));
             lines.Add($"{Text("survey.technical.profile")}: {preview.ProfileId}");

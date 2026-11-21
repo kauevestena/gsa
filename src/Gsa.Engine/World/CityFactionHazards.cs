@@ -221,7 +221,7 @@ public partial class SaoDatumCityScene
     private void OffloadCityData()
     {
         if (_activeContract is null || !NearCityUnload()) { _feedbackText = Text("city.hazards.upload_location"); return; }
-        if (_fieldSamples.Count == 0) { _feedbackText = Text("city.hazards.nothing_to_upload"); return; }
+        if (_fieldSamples.Count == 0 && _pendingLidarReturns == 0) { _feedbackText = Text("city.hazards.nothing_to_upload"); return; }
         var now = _calendar.CalendarTimeSeconds;
         _activeMachine?.AdvanceClock(now);
         if (_activeMachine?.State == ContractState.Expirado)
@@ -236,9 +236,16 @@ public partial class SaoDatumCityScene
         }
 
         var id = _cityHazards.NextEventId();
-        var artifact = new SurveyBatchArtifact(1, id, _activeContract.Id, _fieldSamples.Min(s => s.TimestampSeconds),
-            _fieldSamples.Max(s => s.TimestampSeconds), _fieldSamples.Count, 0, CaptureStopReason.None,
-            _fieldSamples.Select(s => s.SensorId).Distinct().ToArray(), _fieldSamples.Select(SerializableCameraSample.FromDomain).ToArray(), [], [], []);
+        var photoTimes = _fieldSamples.Select(s => s.TimestampSeconds);
+        // Batch/contract events use calendar time. Each LiDAR slice keeps its own physical timestamp.
+        var batchTimes = _pendingLidarReturns == 0 ? photoTimes : photoTimes.Append(now);
+        var sensors = _fieldSamples.Select(s => s.SensorId).Concat(_pendingLidar.Select(slice => slice.ProfileId)).Distinct().ToArray();
+        var artifact = new SurveyBatchArtifact(1, id, _activeContract.Id, batchTimes.Min(), batchTimes.Max(),
+            _fieldSamples.Count + CityLidarSlice.StorageUnits(_pendingLidarReturns), 0, CaptureStopReason.None,
+            sensors, _fieldSamples.Select(SerializableCameraSample.FromDomain).ToArray(), [], [], [])
+        {
+            LidarSlices = _pendingLidarReturns > 0 ? _pendingLidar.ToArray() : null,
+        };
         _cityCustody.RegisterBufferedBatch(artifact, _calendar.CalendarTimeSeconds);
         var result = _cityCustody.OffloadAtomic(id, _calendar.CalendarTimeSeconds);
         if (result.Status is not (CustodyOperationStatus.Executed or CustodyOperationStatus.IdempotentNoOp))
@@ -246,6 +253,8 @@ public partial class SaoDatumCityScene
         _activeMachine?.RecordPendingBatch(_calendar.CalendarTimeSeconds, id);
         _activeMachine?.ProtectBatchAtUnloadPoint(_calendar.CalendarTimeSeconds, id);
         _protectedCityPhotos.AddRange(_fieldSamples); _fieldSamples.Clear();
+        _protectedLidarReturns += _pendingLidarReturns;
+        ClearPendingCityLidar();
         _locomotion.RefillHandcartResources(refillAutonomy: false, clearStorage: true);
         if (_gimbalina.HasFledToSafety) _locomotion.MarkGimbalinaFled();
         _audio.PlayOffloadChime(); _feedbackText = _hazardNotice = Text("city.hazards.uploaded"); SaveHazardChange();
@@ -254,10 +263,12 @@ public partial class SaoDatumCityScene
     private void RestoreCityProtectedPhotos()
     {
         _protectedCityPhotos.Clear();
+        _protectedLidarReturns = 0;
         foreach (var entry in _cityCustody.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
         {
             var batch = JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson) ?? throw new ArgumentException("Invalid city batch.");
             _protectedCityPhotos.AddRange(batch.Samples.Select(s => s.ToDomain()));
+            _protectedLidarReturns += batch.LidarSlices?.Sum(slice => slice.Returns.Count) ?? 0;
         }
     }
 
@@ -271,9 +282,10 @@ public partial class SaoDatumCityScene
 
     private void HandleCityVehicleLoss()
     {
-        var lost = _fieldSamples.Count; var mode = _locomotion.MountedVehicleMode;
+        var lost = _fieldSamples.Count; var lostLidar = _pendingLidarReturns; var mode = _locomotion.MountedVehicleMode;
         if (mode >= LocomotionMode.Car) _cityHazards.DisabledVehicle = mode;
         _fieldSamples.Clear(); _cityCustody.HandleVehicleLoss(_calendar.CalendarTimeSeconds);
+        ClearPendingCityLidar();
         _activeMachine?.HandleFieldIncident(_calendar.CalendarTimeSeconds, FieldIncidentKind.VehicleDestroyed);
         RebuildCityObservedTargets(); _coverageSpots.Clear();
         foreach (var sample in _protectedCityPhotos) _coverageSpots.Add(sample.EstimatedPose.PositionEnu);
@@ -286,6 +298,8 @@ public partial class SaoDatumCityScene
         _mobility.SetVisualPlatformMode(LocomotionMode.Handcart); ResetCityNavigation(); SnapCamera();
         _audio.PlayAlert(critical: true);
         _feedbackText = _hazardNotice = string.Format(Text("city.hazards.vehicle_lost"), lost, _protectedCityPhotos.Count);
+        if (IsTunnelCollection(_activeContract))
+            _feedbackText = _hazardNotice = $"{_hazardNotice} {string.Format(Text("city.lidar.vehicle_lost"), lostLidar, _protectedLidarReturns)}";
         SaveHazardChange();
     }
 
