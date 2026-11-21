@@ -146,6 +146,7 @@ public partial class SaoDatumCityScene
             _feedbackText = Text("city.office.rack_calibrated");
         });
         BuildCityHazardControls(officeTab);
+        BuildViaductOfficeForm(officeTab);
 
         AddOfficeBtn("city.office.process_deliver", ProcessAndDeliverCityContract);
 
@@ -278,17 +279,19 @@ public partial class SaoDatumCityScene
             "HIST-03" => ("sidewalk_seg", 8, CitySurveyInventory.SidewalkArea, "university"),
             "HIST-04" => ("sign", 12, CitySurveyInventory.SignsArea, "city_hall"),
             BusSurveyCorridor.MissionId => ("", 0, BusSurveyCorridor.AreaId, "city_hall"),
+            PortViaductSurvey.MissionId => ("", 0, PortViaductSurvey.AreaId, "university"),
             _ => ("", 0, "port_tunnel", "university"),
         };
         var isBusSurvey = area == BusSurveyCorridor.AreaId;
         var isTunnel = spec.MissionId == TunnelMissionId;
+        var isViaduct = spec.MissionId == PortViaductSurvey.MissionId;
         var featureIds = spec.MissionId switch
         {
             BusSurveyCorridor.MissionId => BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray(),
-            TunnelMissionId => [],
+            TunnelMissionId or PortViaductSurvey.MissionId => [],
             _ => Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray(),
         };
-        var calm = !isBusSurvey || _calmPolicy.CalmCityEnabled;
+        var calm = !(isBusSurvey || isViaduct) || _calmPolicy.CalmCityEnabled;
         var def = new ContractDefinition(
             SchemaVersion: 1,
             Id: spec.MissionId,
@@ -298,8 +301,8 @@ public partial class SaoDatumCityScene
             AreaId: area,
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: isTunnel ? PortTunnelQuality.Requirements : CitySurveyRequirements(area, story: true),
-            RequiredCapabilities: isTunnel ? ["lidar_l4"] : ["camera"],
+            Requirements: isTunnel ? PortTunnelQuality.Requirements : isViaduct ? PortViaductQuality.Requirements : CitySurveyRequirements(area, story: true),
+            RequiredCapabilities: isTunnel || isViaduct ? ["lidar_l4"] : ["camera"],
             Risk: calm ? "easy" : "moderate",
             Calm: calm,
             Deadline: spec.MissionId switch
@@ -321,6 +324,7 @@ public partial class SaoDatumCityScene
             "HIST-04" => "city.story.signs_brief",
             BusSurveyCorridor.MissionId => "city.story.bus_corridor_brief",
             TunnelMissionId => "city.lidar.field_brief",
+            PortViaductSurvey.MissionId => "city.viaduct.field_brief",
             _ => "city.story.facades_brief",
         };
         _gtaHud.ShowCutsceneLetterbox(
@@ -332,7 +336,7 @@ public partial class SaoDatumCityScene
     private bool AcceptCityContract(ContractDefinition def, CampaignMissionFullSpec? story = null)
     {
         if (_activeContract is not null) { _feedbackText = Text("city.hazards.active_job"); return false; }
-        if (!SupportsCityDelivery(def) && !IsTunnelCollection(def)) { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
+        if (!SupportsCityDelivery(def) && !IsCityLidarCollection(def)) { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
         if (_progression.SettledContractIds.Contains(def.Id) || (story is not null && CityMissionCompleted(story.MissionId)))
         {
             _feedbackText = Text("city.story.completed");
@@ -340,6 +344,7 @@ public partial class SaoDatumCityScene
         }
         _lastCitySurveyReview = null;
         _lastTunnelReview = null;
+        RestoreViaductDraft(null);
         _lastSidewalkMeasurements = [];
         _lastAdjustedPhotoCount = 0;
         _activeStorySpec = story;
@@ -350,7 +355,7 @@ public partial class SaoDatumCityScene
         _fieldSamples.Clear();
         RestorePendingCityLidar(null);
         _protectedLidarReturns = 0;
-        if (IsTunnelCollection(def)) _lidarEnabled = false;
+        if (IsCityLidarCollection(def)) _lidarEnabled = false;
         _cityCustody = new BatchCustodyStore(); _protectedCityPhotos.Clear(); _cityHazards.BeginContract();
         _cityHazards.Services.ExpireInsurance();
         _observedTargetIds.Clear();
@@ -368,7 +373,8 @@ public partial class SaoDatumCityScene
     {
         LocomotionMode.Car => CityMissionCompleted("HIST-04"),
         LocomotionMode.Kombi => CityMissionCompleted(BusSurveyCorridor.MissionId),
-        LocomotionMode.Pickup or LocomotionMode.Van => CityMissionCompleted("HIST-04"),
+        LocomotionMode.Pickup => CityMissionCompleted(PortViaductSurvey.MissionId),
+        LocomotionMode.Van => CityMissionCompleted("HIST-04"),
         _ => true,
     };
 
@@ -469,7 +475,7 @@ public partial class SaoDatumCityScene
         _officeStatusLabel.Text =
             $"{Text("city.office.active")}: {contractName}\n" +
             $"{Text("training.targets")}: {foundCount}/{targetCount} · Samples: {_fieldSamples.Count} · LiDAR pts: {_lidarPointVisibleCount}\n" +
-            (_activeContract is { } active && !SupportsCityDelivery(active) && !IsTunnelCollection(active)
+            (_activeContract is { } active && !SupportsCityDelivery(active) && !IsCityLidarCollection(active)
                 ? Text(CityOfficeUnavailableKey(active.Product)) + "\n" : "") +
             $"Mode: {Text(_officeMode == ProcessingMode.Arcade ? "office.mode.arcade" : "office.mode.technical")}\n" +
             $"Rack Calibration: {(_rackMisaligned ? Text("city.rack.misaligned") : Text("city.rack.ok"))}";
@@ -487,6 +493,11 @@ public partial class SaoDatumCityScene
         }
         if (IsTunnelCollection(_activeContract))
             _officeStatusLabel.Text += "\n" + Text("city.lidar.field_brief") + "\n" + CityLidarCollectionStatus();
+        _viaductForm.Visible = IsViaductCollection(_activeContract);
+        if (_viaductForm.Visible)
+            _officeStatusLabel.Text += "\n" + Text("city.viaduct.field_brief") + "\n" + CityLidarCollectionStatus();
+        var viaductReview = ViaductReviewText();
+        if (viaductReview.Length > 0) _officeStatusLabel.Text += "\n" + viaductReview;
         var tunnelReview = TunnelReviewText();
         if (tunnelReview.Length > 0) _officeStatusLabel.Text += "\n" + tunnelReview;
         var review = CitySurveyReviewText();
@@ -612,11 +623,16 @@ public partial class SaoDatumCityScene
         var objDetails = _activeContract is not null
             ? string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count)
             : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
-        if (IsTunnelCollection(_activeContract)) objDetails = CityLidarCollectionStatus();
+        if (IsCityLidarCollection(_activeContract)) objDetails = CityLidarCollectionStatus();
         if (IsTunnelCollection(_activeContract))
         {
             blips.Add(new RadarBlip("tunnel_west", PortTunnelSurvey.WestStop, Colors.Orange, "W", ClampToRim: true));
             blips.Add(new RadarBlip("tunnel_east", PortTunnelSurvey.EastStop, Colors.Orange, "E", ClampToRim: true));
+        }
+        if (IsViaductCollection(_activeContract))
+        {
+            blips.Add(new RadarBlip("viaduct_west", PortViaductSurvey.WestPad, Colors.Orange, "W", ClampToRim: true));
+            blips.Add(new RadarBlip("viaduct_east", PortViaductSurvey.EastPad, Colors.Orange, "E", ClampToRim: true));
         }
 
         var radioTitle = _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
@@ -682,6 +698,8 @@ public partial class SaoDatumCityScene
         }
         if (IsTunnelCollection(_activeContract))
             targets.AddRange([PortTunnelSurvey.WestStop, PortTunnelSurvey.MiddleUpload, PortTunnelSurvey.EastStop]);
+        if (IsViaductCollection(_activeContract))
+            targets.AddRange([PortViaductSurvey.WestPad, PortViaductSurvey.EastPad]);
         _cityMap.UpdateMap(CurrentPositionEnu(), CurrentHeadingRadians(), _geodeticNetwork.Benchmarks.Values.ToArray(), targets);
     }
 

@@ -129,7 +129,7 @@ public partial class SaoDatumCityScene
         _technicalCloudHelp.Text = Text("survey.technical.cloud_help");
         _cityMapLegend.Text = Text("survey.map.legend");
         var lines = new List<string> { Text("survey.technical.preview"), Text("navigation.preview_separate"), "" };
-        if (IsTunnelCollection(_activeContract)) lines.Add(CityLidarCollectionStatus());
+        if (IsCityLidarCollection(_activeContract)) lines.Add(CityLidarCollectionStatus());
         _showNavigationButton.Visible = mode >= LocomotionMode.Car;
         _showNavigationButton.Text = Text("navigation.show_trail");
         var estimate = _navigationRig?.Estimator?.Current;

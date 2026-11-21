@@ -2017,3 +2017,39 @@ msgstr "Trechos para recoletar, medidos a partir da boca oeste: {0}"
 
 msgid "city.tunnel.portal_observed"
 msgstr "Observação de velocidade zero registrada no portal. Descarregue com a varredura."
+
+msgid "city.viaduct.field_brief"
+msgstr "Passe de Kombi com o LiDAR ligado pela faixa laranja sob os 100 m do viaduto do Porto. Envie a nuvem em um ponto azul e informe as alturas dos controles no escritório."
+
+msgid "city.viaduct.height_instructions"
+msgstr "Controles verticais em metros. A ficha fornece a altura elipsoidal h e a ondulação geoidal N. Informe h e a altura ortométrica H usando H = h − N."
+
+msgid "city.viaduct.control"
+msgstr "{0} · h {1:F3} m · N {2:F3} m"
+
+msgid "city.viaduct.h"
+msgstr "h elipsoidal"
+
+msgid "city.viaduct.big_h"
+msgstr "H ortométrica"
+
+msgid "city.viaduct.incomplete_heights"
+msgstr "Informe as duas alturas para os três controles."
+
+msgid "city.viaduct.cloud_rework"
+msgstr "Recolete os trechos ausentes da face inferior ou os painéis de checagem, envie e processe novamente."
+
+msgid "city.viaduct.report"
+msgstr "Células do tabuleiro na densidade-alvo {0}/{1} ({2:P1}, meta 90%) · Densidade média {3:F1} pts/m²\nMaior RMSE dos painéis {4} m (≤0,20 m) · RMSE altimétrico relativo {5} m (≤0,10 m)\nReferência vertical · {6}"
+
+msgid "city.viaduct.gaps"
+msgstr "Trechos da face inferior a revisitar, medidos da extremidade oeste: {0}"
+
+msgid "cq.error.vertical_reference_h_and_orthometric_H_swapped"
+msgstr "A altura elipsoidal h e a ortométrica H estão trocadas. Corrija o relatório e reprocesse o mesmo lote."
+
+msgid "cq.error.vertical_reference_tolerance_exceeded"
+msgstr "Pelo menos uma altura difere mais de 0,02 m. Confira os campos e o cálculo h − N."
+
+msgid "cq.viaduct_height_reference_valid"
+msgstr "As duas alturas coincidem nos três controles."

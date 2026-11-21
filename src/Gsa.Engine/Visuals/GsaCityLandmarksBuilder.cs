@@ -19,7 +19,7 @@ public sealed class GsaCityLandmarksBuilder
 
     public double SampleDriveableElevationEnu(double east, double north)
     {
-        // 1. Old Center Elevated Viaduct (HIST-07): ramps at E=[500605..500655] and E=[500705..500755], N=[7400472..7400486]
+        // 1. Old Center elevated viaduct: ramps at E=[500605..500655] and E=[500705..500755], N=[7400472..7400486]
         if (north is >= 7400472.0 and <= 7400486.0)
         {
             if (east is >= 500655.0 and <= 500705.0)
@@ -109,7 +109,7 @@ public sealed class GsaCityLandmarksBuilder
         // 3. Central Park Fountain, Pond, Walkways & Chicken Challenge Track (500285..500415, 7400315..7400445)
         BuildCentralParkLandmarks(visualBase, roadBatch, structureBatch, lampBulbBatch, lampPoleMat, sharedLampBulbMat, coords, concMat, sidewalkMat, waterMat);
 
-        // 4. Old Center Elevated Viaduct (HIST-07, E=500605..500755, N=7400479)
+        // 4. Old Center elevated viaduct (E=500605..500755, N=7400479)
         BuildViaductOverpass(structureBatch, coords, concMat, roadAsphaltMat, yellowLine);
 
         // 5. Port District Landmarks: Gantry Cranes, Stacked Containers, Harbor Tunnel, Freight Ship!
