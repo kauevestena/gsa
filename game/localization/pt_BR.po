@@ -1638,7 +1638,7 @@ msgid "navigation.show_trail"
 msgstr "Mostrar trajetória estimada e eixos de incerteza no mapa"
 
 msgid "navigation.preview_separate"
-msgstr "Fotos de veículos usam a pose estimada da navegação. Câmeras a pé e em plataformas leves ainda usam poses ideais; a nuvem LiDAR é uma prévia visual e não aprova entregas."
+msgstr "Fotos de veículos usam a pose estimada. Câmeras leves ainda usam poses ideais. A nuvem exibida é separada dos retornos de campo protegidos e não pode aprovar entregas."
 
 msgid "navigation.sigma"
 msgstr "σ E/N/U: {0} / {1} / {2} m · σ 3D: {3} m"
@@ -1987,3 +1987,18 @@ msgstr "Panorama de 360° armazenado. Pontos de ônibus exigidos observados nest
 
 msgid "city.bus.missing_stops"
 msgstr "Pontos de ônibus para revisitar: {0}"
+
+msgid "city.lidar.start_field"
+msgstr "Iniciar coleta de campo"
+
+msgid "city.lidar.field_brief"
+msgstr "A coleta de campo está disponível. Dirija até o Porto, aguarde a inicialização da navegação e pressione L para gravar. Envie em um ponto de descarga. O Escritório pode reconstruir a nuvem protegida. Entrega e pagamento estão em desenvolvimento."
+
+msgid "city.lidar.capture_status"
+msgstr "Retornos a bordo {0} · Protegidos {1} · Passos ignorados (sem pose {2}, sem espaço ou energia {3})"
+
+msgid "city.lidar.protected_cloud"
+msgstr "Nuvem protegida reconstruída de {0} retornos em {1} blocos. Entrega e pagamento estão em desenvolvimento."
+
+msgid "city.lidar.vehicle_lost"
+msgstr "Retornos LiDAR perdidos: {0}. Retornos LiDAR enviados preservados: {1}."

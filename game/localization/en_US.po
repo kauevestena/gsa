@@ -1638,7 +1638,7 @@ msgid "navigation.show_trail"
 msgstr "Show estimated trajectory and uncertainty axes on map"
 
 msgid "navigation.preview_separate"
-msgstr "Vehicle camera observations use the estimated navigation pose. Walking and light-platform cameras still use ideal poses; the LiDAR cloud remains a visual preview and cannot approve delivery."
+msgstr "Vehicle cameras use the estimated navigation pose. Walking and light-platform cameras use ideal poses. The display cloud stays separate from protected field returns and cannot approve delivery."
 
 msgid "navigation.sigma"
 msgstr "σ E/N/U: {0} / {1} / {2} m · 3D σ: {3} m"
@@ -1987,3 +1987,18 @@ msgstr "360° sweep saved. Required bus stops observed in this sweep: {0}."
 
 msgid "city.bus.missing_stops"
 msgstr "Bus stops to revisit: {0}"
+
+msgid "city.lidar.start_field"
+msgstr "Begin field collection"
+
+msgid "city.lidar.field_brief"
+msgstr "Field collection is available. Drive to the Port, let navigation initialize and press L to record. Upload at an unload point. The Office can rebuild the protected cloud. Delivery and payment are in development."
+
+msgid "city.lidar.capture_status"
+msgstr "Returns aboard {0} · Protected {1} · Skipped ticks (no pose {2}, no storage or power {3})"
+
+msgid "city.lidar.protected_cloud"
+msgstr "Protected cloud rebuilt from {0} returns in {1} chunks. Delivery and payment are in development."
+
+msgid "city.lidar.vehicle_lost"
+msgstr "LiDAR returns lost: {0}. Uploaded LiDAR returns preserved: {1}."

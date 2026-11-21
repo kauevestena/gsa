@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
 using Gsa.Core.Sensors.Camera;
@@ -104,6 +105,9 @@ public sealed record SurveyBatchArtifact(
     IReadOnlyList<TriangulatedFeatureEntry> Features,
     IReadOnlyList<SubmittedCheckpointEstimate> Checkpoints)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<CityLidarSlice>? LidarSlices { get; init; }
+
     public static SurveyBatchArtifact FromObservationBatch(
         string contractId,
         ObservationBatch batch,

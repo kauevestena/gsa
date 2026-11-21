@@ -106,16 +106,20 @@ public sealed class SaveCompatibilityTests : IDisposable
         Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));
     }
 
-    [Fact]
-    public void CatalogThreeMigrationKeepsHazardDamageAndRawPhotosWithoutInventingEncounterHistory()
+    [Theory]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void OlderCatalogMigrationKeepsHazardDamageAndRawPhotosWithoutInventingAcquisition(int catalogVersion)
     {
         var manager = new SaveGameManager(_directory); var hazard = new CityHazardState(); hazard.Lens.ApplySplatter(.45);
-        var photo = Photo(); var state = LegacyState() with { SchemaVersion = 2, Content = new(3, 1, 1, ["preview"]),
+        var photo = Photo(); var state = LegacyState() with { SchemaVersion = 2, Content = new(catalogVersion, 1, 1, ["preview"]),
             City = MinimalCity(photo) with { Hazards = hazard.Export() } };
         var raw = Envelope(JsonSerializer.SerializeToNode(state)!, 2); File.WriteAllText(manager.CurrentSavePath, raw);
         var result = manager.LoadCurrent(); Assert.True(result.Succeeded, result.DiagnosticDetail);
-        Assert.Equal(4, result.State!.Content!.CatalogVersion); Assert.True(result.Compatibility!.DerivedCachesInvalidated);
+        Assert.Equal(SaveContentVersions.CurrentCatalogVersion, result.State!.Content!.CatalogVersion);
+        Assert.True(result.Compatibility!.DerivedCachesInvalidated);
         Assert.Equal(.45, result.State.City!.Hazards!.LensObstruction); Assert.Null(result.State.City.Encounters); Assert.Null(result.State.City.Gimbalina);
+        Assert.Null(result.State.City.LidarBuffer);
         Assert.Equal(JsonSerializer.Serialize(photo), JsonSerializer.Serialize(result.State.City.CameraSamples.Single()));
         Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));
     }

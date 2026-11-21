@@ -1,4 +1,5 @@
 using Gsa.Core.Geometry;
+using System.Text.Json.Serialization;
 using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
 using Gsa.Missions.Activities;
@@ -14,7 +15,8 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public static SaveContentVersions Current => new(4, 1, 1, []);
+    public const int CurrentCatalogVersion = 5;
+    public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 
 public sealed record SaveCampaignPresentationState(
@@ -43,7 +45,13 @@ public sealed record SaveCitySessionState(
     ulong NextContractSeed,
     long PhysicsTick,
     long CameraNextSequence = 0, CityHazardSnapshot? Hazards = null,
-    CityEverydaySnapshot? Encounters = null, GimbalinaSaveSnapshot? Gimbalina = null);
+    CityEverydaySnapshot? Encounters = null, GimbalinaSaveSnapshot? Gimbalina = null)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public CityLidarBufferSnapshot? LidarBuffer { get; init; }
+}
+
+public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);
 
 public sealed record SaveCompatibilityInfo(
     int SourceSchemaVersion,
@@ -83,7 +91,8 @@ public static class SaveCompatibility
             throw new ArgumentException("Required save fields are missing or invalid.", nameof(state));
 
         var content = state.Content ?? SaveContentVersions.Current;
-        if (content.CatalogVersion is < 1 or > 4 || content.ModelVersion != 1 || content.WorldVersion != 1 || content.DerivedCacheIds is null)
+        const int currentCatalog = SaveContentVersions.CurrentCatalogVersion;
+        if (content.CatalogVersion < 1 || content.CatalogVersion > currentCatalog || content.ModelVersion != 1 || content.WorldVersion != 1 || content.DerivedCacheIds is null)
             throw new ArgumentException("Unsupported content, model or world version.", nameof(state));
         var aliases = new HashSet<string>(StringComparer.Ordinal);
         string Resolve(string id)
@@ -139,23 +148,49 @@ public static class SaveCompatibility
             new TerritoryAttentionTracker().ImportSnapshot(city.Attention);
             city = city with { Fleet = city.Fleet with { ActivePlatformId = Resolve(city.Fleet.ActivePlatformId) } };
         }
-        var invalidate = sourceSchema != SaveGameManager.CurrentSchemaVersion || content.CatalogVersion != 4 || aliases.Count > 0;
+        var invalidate = sourceSchema != SaveGameManager.CurrentSchemaVersion || content.CatalogVersion != currentCatalog || aliases.Count > 0;
         var normalized = state with
         {
             SchemaVersion = SaveGameManager.CurrentSchemaVersion,
             Equipment = equipment,
             City = city,
-            Content = content with { CatalogVersion = 4, DerivedCacheIds = invalidate ? [] : content.DerivedCacheIds.ToArray() },
+            Content = content with { CatalogVersion = currentCatalog, DerivedCacheIds = invalidate ? [] : content.DerivedCacheIds.ToArray() },
         };
         // Exercise snapshot validation without publishing runtime objects or altering stored state.
         var runtime = SaveGameManager.RestoreRuntime(normalized);
         if (city is not null)
         {
             var ids = city.CameraSamples.Select(s => s.SampleId).ToHashSet(StringComparer.Ordinal);
+            var lidarTicks = new HashSet<long>();
+            var lidarReturns = 0;
+            void CheckLidar(IEnumerable<CityLidarSlice> slices, int limit)
+            {
+                foreach (var slice in slices)
+                {
+                    if (slice is null || !lidarTicks.Add(slice.PhysicsTick))
+                        throw new ArgumentException("Duplicate or missing LiDAR slice.");
+                    slice.Validate(city.PhysicsTick);
+                    lidarReturns += slice.Returns.Count;
+                    if (lidarReturns > limit) throw new ArgumentException("City LiDAR storage exceeds its limit.");
+                }
+            }
+            if (city.LidarBuffer is { } lidar)
+            {
+                if (lidar.Pending is null || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 || city.ActiveStoryMissionId != "HIST-06")
+                    throw new ArgumentException("Invalid pending city LiDAR buffer.");
+                CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns);
+                if (CityLidarSlice.StorageUnits(lidarReturns) > city.Mobility.UsedVirtualStorageUnits)
+                    throw new ArgumentException("Pending city LiDAR storage is unaccounted for.");
+            }
             foreach (var entry in runtime.CustodyStore.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
             {
                 var batch = System.Text.Json.JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson)
                     ?? throw new ArgumentException("Invalid protected city batch.");
+                if (batch.LidarSlices is { } slices)
+                {
+                    if (batch.ContractId != "HIST-06") throw new ArgumentException("Invalid city LiDAR contract.");
+                    CheckLidar(slices, CityLidarSlice.MaxContractReturns);
+                }
                 foreach (var sample in batch.Samples)
                 {
                     _ = sample.ToDomain();

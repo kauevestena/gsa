@@ -44,7 +44,11 @@ public partial class SaoDatumCityScene
                 _campaignState.UnlockedEquipment.ToArray(), _campaignState.AppliedCutsceneIds.ToArray(),
                 _campaignState.SkippedCutsceneIds.ToArray(), new Dictionary<string, string>(_campaignState.ObjectiveStates)),
             _attention.ExportSnapshot(), _activeStorySpec?.MissionId, _officeMode, _privacyMasksApplied, _rackMisaligned,
-            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, NextCityCameraSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot()));
+            _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, NextCityCameraSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot())
+        {
+            LidarBuffer = IsTunnelCollection(_activeContract) && _activeStorySpec?.MissionId == TunnelMissionId
+                ? new(_pendingLidar.ToArray(), _lidarTicksWithoutPose, _lidarTicksWithoutCapacity) : null,
+        });
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
     {
@@ -136,6 +140,8 @@ public partial class SaoDatumCityScene
             _activeMachine = runtime.Contracts.SingleOrDefault();
             _activeContract = result.State.Contracts.SingleOrDefault()?.CatalogDefinition;
             _activeStorySpec = story;
+            RestorePendingCityLidar(city?.LidarBuffer);
+            if (IsTunnelCollection(_activeContract)) _lidarEnabled = false;
             PrepareCityPhotoCoverage();
             _camScheduler = new CameraCaptureScheduler("city_cam", initialSequence: city?.CameraNextSequence ?? 0);
             _panoramicCameras = [];
