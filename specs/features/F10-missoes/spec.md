@@ -46,6 +46,8 @@ HIST-02 usa chuva anunciada como obstáculo de qualidade, não falha instantâne
 
 HIST-07 exige apresentar h e H dos pontos de controle do viaduto usando a ondulação geoidal fictícia; trocar as duas alturas deve reprovar a conformidade do campo de referência vertical, mesmo quando os pontos geométricos estão corretos.
 
+A primeira integração jogável de HIST-05 usa inventário das seis paradas para exercitar faixa, panoramas, custódia, CQ e progressão. Os limites do [produto 360°](../../parametros.md#sensores-e-qualidade) seguem como alvo de aceite. Para encerrar a integração, avaliar cobertura contínua e RMSE ≤0,5 m com posicionamento corrigido ou controle; manter parada e controle independentes. Consulte os [limites da cena](../../../docs/city-hazards.md).
+
 Templates MVP: PROC-FACHADAS (prefeitura/fotos), PROC-DRENAGEM (prefeitura/inventário), PROC-CALCADAS (universidade/inventário), PROC-PLACAS (empresa de mapas/inventário), PROC-PARQUE (seguradora/fotos tranquilas). Cada um possui pelo menos duas áreas/rotas variantes dentro do MVP. Amostrar apenas de combinações pré-validadas de área, clima e equipamento; seed escolhe subconjunto de feições, horário, cliente permitido e faixa de recompensa. Não resolver planejamento universal em runtime.
 
 Depois de M5, adicionar PROC-ENERGIA (concessionária/inventário), PROC-OBRAS (construtora/nuvem), PROC-PAVIMENTO (prefeitura/perfil), PROC-TUNEL (universidade/nuvem). Gerador só oferece o que o inventário pode executar e o acesso permite; manter pelo menos um contrato tranquilo básico disponível.

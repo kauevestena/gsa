@@ -287,6 +287,7 @@ public partial class SaoDatumCityScene : Node3D
 
         // Serra Mountain Smooth Highway, City Hall Monument, Central Park Fountain, Viaduct, Port Cranes/Ship, Waterfront Bridge/Pier & Hazards!
         _landmarks.BuildCityLandmarks(visualBase, _coordinates, _atmosphere);
+        BuildBusCorridor(visualBase);
 
         // Commerce Street promenade, storefronts, curbs, signals, streetlamps & water tanks
         _cityVisuals.BuildCommerceStreetDetails(visualBase, _fullManifest, _coordinates, _atmosphere, includeBeacons: false);
@@ -367,6 +368,7 @@ public partial class SaoDatumCityScene : Node3D
                     "metal" when item.ObjectClass == "sidewalk_survey_mark" => item.Id.EndsWith("_foot", StringComparison.Ordinal)
                         ? new Color(.96f, .54f, .19f) : new Color(.92f, .94f, .24f),
                     "metal" when item.ObjectClass == "sidewalk_control_mark" => new Color(.18f, .8f, .92f),
+                    "metal" when item.Tags.Contains("bus_stop") => new Color(.18f, .55f, .85f),
                     "metal" when item.ObjectClass == "traffic_sign" => new Color(.12f, .56f, .38f),
                     "wood" => new Color(.63f, .35f, .19f),
                     "metal" => new Color(0.62f, 0.68f, 0.72f),
@@ -571,7 +573,8 @@ public partial class SaoDatumCityScene : Node3D
             // City sectors are 100 m wide and the painted avenues repeat every
             // 120 m, so sector-edge setbacks alone do not keep this grid clear.
             if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
-                OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d))
+                OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d) ||
+                BusSurveyCorridor.OverlapsBuildings(e, n, w, d))
                 continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
@@ -759,6 +762,12 @@ public partial class SaoDatumCityScene : Node3D
                 resolvedPos = prevCarPos;
                 _carSim.StopAtExternalContact();
                 _feedbackText = Text("city.story.region_locked");
+            }
+            else if (!CityMayEnterBusLane(prevCarPos, resolvedPos, weather))
+            {
+                resolvedPos = prevCarPos;
+                _carSim.StopAtExternalContact();
+                _feedbackText = Text("city.bus.window_closed");
             }
 
             var terrainZ = GetTerrainElevationEnu(resolvedPos.X, resolvedPos.Y);
@@ -1209,7 +1218,8 @@ public partial class SaoDatumCityScene : Node3D
             (CurrentActiveMode() == LocomotionMode.OnFoot && _locomotion.MountedVehicleMode <= LocomotionMode.Bicycle);
         if (_gimbalina.HasFledToSafety) { _feedbackText = Text("city.encounters.chicken_safe"); return; }
         var navigation = _navigationRig?.Estimator?.Current;
-        if (CurrentActiveMode() >= LocomotionMode.Car && navigation is null)
+        var busSurvey = _activeContract?.AreaId == BusSurveyCorridor.AreaId;
+        if (!busSurvey && CurrentActiveMode() >= LocomotionMode.Car && navigation is null)
         { _feedbackText = Text("city.hazards.wait_navigation"); return; }
         var mount = CameraMountEstimate.ForwardFacing;
         var origin = pos + Vector3d.UnitZ * 1.4;
@@ -1250,6 +1260,11 @@ public partial class SaoDatumCityScene : Node3D
         environment = new CameraEnvironmentSnapshot(environment.IsNight, environment.SunAngleRadians,
             Math.Min(1, Math.Max(environment.LensObstructionFraction, _cityHazards.Lens.ObstructionFraction) + lensObstruction),
             environment.BaseClippingFraction);
+        if (busSurvey)
+        {
+            CaptureBusCorridorSweep(pos, heading, speed, weather, environment, navigation, Occluded);
+            return;
+        }
         if (_camScheduler.TryEnqueueSimulatedCapture(new CameraCaptureRequest(
             _tick, t, start, end, readout, estimatedPose, mount, environment,
             _liveCandidates, Occluded), _locomotion, out var sample, out _) && sample is not null)

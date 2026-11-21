@@ -269,7 +269,11 @@ public sealed record QualitySubmission(
     IReadOnlyList<TriangulatedFeatureEntry> Features,
     IReadOnlyList<SubmittedCheckpointEstimate> Checkpoints,
     bool OverlapOk = true,
-    IReadOnlyList<string>? CorruptSampleErrors = null);
+    IReadOnlyList<string>? CorruptSampleErrors = null)
+{
+    [JsonIgnore]
+    public IReadOnlySet<string>? ImageQualitySampleIds { get; init; }
+}
 
 public enum MetricEvaluationStatus
 {
@@ -505,6 +509,13 @@ public static class QualityEvaluator
         var failures = new HashSet<string>(StringComparer.Ordinal);
         var recollections = new List<RecollectionArea>();
         var isEmptySubmission = uniqueSamples.Count == 0 && submission.Features.Count == 0 && submission.Checkpoints.Count == 0;
+        var imageSampleCount = uniqueSamples.Count;
+        var validImageSampleCount = validSampleIds.Count;
+        if (submission.ImageQualitySampleIds is { } imageScope)
+        {
+            imageSampleCount = uniqueSamples.Count(sample => imageScope.Contains(sample.SampleId));
+            validImageSampleCount = validSampleIds.Count(imageScope.Contains);
+        }
 
         if (isEmptySubmission)
             failures.Add("cq.failure.empty_submission");
@@ -520,8 +531,8 @@ public static class QualityEvaluator
                     threshold,
                     scopedFeatureIds,
                     reference,
-                    uniqueSamples.Count,
-                    validSampleIds.Count,
+                    imageSampleCount,
+                    validImageSampleCount,
                     uniqueFootprintsBySurface,
                     resolvedFeatureIds,
                     uniqueCheckpoints,

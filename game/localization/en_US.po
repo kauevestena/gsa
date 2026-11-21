@@ -1969,3 +1969,21 @@ msgstr "Frame each section’s blue control marks and its three measurement mark
 
 msgid "city.office.collect_inventory"
 msgstr "Photograph each target from two separated positions, then upload your photos."
+
+msgid "city.story.bus_corridor_brief"
+msgstr "Drive the marked lane through the Port and Waterfront between 10:00 and 16:00. Once navigation initializes, capture each of the six blue bus stops from different positions. Upload the panoramas before submitting the inventory."
+
+msgid "city.bus.window_closed"
+msgstr "The bus survey lane is closed. It opens from 10:00 until 16:00."
+
+msgid "city.bus.use_lane"
+msgstr "Move into the marked bus survey lane to capture this corridor."
+
+msgid "city.bus.capture_resources"
+msgstr "A full panorama needs storage and power. Upload or replenish before capturing."
+
+msgid "city.bus.sweep"
+msgstr "360° sweep saved. Required bus stops observed in this sweep: {0}."
+
+msgid "city.bus.missing_stops"
+msgstr "Bus stops to revisit: {0}"
