@@ -29,6 +29,7 @@ public sealed class LiveNavigationEstimator
     public int GnssUpdatesApplied { get; private set; }
     public int DmiUpdatesApplied { get; private set; }
     public int ZuptUpdatesApplied { get; private set; }
+    public double? LastZuptTimestampSeconds { get; private set; }
     public int RejectedGnssCorrections { get; private set; }
     public bool LastGnssCorrectionRejected { get; private set; }
     public string StatusKey => IsInitialized ? "navigation.status.running" : _waitingStatus;
@@ -114,6 +115,7 @@ public sealed class LiveNavigationEstimator
                 _filter.UpdateZupt(stop.VelocitySigmaMetresPerSecond);
                 _gyroBias = stop.EstimatedGyroBiasRadiansPerSecond;
                 ZuptUpdatesApplied++;
+                LastZuptTimestampSeconds = imu.TimestampSeconds;
             }
         }
         else if (imu.TimestampSeconds - _lastDmiTime > .051) _zupt.Reset();

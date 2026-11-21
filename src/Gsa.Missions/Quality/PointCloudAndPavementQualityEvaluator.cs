@@ -468,8 +468,8 @@ public static class PointCloudQualityEvaluator
                 return false;
             }
 
-            var trueDist = (secondRef.TruePositionEnu - firstRef.TruePositionEnu).Length;
-            var estDist = (secondEst - firstEst).Length;
+            var trueDist = pair.Evaluate(secondRef.TruePositionEnu - firstRef.TruePositionEnu);
+            var estDist = pair.Evaluate(secondEst - firstEst);
             var err = estDist - trueDist;
             sumSq += err * err;
             validPairs++;

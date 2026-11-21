@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
+using Gsa.Core.World;
 using Gsa.Missions.Campaign;
+using Gsa.Missions.Contracts;
 using Gsa.Missions.Economy;
 using Gsa.Missions.Persistence;
 using Godot;
@@ -102,7 +104,84 @@ public partial class SaoDatumCityScene
         Require(_pendingLidarReturns == 0 && _protectedLidarReturns == expected &&
             cloud.SequenceEqual(BuildProtectedCityCloud().QueryScientificSamples(expandedMin, expandedMax)),
             "loss or reload changed protected scientific returns");
+        RunPortTunnelDeliverySmoke(wallet);
         _lidarCloudMesh.Visible = true;
         GD.Print($"GSA_CITY_LIDAR_CAPTURE_SMOKE_OK protected_returns={expected} no_pose=explicit capacity=reported lod=independent loss=protected reload=stable payout=blocked");
+    }
+
+    private void RunPortTunnelDeliverySmoke(int wallet)
+    {
+        static void Require(bool condition, string message)
+        {
+            if (!condition) throw new InvalidOperationException("Port tunnel smoke: " + message);
+        }
+
+        const LocomotionMode mode = LocomotionMode.Kombi;
+        var west = PortTunnelSurvey.WestStop;
+        var middle = PortTunnelSurvey.MiddleUpload;
+        var east = PortTunnelSurvey.EastStop;
+        _cityHazards.DisabledVehicle = null; // Isolate delivery from the loss fixture above.
+        _rackMisaligned = false;
+        _cityHazards.RackYawErrorRadians = 0;
+        _carSim = null;
+        _locomotion.RepositionSafeAfterRecovery(west, mode, 0, true, false);
+        _lidarEnabled = true;
+        ResetCityNavigation();
+        UpdateSectorStreaming(west);
+
+        void Frame(Vector3d pos)
+        {
+            const double dt = 1.0 / 60;
+            _locomotion.RepositionSafeAfterRecovery(pos, mode, 0, false, false);
+            _tick++;
+            _calendar.StepPhysical(dt);
+            StepCityNavigation(dt, pos, 0, mode, false);
+            StepLiveLidar(dt, pos, 0, mode, false);
+        }
+
+        void Drive(Vector3d from, Vector3d to)
+        {
+            var steps = (int)Math.Ceiling((to - from).Length / .05);
+            for (var i = 1; i <= steps; i++) Frame(from + (to - from) * (i / (double)steps));
+        }
+
+        void Stop(Vector3d at)
+        {
+            for (var i = 0; i < 270; i++) Frame(at);
+        }
+
+        Drive(west - Vector3d.UnitX * 7, west);
+        Stop(west);
+        Require(_pendingLidar.Any(slice => slice.TunnelRanges?.ZuptPortal == 0), "west zero-velocity observation missing");
+        Drive(west, middle);
+        Require(_navigationRig?.LatestGnss?.IsAvailable == false, "tunnel had GNSS fixes");
+        OffloadCityData();
+        ProcessAndDeliverCityContract();
+        Require(_activeMachine?.State == ContractState.Retrabalho && _ledger.BalanceCoords == wallet &&
+            _lastTunnelReview?.PortalCount == 1 && _lastTunnelReview.Cloud.CoverageFraction < .9,
+            "incomplete first batch avoided rework: " + TunnelReviewText());
+
+        TryLoadCareer();
+        Require(_activeMachine?.State == ContractState.Retrabalho && !_lidarEnabled, "rework did not survive reload");
+        _carSim = null;
+        _lidarEnabled = true;
+        Drive(middle, east);
+        Stop(east);
+        Require(_pendingLidar.Any(slice => slice.TunnelRanges?.ZuptPortal == 1), "east zero-velocity observation missing");
+        ProcessAndDeliverCityContract();
+        Require(_ledger.BalanceCoords == wallet && _lastTunnelReview?.PortalCount == 1, "pending work entered quality control");
+        OffloadCityData();
+        ProcessAndDeliverCityContract();
+        Require(_lastTunnelReview?.Delivery.Passed == true && CityMissionCompleted(TunnelMissionId) &&
+            _activeContract is null && _ledger.BalanceCoords > wallet,
+            "completed tunnel did not settle: " + TunnelReviewText() + $" skipped={_lidarTicksWithoutCapacity}");
+        var report = TunnelReviewText();
+        var paid = _ledger.BalanceCoords;
+        TryLoadCareer();
+        StartStoryMission(FullCampaignCatalog.GetMission(TunnelMissionId));
+        ProcessAndDeliverCityContract();
+        Require(CityMissionCompleted(TunnelMissionId) && _ledger.BalanceCoords == paid && _activeContract is null,
+            "settlement replayed or campaign progression was lost");
+        GD.Print("GSA_PORT_TUNNEL_DELIVERY_SMOKE_OK " + report.Replace('\n', ' '));
     }
 }

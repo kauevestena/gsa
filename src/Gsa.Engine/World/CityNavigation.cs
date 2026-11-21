@@ -45,6 +45,7 @@ public partial class SaoDatumCityScene
     private GnssEnvironment ResolveCityNavigationEnvironment(Vector3d position)
     {
         _navigationSkyQueries++;
+        if (PortTunnelSurvey.IsUnderRoof(position)) return new(0, Vector3d.Zero);
         _navigationSkyRay ??= new PhysicsRayQueryParameters3D { CollisionMask = 1, HitFromInside = true };
         var height = _navigationRig?.Mode switch
         {

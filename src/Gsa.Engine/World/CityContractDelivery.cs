@@ -173,15 +173,15 @@ public partial class SaoDatumCityScene
             return;
         }
 
+        if (IsTunnelCollection(definition))
+        {
+            ProcessTunnelDelivery(machine, now);
+            return;
+        }
+
         if (!SupportsCityDelivery(definition))
         {
-            if (IsTunnelCollection(definition) && _protectedLidarReturns > 0)
-            {
-                var cloud = BuildProtectedCityCloud().GetMetrics();
-                _feedbackText = string.Format(Text("city.lidar.protected_cloud"), cloud.TotalSamples, cloud.ChunkCount);
-            }
-            else
-                _feedbackText = Text(CityOfficeUnavailableKey(definition.Product));
+            _feedbackText = Text(CityOfficeUnavailableKey(definition.Product));
             return;
         }
 
@@ -290,6 +290,11 @@ public partial class SaoDatumCityScene
             return;
         }
 
+        FinishCityDelivery(definition, machine, report, now);
+    }
+
+    private void FinishCityDelivery(ContractDefinition definition, ContractStateMachine machine, QualityReport report, double now)
+    {
         var settlement = ContractSettlementCoordinator.SettleDelivery(machine, _ledger, _progression, report, now);
         if (!settlement.Succeeded)
         {
@@ -307,6 +312,8 @@ public partial class SaoDatumCityScene
         _audio.PlayMissionPassedFanfare();
         _gtaHud.TriggerCelebrationBanner(Text("city.mission_passed"), $"{Text(definition.TitleKey)} · {summary}");
         _feedbackText = summary;
+        _locomotion.ReleaseCaptureUnits(CityLidarSlice.StorageUnits(_pendingLidarReturns));
+        ClearPendingCityLidar();
         _activeContract = null;
         _cityPhotoCoverage = null;
         _activeMachine = null;

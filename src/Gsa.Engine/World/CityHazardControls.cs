@@ -139,6 +139,7 @@ public partial class SaoDatumCityScene
         _locomotion.ReleaseCaptureUnits(CityLidarSlice.StorageUnits(_pendingLidarReturns));
         ClearPendingCityLidar();
         _lastCitySurveyReview = null;
+        _lastTunnelReview = null;
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();
         _feedbackText = Text("city.hazards.abandoned"); SaveHazardChange();

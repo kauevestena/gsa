@@ -1,6 +1,8 @@
 using Gsa.Core.Geometry;
 using Gsa.Core.Sensors.Camera;
 using Gsa.Core.Sensors.Lidar;
+using Gsa.Core.World;
+using System.Text.Json.Serialization;
 
 namespace Gsa.Missions.Persistence;
 
@@ -11,9 +13,12 @@ public sealed record CityLidarReturn(double Azimuth, double Elevation, double Ra
 public sealed record CityLidarSlice(long PhysicsTick, string ProfileId, SerializablePoseDto Pose,
     SerializableMountDto Mount, bool RackNeedsCalibration, IReadOnlyList<CityLidarReturn> Returns)
 {
-    public const int MaxBufferedReturns = 32_000;
+    public const int MaxBufferedReturns = 48_000;
     public const int MaxContractReturns = 160_000;
     private const int ReturnSlotsPerTick = 1024;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TunnelRangeObservation? TunnelRanges { get; init; }
 
     public static int StorageUnits(int returns) => (returns + 999) / 1000;
 
@@ -29,7 +34,7 @@ public sealed record CityLidarSlice(long PhysicsTick, string ProfileId, Serializ
 
     public IReadOnlyList<GeoreferencedLidarSample> Georeference()
     {
-        var pose = ToPose();
+        var pose = TunnelRanges is { } ranges ? PortTunnelSurvey.Solve(ranges, Pose.TimeSeconds) : ToPose();
         var mount = ToMount();
         var transform = LidarBenchSimulator.ComposeLidarToMap(new RigidTransform(pose.BodyToMap, pose.PositionEnu), mount);
         return Returns.Select((r, index) => new GeoreferencedLidarSample(checked(PhysicsTick * ReturnSlotsPerTick + index),
@@ -50,6 +55,7 @@ public sealed record CityLidarSlice(long PhysicsTick, string ProfileId, Serializ
 
         _ = ToPose();
         _ = ToMount();
+        if (TunnelRanges is { } ranges) _ = PortTunnelSurvey.Solve(ranges, Pose.TimeSeconds);
     }
 
     private EstimatedBodyPose ToPose() => new(Pose.TimeSeconds, new Vector3d(Pose.East, Pose.North, Pose.Up),

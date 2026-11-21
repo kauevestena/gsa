@@ -37,6 +37,9 @@ public partial class SaoDatumCityScene
             o.Id is "office_entry" or "unload_point" or "unload_point_north").Select(o => o.PositionEnu).ToArray();
         foreach (var unload in _cityUnloadPositions)
             if (TrainingContractSession.HorizontalDistance(p, unload) <= 10) return true;
+        if (IsTunnelCollection(_activeContract))
+            return (p - PortTunnelSurvey.WestStop).Length <= 8 || (p - PortTunnelSurvey.MiddleUpload).Length <= 8 ||
+                (p - PortTunnelSurvey.EastStop).Length <= 8;
         return false;
     }
 

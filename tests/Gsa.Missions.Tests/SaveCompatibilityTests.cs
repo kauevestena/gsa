@@ -109,6 +109,7 @@ public sealed class SaveCompatibilityTests : IDisposable
     [Theory]
     [InlineData(3)]
     [InlineData(4)]
+    [InlineData(5)]
     public void OlderCatalogMigrationKeepsHazardDamageAndRawPhotosWithoutInventingAcquisition(int catalogVersion)
     {
         var manager = new SaveGameManager(_directory); var hazard = new CityHazardState(); hazard.Lens.ApplySplatter(.45);
