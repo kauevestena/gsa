@@ -1671,7 +1671,7 @@ msgid "navigation.status.waiting_velocity"
 msgstr "○ Waiting for a second GNSS position to estimate velocity"
 
 msgid "city.hazards.upload"
-msgstr "Upload camera data (office / unload / Wi-Fi)"
+msgstr "Upload survey data"
 
 msgid "city.hazards.clean"
 msgstr "Clean lens: stop for 3 s (or hold E)"
@@ -2134,3 +2134,54 @@ msgstr "Difference between repeated positions"
 
 msgid "cq.metric.boundary_displacements_confirmed"
 msgstr "Monument displacements confirmed"
+
+msgid "city.works.field_brief"
+msgstr "Scan all four sides of the 100 × 100 m Port worksite with LiDAR (L). Stop at a red field pad and select Upload survey data in the Office tab. Hold position until the transfer finishes."
+
+msgid "city.works.office_help"
+msgstr "The perimeter needs 90% coverage on every side and at least one protected LiDAR batch from a red field pad."
+
+msgid "city.works.stop_for_upload"
+msgstr "Stop the vehicle on the red pad to start the transfer."
+
+msgid "city.works.upload_started"
+msgstr "Field transfer started. Hold position for four seconds."
+
+msgid "city.works.upload_progress"
+msgstr "Field transfer · {0:N0} s remaining"
+
+msgid "city.works.upload_interrupted"
+msgstr "Field transfer interrupted. The scan is still on board."
+
+msgid "city.works.interception"
+msgstr "The construction faction is approaching the field pad. Hold position to protect the scan, or move to interrupt the transfer."
+
+msgid "city.works.field_required"
+msgstr "Send a calibrated scan from a red field pad before delivering."
+
+msgid "city.works.side_gap"
+msgstr "Review the coverage of each side and the checkpoint errors, then revisit the missing sections."
+
+msgid "city.works.side_report"
+msgstr "{0} {1}/{2} cells ({3:P0})"
+
+msgid "city.works.quality_report"
+msgstr "Mean density {0:F1} pts/m² · Worst check panel RMSE {1} m · Relative RMSE {2} m · Field uploads {3}"
+
+msgid "city.works.side.south"
+msgstr "South"
+
+msgid "city.works.side.east"
+msgstr "East"
+
+msgid "city.works.side.north"
+msgstr "North"
+
+msgid "city.works.side.west"
+msgstr "West"
+
+msgid "cq.metric.works_field_upload"
+msgstr "Protected field upload"
+
+msgid "cq.metric.works_side_coverage"
+msgstr "Worst side coverage"

@@ -46,14 +46,17 @@ public partial class SaoDatumCityScene
             return WaterfrontRainSurvey.UploadPads.Any(pad => (p - pad).Length <= 8);
         if (IsBoundarySurvey(_activeContract))
             return SerraBoundarySurvey.UploadPads.Any(pad => (p - pad).Length <= 9);
+        if (IsWorksSurvey(_activeContract))
+            return PortWorksSurvey.UploadPadAt(p).HasValue;
         return false;
     }
 
     private void SyncCityHazardProtection()
     {
         _calmPolicy.SetActiveContractCalm(_activeContract?.Calm == true, _activeContract?.AreaId);
-        _citySafeZone = NearCityUnload() || FullCityFactionPressureCoordinator.IsInsideProtectedSafeZone(
-            GetRegionIdForEnu(CurrentPositionEnu()), CurrentPositionEnu(), out _);
+        var position = CurrentPositionEnu();
+        _citySafeZone = NearCityUnload(position) && !WorksFieldPadAt(position).HasValue ||
+            FullCityFactionPressureCoordinator.IsInsideProtectedSafeZone(GetRegionIdForEnu(position), position, out _);
         if (_calmPolicy.IsProtectionActive || _citySafeZone)
         {
             _cityHazards.CancelActiveThreats(); _attention.CancelPendingThreats(); _disarmRequested = false;
@@ -104,6 +107,7 @@ public partial class SaoDatumCityScene
         }
         else _cityHazards.Lens.StepStoppedCleaning(0, 1);
         StepBoundaryPursuit(protection);
+        StepWorksUpload(dt, pos, speed, mode, protection);
         StepCityThreatVisuals(dt, pos, speed);
         if (_carSim is not null)
         {
@@ -242,6 +246,16 @@ public partial class SaoDatumCityScene
 
     private void OffloadCityData()
     {
+        if (WorksFieldPadAt(CurrentPositionEnu()) is { } pad)
+        {
+            BeginWorksUpload(pad);
+            return;
+        }
+        CommitCityOffload();
+    }
+
+    private void CommitCityOffload(int? worksFieldPad = null)
+    {
         if (_activeContract is null || !NearCityUnload()) { _feedbackText = Text("city.hazards.upload_location"); return; }
         if (_fieldSamples.Count == 0 && _pendingLidarReturns == 0 && _pendingBoundaryShots.Count == 0)
         { _feedbackText = Text("city.hazards.nothing_to_upload"); return; }
@@ -270,6 +284,7 @@ public partial class SaoDatumCityScene
         {
             LidarSlices = _pendingLidarReturns > 0 ? _pendingLidar.ToArray() : null,
             BoundaryShots = _pendingBoundaryShots.Count > 0 ? _pendingBoundaryShots.ToArray() : null,
+            WorksFieldPad = worksFieldPad,
         };
         _cityCustody.RegisterBufferedBatch(artifact, _calendar.CalendarTimeSeconds);
         var result = _cityCustody.OffloadAtomic(id, _calendar.CalendarTimeSeconds);
@@ -281,6 +296,7 @@ public partial class SaoDatumCityScene
         _protectedBoundaryShots.AddRange(_pendingBoundaryShots); _pendingBoundaryShots.Clear();
         _protectedLidarReturns += _pendingLidarReturns;
         ClearPendingCityLidar();
+        _worksUpload = null;
         _locomotion.RefillHandcartResources(refillAutonomy: false, clearStorage: true);
         if (_gimbalina.HasFledToSafety) _locomotion.MarkGimbalinaFled();
         _audio.PlayOffloadChime(); _feedbackText = _hazardNotice = Text("city.hazards.uploaded"); SaveHazardChange();
@@ -315,6 +331,7 @@ public partial class SaoDatumCityScene
         if (mode >= LocomotionMode.Car) _cityHazards.DisabledVehicle = mode;
         _fieldSamples.Clear(); _cityCustody.HandleVehicleLoss(_calendar.CalendarTimeSeconds);
         ClearPendingCityLidar();
+        _worksUpload = null;
         _pendingBoundaryShots.Clear();
         _activeMachine?.HandleFieldIncident(_calendar.CalendarTimeSeconds, FieldIncidentKind.VehicleDestroyed);
         RebuildCityObservedTargets(); _coverageSpots.Clear();

@@ -155,7 +155,8 @@ public partial class SaoDatumCityScene
         {
             var scientific = ShouldRecordCityLidar(CurrentPositionEnu(), mode, _calendar.IsRaining);
             var rainSurvey = scientific && IsRainCollection(_activeContract);
-            var profile = rainSurvey ? LidarProfile.L5 : CityLidarProfile(mode);
+            var worksSurvey = scientific && IsWorksSurvey(_activeContract);
+            var profile = worksSurvey ? LidarProfile.L4 : rainSurvey ? LidarProfile.L5 : CityLidarProfile(mode);
             var channelStep = scientific ? 1 : CityLidarChannelStep(profile);
             var preview = AdvancedSurveyPresenter.BuildLidarPreview(profile, _lidarEnabled, channelStep,
                 _lidarPointVisibleCount, MaxLidarDisplayPoints, locale);
@@ -163,7 +164,10 @@ public partial class SaoDatumCityScene
             lines.Add($"{Text("survey.technical.profile")}: {preview.ProfileId}");
             lines.Add($"{Text("survey.technical.nominal_rays")}: {preview.NominalPrimaryRaysPerSecond} {Text("survey.technical.rate_unit")}");
             lines.Add($"{Text("survey.technical.sampled_rays")}: {preview.ScheduledPrimaryRaysPerSecond} {Text("survey.technical.rate_unit")}");
-            lines.Add($"{Text("survey.technical.range")}: {(rainSurvey ? WaterfrontRainSurvey.CaptureRange : preview.MaximumRangeMetres)} m");
+            var range = worksSurvey ? TechnicalNumber(PortWorksSurvey.CaptureRange)
+                : rainSurvey ? TechnicalNumber(WaterfrontRainSurvey.CaptureRange)
+                : preview.MaximumRangeMetres;
+            lines.Add($"{Text("survey.technical.range")}: {range} m");
             lines.Add($"{Text("survey.technical.range_sigma")}: {preview.RangeSigmaMetres} m");
             lines.Add($"{Text("survey.technical.visible_points")}: {preview.VisiblePoints}/{preview.DisplayCapacity}");
             lines.Add("");

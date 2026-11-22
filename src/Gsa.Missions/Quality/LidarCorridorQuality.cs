@@ -32,7 +32,11 @@ internal static class LidarCorridorQuality
     }
 
     internal static PointCloudQualityReport EvaluatePoints(string contractId, IReadOnlyList<GeoreferencedLidarSample> points, string surfaceId,
-        Bounds2DEnu bounds, double elevation, IReadOnlyList<Vector3d> checkpoints)
+        Bounds2DEnu bounds, double elevation, IReadOnlyList<Vector3d> checkpoints) =>
+        EvaluatePoints(contractId, points, [new(surfaceId, bounds, elevationEnuZ: elevation)], elevation, checkpoints);
+
+    internal static PointCloudQualityReport EvaluatePoints(string contractId, IReadOnlyList<GeoreferencedLidarSample> points,
+        IReadOnlyList<SurveySurfaceReference> surfaces, double elevation, IReadOnlyList<Vector3d> checkpoints)
     {
         var panels = checkpoints.Select((point, i) => new ControlCheckpointReference($"panel_{i + 1}", point)).ToArray();
         var planes = panels.Select(panel =>
@@ -53,7 +57,7 @@ internal static class LidarCorridorQuality
             RelativeCheckpointMeasure.HeightDifference)).ToArray();
         var reference = new EvaluationReference(contractId, [], [], panels, pairs);
         return PointCloudQualityEvaluator.Evaluate(new(contractId, DensityMinimum, CoverageMinimum, AbsoluteLimit, RelativeLimit,
-            ReferencePlanes: planes), [new(surfaceId, bounds, elevationEnuZ: elevation)], points, reference, observations);
+            ReferencePlanes: planes), surfaces, points, reference, observations);
     }
 
     internal static bool IsInElevationWindow(double sampleUp, double elevation) =>

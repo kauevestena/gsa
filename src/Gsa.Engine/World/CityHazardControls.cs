@@ -49,6 +49,8 @@ public partial class SaoDatumCityScene
         _hazardStatus.Text = string.Format(Text("city.hazards.status"), _fieldSamples.Count, _protectedCityPhotos.Count,
             TechnicalNumber(_cityHazards.Lens.ObstructionFraction * 100, 0),
             Text(_cityHazards.TirePunctured ? "city.hazards.tyre_bad" : "city.hazards.tyre_ok")) + "\n" + _hazardNotice;
+        if (IsWorksSurvey(_activeContract))
+            _hazardStatus.Text += "\n" + WorksCollectionStatus();
         if (_cityHazards.DisabledVehicle is { } disabled)
         {
             var p = PlatformProfile.ForMode(disabled); var quote = _cityHazards.Services.QuoteService(ServiceKind.InsuranceClaim, p);
@@ -144,6 +146,7 @@ public partial class SaoDatumCityScene
         RestoreViaductDraft(null);
         RestoreRainSurveyOffice();
         RestoreBoundarySurvey();
+        RestoreWorksSurvey();
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();
         _feedbackText = Text("city.hazards.abandoned"); SaveHazardChange();
