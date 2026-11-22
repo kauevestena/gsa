@@ -16,7 +16,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public const int CurrentCatalogVersion = 10;
+    public const int CurrentCatalogVersion = 11;
     public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 
@@ -192,6 +192,7 @@ public static class SaveCompatibility
                         PortViaductSurvey.MissionId => corridor == PortViaductSurvey.AreaId,
                         WaterfrontRainSurvey.MissionId => corridor == WaterfrontRainSurvey.AreaId && slice.ProfileId == "lidar-l5",
                         PortWorksSurvey.MissionId => corridor == PortWorksSurvey.AreaId && slice.ProfileId == "lidar-bench",
+                        FinalCityPavementSurvey.MissionId => FinalCityPavementSurvey.FindSector(corridor) is not null && slice.ProfileId == "lidar-l6",
                         _ => false,
                     }))
                         throw new ArgumentException("City LiDAR observations do not match the contract.");
@@ -201,10 +202,13 @@ public static class SaveCompatibility
             }
             if (city.LidarBuffer is { } lidar)
             {
-                if (lidar.Pending is null || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 ||
-                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId))
+                if (lidar.Pending is null || lidar.Pending.Count > CityLidarSlice.MaxBufferedReturns || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 ||
+                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId or FinalCityPavementSurvey.MissionId))
                     throw new ArgumentException("Invalid pending city LiDAR buffer.");
                 CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns, city.ActiveStoryMissionId);
+                if (city.ActiveStoryMissionId == FinalCityPavementSurvey.MissionId &&
+                    lidar.Pending.Select(slice => slice.TunnelRanges!.Corridor).Distinct(StringComparer.Ordinal).Skip(1).Any())
+                    throw new ArgumentException("The finale buffer contains multiple sectors.");
                 if (CityLidarSlice.StorageUnits(lidarReturns) > city.Mobility.UsedVirtualStorageUnits)
                     throw new ArgumentException("Pending city LiDAR storage is unaccounted for.");
             }
@@ -244,6 +248,15 @@ public static class SaveCompatibility
                 if (batch.LidarSlices is { } slices)
                 {
                     CheckLidar(slices, CityLidarSlice.MaxContractReturns, batch.ContractId);
+                }
+                if (batch.ContractId == FinalCityPavementSurvey.MissionId || batch.FinalSurveyUploadSectorId is not null)
+                {
+                    if (batch.ContractId != FinalCityPavementSurvey.MissionId ||
+                        FinalCityPavementSurvey.FindSector(batch.FinalSurveyUploadSectorId) is null ||
+                        batch.LidarSlices is not { Count: > 0 and <= CityLidarSlice.MaxBufferedReturns } || batch.Samples.Count != 0 ||
+                        !batch.LidarSlices.Any(slice => slice.Returns.Count > 0) ||
+                        batch.LidarSlices.Any(slice => slice.TunnelRanges?.Corridor != batch.FinalSurveyUploadSectorId))
+                        throw new ArgumentException("Invalid protected finale sector evidence.");
                 }
                 if (batch.WorksFieldPad is { } pad && (batch.ContractId != PortWorksSurvey.MissionId ||
                     batch.LidarSlices is not { Count: > 0 } || pad < 0 || pad >= PortWorksSurvey.UploadPads.Count))

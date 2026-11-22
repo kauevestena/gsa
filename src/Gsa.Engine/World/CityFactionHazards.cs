@@ -48,6 +48,8 @@ public partial class SaoDatumCityScene
             return SerraBoundarySurvey.UploadPads.Any(pad => (p - pad).Length <= 9);
         if (IsWorksSurvey(_activeContract))
             return PortWorksSurvey.UploadPadAt(p).HasValue;
+        if (IsFinalPavementSurvey(_activeContract))
+            return FinalCityPavementSurvey.UploadAt(p) is not null;
         return false;
     }
 
@@ -246,6 +248,11 @@ public partial class SaoDatumCityScene
 
     private void OffloadCityData()
     {
+        if (IsFinalPavementSurvey(_activeContract))
+        {
+            OffloadFinalPavementSector();
+            return;
+        }
         if (WorksFieldPadAt(CurrentPositionEnu()) is { } pad)
         {
             BeginWorksUpload(pad);
@@ -254,7 +261,7 @@ public partial class SaoDatumCityScene
         CommitCityOffload();
     }
 
-    private void CommitCityOffload(int? worksFieldPad = null)
+    private void CommitCityOffload(int? worksFieldPad = null, string? finalSurveyUploadSectorId = null)
     {
         if (_activeContract is null || !NearCityUnload()) { _feedbackText = Text("city.hazards.upload_location"); return; }
         if (_fieldSamples.Count == 0 && _pendingLidarReturns == 0 && _pendingBoundaryShots.Count == 0)
@@ -277,6 +284,7 @@ public partial class SaoDatumCityScene
         // Batch/contract events use calendar time. Each LiDAR slice keeps its own physical timestamp.
         var batchTimes = _pendingLidarReturns == 0 ? fieldTimes : fieldTimes.Append(now);
         var sensors = _fieldSamples.Select(s => s.SensorId).Concat(_pendingLidar.Select(slice => slice.ProfileId));
+        if (_pendingLidar.Any(slice => slice.PavementFrame is not null)) sensors = sensors.Append("van_pavement_down");
         if (_pendingBoundaryShots.Count > 0) sensors = sensors.Append("boundary_total_station");
         var artifact = new SurveyBatchArtifact(1, id, _activeContract.Id, batchTimes.Min(), batchTimes.Max(),
             _fieldSamples.Count + CityLidarSlice.StorageUnits(_pendingLidarReturns) + _pendingBoundaryShots.Count, 0, CaptureStopReason.None,
@@ -285,6 +293,7 @@ public partial class SaoDatumCityScene
             LidarSlices = _pendingLidarReturns > 0 ? _pendingLidar.ToArray() : null,
             BoundaryShots = _pendingBoundaryShots.Count > 0 ? _pendingBoundaryShots.ToArray() : null,
             WorksFieldPad = worksFieldPad,
+            FinalSurveyUploadSectorId = finalSurveyUploadSectorId,
         };
         _cityCustody.RegisterBufferedBatch(artifact, _calendar.CalendarTimeSeconds);
         var result = _cityCustody.OffloadAtomic(id, _calendar.CalendarTimeSeconds);
@@ -294,6 +303,7 @@ public partial class SaoDatumCityScene
         _activeMachine?.ProtectBatchAtUnloadPoint(_calendar.CalendarTimeSeconds, id);
         _protectedCityPhotos.AddRange(_fieldSamples); _fieldSamples.Clear();
         _protectedBoundaryShots.AddRange(_pendingBoundaryShots); _pendingBoundaryShots.Clear();
+        if (finalSurveyUploadSectorId is not null) _finaleUploadedSectors.Add(finalSurveyUploadSectorId);
         _protectedLidarReturns += _pendingLidarReturns;
         ClearPendingCityLidar();
         _worksUpload = null;
@@ -306,11 +316,13 @@ public partial class SaoDatumCityScene
     {
         _protectedCityPhotos.Clear();
         _protectedBoundaryShots.Clear();
+        _finaleUploadedSectors.Clear();
         _protectedLidarReturns = 0;
         foreach (var entry in _cityCustody.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
         {
             var batch = JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson) ?? throw new ArgumentException("Invalid city batch.");
             _protectedCityPhotos.AddRange(batch.Samples.Select(s => s.ToDomain()));
+            if (batch.FinalSurveyUploadSectorId is { } sector) _finaleUploadedSectors.Add(sector);
             _protectedBoundaryShots.AddRange(batch.BoundaryShots ?? []);
             _protectedLidarReturns += batch.LidarSlices?.Sum(slice => slice.Returns.Count) ?? 0;
         }

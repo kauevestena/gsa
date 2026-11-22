@@ -112,6 +112,9 @@ public sealed record SurveyBatchArtifact(
     public int? WorksFieldPad { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? FinalSurveyUploadSectorId { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<Gsa.Core.World.BoundarySurveyShot>? BoundaryShots { get; init; }
 
     public static SurveyBatchArtifact FromObservationBatch(

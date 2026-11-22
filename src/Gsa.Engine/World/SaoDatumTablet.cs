@@ -284,6 +284,7 @@ public partial class SaoDatumCityScene
             WaterfrontRainSurvey.MissionId => ("", 0, WaterfrontRainSurvey.AreaId, "city_hall"),
             SerraBoundarySurvey.MissionId => ("", 0, SerraBoundarySurvey.AreaId, "city_hall"),
             PortWorksSurvey.MissionId => ("", 0, PortWorksSurvey.AreaId, "city_hall"),
+            FinalCityPavementSurvey.MissionId => ("", 0, FinalCityPavementSurvey.AreaId, "city_hall"),
             _ => ("", 0, "port_tunnel", "university"),
         };
         var isBusSurvey = area == BusSurveyCorridor.AreaId;
@@ -292,14 +293,15 @@ public partial class SaoDatumCityScene
         var isRain = spec.MissionId == WaterfrontRainSurvey.MissionId;
         var isBoundary = spec.MissionId == SerraBoundarySurvey.MissionId;
         var isWorks = spec.MissionId == PortWorksSurvey.MissionId;
+        var isFinale = spec.MissionId == FinalCityPavementSurvey.MissionId;
         var featureIds = spec.MissionId switch
         {
             BusSurveyCorridor.MissionId => BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray(),
             SerraBoundarySurvey.MissionId => SerraBoundarySurvey.Sites.Select(site => site.Id).ToArray(),
-            TunnelMissionId or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId => [],
+            TunnelMissionId or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId or FinalCityPavementSurvey.MissionId => [],
             _ => Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray(),
         };
-        var calm = !(isBusSurvey || isViaduct || isRain || isBoundary || isWorks) || _calmPolicy.CalmCityEnabled;
+        var calm = !(isBusSurvey || isViaduct || isRain || isBoundary || isWorks || isFinale) || _calmPolicy.CalmCityEnabled;
         var def = new ContractDefinition(
             SchemaVersion: 1,
             Id: spec.MissionId,
@@ -315,16 +317,18 @@ public partial class SaoDatumCityScene
                 PortViaductSurvey.AreaId => PortViaductQuality.Requirements,
                 SerraBoundarySurvey.AreaId => SerraBoundaryQuality.Requirements,
                 PortWorksSurvey.AreaId => PortWorksQuality.Requirements,
+                FinalCityPavementSurvey.AreaId => FinalCityPavementQuality.Requirements,
                 "port_tunnel" => PortTunnelQuality.Requirements,
                 _ => CitySurveyRequirements(area, story: true),
             },
-            RequiredCapabilities: isBoundary ? ["boundary_total_station"] : isRain ? ["lidar_l5"] : isTunnel || isViaduct || isWorks ? ["lidar_l4"] : ["camera"],
+            RequiredCapabilities: isFinale ? ["lidar_l6", "camera"] : isBoundary ? ["boundary_total_station"] : isRain ? ["lidar_l5"] : isTunnel || isViaduct || isWorks ? ["lidar_l4"] : ["camera"],
             Risk: calm ? "easy" : "moderate",
             Calm: calm,
             Deadline: spec.MissionId switch
             {
                 "HIST-04" => new(25200, 32400, .05, .5),
                 BusSurveyCorridor.MissionId => new(30 * 3600, 36 * 3600, .05, .5),
+                FinalCityPavementSurvey.MissionId => new(FinalCityPavementSurvey.DueSeconds, FinalCityPavementSurvey.ExpirySeconds, .05, .5),
                 _ => new(21600, 27000, .05, .5),
             },
             Reward: new ContractRewardSpec(spec.RewardCoords, 120 + spec.Act * 60, spec.ReputationDelta, spec.UnlockedPlatforms.ToArray()),
@@ -344,6 +348,7 @@ public partial class SaoDatumCityScene
             WaterfrontRainSurvey.MissionId => "city.rain_survey.field_brief",
             SerraBoundarySurvey.MissionId => "city.boundary.field_brief",
             PortWorksSurvey.MissionId => "city.works.field_brief",
+            FinalCityPavementSurvey.MissionId => "city.finale.field_brief",
             _ => "city.story.facades_brief",
         };
         _gtaHud.ShowCutsceneLetterbox(
@@ -368,6 +373,8 @@ public partial class SaoDatumCityScene
         RestoreRainSurveyOffice();
         RestoreBoundarySurvey();
         RestoreWorksSurvey();
+        _lastFinalSurveyReview = null;
+        _finaleUploadedSectors.Clear();
         _protectedBoundaryShots.Clear();
         _lastSidewalkMeasurements = [];
         _lastAdjustedPhotoCount = 0;
@@ -540,6 +547,10 @@ public partial class SaoDatumCityScene
         if (boundaryReview.Length > 0) _officeStatusLabel.Text += "\n" + boundaryReview;
         if (IsWorksSurvey(_activeContract))
             _officeStatusLabel.Text += "\n" + Text("city.works.office_help");
+        if (IsFinalPavementSurvey(_activeContract))
+            _officeStatusLabel.Text += "\n" + Text("city.finale.office_help") + "\n" + FinalSurveyStatus();
+        var finalSurveyReview = FinalSurveyReviewText();
+        if (finalSurveyReview.Length > 0) _officeStatusLabel.Text += "\n" + finalSurveyReview;
         var worksReview = WorksReviewText();
         if (worksReview.Length > 0) _officeStatusLabel.Text += "\n" + worksReview;
         var review = CitySurveyReviewText();
@@ -666,6 +677,17 @@ public partial class SaoDatumCityScene
             ? string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count)
             : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
         if (IsCityLidarCollection(_activeContract)) objDetails = CityLidarCollectionStatus();
+        if (IsFinalPavementSurvey(_activeContract))
+        {
+            objDetails = FinalSurveyStatus();
+            foreach (var sector in FinalCityPavementSurvey.Sectors)
+            {
+                var id = sector.Manifest.SectorId;
+                var color = _finaleUploadedSectors.Contains(id) ? Colors.LimeGreen : Colors.DeepSkyBlue;
+                blips.Add(new RadarBlip(id, sector.Start, Colors.Orange, "S", ClampToRim: true));
+                blips.Add(new RadarBlip(id + "_upload", sector.Upload, color, "U", ClampToRim: false));
+            }
+        }
         if (IsWorksSurvey(_activeContract))
         {
             objDetails = WorksCollectionStatus();
@@ -776,6 +798,12 @@ public partial class SaoDatumCityScene
             targets.AddRange(BoundaryStations().Select(station => station.Position));
             targets.AddRange(SerraBoundarySurvey.UploadPads);
         }
+        if (IsFinalPavementSurvey(_activeContract))
+            foreach (var sector in FinalCityPavementSurvey.Sectors)
+            {
+                targets.Add(sector.Start);
+                targets.Add(sector.Upload);
+            }
         _cityMap.UpdateMap(CurrentPositionEnu(), CurrentHeadingRadians(), _geodeticNetwork.Benchmarks.Values.ToArray(), targets);
     }
 

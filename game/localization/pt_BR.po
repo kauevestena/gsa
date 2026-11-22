@@ -2185,3 +2185,45 @@ msgstr "Envio de campo protegido"
 
 msgid "cq.metric.works_side_coverage"
 msgstr "Cobertura do lado menos completo"
+
+msgid "city.finale.field_brief"
+msgstr "Levante a faixa viária marcada em cada região com a van. Comece em S, centralize a van entre as linhas amarelas e ligue o LiDAR (L). A câmera voltada para baixo registra automaticamente. Pare na base azul U da própria região e descarregue pelo tablet antes de seguir. Entregue no escritório em até 24 horas do jogo para evitar multa. O contrato expira após 30 horas."
+
+msgid "city.finale.office_help"
+msgstr "Descarregue cada faixa na própria base antes de processar no escritório. Todas as regiões precisam passar nos controles de engenharia."
+
+msgid "city.finale.collection"
+msgstr "Regiões descarregadas {0}/{1} · Memória: {2}"
+
+msgid "city.finale.empty_buffer"
+msgstr "vazia"
+
+msgid "city.finale.sector_report"
+msgstr "{0} · {1}. Cobertura LiDAR {2}% · densidade {3} pts/m² · RMSE nos pontos de checagem {4} m. Cobertura do perfil {5}% · RMSE altimétrico {6} m · RMSE da declividade transversal {7}% · RMSE da trilha de roda {8} mm · RMSE da irregularidade {9} m/km."
+
+msgid "city.finale.passed"
+msgstr "Aprovado"
+
+msgid "city.finale.rework"
+msgstr "Recoletar esta faixa"
+
+msgid "city.finale.waiting_upload"
+msgstr "Aguardando descarga"
+
+msgid "city.finale.upload_first"
+msgstr "Pare a van na base azul da região indicada na memória e descarregue os dados ali."
+
+msgid "city.finale.upload_required"
+msgstr "É preciso descarregar os dados de cada uma das quatro regiões."
+
+msgid "city.finale.review_required"
+msgstr "Consulte os quatro laudos no escritório e refaça o levantamento das faixas reprovadas."
+
+msgid "city.finale.point_view"
+msgstr "Cidade em nuvem de pontos (filtro visual)"
+
+msgid "city.finale.due"
+msgstr "Prazo em {0} h"
+
+msgid "city.finale.expiry"
+msgstr "Expira em {0} h"

@@ -133,6 +133,7 @@ public partial class SaoDatumCityScene
             RestoreRainSurveyOffice(city?.RainSurveyFilterEnabled == true);
             RestoreBoundarySurvey(city?.BoundarySurvey);
             RestoreWorksSurvey(city?.WorksUpload);
+            _lastFinalSurveyReview = null;
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;
