@@ -72,6 +72,7 @@ public static class PortTunnelSurvey
     {
         if (observation.Corridor == PortViaductSurvey.AreaId) return PortViaductSurvey.Solve(observation, time);
         if (observation.Corridor == WaterfrontRainSurvey.AreaId) return WaterfrontRainSurvey.Solve(observation, time);
+        if (observation.Corridor == PortWorksSurvey.AreaId) return PortWorksSurvey.Solve(observation, time);
         if (observation.Station is < 0 or > LastStation || observation.ZuptPortal is < 0 or > 1)
             throw new ArgumentException("Invalid tunnel station or portal.", nameof(observation));
         var pose = SolveStation(observation, time, StationOrigin(observation.Station));

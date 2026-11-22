@@ -51,6 +51,7 @@ public partial class SaoDatumCityScene
             ViaductHeights = IsViaductCollection(_activeContract) ? _viaductHeightFields.Select(field => field.Text).ToArray() : null,
             RainSurveyFilterEnabled = IsRainCollection(_activeContract) && _rainSurveyFilterEnabled,
             BoundarySurvey = IsBoundarySurvey(_activeContract) ? new(_pendingBoundaryShots.ToArray(), _boundaryPursuitTriggered) : null,
+            WorksUpload = IsWorksSurvey(_activeContract) ? _worksUpload : null,
         });
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
@@ -131,6 +132,7 @@ public partial class SaoDatumCityScene
             RestoreViaductDraft(city?.ViaductHeights);
             RestoreRainSurveyOffice(city?.RainSurveyFilterEnabled == true);
             RestoreBoundarySurvey(city?.BoundarySurvey);
+            RestoreWorksSurvey(city?.WorksUpload);
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;

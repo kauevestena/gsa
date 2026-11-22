@@ -56,7 +56,7 @@ public partial class SaoDatumCityScene
 
     private static bool SupportsCityStory(CampaignMissionFullSpec spec) =>
         spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId or TunnelMissionId or
-            PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or SerraBoundarySurvey.MissionId;
+            PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or SerraBoundarySurvey.MissionId or PortWorksSurvey.MissionId;
 
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
@@ -195,6 +195,12 @@ public partial class SaoDatumCityScene
         if (IsBoundarySurvey(definition))
         {
             ProcessBoundaryDelivery(machine, now);
+            return;
+        }
+
+        if (IsWorksSurvey(definition))
+        {
+            ProcessWorksDelivery(machine, now);
             return;
         }
 
@@ -351,7 +357,7 @@ public partial class SaoDatumCityScene
         _audio.PlayMissionPassedFanfare();
         _gtaHud.TriggerCelebrationBanner(Text("city.mission_passed"), $"{Text(definition.TitleKey)} · {summary}");
         _feedbackText = summary;
-        if (IsBoundarySurvey(definition))
+        if (IsBoundarySurvey(definition) || IsWorksSurvey(definition))
         {
             _cityHazards.CancelActiveThreats();
             ClearCityThreatVisuals();
@@ -360,6 +366,7 @@ public partial class SaoDatumCityScene
         _locomotion.ReleaseCaptureUnits(_pendingBoundaryShots.Count);
         _pendingBoundaryShots.Clear();
         ClearPendingCityLidar();
+        _worksUpload = null;
         _activeContract = null;
         _cityPhotoCoverage = null;
         _activeMachine = null;

@@ -16,7 +16,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public const int CurrentCatalogVersion = 9;
+    public const int CurrentCatalogVersion = 10;
     public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 
@@ -59,10 +59,14 @@ public sealed record SaveCitySessionState(
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public BoundarySurveySaveState? BoundarySurvey { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public WorksUploadSaveState? WorksUpload { get; init; }
 }
 
 public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);
 public sealed record BoundarySurveySaveState(IReadOnlyList<BoundarySurveyShot> Pending, bool PursuitTriggered);
+public sealed record WorksUploadSaveState(int PadIndex, double RemainingSeconds);
 
 public sealed record SaveCompatibilityInfo(
     int SourceSchemaVersion,
@@ -187,6 +191,7 @@ public static class SaveCompatibility
                         "HIST-06" => corridor is null,
                         PortViaductSurvey.MissionId => corridor == PortViaductSurvey.AreaId,
                         WaterfrontRainSurvey.MissionId => corridor == WaterfrontRainSurvey.AreaId && slice.ProfileId == "lidar-l5",
+                        PortWorksSurvey.MissionId => corridor == PortWorksSurvey.AreaId && slice.ProfileId == "lidar-bench",
                         _ => false,
                     }))
                         throw new ArgumentException("City LiDAR observations do not match the contract.");
@@ -197,7 +202,7 @@ public static class SaveCompatibility
             if (city.LidarBuffer is { } lidar)
             {
                 if (lidar.Pending is null || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 ||
-                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId))
+                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId))
                     throw new ArgumentException("Invalid pending city LiDAR buffer.");
                 CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns, city.ActiveStoryMissionId);
                 if (CityLidarSlice.StorageUnits(lidarReturns) > city.Mobility.UsedVirtualStorageUnits)
@@ -208,6 +213,10 @@ public static class SaveCompatibility
                 throw new ArgumentException("Invalid viaduct height draft.");
             if (city.RainSurveyFilterEnabled && city.ActiveStoryMissionId != WaterfrontRainSurvey.MissionId)
                 throw new ArgumentException("Invalid Waterfront rain filter selection.");
+            if (city.WorksUpload is { } transfer && (city.ActiveStoryMissionId != PortWorksSurvey.MissionId ||
+                city.LidarBuffer?.Pending.Count is not > 0 || transfer.PadIndex < 0 || transfer.PadIndex >= PortWorksSurvey.UploadPads.Count ||
+                transfer.RemainingSeconds is not (> 0 and <= PortWorksSurvey.UploadDuration)))
+                throw new ArgumentException("Invalid works field upload state.");
             var boundaryTicks = new HashSet<long>();
             void CheckBoundaryShots(IEnumerable<BoundarySurveyShot> shots)
             {
@@ -236,6 +245,9 @@ public static class SaveCompatibility
                 {
                     CheckLidar(slices, CityLidarSlice.MaxContractReturns, batch.ContractId);
                 }
+                if (batch.WorksFieldPad is { } pad && (batch.ContractId != PortWorksSurvey.MissionId ||
+                    batch.LidarSlices is not { Count: > 0 } || pad < 0 || pad >= PortWorksSurvey.UploadPads.Count))
+                    throw new ArgumentException("Invalid works field upload evidence.");
                 if (batch.BoundaryShots is { } boundaryShots)
                 {
                     if (batch.ContractId != SerraBoundarySurvey.MissionId || boundaryShots.Count is < 1 ||

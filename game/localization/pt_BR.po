@@ -1671,7 +1671,7 @@ msgid "navigation.status.waiting_velocity"
 msgstr "○ Aguardando segunda posição GNSS para estimar velocidade"
 
 msgid "city.hazards.upload"
-msgstr "Enviar dados de câmera (escritório / descarga / Wi-Fi)"
+msgstr "Enviar dados de levantamento"
 
 msgid "city.hazards.clean"
 msgstr "Limpar lente: pare por 3 s (ou segure E)"
@@ -2134,3 +2134,54 @@ msgstr "Diferença entre posições repetidas"
 
 msgid "cq.metric.boundary_displacements_confirmed"
 msgstr "Deslocamentos de marcos confirmados"
+
+msgid "city.works.field_brief"
+msgstr "Escaneie com o LiDAR (L) os quatro lados da obra de 100 × 100 m no Porto. Pare em um ponto vermelho e selecione Enviar dados de levantamento na aba Escritório. Mantenha a posição até concluir a transferência."
+
+msgid "city.works.office_help"
+msgstr "O perímetro precisa de 90% de cobertura em cada lado e de pelo menos um lote LiDAR protegido enviado em um ponto vermelho."
+
+msgid "city.works.stop_for_upload"
+msgstr "Pare o veículo no ponto vermelho para iniciar a transferência."
+
+msgid "city.works.upload_started"
+msgstr "Transferência de campo iniciada. Mantenha a posição por quatro segundos."
+
+msgid "city.works.upload_progress"
+msgstr "Transferência de campo · faltam {0:N0} s"
+
+msgid "city.works.upload_interrupted"
+msgstr "Transferência de campo interrompida. A varredura permanece a bordo."
+
+msgid "city.works.interception"
+msgstr "A facção da obra se aproxima do ponto de envio. Mantenha a posição para proteger a varredura ou saia para interromper a transferência."
+
+msgid "city.works.field_required"
+msgstr "Envie uma varredura calibrada em um ponto vermelho antes de entregar."
+
+msgid "city.works.side_gap"
+msgstr "Confira a cobertura de cada lado e os erros de checagem. Depois recolete os trechos ausentes."
+
+msgid "city.works.side_report"
+msgstr "{0} {1}/{2} células ({3:P0})"
+
+msgid "city.works.quality_report"
+msgstr "Densidade média {0:F1} pts/m² · Maior RMSE de painel {1} m · RMSE relativo {2} m · Envios em campo {3}"
+
+msgid "city.works.side.south"
+msgstr "Sul"
+
+msgid "city.works.side.east"
+msgstr "Leste"
+
+msgid "city.works.side.north"
+msgstr "Norte"
+
+msgid "city.works.side.west"
+msgstr "Oeste"
+
+msgid "cq.metric.works_field_upload"
+msgstr "Envio de campo protegido"
+
+msgid "cq.metric.works_side_coverage"
+msgstr "Cobertura do lado menos completo"

@@ -24,7 +24,7 @@ public partial class SaoDatumCityScene
         definition is { Id: PortViaductSurvey.MissionId, Product: "point_cloud" };
 
     private static bool IsCityLidarCollection(ContractDefinition? definition) =>
-        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition);
+        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition) || IsWorksSurvey(definition);
 
     private void BuildPortLidarDeck(Node3D parent)
     {
@@ -39,7 +39,8 @@ public partial class SaoDatumCityScene
         (IsTunnelCollection(_activeContract) && GetRegionIdForEnu(position) == "port" ||
             IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(position) ||
             IsRainCollection(_activeContract) && mode >= LocomotionMode.Pickup && isRaining && _calendar.IsNight &&
-                WaterfrontRainSurvey.IsSurveyLane(position)) &&
+                WaterfrontRainSurvey.IsSurveyLane(position) ||
+            IsWorksSurvey(_activeContract) && _worksUpload is null && mode >= LocomotionMode.Kombi && PortWorksSurvey.IsSurveyLane(position)) &&
         _activeMachine is { IsActiveState: true, Snapshot: { } accepted } &&
         _calendar.CalendarTimeSeconds <= accepted.ExpiresAtSeconds &&
         _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode);

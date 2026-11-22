@@ -258,6 +258,7 @@ public partial class SaoDatumCityScene : Node3D
         BuildPortTunnel(visualBase);
         BuildPortViaduct(visualBase);
         BuildRainSurveyAvenue(visualBase);
+        BuildWorksPerimeter(visualBase);
         BuildBoundaryAccess(visualBase);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
@@ -582,7 +583,8 @@ public partial class SaoDatumCityScene : Node3D
             if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
                 OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d) ||
                 BusSurveyCorridor.OverlapsBuildings(e, n, w, d) || PortTunnelSurvey.OverlapsBuilding(e, n, w, d) ||
-                PortViaductSurvey.OverlapsBuilding(e, n, w, d) || WaterfrontRainSurvey.OverlapsBuilding(e, n, w, d))
+                PortViaductSurvey.OverlapsBuilding(e, n, w, d) || WaterfrontRainSurvey.OverlapsBuilding(e, n, w, d) ||
+                PortWorksSurvey.OverlapsBuilding(e, n, w, d))
                 continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
@@ -741,6 +743,8 @@ public partial class SaoDatumCityScene : Node3D
                 speedLimit = Math.Min(speedLimit, PortViaductSurvey.SurveySpeed);
             if (_lidarEnabled && activeMode >= LocomotionMode.Pickup && IsRainCollection(_activeContract) && WaterfrontRainSurvey.IsSurveyLane(prevCarPos))
                 speedLimit = Math.Min(speedLimit, WaterfrontRainSurvey.SurveySpeed);
+            if (_lidarEnabled && activeMode >= LocomotionMode.Kombi && IsWorksSurvey(_activeContract) && PortWorksSurvey.IsSurveyLane(prevCarPos))
+                speedLimit = Math.Min(speedLimit, PortWorksSurvey.SurveySpeed);
             var carStep = _carSim.StepMotion(
                 delta,
                 Math.Max(0.0, input.Throttle),
@@ -1165,7 +1169,8 @@ public partial class SaoDatumCityScene : Node3D
 
         var scientific = ShouldRecordCityLidar(pos, mode, isRaining);
         var rainySurvey = scientific && IsRainCollection(_activeContract);
-        var profile = rainySurvey ? LidarProfile.L5 : CityLidarProfile(mode);
+        var worksSurvey = scientific && IsWorksSurvey(_activeContract);
+        var profile = worksSurvey ? LidarProfile.L4 : rainySurvey ? LidarProfile.L5 : CityLidarProfile(mode);
         if (_lidarSim.Profile.Id != profile.Id)
         {
             _lidarSim = new LidarBenchSimulator(profile);
@@ -1178,7 +1183,8 @@ public partial class SaoDatumCityScene : Node3D
         _lidarSliceIndex++;
 
         var viaduct = scientific && IsViaductCollection(_activeContract);
-        var ranges = rainySurvey ? WaterfrontRainSurvey.Observe(pos, heading, _tick)
+        var ranges = worksSurvey ? PortWorksSurvey.Observe(pos, heading, _tick)
+            : rainySurvey ? WaterfrontRainSurvey.Observe(pos, heading, _tick)
             : viaduct ? PortViaductSurvey.Observe(pos, heading, _tick)
             : scientific ? ObserveTunnelRanges(pos, heading) : null;
         var navigation = scientific && ranges is null ? _navigationRig?.Estimator?.Current : null;
@@ -1208,10 +1214,11 @@ public partial class SaoDatumCityScene : Node3D
         _lidarRayQuery ??= new PhysicsRayQueryParameters3D { CollisionMask = 1 };
         _lidarRayQuery.CollisionMask = scientific ? 1 | SurveyLidarSurfaceLayer : 1;
 
+        var captureRange = worksSurvey ? PortWorksSurvey.CaptureRange : rainySurvey ? WaterfrontRainSurvey.CaptureRange : double.PositiveInfinity;
         LidarRayHit? CastRay(Vector3d startEnu, Vector3d dirEnu, double maxRange)
         {
             _lidarRayQuery.From = _coordinates.ToGodot(startEnu);
-            var queryRange = rainySurvey ? Math.Min(maxRange, WaterfrontRainSurvey.CaptureRange) : maxRange;
+            var queryRange = Math.Min(maxRange, captureRange);
             _lidarRayQuery.To = _coordinates.ToGodot(startEnu + dirEnu * queryRange);
             var hit = space.IntersectRay(_lidarRayQuery);
             if (hit.Count == 0) return null;
@@ -1232,7 +1239,8 @@ public partial class SaoDatumCityScene : Node3D
         if (_lidarSim.TrySimulateScanSlice(time, lidarToMap, traj, mount,
             isRaining && !PortTunnelSurvey.IsUnderRoof(pos), CastRay, scientific ? (int)(_tick % sliceCount) : sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
-            if (rainySurvey) _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > WaterfrontRainSurvey.CaptureRange);
+            if (worksSurvey) _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > PortWorksSurvey.CaptureRange);
+            else if (rainySurvey) _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > WaterfrontRainSurvey.CaptureRange);
             if (scientific) RecordCityLidarSlice(profile.Id, pose, mount, ranges);
             if (!_lidarCloudMesh.Visible) return;
             var mm = _lidarCloudMesh.Multimesh;
