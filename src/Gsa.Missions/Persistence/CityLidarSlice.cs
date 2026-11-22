@@ -20,6 +20,9 @@ public sealed record CityLidarSlice(long PhysicsTick, string ProfileId, Serializ
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public TunnelRangeObservation? TunnelRanges { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PavementCameraFootprintObservation? PavementFrame { get; init; }
+
     public static int StorageUnits(int returns) => (returns + 999) / 1000;
 
     public static CityLidarSlice Capture(long tick, string profileId, EstimatedBodyPose pose, LidarMountEstimate mount,
@@ -47,11 +50,22 @@ public sealed record CityLidarSlice(long PhysicsTick, string ProfileId, Serializ
         if (PhysicsTick <= 0 || PhysicsTick > maxTick || PhysicsTick >= long.MaxValue / ReturnSlotsPerTick ||
             !LidarProfile.AllProfiles.Any(profile => profile.Id == ProfileId) || Pose is null || Mount is null ||
             Mount.TimeOffsetSeconds != 0 || Pose.TimeSeconds != PhysicsTick / (double)CameraCaptureScheduler.PhysicsTicksPerSecond ||
-            Returns is null || Returns.Count is <= 0 or > ReturnSlotsPerTick || Returns.Any(r => r is null ||
+            Returns is null || Returns.Count > ReturnSlotsPerTick || Returns.Count == 0 && PavementFrame is null || Returns.Any(r => r is null ||
                 !double.IsFinite(r.Azimuth) || !double.IsFinite(r.Elevation) || !double.IsFinite(r.Range) || r.Range <= 0 ||
                 !float.IsFinite(r.Intensity) || r.Intensity is < 0 or > 1 || r.Number < 1 || r.Number > r.Total ||
                 r.Total > LidarMaterialProperties.MaxReturnsPerPulse))
             throw new ArgumentException("Invalid city LiDAR slice.");
+
+        if (PavementFrame is { } frame &&
+            (FinalCityPavementSurvey.FindSector(TunnelRanges?.Corridor) is null || ProfileId != "lidar-l6" ||
+             PhysicsTick % FinalCityPavementSurvey.CameraTickInterval != 0 || frame.SampleId != $"final_camera_{PhysicsTick}" ||
+             frame.TimestampSeconds != Pose.TimeSeconds || frame.CameraSlotId != "van_pavement_down" || frame.TransverseStripIndex != 0 ||
+             !double.IsFinite(frame.ChainageMetres) || frame.ChainageMetres is < -3.1 or > FinalCityPavementSurvey.Length + 3.1 ||
+             !double.IsFinite(frame.TransverseOffsetMetres) || Math.Abs(frame.TransverseOffsetMetres) > FinalCityPavementSurvey.DriveHalfWidth + .05 ||
+             !double.IsFinite(frame.EstimatedElevationMetres) ||
+             !double.IsFinite(frame.ObservedRutDepthMillimetres) || frame.ObservedRutDepthMillimetres < 0 ||
+             !double.IsFinite(frame.LensObstructionFraction) || frame.LensObstructionFraction is < 0 or > 1))
+            throw new ArgumentException("Invalid synchronized pavement camera frame.");
 
         _ = ToPose();
         _ = ToMount();

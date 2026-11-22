@@ -2185,3 +2185,45 @@ msgstr "Protected field upload"
 
 msgid "cq.metric.works_side_coverage"
 msgstr "Worst side coverage"
+
+msgid "city.finale.field_brief"
+msgstr "Survey the marked road strip in each district with the Van. Start at S, center the Van between the yellow lines, and turn on LiDAR (L). The downward camera records automatically. Stop on that district’s blue U pad and upload from the tablet before moving on. Submit at the office within 24 in-game hours to avoid a penalty. The contract expires after 30 hours."
+
+msgid "city.finale.office_help"
+msgstr "Upload each strip on its own pad before running the office review. Every district must pass its engineering checks."
+
+msgid "city.finale.collection"
+msgstr "Districts uploaded {0}/{1} · Buffer: {2}"
+
+msgid "city.finale.empty_buffer"
+msgstr "empty"
+
+msgid "city.finale.sector_report"
+msgstr "{0} · {1}. LiDAR coverage {2}% · density {3} pts/m² · checkpoint RMSE {4} m. Profile coverage {5}% · elevation RMSE {6} m · crossfall RMSE {7}% · rut RMSE {8} mm · roughness RMSE {9} m/km."
+
+msgid "city.finale.passed"
+msgstr "Passed"
+
+msgid "city.finale.rework"
+msgstr "Resurvey this strip"
+
+msgid "city.finale.waiting_upload"
+msgstr "Awaiting upload"
+
+msgid "city.finale.upload_first"
+msgstr "Stop the Van at the blue upload pad for the district in the buffer and upload there."
+
+msgid "city.finale.upload_required"
+msgstr "An upload is required from each of the four districts."
+
+msgid "city.finale.review_required"
+msgstr "Review the four district reports at the office and resurvey any strips that failed."
+
+msgid "city.finale.point_view"
+msgstr "City point cloud (visual filter)"
+
+msgid "city.finale.due"
+msgstr "Due in {0} h"
+
+msgid "city.finale.expiry"
+msgstr "Expires in {0} h"

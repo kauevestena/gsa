@@ -1,3 +1,4 @@
+using Gsa.Core.World;
 using System.Text.Json;
 using Gsa.Core.Geometry;
 using Gsa.Core.Mobility;
@@ -264,7 +265,7 @@ public static class FullCampaignCatalog
         CreateSpec("HIST-10", 3, "mission.hist_10.title", ["port", "serra"], 4, "kombi", ["HIST-09"], "point_cloud", 8400, 20,
             ["van"], [], ["van_workstation_rack"], "dona_clara", "on_fail_hist_10", "on_rework_hist_10", true, 70.0),
         CreateSpec("HIST-11", 3, "mission.hist_11.title", ["old_center", "port", "waterfront", "serra"], 6, "van", ["HIST-10"], "pavement_profile", 12000, 25,
-            [], [], ["master_geodesist_seal"], "eng_arnaldo", "on_fail_hist_11", "on_rework_hist_11", true, 90.0),
+            [], [], ["master_geodesist_seal", FinalCityPavementSurvey.CloudFilterUnlock], "eng_arnaldo", "on_fail_hist_11", "on_rework_hist_11", true, 90.0),
     ];
 
     private static CampaignMissionFullSpec CreateSpec(

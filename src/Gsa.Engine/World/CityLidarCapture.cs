@@ -24,7 +24,7 @@ public partial class SaoDatumCityScene
         definition is { Id: PortViaductSurvey.MissionId, Product: "point_cloud" };
 
     private static bool IsCityLidarCollection(ContractDefinition? definition) =>
-        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition) || IsWorksSurvey(definition);
+        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition) || IsWorksSurvey(definition) || IsFinalPavementSurvey(definition);
 
     private void BuildPortLidarDeck(Node3D parent)
     {
@@ -40,17 +40,21 @@ public partial class SaoDatumCityScene
             IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(position) ||
             IsRainCollection(_activeContract) && mode >= LocomotionMode.Pickup && isRaining && _calendar.IsNight &&
                 WaterfrontRainSurvey.IsSurveyLane(position) ||
-            IsWorksSurvey(_activeContract) && _worksUpload is null && mode >= LocomotionMode.Kombi && PortWorksSurvey.IsSurveyLane(position)) &&
+            IsWorksSurvey(_activeContract) && _worksUpload is null && mode >= LocomotionMode.Kombi && PortWorksSurvey.IsSurveyLane(position) ||
+            IsFinalPavementSurvey(_activeContract) && mode == LocomotionMode.Van && Math.Abs(_lastSpeedMps) >= 1 &&
+                FinalCityPavementSurvey.LaneAt(position) is { } sector &&
+                (PendingFinaleSector is null || PendingFinaleSector == sector.Manifest.SectorId)) &&
         _activeMachine is { IsActiveState: true, Snapshot: { } accepted } &&
         _calendar.CalendarTimeSeconds <= accepted.ExpiresAtSeconds &&
         _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode);
 
-    private void RecordCityLidarSlice(string profileId, EstimatedBodyPose pose, LidarMountEstimate mount, TunnelRangeObservation? ranges)
+    private void RecordCityLidarSlice(string profileId, EstimatedBodyPose pose, LidarMountEstimate mount, TunnelRangeObservation? ranges,
+        PavementCameraFootprintObservation? pavement = null)
     {
-        if (_lidarSliceScratch.Count == 0) return;
+        if (_lidarSliceScratch.Count == 0 && pavement is null) return;
         var nextCount = _pendingLidarReturns + _lidarSliceScratch.Count;
         var units = CityLidarSlice.StorageUnits(nextCount) - CityLidarSlice.StorageUnits(_pendingLidarReturns);
-        if (nextCount > CityLidarSlice.MaxBufferedReturns || nextCount + _protectedLidarReturns > CityLidarSlice.MaxContractReturns ||
+        if (_pendingLidar.Count >= CityLidarSlice.MaxBufferedReturns || nextCount > CityLidarSlice.MaxBufferedReturns || nextCount + _protectedLidarReturns > CityLidarSlice.MaxContractReturns ||
             _locomotion.RemainingAutonomySeconds <= 0 || _locomotion.GimbalinaFled ||
             (units > 0 && !_locomotion.TryConsumeCaptureUnits(units, out _)))
         {
@@ -61,7 +65,10 @@ public partial class SaoDatumCityScene
         if (ranges?.ZuptPortal is { } portal && !_rackMisaligned && !_pendingLidar.Any(slice =>
             !slice.RackNeedsCalibration && slice.TunnelRanges?.ZuptPortal == portal))
             _feedbackText = Text("city.tunnel.portal_observed");
-        _pendingLidar.Add(CityLidarSlice.Capture(_tick, profileId, pose, mount, _rackMisaligned, _lidarSliceScratch) with { TunnelRanges = ranges });
+        _pendingLidar.Add(CityLidarSlice.Capture(_tick, profileId, pose, mount, _rackMisaligned, _lidarSliceScratch) with
+        {
+            TunnelRanges = ranges, PavementFrame = pavement,
+        });
         _pendingLidarReturns = nextCount;
     }
 

@@ -147,6 +147,8 @@ public partial class SaoDatumCityScene
         RestoreRainSurveyOffice();
         RestoreBoundarySurvey();
         RestoreWorksSurvey();
+        _lastFinalSurveyReview = null;
+        _finaleUploadedSectors.Clear();
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();
         _feedbackText = Text("city.hazards.abandoned"); SaveHazardChange();

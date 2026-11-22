@@ -84,9 +84,12 @@ public partial class SaoDatumCityScene
         _showCloudButton = new CheckButton { ButtonPressed = true };
         _showCloudButton.Toggled += visible =>
         {
-            _lidarCloudMesh.Visible = visible;
+            _lidarCloudMesh.Visible = visible && !_cityPointViewEnabled;
         };
         tab.AddChild(_showCloudButton);
+        _cityPointViewButton = new CheckButton { Visible = false };
+        _cityPointViewButton.Toggled += SetCityPointView;
+        tab.AddChild(_cityPointViewButton);
         _showAttentionButton = new CheckButton();
         _showAttentionButton.Toggled += visible =>
         {
@@ -124,6 +127,10 @@ public partial class SaoDatumCityScene
         var hasAttention = _geopedia.IsUnlocked("geopedia_territory_attention");
         _showCloudButton.Visible = hasLidar || _lidarPointVisibleCount > 0;
         _showCloudButton.Text = Text("survey.technical.cloud_show");
+        _cityPointViewButton.Visible = FinalCloudFilterUnlocked();
+        _cityPointViewButton.Text = Text("city.finale.point_view");
+        if (_cityPointViewEnabled && !_cityPointViewButton.Visible) SetCityPointView(false);
+        _cityPointViewButton.SetPressedNoSignal(_cityPointViewEnabled);
         _showAttentionButton.Text = Text("survey.technical.attention_show");
         _showAttentionButton.Visible = hasAttention;
         _technicalCloudHelp.Visible = _showCloudButton.Visible;
@@ -157,14 +164,16 @@ public partial class SaoDatumCityScene
             var rainSurvey = scientific && IsRainCollection(_activeContract);
             var worksSurvey = scientific && IsWorksSurvey(_activeContract);
             var profile = worksSurvey ? LidarProfile.L4 : rainSurvey ? LidarProfile.L5 : CityLidarProfile(mode);
-            var channelStep = scientific ? 1 : CityLidarChannelStep(profile);
+            var finalSurvey = scientific && IsFinalPavementSurvey(_activeContract);
+            var channelStep = finalSurvey ? FinalCityPavementSurvey.LidarChannelStep : scientific ? 1 : CityLidarChannelStep(profile);
             var preview = AdvancedSurveyPresenter.BuildLidarPreview(profile, _lidarEnabled, channelStep,
                 _lidarPointVisibleCount, MaxLidarDisplayPoints, locale);
             lines.Add(Text(preview.StatusKey));
             lines.Add($"{Text("survey.technical.profile")}: {preview.ProfileId}");
             lines.Add($"{Text("survey.technical.nominal_rays")}: {preview.NominalPrimaryRaysPerSecond} {Text("survey.technical.rate_unit")}");
             lines.Add($"{Text("survey.technical.sampled_rays")}: {preview.ScheduledPrimaryRaysPerSecond} {Text("survey.technical.rate_unit")}");
-            var range = worksSurvey ? TechnicalNumber(PortWorksSurvey.CaptureRange)
+            var range = finalSurvey ? TechnicalNumber(FinalCityPavementSurvey.CaptureRange)
+                : worksSurvey ? TechnicalNumber(PortWorksSurvey.CaptureRange)
                 : rainSurvey ? TechnicalNumber(WaterfrontRainSurvey.CaptureRange)
                 : preview.MaximumRangeMetres;
             lines.Add($"{Text("survey.technical.range")}: {range} m");

@@ -163,6 +163,14 @@ public sealed class FullCityGeodeticNetwork
             HorizontalDisplacementMetres: Math.Round(horizontalDelta, 4));
     }
 
+    public static IReadOnlyList<FinalCitySurveySectorSpec> FinalSurveySectors { get; } = Array.AsReadOnly(new FinalCitySurveySectorSpec[]
+    {
+        new("final_sector_old_center", "old_center", "old_center_ring_surface", RegionalSectorCatalog.OldCenter.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_old_01", "cp_final_old_02"]),
+        new("final_sector_port", "port", "port_tunnel_mouth_surface", RegionalSectorCatalog.Port.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_port_01", "cp_final_port_02"]),
+        new("final_sector_waterfront", "waterfront", "waterfront_promenade_surface", RegionalSectorCatalog.Waterfront.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_waterfront_01", "cp_final_waterfront_02"]),
+        new("final_sector_serra", "serra", "serra_works_surface", RegionalSectorCatalog.SerraReserved.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_serra_01", "cp_final_serra_02"]),
+    });
+
     public static (WorldSceneManifest FullManifest, FullCityGeodeticNetwork Network, FinalCitySurveySectorManifest SurveyManifest)
         AssembleFullCity(WorldSceneManifest tutorialManifest)
     {
@@ -173,13 +181,7 @@ public sealed class FullCityGeodeticNetwork
         var mvpPreservation = RegionalSectorCatalog.VerifyMvpTargetIdsPreserved(mvpManifest, fullManifest);
         var network = BuildDefaultNetwork(fullManifest);
 
-        var sectors = new FinalCitySurveySectorSpec[]
-        {
-            new("final_sector_old_center", "old_center", "old_center_ring_surface", RegionalSectorCatalog.OldCenter.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_old_01", "cp_final_old_02"]),
-            new("final_sector_port", "port", "port_tunnel_mouth_surface", RegionalSectorCatalog.Port.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_port_01", "cp_final_port_02"]),
-            new("final_sector_waterfront", "waterfront", "waterfront_promenade_surface", RegionalSectorCatalog.Waterfront.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_waterfront_01", "cp_final_waterfront_02"]),
-            new("final_sector_serra", "serra", "serra_works_surface", RegionalSectorCatalog.SerraReserved.BoundsEnu, 1_000_000.0, 20.0, 0.05, ["cp_final_serra_01", "cp_final_serra_02"]),
-        };
+        var sectors = FinalSurveySectors;
 
         var checkpointSet = sectors.SelectMany(s => s.ContractCheckpointIds).ToHashSet(StringComparer.Ordinal);
         var distinctFromCheckpoints = PrimaryBenchmarkIds.All(b => !checkpointSet.Contains(b));
@@ -188,10 +190,10 @@ public sealed class FullCityGeodeticNetwork
         var surveyManifest = new FinalCitySurveySectorManifest(
             SceneId: fullManifest.SceneId,
             TotalCityAreaM2: totalArea,
-            TotalRegionCount: sectors.Length,
+            TotalRegionCount: sectors.Count,
             TotalCellCount: fullManifest.Cells.Count,
             Benchmarks: Array.AsReadOnly(network.Benchmarks.Values.OrderBy(b => b.BenchmarkId, StringComparer.Ordinal).ToArray()),
-            SurveySectors: Array.AsReadOnly(sectors),
+            SurveySectors: sectors,
             DistinctFromCheckpointsVerified: distinctFromCheckpoints,
             PriorIdsPreserved: mvpPreservation.Preserved);
 

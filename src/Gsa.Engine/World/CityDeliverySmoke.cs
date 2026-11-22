@@ -386,6 +386,7 @@ public partial class SaoDatumCityScene
         RunCityLidarCaptureSmoke();
         RunBoundarySurveySmoke();
         RunWorksSurveySmoke();
+        RunFinalPavementSurveySmoke();
         _saveManager = previous;
         _citySaveBlocked = false;
         TryLoadCareer();

@@ -251,6 +251,8 @@ def main() -> int:
             raise RuntimeError("Missing Serra boundary delivery integration marker")
         if "GSA_PORT_WORKS_DELIVERY_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing Port works delivery integration marker")
+        if "GSA_FINAL_CITY_PAVEMENT_SMOKE_OK" not in city_smoke:
+            raise RuntimeError("Missing final city pavement campaign marker")
         if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing live Old Center traffic integration marker")
 
@@ -322,6 +324,8 @@ def main() -> int:
                     raise RuntimeError(f"{target}: missing exported Serra boundary delivery marker")
                 if "GSA_PORT_WORKS_DELIVERY_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported Port works delivery marker")
+                if "GSA_FINAL_CITY_PAVEMENT_SMOKE_OK" not in city_output:
+                    raise RuntimeError(f"{target}: missing exported final city pavement campaign marker")
                 if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported live Old Center traffic marker")
                 if args.offline_smoke:
