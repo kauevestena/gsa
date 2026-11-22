@@ -111,6 +111,7 @@ public sealed class SaveCompatibilityTests : IDisposable
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
+    [InlineData(7)]
     public void OlderCatalogMigrationKeepsHazardDamageAndRawPhotosWithoutInventingAcquisition(int catalogVersion)
     {
         var manager = new SaveGameManager(_directory); var hazard = new CityHazardState(); hazard.Lens.ApplySplatter(.45);
@@ -123,6 +124,7 @@ public sealed class SaveCompatibilityTests : IDisposable
         Assert.Equal(.45, result.State.City!.Hazards!.LensObstruction); Assert.Null(result.State.City.Encounters); Assert.Null(result.State.City.Gimbalina);
         Assert.Null(result.State.City.LidarBuffer);
         Assert.Null(result.State.City.ViaductHeights);
+        Assert.False(result.State.City.RainSurveyFilterEnabled);
         Assert.Equal(JsonSerializer.Serialize(photo), JsonSerializer.Serialize(result.State.City.CameraSamples.Single()));
         Assert.Equal(raw, File.ReadAllText(manager.CurrentSavePath));
     }

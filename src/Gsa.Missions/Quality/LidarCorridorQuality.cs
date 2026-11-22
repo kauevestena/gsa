@@ -28,7 +28,12 @@ internal static class LidarCorridorQuality
         var points = cloud.QueryScientificSamples(new(bounds.MinEast, bounds.MinNorth, elevation - ElevationWindow),
                 new(bounds.MaxEast, bounds.MaxNorth, elevation + ElevationWindow))
             .Where(p => !p.IsSpuriousRain).ToArray();
+        return EvaluatePoints(contractId, points, surfaceId, bounds, elevation, checkpoints);
+    }
 
+    internal static PointCloudQualityReport EvaluatePoints(string contractId, IReadOnlyList<GeoreferencedLidarSample> points, string surfaceId,
+        Bounds2DEnu bounds, double elevation, IReadOnlyList<Vector3d> checkpoints)
+    {
         var panels = checkpoints.Select((point, i) => new ControlCheckpointReference($"panel_{i + 1}", point)).ToArray();
         var planes = panels.Select(panel =>
         {
@@ -50,6 +55,9 @@ internal static class LidarCorridorQuality
         return PointCloudQualityEvaluator.Evaluate(new(contractId, DensityMinimum, CoverageMinimum, AbsoluteLimit, RelativeLimit,
             ReferencePlanes: planes), [new(surfaceId, bounds, elevationEnuZ: elevation)], points, reference, observations);
     }
+
+    internal static bool IsInElevationWindow(double sampleUp, double elevation) =>
+        Math.Abs(sampleUp - elevation) <= ElevationWindow;
 
     internal static QualityReport Delivery(string contractId, IReadOnlyList<string> batchIds, PointCloudQualityReport cloud,
         MetricEvaluationResult gate, bool validFormat, int passedGates, int checkpointCount)

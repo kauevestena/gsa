@@ -2053,3 +2053,36 @@ msgstr "Pelo menos uma altura difere mais de 0,02 m. Confira os campos e o cálc
 
 msgid "cq.viaduct_height_reference_valid"
 msgstr "As duas alturas coincidem nos três controles."
+
+msgid "city.rain_survey.field_brief"
+msgstr "Leve uma picape à avenida demarcada de 300 m na Orla. Ligue o LiDAR com L, siga a faixa laranja e envie os lotes em cada ponto azul. Selecione o filtro de chuva no Escritório antes de entregar."
+
+msgid "city.rain_survey.office_help"
+msgstr "Use o filtro de chuva nos dados enviados. Ele seleciona pontos por intensidade e vizinhança. Você pode reprocessar os mesmos lotes com qualquer receita."
+
+msgid "city.rain_survey.enable_filter"
+msgstr "Selecionar filtro de chuva"
+
+msgid "city.rain_survey.disable_filter"
+msgstr "Usar receita sem filtro"
+
+msgid "city.rain_survey.apply_filter"
+msgstr "Selecione o filtro de chuva e reprocesse os lotes protegidos."
+
+msgid "city.rain_survey.weather_locked"
+msgstr "O contrato Noite de Chuva fixa o clima até a entrega, expiração ou abandono."
+
+msgid "city.rain_survey.cloud_rework"
+msgstr "Confira as células da pista e os painéis de checagem. Recolete os trechos ausentes, envie e processe novamente."
+
+msgid "city.rain_survey.report"
+msgstr "Células da pista na densidade-alvo {0}/{1} ({2:P1}, meta 90%) · Densidade média {3:F1} pts/m²\nMaior RMSE dos painéis {4} m (≤0,20 m) · RMSE altimétrico relativo {5} m (≤0,10 m)\n{6} · Entrada {7:N0} · Removidos {8:N0} · Mantidos {9:N0}"
+
+msgid "city.rain_survey.filtered"
+msgstr "Filtro de chuva"
+
+msgid "city.rain_survey.unfiltered"
+msgstr "Sem filtro"
+
+msgid "city.rain_survey.gaps"
+msgstr "Trechos da pista a revisitar, medidos da extremidade oeste: {0}"

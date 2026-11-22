@@ -106,6 +106,7 @@ public partial class SaoDatumCityScene
             "loss or reload changed protected scientific returns");
         RunPortTunnelDeliverySmoke(wallet);
         RunViaductDeliverySmoke();
+        RunRainSurveySmoke();
         _lidarCloudMesh.Visible = true;
         GD.Print($"GSA_CITY_LIDAR_CAPTURE_SMOKE_OK protected_returns={expected} no_pose=explicit capacity=reported lod=independent loss=protected reload=stable payout=blocked");
     }

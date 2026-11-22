@@ -84,22 +84,7 @@ public partial class SaoDatumCityScene
         var cloud = BuildProtectedCityCloud(slices);
         var review = PortViaductQuality.Evaluate(machine.ContractId, batches.Select(batch => batch.BatchId).ToArray(), cloud, ReadViaductHeights());
         _lastViaductReview = review;
-        if (!machine.MarkReadyToProcess(now).Succeeded || !machine.StartProcessing(now).Succeeded ||
-            !machine.CompleteProcessing(now).Succeeded ||
-            !machine.RecordQualityEvaluation(now, review.Delivery.Passed, primaryFailureKey: review.Delivery.FailureReasonKeys.FirstOrDefault()).Succeeded)
-        {
-            _feedbackText = Text("city.office.processing_failed");
-            return;
-        }
-
-        if (review.Delivery.Passed)
-            FinishCityDelivery(machine.Snapshot!.Definition, machine, review.Delivery, now);
-        else
-        {
-            _feedbackText = Text(review.Cloud.Passed ? review.Heights.ReasonKey : "city.viaduct.cloud_rework");
-            _audio.PlayAlert();
-            SaveCityCareerState(SaveTrigger.Manual, announce: false);
-        }
+        CompleteLidarReview(machine, now, review.Delivery, review.Cloud.Passed ? review.Heights.ReasonKey : "city.viaduct.cloud_rework");
     }
 
     private string ViaductReviewText()
@@ -154,7 +139,7 @@ public partial class SaoDatumCityScene
             var control = PortViaductSurvey.VerticalControls[i];
             var tag = PortViaductQuality.ControlId(i);
             var height = control.Z - 99.575;
-            Box($"PortViaductControl{tag}", control - Vector3d.UnitZ * height / 2, new(.35, .35, height), orange, PortLidarDeckLayer);
+            Box($"PortViaductControl{tag}", control - Vector3d.UnitZ * height / 2, new(.35, .35, height), orange, SurveyLidarSurfaceLayer);
             parent.AddChild(new Label3D
             {
                 Text = tag, Position = _coordinates.ToGodot(control + Vector3d.UnitZ * .5),
@@ -163,7 +148,7 @@ public partial class SaoDatumCityScene
 
             var panel = PortViaductSurvey.CheckPanels[i];
             var drop = deck.Z - panel.Z;
-            Box($"ViaductCheckPanel{i}", panel + Vector3d.UnitZ * drop / 2, new(2, 2, drop), blue, PortLidarDeckLayer);
+            Box($"ViaductCheckPanel{i}", panel + Vector3d.UnitZ * drop / 2, new(2, 2, drop), blue, SurveyLidarSurfaceLayer);
         }
         foreach (var pier in PortViaductPiers())
             Box(pier.Id, pier.CenterEnu, pier.SizeEnu, concrete, 1);

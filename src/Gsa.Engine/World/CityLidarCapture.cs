@@ -5,6 +5,7 @@ using Gsa.Core.Sensors.Lidar;
 using Gsa.Core.World;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Persistence;
+using Gsa.Missions.Quality;
 using Godot;
 
 namespace Gsa.Engine.World;
@@ -12,7 +13,7 @@ namespace Gsa.Engine.World;
 public partial class SaoDatumCityScene
 {
     private const string TunnelMissionId = "HIST-06";
-    private const uint PortLidarDeckLayer = 2;
+    private const uint SurveyLidarSurfaceLayer = 2;
     private readonly List<CityLidarSlice> _pendingLidar = [];
     private int _pendingLidarReturns, _protectedLidarReturns;
     private int _lidarTicksWithoutPose, _lidarTicksWithoutCapacity;
@@ -24,20 +25,22 @@ public partial class SaoDatumCityScene
         definition is { Id: PortViaductSurvey.MissionId, Product: "point_cloud" };
 
     private static bool IsCityLidarCollection(ContractDefinition? definition) =>
-        IsTunnelCollection(definition) || IsViaductCollection(definition);
+        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition);
 
     private void BuildPortLidarDeck(Node3D parent)
     {
         // Match the flat asphalt deck's rendered upper surface in the Port.
-        var deck = new StaticBody3D { Name = "PortLidarDeck", CollisionLayer = PortLidarDeckLayer, CollisionMask = 0,
+        var deck = new StaticBody3D { Name = "PortLidarDeck", CollisionLayer = SurveyLidarSurfaceLayer, CollisionMask = 0,
             Position = _coordinates.ToGodot(new Vector3d(500500, 7401500, 99.45)) };
         deck.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new(1000, .25f, 1000) } });
         parent.AddChild(deck);
     }
 
-    private bool ShouldRecordCityLidar(Vector3d position, LocomotionMode mode) =>
+    private bool ShouldRecordCityLidar(Vector3d position, LocomotionMode mode, bool isRaining) =>
         (IsTunnelCollection(_activeContract) && GetRegionIdForEnu(position) == "port" ||
-            IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(position)) &&
+            IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(position) ||
+            IsRainCollection(_activeContract) && mode >= LocomotionMode.Pickup && isRaining && _calendar.IsNight &&
+                WaterfrontRainSurvey.IsSurveyLane(position)) &&
         _activeMachine is { IsActiveState: true, Snapshot: { } accepted } &&
         _calendar.CalendarTimeSeconds <= accepted.ExpiresAtSeconds &&
         _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode);
@@ -97,4 +100,24 @@ public partial class SaoDatumCityScene
 
     private PointCloudOctreeAndChunkStore BuildProtectedCityCloud() =>
         BuildProtectedCityCloud(ReadProtectedCityLidarBatches().SelectMany(batch => batch.LidarSlices!));
+
+    private void CompleteLidarReview(ContractStateMachine machine, double now, QualityReport review, string reworkMessage)
+    {
+        if (!machine.MarkReadyToProcess(now).Succeeded || !machine.StartProcessing(now).Succeeded ||
+            !machine.CompleteProcessing(now).Succeeded ||
+            !machine.RecordQualityEvaluation(now, review.Passed, primaryFailureKey: review.FailureReasonKeys.FirstOrDefault()).Succeeded)
+        {
+            _feedbackText = Text("city.office.processing_failed");
+            return;
+        }
+
+        if (review.Passed)
+            FinishCityDelivery(machine.Snapshot!.Definition, machine, review, now);
+        else
+        {
+            _feedbackText = Text(reworkMessage);
+            _audio.PlayAlert();
+            SaveCityCareerState(SaveTrigger.Manual, announce: false);
+        }
+    }
 }

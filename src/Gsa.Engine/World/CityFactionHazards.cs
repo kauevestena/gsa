@@ -42,6 +42,8 @@ public partial class SaoDatumCityScene
                 (p - PortTunnelSurvey.EastStop).Length <= 8;
         if (IsViaductCollection(_activeContract))
             return (p - PortViaductSurvey.WestPad).Length <= 8 || (p - PortViaductSurvey.EastPad).Length <= 8;
+        if (IsRainCollection(_activeContract))
+            return WaterfrontRainSurvey.UploadPads.Any(pad => (p - pad).Length <= 8);
         return false;
     }
 
