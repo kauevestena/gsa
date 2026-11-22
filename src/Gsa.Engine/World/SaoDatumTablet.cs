@@ -147,6 +147,7 @@ public partial class SaoDatumCityScene
         });
         BuildCityHazardControls(officeTab);
         BuildViaductOfficeForm(officeTab);
+        _rainFilterButton = AddOfficeBtn("city.rain_survey.enable_filter", ToggleRainSurveyFilter);
 
         AddOfficeBtn("city.office.process_deliver", ProcessAndDeliverCityContract);
 
@@ -198,7 +199,7 @@ public partial class SaoDatumCityScene
         setTab.AddChild(_daguerreotypeBtn);
 
         var rainBtn = new Button { Text = Text("city.settings.toggle_rain"), FocusMode = Control.FocusModeEnum.None };
-        rainBtn.Pressed += () => _calendar.SetWeather(!_calendar.IsRaining, 0.75);
+        rainBtn.Pressed += ToggleCityRain;
         setTab.AddChild(rainBtn);
 
         var timeBtn = new Button { Text = Text("city.settings.advance_time"), FocusMode = Control.FocusModeEnum.None };
@@ -280,18 +281,20 @@ public partial class SaoDatumCityScene
             "HIST-04" => ("sign", 12, CitySurveyInventory.SignsArea, "city_hall"),
             BusSurveyCorridor.MissionId => ("", 0, BusSurveyCorridor.AreaId, "city_hall"),
             PortViaductSurvey.MissionId => ("", 0, PortViaductSurvey.AreaId, "university"),
+            WaterfrontRainSurvey.MissionId => ("", 0, WaterfrontRainSurvey.AreaId, "city_hall"),
             _ => ("", 0, "port_tunnel", "university"),
         };
         var isBusSurvey = area == BusSurveyCorridor.AreaId;
         var isTunnel = spec.MissionId == TunnelMissionId;
         var isViaduct = spec.MissionId == PortViaductSurvey.MissionId;
+        var isRain = spec.MissionId == WaterfrontRainSurvey.MissionId;
         var featureIds = spec.MissionId switch
         {
             BusSurveyCorridor.MissionId => BusSurveyCorridor.Stops.Select(stop => stop.Id).ToArray(),
-            TunnelMissionId or PortViaductSurvey.MissionId => [],
+            TunnelMissionId or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId => [],
             _ => Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray(),
         };
-        var calm = !(isBusSurvey || isViaduct) || _calmPolicy.CalmCityEnabled;
+        var calm = !(isBusSurvey || isViaduct || isRain) || _calmPolicy.CalmCityEnabled;
         var def = new ContractDefinition(
             SchemaVersion: 1,
             Id: spec.MissionId,
@@ -301,8 +304,14 @@ public partial class SaoDatumCityScene
             AreaId: area,
             Product: spec.ProductType,
             RequiredFeatureIds: featureIds,
-            Requirements: isTunnel ? PortTunnelQuality.Requirements : isViaduct ? PortViaductQuality.Requirements : CitySurveyRequirements(area, story: true),
-            RequiredCapabilities: isTunnel || isViaduct ? ["lidar_l4"] : ["camera"],
+            Requirements: area switch
+            {
+                WaterfrontRainSurvey.AreaId => WaterfrontRainQuality.Requirements,
+                PortViaductSurvey.AreaId => PortViaductQuality.Requirements,
+                "port_tunnel" => PortTunnelQuality.Requirements,
+                _ => CitySurveyRequirements(area, story: true),
+            },
+            RequiredCapabilities: isRain ? ["lidar_l5"] : isTunnel || isViaduct ? ["lidar_l4"] : ["camera"],
             Risk: calm ? "easy" : "moderate",
             Calm: calm,
             Deadline: spec.MissionId switch
@@ -325,6 +334,7 @@ public partial class SaoDatumCityScene
             BusSurveyCorridor.MissionId => "city.story.bus_corridor_brief",
             TunnelMissionId => "city.lidar.field_brief",
             PortViaductSurvey.MissionId => "city.viaduct.field_brief",
+            WaterfrontRainSurvey.MissionId => "city.rain_survey.field_brief",
             _ => "city.story.facades_brief",
         };
         _gtaHud.ShowCutsceneLetterbox(
@@ -345,12 +355,14 @@ public partial class SaoDatumCityScene
         _lastCitySurveyReview = null;
         _lastTunnelReview = null;
         RestoreViaductDraft(null);
+        RestoreRainSurveyOffice();
         _lastSidewalkMeasurements = [];
         _lastAdjustedPhotoCount = 0;
         _activeStorySpec = story;
         _activeContract = def;
         PrepareCityPhotoCoverage();
         _activeMachine = new ContractStateMachine(def);
+        if (IsRainCollection(def)) BeginRainSurveyWeather();
         _activeMachine.Accept(_calendar.CalendarTimeSeconds);
         _fieldSamples.Clear();
         RestorePendingCityLidar(null);
@@ -500,6 +512,14 @@ public partial class SaoDatumCityScene
         if (viaductReview.Length > 0) _officeStatusLabel.Text += "\n" + viaductReview;
         var tunnelReview = TunnelReviewText();
         if (tunnelReview.Length > 0) _officeStatusLabel.Text += "\n" + tunnelReview;
+        _rainFilterButton.Visible = IsRainCollection(_activeContract);
+        if (_rainFilterButton.Visible)
+        {
+            _rainFilterButton.Text = Text(_rainSurveyFilterEnabled ? "city.rain_survey.disable_filter" : "city.rain_survey.enable_filter");
+            _officeStatusLabel.Text += "\n" + Text("city.rain_survey.office_help") + "\n" + CityLidarCollectionStatus();
+        }
+        var rainReview = RainSurveyReviewText();
+        if (rainReview.Length > 0) _officeStatusLabel.Text += "\n" + rainReview;
         var review = CitySurveyReviewText();
         if (review.Length > 0) _officeStatusLabel.Text += "\n" + review;
         if (_activeStorySpec?.MissionId == "HIST-02" && _activeMachine?.Snapshot is { } drainage && !_calendar.IsRaining)
@@ -634,6 +654,12 @@ public partial class SaoDatumCityScene
             blips.Add(new RadarBlip("viaduct_west", PortViaductSurvey.WestPad, Colors.Orange, "W", ClampToRim: true));
             blips.Add(new RadarBlip("viaduct_east", PortViaductSurvey.EastPad, Colors.Orange, "E", ClampToRim: true));
         }
+        if (IsRainCollection(_activeContract))
+        {
+            var pads = WaterfrontRainSurvey.UploadPads;
+            blips.Add(new RadarBlip("rain_west", pads[0], Colors.Orange, "W", ClampToRim: true));
+            blips.Add(new RadarBlip("rain_east", pads[^1], Colors.Orange, "E", ClampToRim: true));
+        }
 
         var radioTitle = _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
         var radioSub = !string.IsNullOrEmpty(_audio.CurrentRadioSubtitleKey) ? Text(_audio.CurrentRadioSubtitleKey) : "";
@@ -700,6 +726,8 @@ public partial class SaoDatumCityScene
             targets.AddRange([PortTunnelSurvey.WestStop, PortTunnelSurvey.MiddleUpload, PortTunnelSurvey.EastStop]);
         if (IsViaductCollection(_activeContract))
             targets.AddRange([PortViaductSurvey.WestPad, PortViaductSurvey.EastPad]);
+        if (IsRainCollection(_activeContract))
+            targets.AddRange(WaterfrontRainSurvey.UploadPads);
         _cityMap.UpdateMap(CurrentPositionEnu(), CurrentHeadingRadians(), _geodeticNetwork.Benchmarks.Values.ToArray(), targets);
     }
 

@@ -182,7 +182,26 @@ public sealed class PointCloudOutlierFilterSession
         if (spec.MinNeighborsWithinRadius < 0)
             throw new ArgumentOutOfRangeException(nameof(spec));
 
-        var rSq = spec.RadiusMetres * spec.RadiusMetres;
+        var maxDistanceSquared = spec.RadiusMetres * spec.RadiusMetres + 1e-12;
+        var cellSize = Math.Sqrt(maxDistanceSquared) * 1.001;
+        var cells = new Dictionary<(long East, long North, long Up), List<int>>();
+        var keys = new (long East, long North, long Up)[inputs.Count];
+        // The padded width covers the inclusive distance tolerance and coordinate division rounding.
+        // Fall back to exact search when a coordinate would exceed reliable integer cell precision.
+        var useGrid = double.IsFinite(cellSize);
+        for (var i = 0; i < inputs.Count && useGrid; i++)
+        {
+            var p = inputs[i].Sample.MapPositionEnu;
+            var east = p.X / cellSize;
+            var north = p.Y / cellSize;
+            var up = p.Z / cellSize;
+            const double maxGridCoordinate = 1L << 40;
+            useGrid = Math.Abs(east) < maxGridCoordinate && Math.Abs(north) < maxGridCoordinate && Math.Abs(up) < maxGridCoordinate;
+            if (!useGrid) break;
+            var key = keys[i] = ((long)Math.Floor(east), (long)Math.Floor(north), (long)Math.Floor(up));
+            if (!cells.TryGetValue(key, out var indices)) cells.Add(key, indices = []);
+            indices.Add(i);
+        }
         var retained = new List<FilteredLidarSampleInput>(inputs.Count);
 
         for (var i = 0; i < inputs.Count; i++)
@@ -196,28 +215,37 @@ public sealed class PointCloudOutlierFilterSession
 
             var p = candidate.Sample.MapPositionEnu;
             var neighborCount = 0;
-            var distinctPasses = new HashSet<int> { candidate.PassIndex };
+            var hasOtherPass = false;
+            var minimum = (long)spec.MinNeighborsWithinRadius;
 
-            for (var j = 0; j < inputs.Count; j++)
+            bool CountNeighbor(int j)
             {
-                if (i == j)
-                    continue;
+                if (i == j) return false;
                 var d = inputs[j].Sample.MapPositionEnu - p;
-                var dSq = d.X * d.X + d.Y * d.Y + d.Z * d.Z;
-                if (dSq <= rSq + 1e-12)
-                {
-                    neighborCount++;
-                    distinctPasses.Add(inputs[j].PassIndex);
-                }
+                if (Vector3d.Dot(d, d) > maxDistanceSquared) return false;
+                neighborCount++;
+                hasOtherPass |= inputs[j].PassIndex != candidate.PassIndex;
+                return Sufficient();
             }
 
-            if (neighborCount < spec.MinNeighborsWithinRadius)
-                continue;
+            bool Sufficient() => neighborCount >= minimum &&
+                (!spec.RequireMultiPassIfSparse || hasOtherPass || neighborCount > minimum + 1);
 
-            if (spec.RequireMultiPassIfSparse && neighborCount <= spec.MinNeighborsWithinRadius + 1 && distinctPasses.Count < 2)
-                continue;
+            if (!Sufficient() && useGrid)
+            {
+                var key = keys[i];
+                for (var x = -1; x <= 1 && !Sufficient(); x++)
+                    for (var y = -1; y <= 1 && !Sufficient(); y++)
+                        for (var z = -1; z <= 1 && !Sufficient(); z++)
+                            if (cells.TryGetValue((key.East + x, key.North + y, key.Up + z), out var indices))
+                                foreach (var j in indices)
+                                    if (CountNeighbor(j)) break;
+            }
+            else
+                for (var j = 0; j < inputs.Count && !Sufficient(); j++)
+                    CountNeighbor(j);
 
-            retained.Add(candidate);
+            if (Sufficient()) retained.Add(candidate);
         }
 
         return Array.AsReadOnly(retained.ToArray());

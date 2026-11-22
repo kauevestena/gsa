@@ -49,6 +49,7 @@ public partial class SaoDatumCityScene
             LidarBuffer = IsCityLidarCollection(_activeContract) && _activeStorySpec?.MissionId == _activeContract?.Id
                 ? new(_pendingLidar.ToArray(), _lidarTicksWithoutPose, _lidarTicksWithoutCapacity) : null,
             ViaductHeights = IsViaductCollection(_activeContract) ? _viaductHeightFields.Select(field => field.Text).ToArray() : null,
+            RainSurveyFilterEnabled = IsRainCollection(_activeContract) && _rainSurveyFilterEnabled,
         });
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
@@ -127,6 +128,7 @@ public partial class SaoDatumCityScene
             _lastCitySurveyReview = null;
             _lastTunnelReview = null;
             RestoreViaductDraft(city?.ViaductHeights);
+            RestoreRainSurveyOffice(city?.RainSurveyFilterEnabled == true);
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;

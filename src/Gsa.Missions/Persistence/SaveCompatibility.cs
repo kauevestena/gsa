@@ -16,7 +16,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public const int CurrentCatalogVersion = 7;
+    public const int CurrentCatalogVersion = 8;
     public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 
@@ -53,6 +53,9 @@ public sealed record SaveCitySessionState(
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<string>? ViaductHeights { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool RainSurveyFilterEnabled { get; init; }
 }
 
 public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);
@@ -174,9 +177,14 @@ public static class SaveCompatibility
                     if (slice is null || !lidarTicks.Add(slice.PhysicsTick))
                         throw new ArgumentException("Duplicate or missing LiDAR slice.");
                     slice.Validate(city.PhysicsTick);
-                    if (missionId == PortViaductSurvey.MissionId
-                        ? slice.TunnelRanges?.Corridor != PortViaductSurvey.AreaId
-                        : missionId != "HIST-06" || slice.TunnelRanges?.Corridor is not null)
+                    var corridor = slice.TunnelRanges?.Corridor;
+                    if (!(missionId switch
+                    {
+                        "HIST-06" => corridor is null,
+                        PortViaductSurvey.MissionId => corridor == PortViaductSurvey.AreaId,
+                        WaterfrontRainSurvey.MissionId => corridor == WaterfrontRainSurvey.AreaId && slice.ProfileId == "lidar-l5",
+                        _ => false,
+                    }))
                         throw new ArgumentException("City LiDAR observations do not match the contract.");
                     lidarReturns += slice.Returns.Count;
                     if (lidarReturns > limit) throw new ArgumentException("City LiDAR storage exceeds its limit.");
@@ -185,7 +193,7 @@ public static class SaveCompatibility
             if (city.LidarBuffer is { } lidar)
             {
                 if (lidar.Pending is null || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 ||
-                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId))
+                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId))
                     throw new ArgumentException("Invalid pending city LiDAR buffer.");
                 CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns, city.ActiveStoryMissionId);
                 if (CityLidarSlice.StorageUnits(lidarReturns) > city.Mobility.UsedVirtualStorageUnits)
@@ -194,6 +202,8 @@ public static class SaveCompatibility
             if (city.ViaductHeights is { } heights && (city.ActiveStoryMissionId != PortViaductSurvey.MissionId ||
                 heights.Count != 2 * PortViaductSurvey.VerticalControls.Count || heights.Any(value => value is null || value.Length > 16)))
                 throw new ArgumentException("Invalid viaduct height draft.");
+            if (city.RainSurveyFilterEnabled && city.ActiveStoryMissionId != WaterfrontRainSurvey.MissionId)
+                throw new ArgumentException("Invalid Waterfront rain filter selection.");
             foreach (var entry in runtime.CustodyStore.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
             {
                 var batch = System.Text.Json.JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson)

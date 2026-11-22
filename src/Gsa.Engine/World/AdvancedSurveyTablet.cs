@@ -1,6 +1,7 @@
 using Gsa.Core.Mobility;
 using Gsa.Core.Sensors.Lidar;
 using Gsa.Core.Traffic;
+using Gsa.Core.World;
 using Gsa.Missions.Activities;
 using Gsa.Missions.Presentation;
 using Godot;
@@ -152,15 +153,17 @@ public partial class SaoDatumCityScene
         lines.Add("");
         if (hasLidar)
         {
-            var profile = CityLidarProfile(mode);
-            var channelStep = ShouldRecordCityLidar(CurrentPositionEnu(), mode) ? 1 : CityLidarChannelStep(profile);
+            var scientific = ShouldRecordCityLidar(CurrentPositionEnu(), mode, _calendar.IsRaining);
+            var rainSurvey = scientific && IsRainCollection(_activeContract);
+            var profile = rainSurvey ? LidarProfile.L5 : CityLidarProfile(mode);
+            var channelStep = scientific ? 1 : CityLidarChannelStep(profile);
             var preview = AdvancedSurveyPresenter.BuildLidarPreview(profile, _lidarEnabled, channelStep,
                 _lidarPointVisibleCount, MaxLidarDisplayPoints, locale);
             lines.Add(Text(preview.StatusKey));
             lines.Add($"{Text("survey.technical.profile")}: {preview.ProfileId}");
             lines.Add($"{Text("survey.technical.nominal_rays")}: {preview.NominalPrimaryRaysPerSecond} {Text("survey.technical.rate_unit")}");
             lines.Add($"{Text("survey.technical.sampled_rays")}: {preview.ScheduledPrimaryRaysPerSecond} {Text("survey.technical.rate_unit")}");
-            lines.Add($"{Text("survey.technical.range")}: {preview.MaximumRangeMetres} m");
+            lines.Add($"{Text("survey.technical.range")}: {(rainSurvey ? WaterfrontRainSurvey.CaptureRange : preview.MaximumRangeMetres)} m");
             lines.Add($"{Text("survey.technical.range_sigma")}: {preview.RangeSigmaMetres} m");
             lines.Add($"{Text("survey.technical.visible_points")}: {preview.VisiblePoints}/{preview.DisplayCapacity}");
             lines.Add("");

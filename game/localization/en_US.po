@@ -2053,3 +2053,36 @@ msgstr "At least one height differs by more than 0.02 m. Check the height labels
 
 msgid "cq.viaduct_height_reference_valid"
 msgstr "Both heights match for all three controls."
+
+msgid "city.rain_survey.field_brief"
+msgstr "Take a pickup to the marked 300 m Waterfront avenue. Switch on LiDAR with L, follow the orange lane, and upload at each blue pad. Select the rain filter in the Office before delivering."
+
+msgid "city.rain_survey.office_help"
+msgstr "Use the rain filter on uploaded data. It screens by intensity and nearby points. You can reprocess the same upload with either recipe."
+
+msgid "city.rain_survey.enable_filter"
+msgstr "Select rain filter"
+
+msgid "city.rain_survey.disable_filter"
+msgstr "Use unfiltered recipe"
+
+msgid "city.rain_survey.apply_filter"
+msgstr "Select the rain filter and process the protected upload again."
+
+msgid "city.rain_survey.weather_locked"
+msgstr "The rainy-night contract fixes the weather until delivery, expiry, or abandonment."
+
+msgid "city.rain_survey.cloud_rework"
+msgstr "Review the road cells and check panels. Survey the missing sections, upload them, and process again."
+
+msgid "city.rain_survey.report"
+msgstr "Road cells at target density {0}/{1} ({2:P1}, target 90%) · Mean density {3:F1} pts/m²\nWorst check panel RMSE {4} m (≤0.20 m) · Relative height RMSE {5} m (≤0.10 m)\n{6} · Input {7:N0} · Removed {8:N0} · Retained {9:N0}"
+
+msgid "city.rain_survey.filtered"
+msgstr "Rain filter"
+
+msgid "city.rain_survey.unfiltered"
+msgstr "Unfiltered"
+
+msgid "city.rain_survey.gaps"
+msgstr "Road sections to revisit, measured from the west end: {0}"

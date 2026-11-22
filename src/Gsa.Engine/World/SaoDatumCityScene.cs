@@ -257,6 +257,7 @@ public partial class SaoDatumCityScene : Node3D
         BuildPortLidarDeck(visualBase);
         BuildPortTunnel(visualBase);
         BuildPortViaduct(visualBase);
+        BuildRainSurveyAvenue(visualBase);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
@@ -579,7 +580,7 @@ public partial class SaoDatumCityScene : Node3D
             if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
                 OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d) ||
                 BusSurveyCorridor.OverlapsBuildings(e, n, w, d) || PortTunnelSurvey.OverlapsBuilding(e, n, w, d) ||
-                PortViaductSurvey.OverlapsBuilding(e, n, w, d))
+                PortViaductSurvey.OverlapsBuilding(e, n, w, d) || WaterfrontRainSurvey.OverlapsBuilding(e, n, w, d))
                 continue;
             var groundZ = GetTerrainElevationEnu(e, n);
             var centerEnu = new Vector3d(e, n, groundZ + h * 0.5);
@@ -736,6 +737,8 @@ public partial class SaoDatumCityScene : Node3D
                 speedLimit = Math.Min(speedLimit, PortTunnelSurvey.SurveySpeed);
             if (_lidarEnabled && activeMode >= LocomotionMode.Kombi && IsViaductCollection(_activeContract) && PortViaductSurvey.IsSurveyLane(prevCarPos))
                 speedLimit = Math.Min(speedLimit, PortViaductSurvey.SurveySpeed);
+            if (_lidarEnabled && activeMode >= LocomotionMode.Pickup && IsRainCollection(_activeContract) && WaterfrontRainSurvey.IsSurveyLane(prevCarPos))
+                speedLimit = Math.Min(speedLimit, WaterfrontRainSurvey.SurveySpeed);
             var carStep = _carSim.StepMotion(
                 delta,
                 Math.Max(0.0, input.Throttle),
@@ -1158,7 +1161,9 @@ public partial class SaoDatumCityScene : Node3D
         if (!_lidarEnabled || mode < LocomotionMode.Kombi)
             return;
 
-        var profile = CityLidarProfile(mode);
+        var scientific = ShouldRecordCityLidar(pos, mode, isRaining);
+        var rainySurvey = scientific && IsRainCollection(_activeContract);
+        var profile = rainySurvey ? LidarProfile.L5 : CityLidarProfile(mode);
         if (_lidarSim.Profile.Id != profile.Id)
         {
             _lidarSim = new LidarBenchSimulator(profile);
@@ -1170,9 +1175,9 @@ public partial class SaoDatumCityScene : Node3D
         var sliceIdx = _lidarSliceIndex % sliceCount;
         _lidarSliceIndex++;
 
-        var scientific = ShouldRecordCityLidar(pos, mode);
         var viaduct = scientific && IsViaductCollection(_activeContract);
-        var ranges = viaduct ? PortViaductSurvey.Observe(pos, heading, _tick)
+        var ranges = rainySurvey ? WaterfrontRainSurvey.Observe(pos, heading, _tick)
+            : viaduct ? PortViaductSurvey.Observe(pos, heading, _tick)
             : scientific ? ObserveTunnelRanges(pos, heading) : null;
         var navigation = scientific && ranges is null ? _navigationRig?.Estimator?.Current : null;
         if (scientific && navigation is null && ranges is null)
@@ -1183,9 +1188,9 @@ public partial class SaoDatumCityScene : Node3D
 
         var time = _tick / (double)CameraCaptureScheduler.PhysicsTicksPerSecond;
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
-        // Point the transverse profiler at the viaduct deck underside or at the tunnel floor.
+        // Turn the survey heads toward the contracted underside or pavement.
         var scannerRotation = viaduct ? Quaterniond.FromAxisAngle(Vector3d.UnitY, -Math.PI / 2)
-            : ranges is not null && profile.Grade == 4 ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2)
+            : rainySurvey || ranges is not null && profile.Grade == 4 ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2)
             : Quaterniond.Identity;
         var mount = new LidarMountEstimate(new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0), scannerRotation);
         var physicalMount = scientific ? mount with
@@ -1199,12 +1204,13 @@ public partial class SaoDatumCityScene : Node3D
         var lidarToMap = LidarBenchSimulator.ComposeLidarToMap(new RigidTransform(yaw, pos), physicalMount);
         var space = GetWorld3D().DirectSpaceState;
         _lidarRayQuery ??= new PhysicsRayQueryParameters3D { CollisionMask = 1 };
-        _lidarRayQuery.CollisionMask = scientific ? 1 | PortLidarDeckLayer : 1;
+        _lidarRayQuery.CollisionMask = scientific ? 1 | SurveyLidarSurfaceLayer : 1;
 
         LidarRayHit? CastRay(Vector3d startEnu, Vector3d dirEnu, double maxRange)
         {
             _lidarRayQuery.From = _coordinates.ToGodot(startEnu);
-            _lidarRayQuery.To = _coordinates.ToGodot(startEnu + dirEnu * maxRange);
+            var queryRange = rainySurvey ? Math.Min(maxRange, WaterfrontRainSurvey.CaptureRange) : maxRange;
+            _lidarRayQuery.To = _coordinates.ToGodot(startEnu + dirEnu * queryRange);
             var hit = space.IntersectRay(_lidarRayQuery);
             if (hit.Count == 0) return null;
             var hitPosG = hit["position"].AsVector3();
@@ -1224,6 +1230,7 @@ public partial class SaoDatumCityScene : Node3D
         if (_lidarSim.TrySimulateScanSlice(time, lidarToMap, traj, mount,
             isRaining && !PortTunnelSurvey.IsUnderRoof(pos), CastRay, scientific ? (int)(_tick % sliceCount) : sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
+            if (rainySurvey) _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > WaterfrontRainSurvey.CaptureRange);
             if (scientific) RecordCityLidarSlice(profile.Id, pose, mount, ranges);
             if (!_lidarCloudMesh.Visible) return;
             var mm = _lidarCloudMesh.Multimesh;
@@ -1448,7 +1455,7 @@ public partial class SaoDatumCityScene : Node3D
                     GetViewport().SetInputAsHandled();
                     return;
                 case Key.P:
-                    _calendar.SetWeather(!_calendar.IsRaining, 0.75);
+                    ToggleCityRain();
                     GetViewport().SetInputAsHandled();
                     return;
                 case Key.T:

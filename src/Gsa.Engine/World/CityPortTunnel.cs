@@ -28,22 +28,8 @@ public partial class SaoDatumCityScene
         var cloud = BuildProtectedCityCloud(slices);
         var review = PortTunnelQuality.Evaluate(machine.ContractId, batches.Select(batch => batch.BatchId).ToArray(), cloud, slices);
         _lastTunnelReview = review;
-        if (!machine.MarkReadyToProcess(now).Succeeded || !machine.StartProcessing(now).Succeeded ||
-            !machine.CompleteProcessing(now).Succeeded ||
-            !machine.RecordQualityEvaluation(now, review.Delivery.Passed, primaryFailureKey: review.Delivery.FailureReasonKeys.FirstOrDefault()).Succeeded)
-        {
-            _feedbackText = Text("city.office.processing_failed");
-            return;
-        }
-
-        if (review.Delivery.Passed)
-            FinishCityDelivery(machine.Snapshot!.Definition, machine, review.Delivery, now);
-        else
-        {
-            _feedbackText = Text(review.PortalCount < 2 ? "city.tunnel.portal_rework" : "city.tunnel.road_rework");
-            _audio.PlayAlert();
-            SaveCityCareerState(SaveTrigger.Manual, announce: false);
-        }
+        CompleteLidarReview(machine, now, review.Delivery,
+            review.PortalCount < 2 ? "city.tunnel.portal_rework" : "city.tunnel.road_rework");
     }
 
     private string TunnelReviewText()
@@ -92,7 +78,7 @@ public partial class SaoDatumCityScene
         foreach (var (point, index) in PortTunnelSurvey.Checkpoints.Select((p, i) => (p, i)))
         {
             var height = point.Z - PortTunnelSurvey.FloorUp;
-            Box($"TunnelCheck{index}", point - Vector3d.UnitZ * (height / 2), new(2, 2, height), platform, PortLidarDeckLayer);
+            Box($"TunnelCheck{index}", point - Vector3d.UnitZ * (height / 2), new(2, 2, height), platform, SurveyLidarSurfaceLayer);
         }
 
         var pads = new[] { PortTunnelSurvey.WestStop, middle, PortTunnelSurvey.EastStop };

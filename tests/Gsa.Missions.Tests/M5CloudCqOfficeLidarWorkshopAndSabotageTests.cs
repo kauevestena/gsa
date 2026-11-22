@@ -19,6 +19,37 @@ namespace Gsa.Missions.Tests;
 public sealed class M5CloudCqOfficeLidarWorkshopAndSabotageTests
 {
     [Fact]
+    public void IndexedOutlierFilterMatchesExhaustiveNeighborsWithoutRainLabels()
+    {
+        var random = new Random(3923);
+        var inputs = Enumerable.Range(1, 300).Select(i => new FilteredLidarSampleInput(
+            new GeoreferencedLidarSample(i, i * .01,
+                new(501350 + random.NextDouble() * 5, 7400836 + random.NextDouble() * 5, random.NextDouble() - .5),
+                i % 7 == 0 ? .15f : .7f, 1, i % 3 == 0), i % 4)).ToArray();
+
+        foreach (var spec in new[] { new SpuriousPointFilterSpec(.45, 2, false, .24f), new(.45, 3, true), new(.9, 0, false) })
+        {
+            double maxDistanceSquared = spec.RadiusMetres * spec.RadiusMetres + 1e-12;
+            var expected = inputs.Where(candidate =>
+            {
+                if (spec.MinIntensity is { } minimum && candidate.Sample.Intensity < minimum) return false;
+                var neighbors = inputs.Where(other => other.Sample.SampleId != candidate.Sample.SampleId)
+                    .Where(other =>
+                    {
+                        var delta = other.Sample.MapPositionEnu - candidate.Sample.MapPositionEnu;
+                        return Vector3d.Dot(delta, delta) <= maxDistanceSquared;
+                    }).ToArray();
+                return neighbors.Length >= spec.MinNeighborsWithinRadius && (!spec.RequireMultiPassIfSparse ||
+                    neighbors.Length > spec.MinNeighborsWithinRadius + 1 || neighbors.Any(other => other.PassIndex != candidate.PassIndex));
+            }).Select(input => input.Sample.SampleId).ToArray();
+
+            var relabeled = inputs.Select(input => input with { Sample = input.Sample with { IsSpuriousRain = !input.Sample.IsSpuriousRain } }).ToArray();
+            Assert.Equal(expected, PointCloudOutlierFilterSession.FilterBySpatiotemporalNeighborhoodAndIntensity(inputs, spec).Select(x => x.Sample.SampleId));
+            Assert.Equal(expected, PointCloudOutlierFilterSession.FilterBySpatiotemporalNeighborhoodAndIntensity(relabeled, spec).Select(x => x.Sample.SampleId));
+        }
+    }
+
+    [Fact]
     public void T_F06_06_PointCloudDensityDeduplicationLodInvarianceOcclusionAndPavementEvaluator()
     {
         var usefulSurface = new SurveySurfaceReference(
