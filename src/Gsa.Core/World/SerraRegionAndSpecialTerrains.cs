@@ -156,8 +156,9 @@ public static class SerraWorldAssembler
                 new Vector3d(treeE, treeN - 24.0, 141.0),
                 new Vector3d(18.0, 4.0, 12.0)));
 
+            var boundarySite = SerraBoundarySurvey.Sites[i - 1];
             serraObjects.Add(new WorldBoxObject(
-                $"serra_divisa_marco_{i:00}",
+                boundarySite.Id,
                 "boundary_monument",
                 "concrete",
                 "serra",
@@ -165,8 +166,8 @@ public static class SerraWorldAssembler
                 ["boundary_divisa", "hist_09_target"],
                 false,
                 true,
-                new Vector3d(501260.0 + i * 85.0, 7401620.0 + (i % 2) * 35.0, 165.0 + i * 4.0),
-                new Vector3d(1.0, 1.0, 1.4)));
+                boundarySite.PublishedPositionEnu,
+                new Vector3d(1.0, 1.0, SerraBoundarySurvey.MonumentHeight)));
 
             serraObjects.Add(new WorldBoxObject(
                 $"serra_slope_cut_{i:00}",

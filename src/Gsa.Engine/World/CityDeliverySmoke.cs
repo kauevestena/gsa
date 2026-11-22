@@ -384,6 +384,7 @@ public partial class SaoDatumCityScene
         AbandonCityContract();
         Require(_activeContract is null, "unsupported saved job could not be closed");
         RunCityLidarCaptureSmoke();
+        RunBoundarySurveySmoke();
         _saveManager = previous;
         _citySaveBlocked = false;
         TryLoadCareer();

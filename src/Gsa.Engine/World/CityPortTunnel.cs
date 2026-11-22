@@ -28,7 +28,7 @@ public partial class SaoDatumCityScene
         var cloud = BuildProtectedCityCloud(slices);
         var review = PortTunnelQuality.Evaluate(machine.ContractId, batches.Select(batch => batch.BatchId).ToArray(), cloud, slices);
         _lastTunnelReview = review;
-        CompleteLidarReview(machine, now, review.Delivery,
+        CompleteCitySurveyReview(machine, now, review.Delivery,
             review.PortalCount < 2 ? "city.tunnel.portal_rework" : "city.tunnel.road_rework");
     }
 

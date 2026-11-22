@@ -137,11 +137,13 @@ public partial class SaoDatumCityScene
         _activeMachine?.Abandon(_calendar.CalendarTimeSeconds);
         _activeContract = null; _cityPhotoCoverage = null; _activeMachine = null; _activeStorySpec = null;
         _locomotion.ReleaseCaptureUnits(CityLidarSlice.StorageUnits(_pendingLidarReturns));
+        _locomotion.ReleaseCaptureUnits(_pendingBoundaryShots.Count);
         ClearPendingCityLidar();
         _lastCitySurveyReview = null;
         _lastTunnelReview = null;
         RestoreViaductDraft(null);
         RestoreRainSurveyOffice();
+        RestoreBoundarySurvey();
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();
         _feedbackText = Text("city.hazards.abandoned"); SaveHazardChange();

@@ -56,7 +56,7 @@ public partial class SaoDatumCityScene
 
     private static bool SupportsCityStory(CampaignMissionFullSpec spec) =>
         spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId or TunnelMissionId or
-            PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId;
+            PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or SerraBoundarySurvey.MissionId;
 
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
@@ -192,6 +192,12 @@ public partial class SaoDatumCityScene
             return;
         }
 
+        if (IsBoundarySurvey(definition))
+        {
+            ProcessBoundaryDelivery(machine, now);
+            return;
+        }
+
         if (!SupportsCityDelivery(definition))
         {
             _feedbackText = Text(CityOfficeUnavailableKey(definition.Product));
@@ -306,6 +312,26 @@ public partial class SaoDatumCityScene
         FinishCityDelivery(definition, machine, report, now);
     }
 
+    private void CompleteCitySurveyReview(ContractStateMachine machine, double now, QualityReport review, string reworkMessage)
+    {
+        if (!machine.MarkReadyToProcess(now).Succeeded || !machine.StartProcessing(now).Succeeded ||
+            !machine.CompleteProcessing(now).Succeeded ||
+            !machine.RecordQualityEvaluation(now, review.Passed, primaryFailureKey: review.FailureReasonKeys.FirstOrDefault()).Succeeded)
+        {
+            _feedbackText = Text("city.office.processing_failed");
+            return;
+        }
+
+        if (review.Passed)
+            FinishCityDelivery(machine.Snapshot!.Definition, machine, review, now);
+        else
+        {
+            _feedbackText = Text(reworkMessage);
+            _audio.PlayAlert();
+            SaveCityCareerState(SaveTrigger.Manual, announce: false);
+        }
+    }
+
     private void FinishCityDelivery(ContractDefinition definition, ContractStateMachine machine, QualityReport report, double now)
     {
         var settlement = ContractSettlementCoordinator.SettleDelivery(machine, _ledger, _progression, report, now);
@@ -325,7 +351,14 @@ public partial class SaoDatumCityScene
         _audio.PlayMissionPassedFanfare();
         _gtaHud.TriggerCelebrationBanner(Text("city.mission_passed"), $"{Text(definition.TitleKey)} · {summary}");
         _feedbackText = summary;
+        if (IsBoundarySurvey(definition))
+        {
+            _cityHazards.CancelActiveThreats();
+            ClearCityThreatVisuals();
+        }
         _locomotion.ReleaseCaptureUnits(CityLidarSlice.StorageUnits(_pendingLidarReturns));
+        _locomotion.ReleaseCaptureUnits(_pendingBoundaryShots.Count);
+        _pendingBoundaryShots.Clear();
         ClearPendingCityLidar();
         _activeContract = null;
         _cityPhotoCoverage = null;

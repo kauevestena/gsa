@@ -2086,3 +2086,51 @@ msgstr "Sem filtro"
 
 msgid "city.rain_survey.gaps"
 msgstr "Trechos da pista a revisitar, medidos da extremidade oeste: {0}"
+
+msgid "city.boundary.field_brief"
+msgstr "Siga até a via de serviço da Serra. Pare nas duas estações laranja de cada um dos seis marcos e pressione C para registrar a leitura. Envie os lotes nos pontos azuis e processe no Escritório."
+
+msgid "city.boundary.office_help"
+msgstr "Duas leituras localizam cada marco. O Escritório verifica a concordância em até 0,08 m e compara a posição estimada às coordenadas publicadas. Um desvio horizontal de pelo menos 1,50 m confirma o deslocamento."
+
+msgid "city.boundary.capture_status"
+msgstr "Marcos com duas leituras {0}/6 · Pendentes {1} · Enviadas {2}"
+
+msgid "city.boundary.use_station"
+msgstr "Pare em uma estação laranja A ou B e pressione C."
+
+msgid "city.boundary.station_occluded"
+msgstr "O instrumento está sem visada para o marco nesta estação."
+
+msgid "city.boundary.storage"
+msgstr "O instrumento está sem condição de registrar. Confira o armazenamento e o estado do veículo."
+
+msgid "city.boundary.shot_recorded"
+msgstr "Marco {0} · Leitura da estação {1} registrada"
+
+msgid "city.boundary.pursuit"
+msgstr "Os grileiros estão seguindo você. Os pontos azuis de envio são protegidos."
+
+msgid "city.boundary.vehicle_lost"
+msgstr "Leituras de divisas perdidas {0} · Leituras enviadas preservadas {1}"
+
+msgid "city.boundary.recollect"
+msgstr "Confira as leituras de estação no Escritório e retorne aos marcos indicados."
+
+msgid "city.boundary.unconfirmed"
+msgstr "Deslocamento a confirmar"
+
+msgid "city.boundary.moved"
+msgstr "Deslocamento confirmado"
+
+msgid "city.boundary.missing_station"
+msgstr "Marco {0} · Falta a estação {1}"
+
+msgid "city.boundary.result"
+msgstr "Marco {0} · Desvio horizontal {1:F2} m · Diferença entre leituras {2:F3} m · {3}"
+
+msgid "cq.metric.boundary_repeat_error"
+msgstr "Diferença entre posições repetidas"
+
+msgid "cq.metric.boundary_displacements_confirmed"
+msgstr "Deslocamentos de marcos confirmados"

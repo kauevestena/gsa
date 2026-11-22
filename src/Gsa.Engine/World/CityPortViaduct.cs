@@ -84,7 +84,7 @@ public partial class SaoDatumCityScene
         var cloud = BuildProtectedCityCloud(slices);
         var review = PortViaductQuality.Evaluate(machine.ContractId, batches.Select(batch => batch.BatchId).ToArray(), cloud, ReadViaductHeights());
         _lastViaductReview = review;
-        CompleteLidarReview(machine, now, review.Delivery, review.Cloud.Passed ? review.Heights.ReasonKey : "city.viaduct.cloud_rework");
+        CompleteCitySurveyReview(machine, now, review.Delivery, review.Cloud.Passed ? review.Heights.ReasonKey : "city.viaduct.cloud_rework");
     }
 
     private string ViaductReviewText()

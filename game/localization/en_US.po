@@ -2086,3 +2086,51 @@ msgstr "Unfiltered"
 
 msgid "city.rain_survey.gaps"
 msgstr "Road sections to revisit, measured from the west end: {0}"
+
+msgid "city.boundary.field_brief"
+msgstr "Drive to the Serra service road. Stop at both orange stations for each of the six monuments and press C to record a reading. Upload at the blue pads and process in the Office."
+
+msgid "city.boundary.office_help"
+msgstr "Two readings locate each monument. The Office checks agreement within 0.08 m and compares the resulting position to the published coordinates. A horizontal offset of at least 1.50 m confirms displacement."
+
+msgid "city.boundary.capture_status"
+msgstr "Monuments with both readings {0}/6 · Pending {1} · Uploaded {2}"
+
+msgid "city.boundary.use_station"
+msgstr "Stop on an orange A or B station and press C."
+
+msgid "city.boundary.station_occluded"
+msgstr "The instrument cannot see the monument from this station."
+
+msgid "city.boundary.storage"
+msgstr "The instrument cannot record. Check storage and vehicle status."
+
+msgid "city.boundary.shot_recorded"
+msgstr "Monument {0} · Station {1} reading recorded"
+
+msgid "city.boundary.pursuit"
+msgstr "The claim jumpers are following you. Blue upload pads are protected."
+
+msgid "city.boundary.vehicle_lost"
+msgstr "Boundary readings lost {0} · Uploaded readings preserved {1}"
+
+msgid "city.boundary.recollect"
+msgstr "Check the station readings listed in the Office and return to the indicated monuments."
+
+msgid "city.boundary.unconfirmed"
+msgstr "Displacement unconfirmed"
+
+msgid "city.boundary.moved"
+msgstr "Displacement confirmed"
+
+msgid "city.boundary.missing_station"
+msgstr "Monument {0} · Missing station {1}"
+
+msgid "city.boundary.result"
+msgstr "Monument {0} · Horizontal offset {1:F2} m · Repeat difference {2:F3} m · {3}"
+
+msgid "cq.metric.boundary_repeat_error"
+msgstr "Difference between repeated positions"
+
+msgid "cq.metric.boundary_displacements_confirmed"
+msgstr "Monument displacements confirmed"

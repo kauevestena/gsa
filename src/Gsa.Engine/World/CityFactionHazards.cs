@@ -44,6 +44,8 @@ public partial class SaoDatumCityScene
             return (p - PortViaductSurvey.WestPad).Length <= 8 || (p - PortViaductSurvey.EastPad).Length <= 8;
         if (IsRainCollection(_activeContract))
             return WaterfrontRainSurvey.UploadPads.Any(pad => (p - pad).Length <= 8);
+        if (IsBoundarySurvey(_activeContract))
+            return SerraBoundarySurvey.UploadPads.Any(pad => (p - pad).Length <= 9);
         return false;
     }
 
@@ -101,6 +103,7 @@ public partial class SaoDatumCityScene
             { _cleanLensRequested = false; _hazardNotice = Text("city.hazards.cleaned"); SaveHazardChange(); }
         }
         else _cityHazards.Lens.StepStoppedCleaning(0, 1);
+        StepBoundaryPursuit(protection);
         StepCityThreatVisuals(dt, pos, speed);
         if (_carSim is not null)
         {
@@ -152,21 +155,30 @@ public partial class SaoDatumCityScene
         var displaced = mark.PhysicalPositionEnu + new Vector3d(.8, -.3, 0);
         _cityHazards.Sabotage.MovedBenchmarks.RegisterDisplacement(mark.BenchmarkId, mark.PublishedCadastralPositionEnu,
             displaced - mark.PublishedCadastralPositionEnu, _calendar.CalendarTimeSeconds);
-        SetCityBenchmarkPhysicalPosition(mark.BenchmarkId, displaced);
+        SetCitySurveyMarkPhysicalPosition(mark.BenchmarkId, displaced);
     }
 
-    private void SetCityBenchmarkPhysicalPosition(string id, Vector3d position)
+    private void SetCitySurveyMarkPhysicalPosition(string id, Vector3d position)
     {
-        var mark = _geodeticNetwork.Benchmarks[id];
-        if ((position - mark.PhysicalPositionEnu).Length > 1e-9)
+        if (_geodeticNetwork.Benchmarks.TryGetValue(id, out var mark) && (position - mark.PhysicalPositionEnu).Length > 1e-9)
             _geodeticNetwork.ApplyClandestineDisplacement(id, position - mark.PhysicalPositionEnu);
         var node = _worldRoot.GetNodeOrNull<Node3D>(id);
-        if (node is not null) node.Position = _coordinates.ToGodot(position);
+        if (node is not null)
+        {
+            node.Position = _coordinates.ToGodot(position);
+            node.ForceUpdateTransform();
+        }
         if (FindChild("Beacon_" + id, true, false) is Node3D beacon) beacon.Position = _coordinates.ToGodot(position);
         if (_manifestObjectsById.TryGetValue(id, out var definition)) _manifestObjectsById[id] = definition.WithPhysicalPosition(position);
         _registry.UpdatePhysicalPosition(id, position);
         for (var i = 0; i < _liveCandidates.Length; i++)
             if (_liveCandidates[i].TargetId == id) _liveCandidates[i] = _liveCandidates[i] with { CenterEnu = position };
+        if (_manifestObjectsById.TryGetValue(id, out var boundary) && boundary.ObjectClass == "boundary_monument")
+        {
+            for (var i = 0; i < _manifestObstacles.Length; i++)
+                if (_manifestObstacles[i].Id == id) _manifestObstacles[i] = _manifestObstacles[i] with { CenterEnu = position };
+            _hasNearbyObstacleAnchor = false;
+        }
     }
 
     private void RestoreCityHazardWorld()
@@ -174,9 +186,12 @@ public partial class SaoDatumCityScene
         ClearCityThreatVisuals();
         (_, _geodeticNetwork, _) = FullCityGeodeticNetwork.AssembleFullCity(_tutorialManifest);
         foreach (var mark in _geodeticNetwork.Benchmarks.Values.ToArray())
-            SetCityBenchmarkPhysicalPosition(mark.BenchmarkId, mark.PublishedCadastralPositionEnu);
+            SetCitySurveyMarkPhysicalPosition(mark.BenchmarkId, mark.PublishedCadastralPositionEnu);
+        foreach (var site in SerraBoundarySurvey.Sites)
+            SetCitySurveyMarkPhysicalPosition(site.Id, site.PublishedPositionEnu);
         foreach (var moved in _cityHazards.Sabotage.MovedBenchmarks.Records)
-            if (_geodeticNetwork.Benchmarks.ContainsKey(moved.BenchmarkId)) SetCityBenchmarkPhysicalPosition(moved.BenchmarkId, moved.DisplacedEnuPosition);
+            if (_geodeticNetwork.Benchmarks.ContainsKey(moved.BenchmarkId) || SerraBoundarySurvey.Sites.Any(site => site.Id == moved.BenchmarkId))
+                SetCitySurveyMarkPhysicalPosition(moved.BenchmarkId, moved.DisplacedEnuPosition);
         SyncCityHazardProtection();
     }
 
@@ -228,7 +243,8 @@ public partial class SaoDatumCityScene
     private void OffloadCityData()
     {
         if (_activeContract is null || !NearCityUnload()) { _feedbackText = Text("city.hazards.upload_location"); return; }
-        if (_fieldSamples.Count == 0 && _pendingLidarReturns == 0) { _feedbackText = Text("city.hazards.nothing_to_upload"); return; }
+        if (_fieldSamples.Count == 0 && _pendingLidarReturns == 0 && _pendingBoundaryShots.Count == 0)
+        { _feedbackText = Text("city.hazards.nothing_to_upload"); return; }
         var now = _calendar.CalendarTimeSeconds;
         _activeMachine?.AdvanceClock(now);
         if (_activeMachine?.State == ContractState.Expirado)
@@ -243,15 +259,17 @@ public partial class SaoDatumCityScene
         }
 
         var id = _cityHazards.NextEventId();
-        var photoTimes = _fieldSamples.Select(s => s.TimestampSeconds);
+        var fieldTimes = _fieldSamples.Select(s => s.TimestampSeconds).Concat(_pendingBoundaryShots.Select(shot => shot.TimestampSeconds));
         // Batch/contract events use calendar time. Each LiDAR slice keeps its own physical timestamp.
-        var batchTimes = _pendingLidarReturns == 0 ? photoTimes : photoTimes.Append(now);
-        var sensors = _fieldSamples.Select(s => s.SensorId).Concat(_pendingLidar.Select(slice => slice.ProfileId)).Distinct().ToArray();
+        var batchTimes = _pendingLidarReturns == 0 ? fieldTimes : fieldTimes.Append(now);
+        var sensors = _fieldSamples.Select(s => s.SensorId).Concat(_pendingLidar.Select(slice => slice.ProfileId));
+        if (_pendingBoundaryShots.Count > 0) sensors = sensors.Append("boundary_total_station");
         var artifact = new SurveyBatchArtifact(1, id, _activeContract.Id, batchTimes.Min(), batchTimes.Max(),
-            _fieldSamples.Count + CityLidarSlice.StorageUnits(_pendingLidarReturns), 0, CaptureStopReason.None,
-            sensors, _fieldSamples.Select(SerializableCameraSample.FromDomain).ToArray(), [], [], [])
+            _fieldSamples.Count + CityLidarSlice.StorageUnits(_pendingLidarReturns) + _pendingBoundaryShots.Count, 0, CaptureStopReason.None,
+            sensors.Distinct().ToArray(), _fieldSamples.Select(SerializableCameraSample.FromDomain).ToArray(), [], [], [])
         {
             LidarSlices = _pendingLidarReturns > 0 ? _pendingLidar.ToArray() : null,
+            BoundaryShots = _pendingBoundaryShots.Count > 0 ? _pendingBoundaryShots.ToArray() : null,
         };
         _cityCustody.RegisterBufferedBatch(artifact, _calendar.CalendarTimeSeconds);
         var result = _cityCustody.OffloadAtomic(id, _calendar.CalendarTimeSeconds);
@@ -260,6 +278,7 @@ public partial class SaoDatumCityScene
         _activeMachine?.RecordPendingBatch(_calendar.CalendarTimeSeconds, id);
         _activeMachine?.ProtectBatchAtUnloadPoint(_calendar.CalendarTimeSeconds, id);
         _protectedCityPhotos.AddRange(_fieldSamples); _fieldSamples.Clear();
+        _protectedBoundaryShots.AddRange(_pendingBoundaryShots); _pendingBoundaryShots.Clear();
         _protectedLidarReturns += _pendingLidarReturns;
         ClearPendingCityLidar();
         _locomotion.RefillHandcartResources(refillAutonomy: false, clearStorage: true);
@@ -270,11 +289,13 @@ public partial class SaoDatumCityScene
     private void RestoreCityProtectedPhotos()
     {
         _protectedCityPhotos.Clear();
+        _protectedBoundaryShots.Clear();
         _protectedLidarReturns = 0;
         foreach (var entry in _cityCustody.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
         {
             var batch = JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson) ?? throw new ArgumentException("Invalid city batch.");
             _protectedCityPhotos.AddRange(batch.Samples.Select(s => s.ToDomain()));
+            _protectedBoundaryShots.AddRange(batch.BoundaryShots ?? []);
             _protectedLidarReturns += batch.LidarSlices?.Sum(slice => slice.Returns.Count) ?? 0;
         }
     }
@@ -289,10 +310,12 @@ public partial class SaoDatumCityScene
 
     private void HandleCityVehicleLoss()
     {
-        var lost = _fieldSamples.Count; var lostLidar = _pendingLidarReturns; var mode = _locomotion.MountedVehicleMode;
+        var lost = _fieldSamples.Count; var lostLidar = _pendingLidarReturns; var lostBoundary = _pendingBoundaryShots.Count;
+        var mode = _locomotion.MountedVehicleMode;
         if (mode >= LocomotionMode.Car) _cityHazards.DisabledVehicle = mode;
         _fieldSamples.Clear(); _cityCustody.HandleVehicleLoss(_calendar.CalendarTimeSeconds);
         ClearPendingCityLidar();
+        _pendingBoundaryShots.Clear();
         _activeMachine?.HandleFieldIncident(_calendar.CalendarTimeSeconds, FieldIncidentKind.VehicleDestroyed);
         RebuildCityObservedTargets(); _coverageSpots.Clear();
         foreach (var sample in _protectedCityPhotos) _coverageSpots.Add(sample.EstimatedPose.PositionEnu);
@@ -307,6 +330,8 @@ public partial class SaoDatumCityScene
         _feedbackText = _hazardNotice = string.Format(Text("city.hazards.vehicle_lost"), lost, _protectedCityPhotos.Count);
         if (IsCityLidarCollection(_activeContract))
             _feedbackText = _hazardNotice = $"{_hazardNotice} {string.Format(Text("city.lidar.vehicle_lost"), lostLidar, _protectedLidarReturns)}";
+        if (IsBoundarySurvey(_activeContract))
+            _feedbackText = _hazardNotice = $"{_hazardNotice} {string.Format(Text("city.boundary.vehicle_lost"), lostBoundary, _protectedBoundaryShots.Count)}";
         SaveHazardChange();
     }
 

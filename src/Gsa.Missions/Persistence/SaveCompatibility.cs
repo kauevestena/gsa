@@ -16,7 +16,7 @@ public sealed record SaveContentVersions(
     int WorldVersion,
     IReadOnlyList<string> DerivedCacheIds)
 {
-    public const int CurrentCatalogVersion = 8;
+    public const int CurrentCatalogVersion = 9;
     public static SaveContentVersions Current => new(CurrentCatalogVersion, 1, 1, []);
 }
 
@@ -56,9 +56,13 @@ public sealed record SaveCitySessionState(
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool RainSurveyFilterEnabled { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public BoundarySurveySaveState? BoundarySurvey { get; init; }
 }
 
 public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);
+public sealed record BoundarySurveySaveState(IReadOnlyList<BoundarySurveyShot> Pending, bool PursuitTriggered);
 
 public sealed record SaveCompatibilityInfo(
     int SourceSchemaVersion,
@@ -204,6 +208,26 @@ public static class SaveCompatibility
                 throw new ArgumentException("Invalid viaduct height draft.");
             if (city.RainSurveyFilterEnabled && city.ActiveStoryMissionId != WaterfrontRainSurvey.MissionId)
                 throw new ArgumentException("Invalid Waterfront rain filter selection.");
+            var boundaryTicks = new HashSet<long>();
+            void CheckBoundaryShots(IEnumerable<BoundarySurveyShot> shots)
+            {
+                foreach (var shot in shots)
+                {
+                    if (shot is null || !boundaryTicks.Add(shot.PhysicsTick) || shot.PhysicsTick > city.PhysicsTick ||
+                        shot.TimestampSeconds > state.Clocks.SimulationTimeSeconds ||
+                        SerraBoundarySurvey.Sites.FirstOrDefault(site => site.Id == shot.MonumentId) is not { } target)
+                        throw new ArgumentException("Invalid boundary observation identity.");
+                    _ = shot.RecomputePoint(target);
+                }
+            }
+            if (city.BoundarySurvey is { } boundary)
+            {
+                if (city.ActiveStoryMissionId != SerraBoundarySurvey.MissionId || boundary.Pending is null ||
+                    boundary.Pending.Count > city.Mobility.UsedVirtualStorageUnits || boundary.Pending.Count > SerraBoundarySurvey.Sites.Count * 2 ||
+                    boundary.Pending.Select(shot => (shot?.MonumentId, shot?.StationIndex)).Distinct().Count() != boundary.Pending.Count)
+                    throw new ArgumentException("Invalid pending boundary survey.");
+                CheckBoundaryShots(boundary.Pending);
+            }
             foreach (var entry in runtime.CustodyStore.Entries.Where(e => e.Stage == BatchCustodyStage.Protected))
             {
                 var batch = System.Text.Json.JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson)
@@ -211,6 +235,15 @@ public static class SaveCompatibility
                 if (batch.LidarSlices is { } slices)
                 {
                     CheckLidar(slices, CityLidarSlice.MaxContractReturns, batch.ContractId);
+                }
+                if (batch.BoundaryShots is { } boundaryShots)
+                {
+                    if (batch.ContractId != SerraBoundarySurvey.MissionId || boundaryShots.Count is < 1 ||
+                        boundaryShots.Count > SerraBoundarySurvey.Sites.Count * 2 ||
+                        boundaryShots.Count > batch.StorageUnitsUsed ||
+                        boundaryShots.Any(shot => shot is null || shot.TimestampSeconds < batch.StartTimeSeconds || shot.TimestampSeconds > batch.EndTimeSeconds))
+                        throw new ArgumentException("Invalid protected boundary survey.");
+                    CheckBoundaryShots(boundaryShots);
                 }
                 foreach (var sample in batch.Samples)
                 {

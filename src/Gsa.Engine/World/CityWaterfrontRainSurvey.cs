@@ -69,7 +69,7 @@ public partial class SaoDatumCityScene
             .Select(point => new FilteredLidarSampleInput(point, pass))).ToArray();
         var review = WaterfrontRainQuality.Evaluate(machine.ContractId, batches.Select(batch => batch.BatchId).ToArray(), inputs, _rainSurveyFilterEnabled);
         _lastRainSurveyReview = review;
-        CompleteLidarReview(machine, now, review.Delivery,
+        CompleteCitySurveyReview(machine, now, review.Delivery,
             review.FilterSelected ? "city.rain_survey.cloud_rework" : "city.rain_survey.apply_filter");
     }
 
