@@ -108,6 +108,9 @@ public sealed record SurveyBatchArtifact(
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<CityLidarSlice>? LidarSlices { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<Gsa.Core.World.BoundarySurveyShot>? BoundaryShots { get; init; }
+
     public static SurveyBatchArtifact FromObservationBatch(
         string contractId,
         ObservationBatch batch,

@@ -258,6 +258,7 @@ public partial class SaoDatumCityScene : Node3D
         BuildPortTunnel(visualBase);
         BuildPortViaduct(visualBase);
         BuildRainSurveyAvenue(visualBase);
+        BuildBoundaryAccess(visualBase);
 
         // Central Park grass deck (500260..500420, 7400280..7400440)
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
@@ -369,6 +370,7 @@ public partial class SaoDatumCityScene : Node3D
                     "glass" => new Color(0.24f, 0.68f, 0.82f, 0.52f),
                     "water" => new Color(0.10f, 0.42f, 0.68f, 0.72f),
                     "vegetation" => new Color(0.22f, 0.48f, 0.24f),
+                    "concrete" when item.ObjectClass == "boundary_monument" => new Color(.92f, .61f, .20f),
                     "metal" when item.ObjectClass == "sidewalk_survey_mark" => item.Id.EndsWith("_foot", StringComparison.Ordinal)
                         ? new Color(.96f, .54f, .19f) : new Color(.92f, .94f, .24f),
                     "metal" when item.ObjectClass == "sidewalk_control_mark" => new Color(.18f, .8f, .92f),
@@ -1256,6 +1258,11 @@ public partial class SaoDatumCityScene : Node3D
 
     private void CaptureCityPhoto(Vector3d pos, double heading, double speed, WeatherAndTimeSnapshot weather)
     {
+        if (IsBoundarySurvey(_activeContract))
+        {
+            CaptureBoundaryShot(pos, speed);
+            return;
+        }
         var usesGimbalina = CurrentActiveMode() is LocomotionMode.Handcart or LocomotionMode.Bicycle ||
             (CurrentActiveMode() == LocomotionMode.OnFoot && _locomotion.MountedVehicleMode <= LocomotionMode.Bicycle);
         if (_gimbalina.HasFledToSafety) { _feedbackText = Text("city.encounters.chicken_safe"); return; }

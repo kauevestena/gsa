@@ -50,6 +50,7 @@ public partial class SaoDatumCityScene
                 ? new(_pendingLidar.ToArray(), _lidarTicksWithoutPose, _lidarTicksWithoutCapacity) : null,
             ViaductHeights = IsViaductCollection(_activeContract) ? _viaductHeightFields.Select(field => field.Text).ToArray() : null,
             RainSurveyFilterEnabled = IsRainCollection(_activeContract) && _rainSurveyFilterEnabled,
+            BoundarySurvey = IsBoundarySurvey(_activeContract) ? new(_pendingBoundaryShots.ToArray(), _boundaryPursuitTriggered) : null,
         });
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
@@ -129,6 +130,7 @@ public partial class SaoDatumCityScene
             _lastTunnelReview = null;
             RestoreViaductDraft(city?.ViaductHeights);
             RestoreRainSurveyOffice(city?.RainSurveyFilterEnabled == true);
+            RestoreBoundarySurvey(city?.BoundarySurvey);
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;

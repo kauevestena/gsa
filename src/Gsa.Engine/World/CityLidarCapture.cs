@@ -5,7 +5,6 @@ using Gsa.Core.Sensors.Lidar;
 using Gsa.Core.World;
 using Gsa.Missions.Contracts;
 using Gsa.Missions.Persistence;
-using Gsa.Missions.Quality;
 using Godot;
 
 namespace Gsa.Engine.World;
@@ -101,23 +100,4 @@ public partial class SaoDatumCityScene
     private PointCloudOctreeAndChunkStore BuildProtectedCityCloud() =>
         BuildProtectedCityCloud(ReadProtectedCityLidarBatches().SelectMany(batch => batch.LidarSlices!));
 
-    private void CompleteLidarReview(ContractStateMachine machine, double now, QualityReport review, string reworkMessage)
-    {
-        if (!machine.MarkReadyToProcess(now).Succeeded || !machine.StartProcessing(now).Succeeded ||
-            !machine.CompleteProcessing(now).Succeeded ||
-            !machine.RecordQualityEvaluation(now, review.Passed, primaryFailureKey: review.FailureReasonKeys.FirstOrDefault()).Succeeded)
-        {
-            _feedbackText = Text("city.office.processing_failed");
-            return;
-        }
-
-        if (review.Passed)
-            FinishCityDelivery(machine.Snapshot!.Definition, machine, review, now);
-        else
-        {
-            _feedbackText = Text(reworkMessage);
-            _audio.PlayAlert();
-            SaveCityCareerState(SaveTrigger.Manual, announce: false);
-        }
-    }
 }

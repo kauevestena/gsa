@@ -39,11 +39,7 @@ public sealed class GsaCityLandmarksBuilder
 
         // 3. Serra Smooth Mountain Climb (NE quadrant E >= 501000, N >= 7401000)
         if (east >= 501000.0 && north >= 7401000.0)
-        {
-            var sx = Math.Clamp((east - 501000.0) / 1000.0, 0.0, 1.0);
-            var sy = Math.Clamp((north - 7401000.0) / 1000.0, 0.0, 1.0);
-            return 100.0 + (sx + sy) * 28.0; // Smooth up to ~156 m summit without jarring block stairs!
-        }
+            return SerraBoundarySurvey.CityGroundElevation(east, north);
 
         return 100.0;
     }
