@@ -1,5 +1,7 @@
 using Gsa.Core.Geometry;
+using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
+using Gsa.Core.World;
 using Xunit;
 
 namespace Gsa.Core.Tests;
@@ -93,5 +95,59 @@ public sealed class TrafficBenchTests
 
         Assert.Equal(0, summary.DeadlockRemovals);
         Assert.Contains(sim.GetSnapshots(), s => s.Id == onCamTarget.Id);
+    }
+
+    [Fact]
+    public void TutorialRoadAndSidewalkLanesDoNotIntersectManifestBuildings()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "game", "world", "tutorial-block.json")))
+            dir = dir.Parent;
+        var manifest = WorldSceneManifest.Parse(File.ReadAllText(Path.Combine(dir!.FullName, "game", "world", "tutorial-block.json")));
+        var obstacles = ObstacleBoxEnu.FromWorldObjects(
+            manifest.Objects.Where(o => o.Collision && o.ObjectClass is not ("ground" or "unload_point" or "survey_control"))).ToArray();
+        var graph = RoadNetworkGraph.CreateTutorialBlockGraph();
+
+        foreach (var seg in graph.Segments.Values)
+        {
+            var clearance = seg.IsVehicleLane ? 1.1 : 0.35;
+            for (var d = 0.0; d <= seg.LengthMetres; d += 0.5)
+            {
+                var pt = seg.EvaluateEnu(d);
+                Assert.DoesNotContain(obstacles, box =>
+                    pt.Z + 1.6 > box.MinZ && pt.Z + 0.05 < box.MaxZ &&
+                    pt.X + clearance > box.MinX && pt.X - clearance < box.MaxX &&
+                    pt.Y + clearance > box.MinY && pt.Y - clearance < box.MaxY);
+            }
+        }
+    }
+
+    [Fact]
+    public void FindPedestrianContactStartlesPedestrianAndNotifyPausesVehicle()
+    {
+        var sim = new TrafficBenchSimulator(seed: 20261114UL);
+        sim.Advance(TrafficBenchSimulator.FixedDtSeconds);
+        var agents = new List<TrafficVisualAgent>();
+        sim.CopyVisualAgentsTo(agents);
+
+        var ped = agents.First(a => !a.IsVehicle);
+        var pedHit = sim.FindPedestrianContact(
+            ped.PositionEnu + new Vector3d(0.0, -3.0, 0.0),
+            ped.PositionEnu + new Vector3d(0.0, 1.0, 0.0),
+            playerRadius: 1.15,
+            dt: 1.0 / 60.0);
+        Assert.NotNull(pedHit);
+        Assert.Equal(ped.Id, pedHit.Value.AgentId);
+
+        sim.Advance(TrafficBenchSimulator.FixedDtSeconds);
+        sim.CopyVisualAgentsTo(agents);
+        Assert.True(agents.First(a => a.Id == ped.Id).IsStartled);
+
+        var car = agents.First(a => a.IsVehicle && a.SpeedMetresPerSecond > 0.5);
+        sim.NotifyAgentContact(car.Id, pauseSeconds: 1.0);
+        for (var i = 0; i < 30; i++)
+            sim.Advance(TrafficBenchSimulator.FixedDtSeconds);
+        sim.CopyVisualAgentsTo(agents);
+        Assert.True(agents.First(a => a.Id == car.Id).SpeedMetresPerSecond < 0.1);
     }
 }

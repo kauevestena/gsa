@@ -164,8 +164,9 @@ public partial class TutorialBlockScene
                     if (succeeded) _audio?.PlayOffloadChime();
                     break;
                 case "horn":
-                    _audio?.PlayHorn(_liveLocomotion.Mode);
-                    if (_liveLocomotion.Mode <= LocomotionMode.Bicycle)
+                    _audio?.PlayHorn(_liveLocomotion!.Mode);
+                    _trafficBench?.Simulator.StartleNearbyPedestrians(_liveLocomotion!.PositionEnu, 9.0);
+                    if (_liveLocomotion!.Mode <= LocomotionMode.Bicycle)
                         _gimbalina.ApplyStartle(StartleEventKind.Horn);
                     succeeded = true;
                     break;
@@ -369,6 +370,7 @@ public partial class TutorialBlockScene
         var radioTitle = _audio is not null && _audio.RadioStation > 0 ? "♫ " + Text(_audio.ActiveRadioTitleKey) : "";
         var radioSub = _audio is not null && !string.IsNullOrEmpty(_audio.CurrentRadioSubtitleKey) ? Text(_audio.CurrentRadioSubtitleKey) : "";
 
+        _gtaHud.Radar.UpdateDynamicWorld(null, _trafficBench?.VisualAgents);
         _gtaHud.Update(
             dt,
             new GtaHudState(

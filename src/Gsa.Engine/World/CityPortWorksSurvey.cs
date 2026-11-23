@@ -128,7 +128,13 @@ public partial class SaoDatumCityScene
         {
             var size = new Vector3((float)east, (float)height, (float)north);
             var body = new StaticBody3D { Name = id, Position = _coordinates.ToGodot(p), CollisionLayer = collision, CollisionMask = 0 };
-            body.AddChild(new MeshInstance3D { Mesh = new BoxMesh { Size = size }, MaterialOverride = material });
+            body.AddChild(new MeshInstance3D
+            {
+                Mesh = new BoxMesh { Size = size },
+                MaterialOverride = material,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+                VisibilityRangeEnd = 420f,
+            });
             if (collision != 0) body.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = size } });
             parent.AddChild(body);
         }
@@ -152,9 +158,17 @@ public partial class SaoDatumCityScene
         const double east = PortWorksSurvey.WestEast + 50;
         const double north = PortWorksSurvey.SouthNorth + 50;
         Box("WorksFoundation", new(east, north, 100.2), 52, 42, .8, concrete);
+        foreach (var col in PortWorksColumns())
+            Box(col.Id, col.CenterEnu, col.SizeEnu.X, col.SizeEnu.Y, col.SizeEnu.Z, concrete, 1);
+        Box("WorksUnfinishedDeck", new(east, north, 105.9), 48, 17, .45, concrete, 1);
+    }
+
+    private static IEnumerable<ObstacleBoxEnu> PortWorksColumns()
+    {
+        const double east = PortWorksSurvey.WestEast + 50;
+        const double north = PortWorksSurvey.SouthNorth + 50;
         foreach (var offset in new[] { -19.0, 19.0 })
             for (var x = -21; x <= 21; x += 14)
-                Box($"WorksColumn_{x}_{offset}", new(east + x, north + offset, 103.0), 1.1, 1.1, 6, concrete, 1);
-        Box("WorksUnfinishedDeck", new(east, north, 105.9), 48, 17, .45, concrete, 1);
+                yield return new($"WorksColumn_{x}_{offset}", new(east + x, north + offset, 103.0), new(1.1, 1.1, 6), true);
     }
 }

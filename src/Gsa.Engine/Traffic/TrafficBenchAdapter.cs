@@ -195,13 +195,18 @@ public sealed class TrafficBenchAdapter
             }
             else if (pedIndex < _pedestrianMeshNode.Multimesh.InstanceCount)
             {
-                var bob = agent.SpeedMetresPerSecond > 0.1
-                    ? MathF.Abs(MathF.Sin(walkPhase + vis.Hash)) * 0.055f
-                    : 0f;
+                var bob = agent.IsStartled
+                    ? MathF.Abs(MathF.Sin(walkPhase * 2.4f + vis.Hash)) * 0.28f
+                    : (agent.SpeedMetresPerSecond > 0.1
+                        ? MathF.Abs(MathF.Sin(walkPhase + vis.Hash)) * 0.055f
+                        : 0f);
+                var pedBasis = agent.IsStartled
+                    ? basis.Rotated(Vector3.Up, MathF.Sin(walkPhase * 3.0f + vis.Hash) * 0.35f)
+                    : basis;
                 var idx = pedIndex++;
                 _pedestrianMeshNode.Multimesh.SetInstanceTransform(
                     idx,
-                    new Transform3D(basis, new Vector3(godotPos.X, godotPos.Y + bob, godotPos.Z)));
+                    new Transform3D(pedBasis, new Vector3(godotPos.X, godotPos.Y + bob, godotPos.Z)));
                 _pedestrianMeshNode.Multimesh.SetInstanceColor(idx, vis.Tint);
 
                 if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)

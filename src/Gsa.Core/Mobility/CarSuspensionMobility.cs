@@ -74,6 +74,13 @@ public sealed class CarSuspensionSimulator
 
     public void StopAtExternalContact() => _speedMetresPerSecond = 0;
 
+    public void DampSpeedOnWallSlide(double preservedRatio)
+    {
+        _speedMetresPerSecond *= Math.Clamp(preservedRatio, 0.0, 0.92);
+        if (Math.Abs(_speedMetresPerSecond) < 0.15)
+            _speedMetresPerSecond = 0.0;
+    }
+
     public CarSuspensionSimulator(
         Vector3d initialPositionEnu,
         double initialHeadingRadians = 0.0,
@@ -114,7 +121,7 @@ public sealed class CarSuspensionSimulator
             throw new ArgumentOutOfRangeException(nameof(surfaceGripMultiplier));
 
         var grip = Math.Clamp(_dryGripCoefficient * surfaceGripMultiplier, 0.2, 1.2);
-        throttleInput = Math.Clamp(throttleInput, 0.0, 1.0);
+        throttleInput = Math.Clamp(throttleInput, -1.0, 1.0);
         brakeInput = Math.Clamp(brakeInput, 0.0, 1.0);
         steerInput = Math.Clamp(steerInput, -1.0, 1.0);
 
@@ -125,16 +132,45 @@ public sealed class CarSuspensionSimulator
         }
 
         _timestampSeconds += dtSeconds;
-        _remainingAutonomySeconds = Math.Max(0.0, _remainingAutonomySeconds - dtSeconds * (throttleInput > 0.0 ? 1.0 : 0.25));
+        _remainingAutonomySeconds = Math.Max(0.0, _remainingAutonomySeconds - dtSeconds * (Math.Abs(throttleInput) > 0.0 ? 1.0 : 0.25));
 
-        var accel = throttleInput * _profile.AccelerationMetresPerSecondSquared * grip
+        double accel;
+        if (throttleInput >= 0.0 && _speedMetresPerSecond >= 0.0)
+        {
+            accel = throttleInput * _profile.AccelerationMetresPerSecondSquared * grip
                   - brakeInput * _profile.DecelerationMetresPerSecondSquared * grip;
-        var drag = _speedMetresPerSecond * 0.12;
-        _speedMetresPerSecond = Math.Clamp(_speedMetresPerSecond + (accel - drag) * dtSeconds, 0.0, Math.Min(_profile.MaxSpeedMetresPerSecond, speedLimitMetresPerSecond));
-        if (brakeInput > 0.5 && _speedMetresPerSecond < 0.05)
-            _speedMetresPerSecond = 0.0;
+            var drag = _speedMetresPerSecond * 0.12;
+            _speedMetresPerSecond = Math.Clamp(_speedMetresPerSecond + (accel - drag) * dtSeconds, 0.0, Math.Min(_profile.MaxSpeedMetresPerSecond, speedLimitMetresPerSecond));
+            if (brakeInput > 0.5 && _speedMetresPerSecond < 0.05)
+                _speedMetresPerSecond = 0.0;
+        }
+        else if (throttleInput < 0.0)
+        {
+            if (_speedMetresPerSecond > 0.08)
+            {
+                var stopStep = (-throttleInput + brakeInput) * _profile.DecelerationMetresPerSecondSquared * grip * dtSeconds;
+                _speedMetresPerSecond = Math.Max(0.0, _speedMetresPerSecond - stopStep);
+                accel = -(-throttleInput + brakeInput) * _profile.DecelerationMetresPerSecondSquared * grip;
+            }
+            else
+            {
+                var maxReverse = Math.Min(_profile.MaxSpeedMetresPerSecond * 0.45, speedLimitMetresPerSecond);
+                var revAccel = throttleInput * 0.75 * _profile.AccelerationMetresPerSecondSquared * grip;
+                var drag = _speedMetresPerSecond * 0.18;
+                _speedMetresPerSecond = Math.Clamp(_speedMetresPerSecond + (revAccel - drag) * dtSeconds, -maxReverse, 0.0);
+                accel = revAccel;
+            }
+        }
+        else
+        {
+            var decel = (throttleInput + brakeInput) * _profile.DecelerationMetresPerSecondSquared * grip + Math.Abs(_speedMetresPerSecond) * 0.25;
+            _speedMetresPerSecond = Math.Min(0.0, _speedMetresPerSecond + decel * dtSeconds);
+            accel = decel;
+        }
 
-        var steerFactor = Math.Min(1.0, _speedMetresPerSecond / 4.0);
+        var steerFactor = _speedMetresPerSecond >= 0.0
+            ? Math.Min(1.0, _speedMetresPerSecond / 4.0)
+            : -Math.Min(1.0, Math.Abs(_speedMetresPerSecond) / 2.5);
         var yawRate = steerInput * _profile.TurnRateRadiansPerSecond * steerFactor * Math.Min(1.0, grip);
         _headingRadians += yawRate * dtSeconds;
 
@@ -214,7 +250,9 @@ public sealed class CarSuspensionSimulator
             : Math.Round(deltaVMetresPerSecond * 1.5, 2);
 
         _conditionDamage = Math.Clamp(_conditionDamage + damage, 0.0, DestroyedThreshold);
-        _speedMetresPerSecond = Math.Max(0.0, _speedMetresPerSecond - deltaVMetresPerSecond);
+        _speedMetresPerSecond = _speedMetresPerSecond >= 0.0
+            ? Math.Max(0.0, _speedMetresPerSecond - deltaVMetresPerSecond)
+            : Math.Min(0.0, _speedMetresPerSecond + deltaVMetresPerSecond);
 
         _impactCounter++;
         var ev = new RackImpactEvent(

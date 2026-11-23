@@ -9,7 +9,8 @@ public readonly record struct TrafficVisualAgent(
     Vector3d PositionEnu,
     double HeadingRadians,
     double SpeedMetresPerSecond,
-    bool IsErratic = false);
+    bool IsErratic = false,
+    bool IsStartled = false);
 
 public sealed record TrafficAgentSnapshot(
     string Id,
@@ -64,6 +65,9 @@ public sealed partial class TrafficBenchSimulator
         public double? ErraticAgeSeconds { get; set; }
         public double ErraticPeriodSeconds { get; set; }
         public bool? IgnoreSignalThisApproach { get; set; }
+        public double StartledSeconds { get; set; }
+        public Vector3d DodgeOffsetEnu { get; set; }
+        public double CollisionPauseSeconds { get; set; }
     }
 
     private readonly RoadNetworkGraph _graph;
@@ -121,7 +125,7 @@ public sealed partial class TrafficBenchSimulator
         for (var i = 0; i < _agents.Count; i++)
         {
             var a = _agents[i];
-            destination.Add(new TrafficVisualAgent(a.Id, a.IsVehicle, a.PositionEnu, a.HeadingRadians, a.Speed, a.ErraticAgeSeconds.HasValue));
+            destination.Add(new TrafficVisualAgent(a.Id, a.IsVehicle, a.PositionEnu, a.HeadingRadians, a.Speed, a.ErraticAgeSeconds.HasValue, a.StartledSeconds > 0.0));
         }
     }
 
@@ -237,9 +241,36 @@ public sealed partial class TrafficBenchSimulator
             return;
         }
 
+        if (agent.CollisionPauseSeconds > 0.0)
+        {
+            agent.CollisionPauseSeconds = Math.Max(0.0, agent.CollisionPauseSeconds - dt);
+            agent.Speed = Math.Max(0.0, agent.Speed - 12.0 * dt);
+            if (agent.CollisionPauseSeconds > 0.0)
+            {
+                agent.WaitingAtSignal = true;
+                return;
+            }
+        }
+
         var segment = _graph.Segments[agent.SegmentId];
         var desiredSpeed = segment.SpeedLimitMetresPerSecond * agent.NominalSpeedScale;
         var waitingAtSignal = false;
+
+        if (!agent.IsVehicle)
+        {
+            if (agent.StartledSeconds > 0.0)
+            {
+                agent.StartledSeconds = Math.Max(0.0, agent.StartledSeconds - dt);
+                desiredSpeed *= 1.85;
+            }
+            else if (agent.DodgeOffsetEnu != Vector3d.Zero)
+            {
+                var decay = Math.Max(0.0, 1.0 - dt * 1.4);
+                agent.DodgeOffsetEnu *= decay;
+                if (agent.DodgeOffsetEnu.Length < 0.02)
+                    agent.DodgeOffsetEnu = Vector3d.Zero;
+            }
+        }
 
         var remainingOnSegment = segment.LengthMetres - agent.DistanceAlongSegment;
         ErraticDriverSample? erratic = agent.ErraticAgeSeconds is >= ErraticWarningSeconds
@@ -317,6 +348,8 @@ public sealed partial class TrafficBenchSimulator
         agent.DistanceAlongSegment = Math.Max(0.0, nextDistance);
         agent.PositionEnu = segment.EvaluateEnu(agent.DistanceAlongSegment);
         agent.HeadingRadians = segment.HeadingRadians;
+        if (!agent.IsVehicle && agent.DodgeOffsetEnu != Vector3d.Zero)
+            agent.PositionEnu += agent.DodgeOffsetEnu;
         if (erratic is { } unstable)
         {
             var turn = unstable.SteeringPerturbationRadians;
@@ -401,7 +434,11 @@ public sealed partial class TrafficBenchSimulator
         {
             if (other.IsVehicle)
                 continue;
-            if (!_graph.Segments[other.SegmentId].IsCrosswalk)
+            var pedSeg = _graph.Segments[other.SegmentId];
+            if (!pedSeg.IsCrosswalk)
+                continue;
+            // Only yield to crosswalk pedestrians crossing perpendicular to the vehicle's travel direction
+            if (Math.Abs(pedSeg.TangentXy.X * vehicleSegment.TangentXy.X + pedSeg.TangentXy.Y * vehicleSegment.TangentXy.Y) > 0.5)
                 continue;
             if (Math.Abs(other.PositionEnu.X - intersectionEnd.X) <= 4.0 &&
                 Math.Abs(other.PositionEnu.Y - intersectionEnd.Y) <= 2.2)

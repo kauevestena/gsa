@@ -163,16 +163,16 @@ public sealed class RoadNetworkGraph
 
     public static RoadNetworkGraph CreateTutorialBlockGraph()
     {
-        // Two-way East/West corridors with >= 8 m lane spacing (ensuring every segment >= 8 m),
-        // keeping clear of facades (Y=7400005), walk_obstacle (500125, 7400035), and office_entry (500232, 7400005).
+        // Two-way East/West corridors with >= 7.5 m lane spacing (ensuring every segment >= 8 m),
+        // keeping clear of building_shell_01..20 (Y=7400005.4..7400015.4), glass_sample/water_sample/walk_obstacle (Y>=7400029.9), and office_entry (500232, 7400005).
         const double z = 100.0;
-        const double xOutW = 500014.0;
+        const double xOutW = 500006.0;
         const double xC_W = 500108.0;
         const double xC_E = 500116.0;
-        const double xE = 500210.0;
+        const double xE = 500208.0;
         const double xOutE = 500220.0;
-        const double yS_EB = 7400011.0;
-        const double yS_WB = 7400019.0;
+        const double yS_EB = 7400019.0;
+        const double yS_WB = 7400027.0;
         const double yN_EB = 7400043.0;
         const double yN_WB = 7400051.0;
 
@@ -251,16 +251,16 @@ public sealed class RoadNetworkGraph
         AddSeg("v_e_nb", "v_se_e_eb", "v_ne_wb", true, false, SignalGroup.NorthSouthRoad, 8.5, "v_n_wb_2");
         AddSeg("v_e_sb_outer", "v_ne_out_wb", "v_se_out_wb", true, false, SignalGroup.AlwaysGreen, 9.0, "v_s_wb_1");
 
-        // Pedestrian sidewalks & marked crosswalks (keep clear of office_entry 500232, 7400005)
-        AddNode("p_sw", 500012.0, 7400008.5);
-        AddNode("p_sc_w", 500104.0, 7400008.5, true, SignalGroup.EastWestCrosswalk);
-        AddNode("p_sc_e", 500120.0, 7400008.5);
-        AddNode("p_se", 500218.0, 7400008.5);
-        AddNode("p_cw_mid", 500104.0, 7400022.0, true, SignalGroup.NorthSouthCrosswalk);
-        AddNode("p_ce_mid", 500120.0, 7400022.0, true, SignalGroup.NorthSouthCrosswalk);
+        // Pedestrian sidewalks & marked crosswalks (clear of building_shell_01..20 MaxY=7400015.4 and office_entry 500232, 7400005)
+        AddNode("p_sw", 500003.5, 7400016.5);
+        AddNode("p_sc_w", 500104.0, 7400016.5, true, SignalGroup.EastWestCrosswalk);
+        AddNode("p_sc_e", 500120.0, 7400016.5);
+        AddNode("p_se", 500218.0, 7400016.5);
+        AddNode("p_cw_mid", 500104.0, 7400028.4, true, SignalGroup.NorthSouthCrosswalk);
+        AddNode("p_ce_mid", 500120.0, 7400028.4, true, SignalGroup.NorthSouthCrosswalk);
         AddNode("p_cw_n", 500104.0, 7400040.5, true, SignalGroup.NorthSouthCrosswalk);
         AddNode("p_ce_n", 500120.0, 7400040.5, true, SignalGroup.NorthSouthCrosswalk);
-        AddNode("p_nw", 500012.0, 7400054.0);
+        AddNode("p_nw", 500003.5, 7400054.0);
         AddNode("p_nc_w", 500104.0, 7400054.0, true, SignalGroup.EastWestCrosswalk);
         AddNode("p_nc_e", 500120.0, 7400054.0);
         AddNode("p_ne", 500218.0, 7400054.0);

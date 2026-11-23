@@ -1,4 +1,6 @@
 using Gsa.Core.Geometry;
+using Gsa.Core.Mobility;
+using Gsa.Core.Traffic;
 using Gsa.Core.World;
 using Godot;
 
@@ -34,7 +36,17 @@ public sealed partial class GsaRadarControl : Control
     private double _headingRadians = Math.PI / 2.0;
     private IReadOnlyList<RadarBlip> _blips = [];
     private IReadOnlyList<Vector3d> _coverageSpots = [];
+    private IReadOnlyList<ObstacleBoxEnu>? _dynamicObstacles;
+    private IReadOnlyList<TrafficVisualAgent>? _trafficAgents;
     private float _rangeMetres = 95f;
+
+    public void UpdateDynamicWorld(
+        IReadOnlyList<ObstacleBoxEnu>? dynamicObstacles,
+        IReadOnlyList<TrafficVisualAgent>? trafficAgents)
+    {
+        _dynamicObstacles = dynamicObstacles;
+        _trafficAgents = trafficAgents;
+    }
 
     public GsaRadarControl()
     {
@@ -207,6 +219,37 @@ public sealed partial class GsaRadarControl : Control
                 Math.Abs(rect.CenterN - _playerPosEnu.Y) > rangePlusPad + rect.MaxHalfExtent)
                 continue;
             DrawClippedRect(rect.CenterE, rect.CenterN, rect.HalfW * 2.0, rect.HalfH * 2.0, rect.Color);
+        }
+
+        if (_dynamicObstacles is { Count: > 0 } dynObs)
+        {
+            var dynBldgCol = new Color(0.34f, 0.40f, 0.45f, 0.85f);
+            for (var i = 0; i < dynObs.Count; i++)
+            {
+                var box = dynObs[i];
+                if (!box.Collision || box.SizeEnu.X < 4.0 || box.SizeEnu.Z < 3.0)
+                    continue;
+                if (Math.Abs(box.CenterEnu.X - _playerPosEnu.X) > rangePlusPad + box.SizeEnu.X * 0.5 ||
+                    Math.Abs(box.CenterEnu.Y - _playerPosEnu.Y) > rangePlusPad + box.SizeEnu.Y * 0.5)
+                    continue;
+                DrawClippedRect(box.CenterEnu.X, box.CenterEnu.Y, box.SizeEnu.X, box.SizeEnu.Y, dynBldgCol);
+            }
+        }
+
+        if (_trafficAgents is { Count: > 0 } agents)
+        {
+            var carCol = new Color(0.95f, 0.72f, 0.22f, 0.88f);
+            var erraticCol = new Color(1.0f, 0.28f, 0.22f, 0.95f);
+            var pedCol = new Color(0.45f, 0.90f, 0.96f, 0.80f);
+            var innerLimitSq = (radius - 4f) * (radius - 4f);
+            for (var i = 0; i < agents.Count; i++)
+            {
+                var a = agents[i];
+                var off = EnuToRadarOffset(a.PositionEnu.X, a.PositionEnu.Y);
+                if (off.LengthSquared() > innerLimitSq)
+                    continue;
+                DrawCircle(center + off, a.IsVehicle ? 2.5f : 1.5f, a.IsVehicle ? (a.IsErratic ? erraticCol : carCol) : pedCol);
+            }
         }
 
         // Coverage heatmap cells collected by player

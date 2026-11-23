@@ -1901,6 +1901,12 @@ msgstr "A blitz retirou um motorista errático de circulação."
 msgid "city.traffic.contact"
 msgstr "Impacto no trânsito. Confira a condição do veículo."
 
+msgid "city.traffic.pedestrian_contact"
+msgstr "Cuidado com o pedestre! A Gimbalina está julgando sua direção!"
+
+msgid "city.stunt.jump"
+msgstr "SALTO DE VISTORIA!"
+
 msgid "city.traffic.music_bar"
 msgstr "Bar Musical do Centro Velho"
 

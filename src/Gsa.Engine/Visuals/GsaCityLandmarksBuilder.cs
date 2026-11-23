@@ -1,4 +1,5 @@
 using Gsa.Core.Geometry;
+using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
 using Gsa.Core.World;
 using Godot;
@@ -9,6 +10,7 @@ namespace Gsa.Engine.Visuals;
 public sealed class GsaCityLandmarksBuilder
 {
     public IReadOnlyList<Vector3d> PotholeCentersEnu { get; private set; } = [];
+    public List<ObstacleBoxEnu> LandmarkObstacles { get; } = [];
     public Vector3d BlitzCheckpointEnu => OldCenterTrafficNetwork.CheckpointEnu;
     public Vector3d ChickenChallengeStartEnu { get; } = new(500288.0, 7400350.0, 100.1);
     public Vector3d ChickenChallengeEndEnu { get; } = new(500488.0, 7400350.0, 100.1);
@@ -143,6 +145,8 @@ public sealed class GsaCityLandmarksBuilder
         blitz.Position = coords.ToGodot(BlitzCheckpointEnu + new Vector3d(1, 10.0, 0));
         visualBase.AddChild(blitz);
 
+        BuildLandmarkColliders(visualBase, coords);
+
         // Absurd urban event dynamic nodes (hidden until spawned by AbsurdUrbanEventsCoordinator!)
         TrioTruckNode = GsaMeshBuilder.BuildTrioEletricoTruck("AbsurdTrioEletrico");
         TrioTruckNode.Position = coords.ToGodot(new Vector3d(500240.0, 7400236.0, 100.0));
@@ -182,6 +186,63 @@ public sealed class GsaCityLandmarksBuilder
         structureBatch.AddBox(bannerMat, hallPos + new Vector3(0f, 10.2f, 8.2f), new Vector3(14f, 1.4f, 0.4f));
     }
 
+    private void BuildLandmarkColliders(Node3D visualBase, GodotCoordinateAdapter coords)
+    {
+        LandmarkObstacles.Clear();
+        void AddBox(string id, Vector3d centerEnu, Vector3d sizeEnu) =>
+            LandmarkObstacles.Add(new ObstacleBoxEnu(id, centerEnu, sizeEnu, true));
+
+        AddBox("CityHall_Main", new(500462, 7400507, 106.4), new(28.0, 20.0, 12.8));
+        AddBox("CentralPark_Fountain", new(500350, 7400410, 101.2), new(8.5, 8.5, 2.8));
+
+        foreach (var px in new[] { 500658.0, 500680.0, 500702.0 })
+            foreach (var pn in new[] { 7400474.5, 7400483.5 })
+                AddBox($"Viaduct_Pier_{(int)px}_{(int)pn}", new(px, pn, 103.0), new(1.6, 1.6, 6.2));
+
+        AddBox("Port_Warehouse_1", new(500280, 7401640, 106.0), new(44.0, 26.0, 12.0));
+        AddBox("Port_Warehouse_2", new(500440, 7401640, 106.0), new(44.0, 26.0, 12.0));
+        for (var s = 0; s < 14; s++)
+        {
+            var e = 500160.0 + (s % 7) * 58.0;
+            var n = 7401680.0 + (s / 7) * 44.0;
+            AddBox($"Port_ContainerStack_{s}", new(e, n, 103.0), new(12.0, 3.2, 6.0));
+        }
+        for (var i = 0; i < 2; i++)
+        {
+            var cx = 500260.0 + i * 240.0;
+            foreach (var offX in new[] { -8.0, 8.0 })
+                foreach (var offN in new[] { -6.0, 6.0 })
+                    AddBox($"Port_Crane_{i}_{(int)offX}_{(int)offN}", new(cx + offX, 7401790.0 + offN, 106.0), new(1.6, 1.6, 12.0));
+        }
+        AddBox("Port_QuayWall", new(500330, 7401806, 101.0), new(620.0, 2.5, 3.0));
+        AddBox("Port_HarborTunnelWall_L", new(500471, 7401320, 103.75), new(3.5, 24.0, 7.5));
+        AddBox("Port_HarborTunnelWall_R", new(500489, 7401320, 103.75), new(3.5, 24.0, 7.5));
+
+        AddBox("Waterfront_Tower_North", new(501742, 7400488, 117.0), new(24.0, 24.0, 34.0));
+        AddBox("Waterfront_Tower_South", new(501742, 7400408, 114.0), new(24.0, 24.0, 28.0));
+        foreach (var tx in new[] { 501780.0, 501840.0 })
+        {
+            AddBox($"Waterfront_BridgeTower_{(int)tx}_S", new(tx, 7400441.5, 104.0), new(1.6, 1.6, 14.0));
+            AddBox($"Waterfront_BridgeTower_{(int)tx}_N", new(tx, 7400454.5, 104.0), new(1.6, 1.6, 14.0));
+        }
+
+        var sumElev = SampleDriveableElevationEnu(501860, 7401860);
+        AddBox("Serra_SummitTower", new(501860, 7401860, sumElev + 6.0), new(3.6, 3.6, 12.0));
+        AddBox("PoliceBlitz_Unit", BlitzCheckpointEnu + new Vector3d(1.0, 10.0, 1.1), new(5.2, 2.8, 2.2));
+
+        var colliderBody = new StaticBody3D { Name = "CityLandmarkColliders", CollisionLayer = 1, CollisionMask = 1 };
+        foreach (var box in LandmarkObstacles)
+        {
+            colliderBody.AddChild(new CollisionShape3D
+            {
+                Name = box.Id,
+                Position = coords.ToGodot(box.CenterEnu),
+                Shape = new BoxShape3D { Size = new Vector3((float)box.SizeEnu.X, (float)box.SizeEnu.Z, (float)box.SizeEnu.Y) },
+            });
+        }
+        visualBase.AddChild(colliderBody);
+    }
+
     private void BuildCentralParkLandmarks(
         Node3D parent,
         GsaStaticMeshBatcher roadBatch,
@@ -194,12 +255,12 @@ public sealed class GsaCityLandmarksBuilder
         Material sidewalkMat,
         Material waterMat)
     {
-        var parkPos = coords.ToGodot(new Vector3d(500350, 7400380, 100.0));
-        roadBatch.AddBox(sidewalkMat, parkPos + new Vector3(0f, 0.08f, 0f), new Vector3(4.5f, 0.14f, 124f), uvScale: 0.24f);
+        var parkPos = coords.ToGodot(new Vector3d(500350, 7400410, 100.0));
+        roadBatch.AddBox(sidewalkMat, parkPos + new Vector3(0f, 0.08f, 0f), new Vector3(4.5f, 0.14f, 74f), uvScale: 0.24f);
         roadBatch.AddBox(sidewalkMat, parkPos + new Vector3(0f, 0.08f, 0f), new Vector3(124f, 0.14f, 4.5f), uvScale: 0.24f);
-        structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 0.35f, 0f), 9.0f, 9.5f, 0.7f, radialSegments: 14);
-        structureBatch.AddCylinder(waterMat, parkPos + new Vector3(0f, 0.55f, 0f), 8.2f, 8.2f, 0.4f, radialSegments: 14, uvScale: 0.08f);
-        structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 2.2f, 0f), 1.2f, 2.0f, 3.2f, radialSegments: 8);
+        structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 0.35f, 0f), 4.5f, 4.8f, 0.7f, radialSegments: 14);
+        structureBatch.AddCylinder(waterMat, parkPos + new Vector3(0f, 0.55f, 0f), 4.0f, 4.0f, 0.4f, radialSegments: 14, uvScale: 0.08f);
+        structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 2.0f, 0f), 0.9f, 1.3f, 2.8f, radialSegments: 8);
 
         // Chicken Challenge 200 m Track Checkered Beacons (N = 7400350)
         var startBeacon = GsaMeshBuilder.BuildBeaconRing("ChickenTrackStart", new Color(0.98f, 0.38f, 0.72f), 2.2f, 1.4f);

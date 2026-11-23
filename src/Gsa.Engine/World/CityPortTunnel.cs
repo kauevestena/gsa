@@ -68,7 +68,13 @@ public partial class SaoDatumCityScene
         {
             var size = new Vector3((float)extent.X, (float)extent.Z, (float)extent.Y);
             var body = new StaticBody3D { Name = name, Position = _coordinates.ToGodot(center), CollisionLayer = collision, CollisionMask = 0 };
-            body.AddChild(new MeshInstance3D { Mesh = new BoxMesh { Size = size }, MaterialOverride = material });
+            body.AddChild(new MeshInstance3D
+            {
+                Mesh = new BoxMesh { Size = size },
+                MaterialOverride = material,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+                VisibilityRangeEnd = 420f,
+            });
             if (collision != 0) body.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = size } });
             parent.AddChild(body);
         }
@@ -91,12 +97,12 @@ public partial class SaoDatumCityScene
             Box($"SurveyLaneEdge{side + 1}", new(middle.X, middle.Y + side * PortTunnelSurvey.RoadHalfWidth, PortTunnelSurvey.FloorUp + .015),
                 new(248, .12, .025), marker);
 
+        var ceilingBatch = new GsaStaticMeshBatcher();
+        var lampStripMat = GsaMeshBuilder.SolidMat(new Color(.88f, .94f, 1f), emit: true, emissionEnergy: 1.4f);
         for (var offset = 8.0; offset < 200; offset += 16)
-        {
-            var lamp = new OmniLight3D { Position = _coordinates.ToGodot(new(PortTunnelSurvey.WestEast + offset, middle.Y, 104.8)),
-                OmniRange = 14, LightEnergy = .75f, LightColor = new Color(.84f, .9f, 1f) };
-            parent.AddChild(lamp);
-        }
+            ceilingBatch.AddBox(lampStripMat, _coordinates.ToGodot(new(PortTunnelSurvey.WestEast + offset, middle.Y, 105.05)), new Vector3(3.2f, 0.12f, 1.4f));
+        if (ceilingBatch.BuildSingleMeshInstance("TunnelCeilingStrips", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 380f) is { } strips)
+            parent.AddChild(strips);
     }
 
     private TunnelRangeObservation? ObserveTunnelRanges(Vector3d position, double heading)

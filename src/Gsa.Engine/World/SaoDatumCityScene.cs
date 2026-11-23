@@ -53,6 +53,7 @@ public partial class SaoDatumCityScene : Node3D
     private readonly HashSet<WorldSectorCellId> _builtSectors = [];
     private readonly Dictionary<WorldSectorCellId, Node3D> _sectorNodes = new();
     private readonly Dictionary<WorldSectorCellId, List<ObstacleBoxEnu>> _sectorObstacles = new();
+    private readonly Dictionary<WorldSectorCellId, (Node3D Node, List<ObstacleBoxEnu> Obstacles)> _sectorCache = new();
     private readonly Dictionary<string, Node3D> _collectibleNodes = new();
     private Dictionary<string, WorldBoxObject> _manifestObjectsById = new(StringComparer.Ordinal);
     private WorldSectorCellId? _lastStreamingSector;
@@ -79,6 +80,18 @@ public partial class SaoDatumCityScene : Node3D
     private CampaignMissionFullSpec? _activeStorySpec;
     private bool _disguiseActive;
     private double _hazardCooldown;
+    private double _wallImpactCooldown;
+    private double _stuntJumpCooldown;
+    private bool _handbrakeActive;
+
+    private const int MaxVfxParticles = 24;
+    private MultiMeshInstance3D? _vfxMesh;
+    private readonly Vector3[] _vfxPos = new Vector3[MaxVfxParticles];
+    private readonly Vector3[] _vfxVel = new Vector3[MaxVfxParticles];
+    private readonly float[] _vfxLife = new float[MaxVfxParticles];
+    private readonly float[] _vfxMaxLife = new float[MaxVfxParticles];
+    private readonly Color[] _vfxColors = new Color[MaxVfxParticles];
+    private int _vfxWriteIdx;
     private double _nextAbsurdEventTimer = 18.0;
     private bool _chickenChallengeActive;
     private double _chickenChallengeTime;
@@ -164,6 +177,7 @@ public partial class SaoDatumCityScene : Node3D
             BuildPlayerAndTraffic();
             BuildCityEverydayActors();
             BuildLidarPointCloudOverlay();
+            BuildImpactVfxOverlay();
             BuildHudAndTablet();
 
             if (_isSandbox)
@@ -262,20 +276,20 @@ public partial class SaoDatumCityScene : Node3D
         BuildBoundaryAccess(visualBase);
         BuildFinalPavementCorridors(visualBase);
 
-        // Central Park grass deck (500260..500420, 7400280..7400440)
+        // Central Park grass deck (500285..500415, 7400366..7400446, keeping N=7400356 traffic avenue clear!)
         var parkMat = GsaRetroTextures.CreateWorldMaterial("city_park_grass_uv", "park_grass", Colors.White, triplanar: false);
         visualBase.AddChild(new MeshInstance3D
         {
             Name = "CentralParkLawn",
-            Position = _coordinates.ToGodot(new Vector3d(500350, 7400380, 99.78)),
-            Mesh = GsaMeshBuilder.CreateWorldUvBoxMesh(new Vector3(130f, 0.3f, 130f), 0.10f),
+            Position = _coordinates.ToGodot(new Vector3d(500350, 7400406, 99.62)),
+            Mesh = GsaMeshBuilder.CreateWorldUvBoxMesh(new Vector3(130f, 0.16f, 80f), 0.10f),
             MaterialOverride = parkMat,
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
-        var parkTrees = new List<(Vector3 Position, float Scale)>(25);
+        var parkTrees = new List<(Vector3 Position, float Scale)>(20);
         for (var px = 500300.0; px <= 500400.0; px += 25.0)
         {
-            for (var py = 7400330.0; py <= 7400430.0; py += 25.0)
+            foreach (var py in new[] { 7400374.0, 7400408.0, 7400438.0 })
                 parkTrees.Add((_coordinates.ToGodot(new Vector3d(px, py, 99.9)), 1.15f));
         }
         GsaMeshBuilder.BuildBatchedStreetTrees(visualBase, "ParkTrees", parkTrees);
@@ -339,6 +353,17 @@ public partial class SaoDatumCityScene : Node3D
     {
         _worldRoot = new Node3D { Name = "WorldGeometry" };
         AddChild(_worldRoot);
+        var quadrants = new[]
+        {
+            new GsaStaticMeshBatcher(),
+            new GsaStaticMeshBatcher(),
+            new GsaStaticMeshBatcher(),
+            new GsaStaticMeshBatcher(),
+        };
+        const double midE = 501000.0;
+        const double midN = 7401000.0;
+        var postMat = GsaMeshBuilder.SolidMat(new Color(.34f, .36f, .38f));
+
         foreach (var item in _fullManifest.Objects)
         {
             if (item.ObjectClass is "ground" or "training_park" or "calm_zone" or "wifi_hotspot")
@@ -352,7 +377,8 @@ public partial class SaoDatumCityScene : Node3D
                 ? new StaticBody3D { CollisionLayer = 1, CollisionMask = 1 }
                 : new Node3D();
             node.Name = item.Id;
-            node.Position = _coordinates.ToGodot(item.PositionEnu);
+            var posG = _coordinates.ToGodot(item.PositionEnu);
+            node.Position = posG;
             _worldRoot.AddChild(node);
             _registry.Register(item, node);
 
@@ -383,37 +409,49 @@ public partial class SaoDatumCityScene : Node3D
                     _ => new Color(0.58f, 0.60f, 0.58f),
                 });
 
-            node.AddChild(new MeshInstance3D
-            {
-                Name = "Geometry",
-                Mesh = textured ? GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.095f) : new BoxMesh { Size = size },
-                MaterialOverride = material,
-                CastShadow = item.ObjectClass is "survey_control" or "unload_point" or "manhole" || item.Material is "glass" or "water"
-                    ? GeometryInstance3D.ShadowCastingSetting.Off
-                    : GeometryInstance3D.ShadowCastingSetting.On,
-            });
             if (item.Collision)
                 node.AddChild(new CollisionShape3D { Name = "Collision", Shape = new BoxShape3D { Size = size } });
 
-            if (item.ObjectClass == "traffic_sign")
+            var keepDynamicVisual = item.ObjectClass is "survey_control" or "boundary_monument" || item.Material is "glass" or "water";
+            if (keepDynamicVisual)
+            {
                 node.AddChild(new MeshInstance3D
                 {
-                    Position = new Vector3(0, -1.1f, .05f),
-                    Mesh = new BoxMesh { Size = new Vector3(.07f, 1.65f, .07f) },
-                    MaterialOverride = GsaMeshBuilder.SolidMat(new Color(.34f, .36f, .38f)),
-                });
-            if (item.ObjectClass == "park_bench")
-                node.AddChild(new MeshInstance3D
-                {
-                    Position = new Vector3(0, -.25f, .25f),
-                    Mesh = new BoxMesh { Size = new Vector3(size.X, .10f, .60f) },
+                    Name = "Geometry",
+                    Mesh = textured ? GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.095f) : new BoxMesh { Size = size },
                     MaterialOverride = material,
+                    CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
                 });
+            }
+            else
+            {
+                var qIdx = (item.PositionEnu.X >= midE ? 1 : 0) + (item.PositionEnu.Y >= midN ? 2 : 0);
+                var batch = quadrants[qIdx];
+                batch.AddBox(material, posG, size, uvScale: textured ? 0.095f : 0.1f);
+                if (item.ObjectClass == "traffic_sign")
+                    batch.AddBox(postMat, posG + new Vector3(0f, -1.1f, .05f), new Vector3(.07f, 1.65f, .07f));
+                if (item.ObjectClass == "park_bench")
+                    batch.AddBox(material, posG + new Vector3(0f, -.25f, .25f), new Vector3(size.X, .10f, .60f));
+            }
         }
 
-        _manifestObstacles = ObstacleBoxEnu.FromWorldObjects(
-            _fullManifest.Objects.Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot")))
-            .Concat(PortTunnelWalls()).Concat(PortViaductPiers()).ToArray();
+        for (var q = 0; q < quadrants.Length; q++)
+        {
+            if (quadrants[q].BuildSingleMeshInstance($"SemanticWorldQ{q}", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 460f) is { } qMesh)
+                _worldRoot.AddChild(qMesh);
+        }
+
+        _manifestObstacles = _fullManifest.Objects
+            .Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot"))
+            .Select(o => o.ObjectClass == "traffic_sign"
+                ? new ObstacleBoxEnu(o.Id, new Vector3d(o.PositionEnu.X, o.PositionEnu.Y, 101.15), new Vector3d(0.45, 0.45, 2.3), o.Collision)
+                : new ObstacleBoxEnu(o.Id, o.PositionEnu, o.SizeEnu, o.Collision))
+            .Concat(PortTunnelWalls())
+            .Concat(PortViaductPiers())
+            .Concat(PortWorksColumns())
+            .Concat(_cityVisuals.ExtraObstacles)
+            .Concat(_landmarks.LandmarkObstacles)
+            .ToArray();
         _liveCandidates = _fullManifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
     }
 
@@ -488,6 +526,103 @@ public partial class SaoDatumCityScene : Node3D
         AddChild(_lidarCloudMesh);
     }
 
+    private void BuildImpactVfxOverlay()
+    {
+        var cube = new BoxMesh { Size = new Vector3(0.24f, 0.24f, 0.24f) };
+        cube.SurfaceSetMaterial(0, new StandardMaterial3D
+        {
+            VertexColorUseAsAlbedo = true,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+        });
+        var mm = new MultiMesh
+        {
+            TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+            UseColors = true,
+            Mesh = cube,
+            InstanceCount = MaxVfxParticles,
+            VisibleInstanceCount = 0,
+        };
+        _vfxMesh = new MultiMeshInstance3D
+        {
+            Name = "ImpactAndDriftVfx",
+            Multimesh = mm,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        };
+        AddChild(_vfxMesh);
+    }
+
+    private void SpawnImpactSparks(Vector3d posEnu, double speedMps)
+    {
+        if (_vfxMesh is null)
+            return;
+        var origin = _coordinates.ToGodot(posEnu + Vector3d.UnitZ * 0.65);
+        var count = Math.Clamp((int)(speedMps * 0.8), 4, 8);
+        for (var i = 0; i < count; i++)
+        {
+            var idx = _vfxWriteIdx;
+            _vfxWriteIdx = (_vfxWriteIdx + 1) % MaxVfxParticles;
+            var ang = (i / (float)count) * MathF.Tau + (_tick % 7) * 0.35f;
+            var horiz = 3.2f + (i % 3) * 1.4f;
+            _vfxPos[idx] = origin;
+            _vfxVel[idx] = new Vector3(MathF.Cos(ang) * horiz, 2.8f + (i % 2) * 1.8f, MathF.Sin(ang) * horiz);
+            _vfxMaxLife[idx] = 0.42f;
+            _vfxLife[idx] = 0.42f;
+            _vfxColors[idx] = i % 2 == 0 ? new Color(1.0f, 0.72f, 0.16f) : new Color(1.0f, 0.94f, 0.42f);
+        }
+    }
+
+    private void SpawnDriftSmoke(Vector3d posEnu, double headingRadians)
+    {
+        if (_vfxMesh is null)
+            return;
+        var backX = -Math.Cos(headingRadians) * 1.3;
+        var backY = -Math.Sin(headingRadians) * 1.3;
+        var origin = _coordinates.ToGodot(posEnu + new Vector3d(backX, backY, 0.22));
+        var idx = _vfxWriteIdx;
+        _vfxWriteIdx = (_vfxWriteIdx + 1) % MaxVfxParticles;
+        _vfxPos[idx] = origin + new Vector3(((_tick % 3) - 1) * 0.35f, 0f, 0f);
+        _vfxVel[idx] = new Vector3(0f, 1.35f, 0f);
+        _vfxMaxLife[idx] = 0.55f;
+        _vfxLife[idx] = 0.55f;
+        _vfxColors[idx] = new Color(0.84f, 0.86f, 0.88f);
+    }
+
+    private void StepImpactVfx(double dt)
+    {
+        if (_vfxMesh is null)
+            return;
+        var fdt = (float)dt;
+        var mm = _vfxMesh.Multimesh;
+        var visible = 0;
+        for (var i = 0; i < MaxVfxParticles; i++)
+        {
+            if (_vfxLife[i] <= 0f)
+                continue;
+            _vfxLife[i] -= fdt;
+            if (_vfxLife[i] <= 0f)
+                continue;
+            _vfxPos[i] += _vfxVel[i] * fdt;
+            _vfxVel[i].Y -= 9.5f * fdt;
+            if (_vfxVel[i].Y < -1.5f && _vfxColors[i].R < 0.95f)
+                _vfxVel[i].Y = 0.8f;
+            var s = Math.Max(0.05f, (_vfxLife[i] / Math.Max(0.01f, _vfxMaxLife[i])) * 1.25f);
+            mm.SetInstanceTransform(visible, new Transform3D(Basis.Identity.Scaled(new Vector3(s, s, s)), _vfxPos[i]));
+            mm.SetInstanceColor(visible, _vfxColors[i]);
+            visible++;
+        }
+        mm.VisibleInstanceCount = visible;
+    }
+
+    private void DisposeCachedSectors()
+    {
+        foreach (var (_, cached) in _sectorCache)
+        {
+            if (IsInstanceValid(cached.Node) && cached.Node.GetParent() is null)
+                cached.Node.Free();
+        }
+        _sectorCache.Clear();
+    }
+
     private static WorldSectorCellId GetStreamingSectorCell(Vector3d enu) => new(
         (int)Math.Floor((enu.X - OldCenterMvpWorldAssembler.MvpOriginEast) / OldCenterMvpWorldAssembler.SectorSizeMetres),
         (int)Math.Floor((enu.Y - OldCenterMvpWorldAssembler.MvpOriginNorth) / OldCenterMvpWorldAssembler.SectorSizeMetres));
@@ -499,7 +634,7 @@ public partial class SaoDatumCityScene : Node3D
         var wanted = eval.LoadedSectors.ToHashSet();
         var changed = false;
 
-        // Unload far sectors cleanly
+        // Unload far sectors cleanly (keep built geometry & colliders cached to avoid GC/allocation spikes on re-entry)
         foreach (var existing in _builtSectors.ToArray())
         {
             if (wanted.Contains(existing))
@@ -507,7 +642,6 @@ public partial class SaoDatumCityScene : Node3D
             if (_sectorNodes.TryGetValue(existing, out var node))
             {
                 _streamedBlocksRoot.RemoveChild(node);
-                node.QueueFree();
                 _sectorNodes.Remove(existing);
             }
             _sectorObstacles.Remove(existing);
@@ -521,11 +655,16 @@ public partial class SaoDatumCityScene : Node3D
             if (_builtSectors.Contains(sector))
                 continue;
             _builtSectors.Add(sector);
-            var sectorObstacles = new List<ObstacleBoxEnu>(4);
-            var sectorNode = BuildProceduralCitySector(sector, sectorObstacles);
-            _sectorNodes[sector] = sectorNode;
-            _sectorObstacles[sector] = sectorObstacles;
-            _streamedBlocksRoot.AddChild(sectorNode);
+            if (!_sectorCache.TryGetValue(sector, out var cached))
+            {
+                var obstacles = new List<ObstacleBoxEnu>(4);
+                var sectorNode = BuildProceduralCitySector(sector, obstacles);
+                cached = (sectorNode, obstacles);
+                _sectorCache[sector] = cached;
+            }
+            _sectorNodes[sector] = cached.Node;
+            _sectorObstacles[sector] = cached.Obstacles;
+            _streamedBlocksRoot.AddChild(cached.Node);
             changed = true;
         }
 
@@ -733,6 +872,7 @@ public partial class SaoDatumCityScene : Node3D
             _pendingDistrictPopup = Text(GetDistrictBannerKey(activePos));
         }
 
+        _handbrakeActive = false;
         if (_carSim is not null && _locomotion.Mode >= LocomotionMode.Car)
         {
             var terrainZBefore = GetTerrainElevationEnu(_carSim.PositionEnu.X, _carSim.PositionEnu.Y);
@@ -749,27 +889,46 @@ public partial class SaoDatumCityScene : Node3D
             if (_lidarEnabled && activeMode == LocomotionMode.Van && IsFinalPavementSurvey(_activeContract) &&
                 FinalCityPavementSurvey.LaneAt(prevCarPos) is not null)
                 speedLimit = Math.Min(speedLimit, FinalCityPavementSurvey.SurveySpeed);
+            var handbrake = !_gtaHud.IsCutsceneVisible && Input.IsPhysicalKeyPressed(Key.Space) && Math.Abs(_carSim.SpeedMetresPerSecond) > 3.0;
+            _handbrakeActive = handbrake;
+            var carSteer = handbrake ? Math.Clamp(input.Steer * 1.45, -1.0, 1.0) : input.Steer;
+            var carBrake = handbrake ? Math.Max(input.Brake, 0.35) : input.Brake;
             var carStep = _carSim.StepMotion(
                 delta,
-                Math.Max(0.0, input.Throttle),
-                input.Brake + (input.Throttle < 0.0 ? -input.Throttle : 0.0),
-                input.Steer,
+                input.Throttle,
+                carBrake,
+                carSteer,
                 weather.SurfaceGripMultiplier,
                 0.0,
                 _fleet.GetSkillRank(SkillTrackKind.DefensiveDriving),
                 speedLimitMetresPerSecond: speedLimit);
 
-            var resolvedPos = ResolveObstaclePushout(prevCarPos, carStep.PositionEnu, 1.25, out var hitId);
-            if (hitId is not null && carStep.SpeedMetresPerSecond > 3.2)
+            var carRadius = PlatformProfile.ForMode(activeMode).CollisionRadiusMetres;
+            var resolvedPos = ResolveObstaclePushout(prevCarPos, carStep.PositionEnu, carRadius, out var hitId);
+            if (hitId is not null)
             {
-                _audio.PlayCollisionThud(carStep.SpeedMetresPerSecond);
-                _chaseCamera.TriggerShake(0.32f, 0.32f);
-                var imp = _carSim.ApplyCollisionImpact(carStep.SpeedMetresPerSecond * 0.65, hitId, _fleet.GetSkillRank(SkillTrackKind.DefensiveDriving));
-                if (imp.TriggersRackMisalignment)
+                var intendedDist = Math.Sqrt(
+                    (carStep.PositionEnu.X - prevCarPos.X) * (carStep.PositionEnu.X - prevCarPos.X) +
+                    (carStep.PositionEnu.Y - prevCarPos.Y) * (carStep.PositionEnu.Y - prevCarPos.Y));
+                var actualDist = Math.Sqrt(
+                    (resolvedPos.X - prevCarPos.X) * (resolvedPos.X - prevCarPos.X) +
+                    (resolvedPos.Y - prevCarPos.Y) * (resolvedPos.Y - prevCarPos.Y));
+                var preserved = intendedDist > 1e-5 ? actualDist / intendedDist : 0.0;
+                var impactSpeed = Math.Abs(carStep.SpeedMetresPerSecond);
+                _carSim.DampSpeedOnWallSlide(preserved);
+                if (_wallImpactCooldown <= 0.0 && impactSpeed > 3.2)
                 {
-                    _rackMisaligned = true;
-                    _feedbackText = Text("city.rack.misaligned");
-                    _audio.PlayAlert(critical: true);
+                    _wallImpactCooldown = 0.40;
+                    _audio.PlayCollisionThud(impactSpeed);
+                    _chaseCamera.TriggerShake(0.32f, 0.32f);
+                    SpawnImpactSparks(resolvedPos, impactSpeed);
+                    var imp = _carSim.ApplyCollisionImpact(impactSpeed * 0.65, hitId, _fleet.GetSkillRank(SkillTrackKind.DefensiveDriving));
+                    if (imp.TriggersRackMisalignment)
+                    {
+                        _rackMisaligned = true;
+                        _feedbackText = Text("city.rack.misaligned");
+                        _audio.PlayAlert(critical: true);
+                    }
                 }
             }
 
@@ -777,7 +936,12 @@ public partial class SaoDatumCityScene : Node3D
             if (trafficContact is { } vehicleHit)
             {
                 saveTrafficImpact = ApplyCityTrafficImpact(vehicleHit, activeMode);
-                _carSim.StopAtExternalContact();
+                SpawnImpactSparks(resolvedPos, Math.Max(4.0, vehicleHit.ClosingSpeedMetresPerSecond));
+                if (vehicleHit.AgentId.StartsWith("ped_", StringComparison.Ordinal) ||
+                    vehicleHit.AgentId.StartsWith("npc_", StringComparison.Ordinal))
+                    _carSim.DampSpeedOnWallSlide(0.30);
+                else
+                    _carSim.StopAtExternalContact();
             }
 
             if (!CityMayEnterRegion(prevCarPos, resolvedPos))
@@ -808,6 +972,19 @@ public partial class SaoDatumCityScene : Node3D
             activeSpeed = _carSim.SpeedMetresPerSecond;
             activePitch = carStep.PitchRadians + Math.Clamp((terrainZ - terrainZBefore) * 0.4, -0.25, 0.25);
             activeRoll = carStep.RollRadians;
+
+            if ((handbrake || (input.Brake > 0.45 && activeSpeed > 5.0)) && _tick % 2 == 0)
+                SpawnDriftSmoke(finalCarPos, activeHeading);
+
+            if (!_citySaveSmoke && _stuntJumpCooldown <= 0.0 && Math.Abs(activeSpeed) >= 13.5 && terrainZ >= 104.2 &&
+                ((finalCarPos.X is >= 500640.0 and <= 500720.0 && finalCarPos.Y is >= 7400472.0 and <= 7400486.0) ||
+                 (finalCarPos.X is >= 501770.0 and <= 501850.0 && finalCarPos.Y is >= 7400440.0 and <= 7400456.0)))
+            {
+                _stuntJumpCooldown = 25.0;
+                _ledger.RecordActivityReward($"stunt_{_tick}", "stunt_jump", _calendar.CalendarTimeSeconds, 15, "stunt", "city.stunt.jump");
+                _audio.PlayMissionPassedFanfare();
+                _gtaHud.TriggerCelebrationBanner(Text("city.stunt.jump"), "+15 C$");
+            }
         }
         else
         {
@@ -845,9 +1022,10 @@ public partial class SaoDatumCityScene : Node3D
         if (gStep.HasFledToSafety) _locomotion.MarkGimbalinaFled();
         _mobility.SetGimbalinaPresent(!gStep.HasFledToSafety);
 
+        var brakingNow = input.Brake > 0.1 || input.Throttle < -0.1 || _handbrakeActive;
         _mobility.SetVisualPlatformMode(activeMode);
         _mobility.SyncAvatarPose(activePos, activeHeading, delta, activeSpeed, input.Steer, activePitch, activeRoll,
-            gStep.Stress, gStep.ResidualPitchRadians, gStep.ResidualRollRadians, weather.IsNight, input.Brake > 0.1);
+            gStep.Stress, gStep.ResidualPitchRadians, gStep.ResidualRollRadians, weather.IsNight, brakingNow);
 
         if (activeMode == LocomotionMode.OnFoot)
             _mobility.SyncParkedVehicle(_benchRoot, _locomotion.MountedVehicleMode, _locomotion.HandcartPositionEnu, _locomotion.HandcartHeadingRadians);
@@ -860,7 +1038,8 @@ public partial class SaoDatumCityScene : Node3D
         StepCityPointView(activePos);
         _cityVisuals.UpdateAnimatedProps(delta, _traffic.Simulator);
         _atmosphere.Update(weather, _coordinates.ToGodot(activePos), delta);
-        _audio.Step(delta, gStep.Stress, activeMode <= LocomotionMode.Bicycle, weather.IsRaining, activeSpeed, activeMode, input.Brake > 0.1);
+        _audio.Step(delta, gStep.Stress, activeMode <= LocomotionMode.Bicycle, weather.IsRaining, activeSpeed, activeMode, brakingNow);
+        StepImpactVfx(delta);
 
         // Step world hazards, police blitz, absurd events & Chicken Challenge (200 m track)
         StepCityHazardsAndEvents(delta, activePos, activeSpeed, activeMode, gStep);
@@ -923,18 +1102,100 @@ public partial class SaoDatumCityScene : Node3D
     private Vector3d ResolveObstaclePushout(Vector3d prevPos, Vector3d candidate, double radius, out string? hitId)
     {
         hitId = null;
-        var cur = candidate;
-        foreach (var box in GetNearbyObstacles(cur))
+        var cur = prevPos;
+        var nearby = GetNearbyObstacles(candidate);
+
+        // Depenetrate first if starting embedded in an obstacle edge
+        foreach (var box in nearby)
         {
             if (!box.Collision) continue;
             if (cur.X + radius > box.MinX && cur.X - radius < box.MaxX &&
                 cur.Y + radius > box.MinY && cur.Y - radius < box.MaxY &&
-                cur.Z + 1.8 > box.MinZ && cur.Z < box.MaxZ)
+                cur.Z + 1.8 > box.MinZ && cur.Z + 0.05 < box.MaxZ)
             {
-                hitId = box.Id;
+                var penLeft = (cur.X + radius) - box.MinX;
+                var penRight = box.MaxX - (cur.X - radius);
+                var penDown = (cur.Y + radius) - box.MinY;
+                var penUp = box.MaxY - (cur.Y - radius);
+                var minPen = Math.Min(Math.Min(penLeft, penRight), Math.Min(penDown, penUp));
+                const double skin = 1e-3;
+                if (minPen == penLeft) cur = new Vector3d(box.MinX - radius - skin, cur.Y, cur.Z);
+                else if (minPen == penRight) cur = new Vector3d(box.MaxX + radius + skin, cur.Y, cur.Z);
+                else if (minPen == penDown) cur = new Vector3d(cur.X, box.MinY - radius - skin, cur.Z);
+                else cur = new Vector3d(cur.X, box.MaxY + radius + skin, cur.Z);
+                hitId ??= box.Id;
+            }
+        }
+
+        var dx = candidate.X - cur.X;
+        var dy = candidate.Y - cur.Y;
+        var dz = candidate.Z - cur.Z;
+        var dist = Math.Sqrt(dx * dx + dy * dy);
+        var steps = Math.Max(1, (int)Math.Ceiling(dist / 0.35));
+        var stepX = dx / steps;
+        var stepY = dy / steps;
+        var stepZ = dz / steps;
+
+        for (var s = 0; s < steps; s++)
+        {
+            // X-axis substep with wall sliding
+            if (Math.Abs(stepX) > 1e-9)
+            {
+                var nextX = cur.X + stepX;
+                foreach (var box in nearby)
+                {
+                    if (!box.Collision) continue;
+                    if (nextX + radius > box.MinX && nextX - radius < box.MaxX &&
+                        cur.Y + radius > box.MinY && cur.Y - radius < box.MaxY &&
+                        cur.Z + 1.8 > box.MinZ && cur.Z + 0.05 < box.MaxZ)
+                    {
+                        hitId ??= box.Id;
+                        const double skin = 1e-3;
+                        nextX = stepX > 0 ? box.MinX - radius - skin : box.MaxX + radius + skin;
+                    }
+                }
+                cur = new Vector3d(nextX, cur.Y, cur.Z);
+            }
+
+            // Y-axis substep with wall sliding
+            if (Math.Abs(stepY) > 1e-9)
+            {
+                var nextY = cur.Y + stepY;
+                foreach (var box in nearby)
+                {
+                    if (!box.Collision) continue;
+                    if (cur.X + radius > box.MinX && cur.X - radius < box.MaxX &&
+                        nextY + radius > box.MinY && nextY - radius < box.MaxY &&
+                        cur.Z + 1.8 > box.MinZ && cur.Z + 0.05 < box.MaxZ)
+                    {
+                        hitId ??= box.Id;
+                        const double skin = 1e-3;
+                        nextY = stepY > 0 ? box.MinY - radius - skin : box.MaxY + radius + skin;
+                    }
+                }
+                cur = new Vector3d(cur.X, nextY, cur.Z);
+            }
+
+            cur = new Vector3d(cur.X, cur.Y, cur.Z + stepZ);
+        }
+
+        // Collide against unoccupied visible world parked vehicles
+        foreach (var parked in _worldParkedVehicles)
+        {
+            if (!parked.Root.Visible || Math.Abs(cur.Z - parked.PosEnu.Z) > 1.8)
+                continue;
+            const double pHalf = 1.05;
+            if (Math.Abs(prevPos.X - parked.PosEnu.X) < pHalf + radius &&
+                Math.Abs(prevPos.Y - parked.PosEnu.Y) < pHalf + radius)
+                continue; // Do not trap actors spawned directly on a parked vehicle marker
+            if (Math.Abs(cur.X - parked.PosEnu.X) < pHalf + radius &&
+                Math.Abs(cur.Y - parked.PosEnu.Y) < pHalf + radius)
+            {
+                hitId ??= $"ParkedWorld_{parked.Mode}";
                 return prevPos;
             }
         }
+
         return cur;
     }
 
@@ -946,6 +1207,8 @@ public partial class SaoDatumCityScene : Node3D
         GimbalinaStepResult gStep)
     {
         _hazardCooldown = Math.Max(0.0, _hazardCooldown - dt);
+        _wallImpactCooldown = Math.Max(0.0, _wallImpactCooldown - dt);
+        _stuntJumpCooldown = Math.Max(0.0, _stuntJumpCooldown - dt);
 
         // 1. Pothole jolts & rack impact
         if (_hazardCooldown <= 0.0 && Math.Abs(speedMps) > 4.5 && mode != LocomotionMode.OnFoot)
@@ -985,7 +1248,17 @@ public partial class SaoDatumCityScene : Node3D
         _absurdEvents.ApplyCalmPolicy(_calmPolicy.IsProtectionActive);
         _absurdEvents.StepEvents(dt);
 
-        if (!_calmPolicy.IsProtectionActive && !_absurdEvents.Events.Values.Any(e => e.Active))
+        AbsurdUrbanEventState? activeEv = null;
+        foreach (var ev in _absurdEvents.Events.Values)
+        {
+            if (ev.Active)
+            {
+                activeEv = ev;
+                break;
+            }
+        }
+
+        if (!_calmPolicy.IsProtectionActive && activeEv is null)
         {
             _nextAbsurdEventTimer -= dt;
             if (_nextAbsurdEventTimer <= 0.0)
@@ -1006,8 +1279,6 @@ public partial class SaoDatumCityScene : Node3D
                 }
             }
         }
-
-        var activeEv = _absurdEvents.Events.Values.FirstOrDefault(e => e.Active);
         if (_landmarks.TrioTruckNode is not null)
         {
             _landmarks.TrioTruckNode.Visible = activeEv?.Kind == AbsurdUrbanEventKind.TrioEletrico;
@@ -1472,6 +1743,7 @@ public partial class SaoDatumCityScene : Node3D
                     return;
                 case Key.H:
                     _audio.PlayHorn(CurrentActiveMode());
+                    _traffic.Simulator.StartleNearbyPedestrians(CurrentPositionEnu(), 9.0);
                     if (CurrentActiveMode() <= LocomotionMode.Bicycle) _gimbalina.ApplyStartle(StartleEventKind.Horn);
                     GetViewport().SetInputAsHandled();
                     return;

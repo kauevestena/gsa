@@ -667,9 +667,17 @@ public partial class SaoDatumCityScene
         if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
         if (!attn.BombWarningActive && !_everyday.DogActive && _everyday.Parking is null && _cityTrafficWarningId is not null)
             promptText = Text("city.traffic.erratic_warning");
-        if (string.IsNullOrEmpty(_hazardNotice) && _cityTrafficWarningId is null && !_everyday.DogActive && _everyday.Parking is null && mode == LocomotionMode.OnFoot &&
-            _worldParkedVehicles.Any(v => TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2))
-            promptText = Text("city.board_vehicle");
+        if (string.IsNullOrEmpty(_hazardNotice) && _cityTrafficWarningId is null && !_everyday.DogActive && _everyday.Parking is null && mode == LocomotionMode.OnFoot)
+        {
+            foreach (var v in _worldParkedVehicles)
+            {
+                if (TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2)
+                {
+                    promptText = Text("city.board_vehicle");
+                    break;
+                }
+            }
+        }
 
         var objTitle = _activeContract is not null ? Text(_activeContract.TitleKey)
             : (_isSandbox ? Text("city.sandbox.title") : Text("city.freeroam.title"));
@@ -731,6 +739,12 @@ public partial class SaoDatumCityScene
                 ? _locomotion.RemainingAutonomySeconds / _locomotion.CurrentProfile.PhysicalAutonomySeconds
                 : 1.0);
 
+        var kmh = (int)Math.Round(Math.Abs(_lastSpeedMps) * 3.6);
+        var gearTag = mode == LocomotionMode.OnFoot ? ""
+            : (_lastSpeedMps < -0.15 ? "[R]" : (_handbrakeActive ? "[DRIFT]" : "[D]"));
+        var speedText = mode == LocomotionMode.OnFoot ? $"{kmh} km/h" : $"{kmh} km/h {gearTag}";
+
+        _gtaHud.Radar.UpdateDynamicWorld(_cityBlockObstacles, _traffic.VisualAgents);
         _gtaHud.Update(
             dt,
             new GtaHudState(
@@ -760,7 +774,8 @@ public partial class SaoDatumCityScene
                 ContextPromptText: promptText,
                 SurveyViewfinderActive: _chaseCamera.Mode == GsaCameraMode.SurveyView,
                 DistrictPopup: _pendingDistrictPopup,
-                VehiclePopup: _pendingVehiclePopup),
+                VehiclePopup: _pendingVehiclePopup,
+                SpeedText: speedText),
             pos,
             heading,
             blips,

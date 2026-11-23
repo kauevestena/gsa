@@ -244,4 +244,24 @@ public sealed class M4WorldCar360AndRtkTests
         var nextRest = restored.StepEpoch(28.0, 1.0, roverNear, commonErr, openness: 0.9, platformLevel: 3, hasMultiFrequencyProfile: true, activeBase: null);
         Assert.Equal(nextOrig.MeasuredPositionEnu!.Value, nextRest.MeasuredPositionEnu!.Value);
     }
+
+    [Fact]
+    public void CarSuspensionSupportsReverseGearAndWallSlideDamping()
+    {
+        var car = new CarSuspensionSimulator(new Vector3d(500208.0, 7399992.5, 100.0), 0.0, LocomotionMode.Car);
+        for (var i = 0; i < 60; i++)
+            car.StepMotion(1.0 / 60.0, throttleInput: -1.0, brakeInput: 0.0, steerInput: 0.6);
+
+        Assert.True(car.SpeedMetresPerSecond < -1.0, $"Expected reverse speed < -1 m/s, got {car.SpeedMetresPerSecond}");
+        Assert.True(car.PositionEnu.X < 500208.0);
+        Assert.NotEqual(0.0, car.HeadingRadians);
+
+        var speedBeforeSlide = car.SpeedMetresPerSecond;
+        car.DampSpeedOnWallSlide(0.4);
+        Assert.Equal(speedBeforeSlide * 0.4, car.SpeedMetresPerSecond, 6);
+
+        for (var i = 0; i < 60; i++)
+            car.StepMotion(1.0 / 60.0, throttleInput: 1.0, brakeInput: 0.0, steerInput: 0.0);
+        Assert.True(car.SpeedMetresPerSecond > 0.0);
+    }
 }

@@ -32,7 +32,8 @@ public sealed record GtaHudState(
     string ContextPromptText,
     bool SurveyViewfinderActive,
     string? DistrictPopup,
-    string? VehiclePopup);
+    string? VehiclePopup,
+    string SpeedText = "");
 
 /// <summary>GTA III-styled HUD overlay: bottom-left circular radar, top-right telemetry/money/stars, and district banners.</summary>
 public sealed class GsaGtaHud
@@ -426,7 +427,9 @@ public sealed class GsaGtaHud
             _cachedBalance = state.BalanceCoords;
             _moneyLabel.Text = $"C$ {state.BalanceCoords:00000000}";
         }
-        var platformText = $"{state.PlatformTitleText} · {state.Xp} XP";
+        var platformText = string.IsNullOrEmpty(state.SpeedText)
+            ? $"{state.PlatformTitleText} · {state.Xp} XP"
+            : $"{state.PlatformTitleText} · {state.SpeedText} · {state.Xp} XP";
         if (platformText != _cachedPlatformText)
         {
             _cachedPlatformText = platformText;

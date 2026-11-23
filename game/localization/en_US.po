@@ -1901,6 +1901,12 @@ msgstr "The checkpoint stopped an erratic driver."
 msgid "city.traffic.contact"
 msgstr "Traffic impact. Check vehicle condition."
 
+msgid "city.traffic.pedestrian_contact"
+msgstr "Watch the pedestrian! Gimbalina is judging your driving!"
+
+msgid "city.stunt.jump"
+msgstr "STUNT SURVEY JUMP!"
+
 msgid "city.traffic.music_bar"
 msgstr "Old Center Music Bar"
 

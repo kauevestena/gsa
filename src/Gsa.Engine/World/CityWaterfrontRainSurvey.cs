@@ -105,7 +105,14 @@ public partial class SaoDatumCityScene
         void Box(string id, Vector3d p, Vector3 size, Material? material, WorldBoxObject? surface = null)
         {
             var node = new StaticBody3D { Name = id, Position = _coordinates.ToGodot(p), CollisionLayer = surface is not null ? SurveyLidarSurfaceLayer : 0, CollisionMask = 0 };
-            if (material is not null) node.AddChild(new MeshInstance3D { Mesh = new BoxMesh { Size = size }, MaterialOverride = material });
+            if (material is not null)
+                node.AddChild(new MeshInstance3D
+                {
+                    Mesh = new BoxMesh { Size = size },
+                    MaterialOverride = material,
+                    CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+                    VisibilityRangeEnd = 420f,
+                });
             if (surface is not null)
             {
                 node.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = size } });

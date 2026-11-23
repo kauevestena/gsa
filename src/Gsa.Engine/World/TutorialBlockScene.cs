@@ -231,7 +231,9 @@ public partial class TutorialBlockScene : Node3D
         _lidarBench = new LidarBenchRig(_coordinates);
         _audio = new GsaProceduralAudio(this);
 
-        _liveObstacles = ObstacleBoxEnu.FromWorldObjects(_manifest.Objects).ToArray();
+        _liveObstacles = ObstacleBoxEnu.FromWorldObjects(_manifest.Objects)
+            .Concat(_cityVisuals!.ExtraObstacles)
+            .ToArray();
         _liveLocomotion = new LocomotionSimulator(startEnu, Math.PI / 2.0, LocomotionMode.Handcart, _manifest.Bounds);
     }
 
@@ -244,9 +246,37 @@ public partial class TutorialBlockScene : Node3D
         var weather = _calendarWeather.StepPhysical(delta);
         var input = _mobilityBench.SampleLiveInput(_liveLocomotion.ForwardSpeedMetresPerSecond);
         var previousHeading = _liveLocomotion.HeadingRadians;
+        var prevPos = _liveLocomotion.PositionEnu;
         var result = _liveLocomotion.Step(delta, input, 0.0, weather.SurfaceGripMultiplier, _liveObstacles);
         if (input.InteractPressed)
             _liveLocomotion.TryInteract(InteractiveTargetEnu.FromWorldObjects(_manifest.Objects), _liveObstacles);
+
+        if (_trafficBench is not null)
+        {
+            var radius = _liveLocomotion.CurrentProfile.CollisionRadiusMetres;
+            if (_trafficBench.Simulator.FindVehicleContact(prevPos, result.PositionEnu, radius, delta) is { } vehHit)
+            {
+                _trafficBench.Simulator.NotifyAgentContact(vehHit.AgentId);
+                _liveLocomotion.StopAtExternalContact(vehHit.SafePlayerPositionEnu);
+                result = result with { PositionEnu = vehHit.SafePlayerPositionEnu, ForwardSpeedMetresPerSecond = 0.0, Collided = true };
+                if (vehHit.ClosingSpeedMetresPerSecond > 1.2)
+                {
+                    _gimbalina.ApplyStartle(StartleEventKind.Pothole);
+                    _audio?.PlayCollisionThud(vehHit.ClosingSpeedMetresPerSecond);
+                    _chaseCamera?.TriggerShake(0.22f, 0.22f);
+                }
+            }
+            else if (_trafficBench.Simulator.FindPedestrianContact(prevPos, result.PositionEnu, radius, delta) is { } pedHit)
+            {
+                _liveLocomotion.StopAtExternalContact(pedHit.SafePlayerPositionEnu);
+                result = result with { PositionEnu = pedHit.SafePlayerPositionEnu, ForwardSpeedMetresPerSecond = 0.0, Collided = true };
+                if (pedHit.ClosingSpeedMetresPerSecond > 0.8)
+                {
+                    _audio?.PlayCollisionThud(pedHit.ClosingSpeedMetresPerSecond);
+                    _chaseCamera?.TriggerShake(0.14f, 0.16f);
+                }
+            }
+        }
 
         if (result.Collided && result.ImpactDeltaVMetresPerSecond > 1.2)
         {

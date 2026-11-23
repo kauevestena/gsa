@@ -141,4 +141,117 @@ public sealed partial class TrafficBenchSimulator
         exit = Math.Min(exit, Math.Max(a, b));
         return enter <= exit;
     }
+
+    public void NotifyAgentContact(string agentId, double pauseSeconds = 1.2)
+    {
+        if (string.IsNullOrWhiteSpace(agentId) || pauseSeconds <= 0.0)
+            return;
+        foreach (var agent in _agents)
+        {
+            if (string.Equals(agent.Id, agentId, StringComparison.Ordinal))
+            {
+                agent.Speed = 0.0;
+                agent.CollisionPauseSeconds = Math.Max(agent.CollisionPauseSeconds, pauseSeconds);
+                return;
+            }
+        }
+    }
+
+    public int StartleNearbyPedestrians(Vector3d sourceEnu, double radiusMetres = 7.5)
+    {
+        var count = 0;
+        var rSq = radiusMetres * radiusMetres;
+        foreach (var agent in _agents)
+        {
+            if (agent.IsVehicle)
+                continue;
+            var dx = agent.PositionEnu.X - sourceEnu.X;
+            var dy = agent.PositionEnu.Y - sourceEnu.Y;
+            var dSq = dx * dx + dy * dy;
+            if (dSq > rSq)
+                continue;
+
+            agent.StartledSeconds = Math.Max(agent.StartledSeconds, 2.4);
+            var dist = Math.Sqrt(dSq);
+            var dir = dist > 1e-4 ? new Vector3d(dx / dist, dy / dist, 0.0) : Vector3d.UnitX;
+            var nextDodge = agent.DodgeOffsetEnu + dir * 0.9;
+            if (nextDodge.Length > 1.35)
+                nextDodge = nextDodge.Normalized() * 1.35;
+            agent.DodgeOffsetEnu = nextDodge;
+            count++;
+        }
+        return count;
+    }
+
+    public TrafficVehicleContact? FindPedestrianContact(Vector3d from, Vector3d to, double playerRadius, double dt)
+    {
+        TrafficVehicleContact? closest = null;
+        var earliest = double.PositiveInfinity;
+        var combinedRadius = 0.42 + playerRadius;
+        var combinedRadiusSq = combinedRadius * combinedRadius;
+        var segDx = to.X - from.X;
+        var segDy = to.Y - from.Y;
+        var segLenSq = segDx * segDx + segDy * segDy;
+
+        foreach (var agent in _agents)
+        {
+            if (agent.IsVehicle || Math.Abs(to.Z - agent.PositionEnu.Z) > 2.2)
+                continue;
+
+            var relFromX = from.X - agent.PositionEnu.X;
+            var relFromY = from.Y - agent.PositionEnu.Y;
+            var t = segLenSq > 1e-10
+                ? Math.Clamp(-(relFromX * segDx + relFromY * segDy) / segLenSq, 0.0, 1.0)
+                : 0.0;
+            var cx = from.X + t * segDx;
+            var cy = from.Y + t * segDy;
+            var nx = cx - agent.PositionEnu.X;
+            var ny = cy - agent.PositionEnu.Y;
+            var distSq = nx * nx + ny * ny;
+            if (distSq > combinedRadiusSq || t >= earliest)
+                continue;
+
+            var endDistSq = (to.X - agent.PositionEnu.X) * (to.X - agent.PositionEnu.X) +
+                            (to.Y - agent.PositionEnu.Y) * (to.Y - agent.PositionEnu.Y);
+            if (relFromX * relFromX + relFromY * relFromY < combinedRadiusSq &&
+                endDistSq > relFromX * relFromX + relFromY * relFromY)
+                continue;
+
+            var dist = Math.Sqrt(distSq);
+            Vector3d normal;
+            if (dist > 1e-5)
+            {
+                normal = new Vector3d(nx / dist, ny / dist, 0.0);
+            }
+            else if (segLenSq > 1e-10)
+            {
+                var segLen = Math.Sqrt(segLenSq);
+                normal = new Vector3d(-segDx / segLen, -segDy / segLen, 0.0);
+            }
+            else
+            {
+                normal = Vector3d.UnitX;
+            }
+
+            agent.StartledSeconds = 2.6;
+            var dodgeDir = segLenSq > 1e-10
+                ? new Vector3d(-segDy, segDx, 0.0).Normalized()
+                : new Vector3d(-normal.X, -normal.Y, 0.0);
+            if (Vector3d.Dot(dodgeDir, -normal) < 0)
+                dodgeDir = -dodgeDir;
+            var nextDodge = agent.DodgeOffsetEnu + dodgeDir * 1.15;
+            if (nextDodge.Length > 1.4)
+                nextDodge = nextDodge.Normalized() * 1.4;
+            agent.DodgeOffsetEnu = nextDodge;
+            agent.PositionEnu += dodgeDir * 0.45;
+
+            var safeX = agent.PositionEnu.X + normal.X * (combinedRadius + 0.05);
+            var safeY = agent.PositionEnu.Y + normal.Y * (combinedRadius + 0.05);
+            var closingSpeed = dt > 1e-9 ? Math.Max(0.0, -(segDx * normal.X + segDy * normal.Y) / dt) : 0.0;
+            earliest = t;
+            closest = new TrafficVehicleContact(agent.Id, new Vector3d(safeX, safeY, to.Z), closingSpeed);
+        }
+
+        return closest;
+    }
 }

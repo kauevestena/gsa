@@ -1,4 +1,5 @@
 using Gsa.Core.Geometry;
+using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
 using Gsa.Core.World;
 using Godot;
@@ -17,11 +18,13 @@ public sealed class GsaCityVisualBuilder
 {
     public List<AnimatedTrafficSignal> Signals { get; } = [];
     public List<Node3D> SpinningBeacons { get; } = [];
+    public List<ObstacleBoxEnu> ExtraObstacles { get; } = [];
 
     public void Clear()
     {
         Signals.Clear();
         SpinningBeacons.Clear();
+        ExtraObstacles.Clear();
     }
 
     public void BuildTutorialBlockVisuals(
@@ -90,6 +93,7 @@ public sealed class GsaCityVisualBuilder
             var bMat = GsaRetroTextures.CreateWorldMaterial(style.Item1, style.Item2, Colors.White, triplanar: false, nightWindowGlow: true);
             var pos = coords.ToGodot(new Vector3d(e, 7399967.5, 100.0 + bh * 0.5));
             bldgBatch.AddBox(bMat, pos, new Vector3(22f, bh, 14f), uvScale: 0.095f);
+            ExtraObstacles.Add(new ObstacleBoxEnu($"SouthBlock_{(int)e}", new Vector3d(e, 7399967.5, 100.0 + bh * 0.5), new Vector3d(22.0, 14.0, bh), true));
             if (!includeBeacons)
             {
                 var bBody = new StaticBody3D { Name = $"SouthBlock_{(int)e}", Position = pos, CollisionLayer = 1, CollisionMask = 1 };
@@ -100,10 +104,12 @@ public sealed class GsaCityVisualBuilder
             treeList.Add((coords.ToGodot(new Vector3d(e + 9.0, 7399979.2, 100.0)), 0.95f));
         }
 
-        // North Avenue corridor (Y = 7400043..7400051) + North Sidewalk
+        // Mid-block Commerce street corridor (Y = 7400019..7400026.5) + rear sidewalk (Y = 7400016.5) + North Avenue corridor (Y = 7400043..7400051)
+        AddRoadBox(new Vector3d(500112, 7400016.6, 100.01), new Vector3d(220, 2.4, 0.14), sidewalkMat, 0.24f);
+        AddRoadLaneMarkings(roadBatch, coords, xStart: 500006, xEnd: 500222, yCenter: 7400022.75, zHeight: 100.015, stripeYellow, stripeWhite);
         AddRoadLaneMarkings(roadBatch, coords, xStart: 500010, xEnd: 500230, yCenter: 7400047.0, zHeight: 100.025, stripeYellow, stripeWhite);
         AddRoadBox(new Vector3d(500120, 7400056.0, 100.02), new Vector3d(236, 5.0, 0.16), sidewalkMat, 0.24f);
-        AddRoadBox(new Vector3d(500112, 7400029.5, 100.01), new Vector3d(206, 17.5, 0.14), sidewalkMat, 0.24f);
+        AddRoadBox(new Vector3d(500112, 7400034.5, 100.01), new Vector3d(206, 11.5, 0.14), sidewalkMat, 0.24f);
 
         // Crosswalk stripes at main intersection (X = 500112)
         var cwMat = GsaRetroTextures.CreateWorldMaterial("crosswalk_mat_uv", "crosswalk", Colors.White, triplanar: false);
@@ -166,10 +172,18 @@ public sealed class GsaCityVisualBuilder
         }
 
         // Office building behind office_entry (500232, 7400005)
-        var officePos = coords.ToGodot(new Vector3d(500232, 7400010.8, 104.5));
+        var officeCenterEnu = new Vector3d(500232, 7400010.8, 104.5);
+        var officePos = coords.ToGodot(officeCenterEnu);
         bldgBatch.AddBox(
             GsaRetroTextures.CreateWorldMaterial("bldg_office_uv", "facade_concrete", new Color(0.88f, 0.96f, 0.94f), triplanar: false, nightWindowGlow: true),
             officePos, new Vector3(10f, 9f, 10f), uvScale: 0.09f);
+        ExtraObstacles.Add(new ObstacleBoxEnu("OfficeBuildingHq", officeCenterEnu, new Vector3d(10.0, 10.0, 9.0), true));
+        if (!includeBeacons)
+        {
+            var officeBody = new StaticBody3D { Name = "OfficeBuildingHq", Position = officePos, CollisionLayer = 1, CollisionMask = 1 };
+            officeBody.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(10f, 9f, 10f) } });
+            visualRoot.AddChild(officeBody);
+        }
         bldgBatch.AddBox(
             GsaMeshBuilder.SolidMat(new Color(0.12f, 0.56f, 0.44f)),
             coords.ToGodot(new Vector3d(500232, 7400004.5, 103.3)), new Vector3(5.2f, 0.28f, 2.4f));

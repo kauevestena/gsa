@@ -9,6 +9,7 @@ export XDG_RUNTIME_DIR=/run/user/1000
 export WAYLAND_DISPLAY=wayland-0
 export DISPLAY=:1
 export XAUTHORITY=$(ls -t /run/user/1000/.mutter-Xwaylandauth.* 2>/dev/null | head -n 1)
+export DRI_PRIME=pci-0000_00_02_0
 
 cd /home/kaue/tests/gsa
 if [ -n "${WAYLAND_DISPLAY:-}" ] && [[ " $* " != *" --display-driver "* ]] && [[ " $* " != *" --headless "* ]]; then

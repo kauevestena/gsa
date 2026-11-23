@@ -119,6 +119,7 @@ public partial class SaoDatumCityScene
 
     public override void _ExitTree()
     {
+        DisposeCachedSectors();
         if (_citySmokeDirectory is null) return;
         try { Directory.Delete(_citySmokeDirectory, true); }
         catch (IOException) { }
