@@ -55,6 +55,7 @@ public partial class SaoDatumCityScene : Node3D
     private readonly Dictionary<WorldSectorCellId, List<ObstacleBoxEnu>> _sectorObstacles = new();
     private readonly Dictionary<WorldSectorCellId, (Node3D Node, List<ObstacleBoxEnu> Obstacles)> _sectorCache = new();
     private readonly Dictionary<string, Node3D> _collectibleNodes = new();
+    private readonly Dictionary<string, Label3D> _cityFacadeLabels = new(StringComparer.Ordinal);
     private Dictionary<string, WorldBoxObject> _manifestObjectsById = new(StringComparer.Ordinal);
     private WorldSectorCellId? _lastStreamingSector;
 
@@ -137,6 +138,7 @@ public partial class SaoDatumCityScene : Node3D
     private long _tick;
     private double _hudElapsed;
     private double _lastSpeedMps;
+    private int _renderFrames;
     private string _feedbackText = "";
     private string _lastRegionId = "";
     private string? _pendingDistrictPopup;
@@ -353,15 +355,10 @@ public partial class SaoDatumCityScene : Node3D
     {
         _worldRoot = new Node3D { Name = "WorldGeometry" };
         AddChild(_worldRoot);
-        var quadrants = new[]
-        {
-            new GsaStaticMeshBatcher(),
-            new GsaStaticMeshBatcher(),
-            new GsaStaticMeshBatcher(),
-            new GsaStaticMeshBatcher(),
-        };
-        const double midE = 501000.0;
-        const double midN = 7401000.0;
+        // 4x4 grid of 500x500 m chunks: safe 750 m visibility culling without hiding edge landmarks
+        var chunks = new GsaStaticMeshBatcher[16];
+        for (var i = 0; i < chunks.Length; i++)
+            chunks[i] = new GsaStaticMeshBatcher();
         var postMat = GsaMeshBuilder.SolidMat(new Color(.34f, .36f, .38f));
 
         foreach (var item in _fullManifest.Objects)
@@ -404,6 +401,7 @@ public partial class SaoDatumCityScene : Node3D
                     "metal" when item.ObjectClass == "sidewalk_control_mark" => new Color(.18f, .8f, .92f),
                     "metal" when item.Tags.Contains("bus_stop") => new Color(.18f, .55f, .85f),
                     "metal" when item.ObjectClass == "traffic_sign" => new Color(.12f, .56f, .38f),
+                    "metal" when item.ObjectClass == "unload_point" => new Color(.95f, .76f, .20f),
                     "wood" => new Color(.63f, .35f, .19f),
                     "metal" => new Color(0.62f, 0.68f, 0.72f),
                     _ => new Color(0.58f, 0.60f, 0.58f),
@@ -418,16 +416,43 @@ public partial class SaoDatumCityScene : Node3D
                 node.AddChild(new MeshInstance3D
                 {
                     Name = "Geometry",
-                    Mesh = textured ? GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.095f) : new BoxMesh { Size = size },
+                    Mesh = textured ? GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.125f) : new BoxMesh { Size = size },
                     MaterialOverride = material,
                     CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
                 });
             }
             else
             {
-                var qIdx = (item.PositionEnu.X >= midE ? 1 : 0) + (item.PositionEnu.Y >= midN ? 2 : 0);
-                var batch = quadrants[qIdx];
-                batch.AddBox(material, posG, size, uvScale: textured ? 0.095f : 0.1f);
+                var gx = Math.Clamp((int)((item.PositionEnu.X - 500000.0) / 500.0), 0, 3);
+                var gy = Math.Clamp((int)((item.PositionEnu.Y - 7400000.0) / 500.0), 0, 3);
+                var batch = chunks[gx + gy * 4];
+                if (item.ObjectClass == "unload_point")
+                {
+                    batch.AddBox(material, new Vector3(posG.X, posG.Y - 0.045f, posG.Z), new Vector3(size.X, 0.03f, size.Z));
+                }
+                else if (item.ObjectClass != "building_facade")
+                {
+                    batch.AddBox(material, posG, size, uvScale: textured ? 0.125f : 0.1f);
+                }
+                if (item.ObjectClass == "building_facade")
+                {
+                    var tag = new Label3D
+                    {
+                        Text = $"#{item.Id[7..]}",
+                        Position = _coordinates.ToGodot(item.PositionEnu + new Vector3d(0, -0.35, 2.85)),
+                        FontSize = 32,
+                        PixelSize = 0.006f,
+                        Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
+                        Modulate = new Color(1f, 0.85f, 0.25f),
+                        OutlineModulate = Colors.Black,
+                        OutlineSize = 4,
+                        AlphaCut = Label3D.AlphaCutMode.Disabled,
+                        VisibilityRangeEnd = 55f,
+                        Visible = false,
+                    };
+                    _worldRoot.AddChild(tag);
+                    _cityFacadeLabels[item.Id] = tag;
+                }
                 if (item.ObjectClass == "traffic_sign")
                     batch.AddBox(postMat, posG + new Vector3(0f, -1.1f, .05f), new Vector3(.07f, 1.65f, .07f));
                 if (item.ObjectClass == "park_bench")
@@ -435,9 +460,9 @@ public partial class SaoDatumCityScene : Node3D
             }
         }
 
-        for (var q = 0; q < quadrants.Length; q++)
+        for (var q = 0; q < chunks.Length; q++)
         {
-            if (quadrants[q].BuildSingleMeshInstance($"SemanticWorldQ{q}", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 460f) is { } qMesh)
+            if (chunks[q].BuildSingleMeshInstance($"SemanticWorldChunk_{q}", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 750f) is { } qMesh)
                 _worldRoot.AddChild(qMesh);
         }
 
@@ -829,7 +854,11 @@ public partial class SaoDatumCityScene : Node3D
         _ => (enu.Y < 7400100.0 && enu.X < 500300.0) ? "district.old_center.commerce" : "district.old_center",
     };
 
-    public override void _Process(double delta) => _perfProbe?.StepFrame(this);
+    public override void _Process(double delta)
+    {
+        GsaScreenshotHelper.TryCaptureOnFrame(this, ++_renderFrames, targetFrame: 35);
+        _perfProbe?.StepFrame(this);
+    }
 
     public override void _PhysicsProcess(double delta)
     {
@@ -1072,7 +1101,6 @@ public partial class SaoDatumCityScene : Node3D
             if (_tabletPanel.Visible && _tabletTabs.CurrentTab is MapTabletTab or TechnicalTabletTab)
                 RefreshTechnicalTablet();
         }
-        GsaScreenshotHelper.TryCaptureOnFrame(this, (int)_tick, targetFrame: 35);
     }
 
     private IReadOnlyList<ObstacleBoxEnu> GetNearbyObstacles(Vector3d pos)
@@ -1611,24 +1639,35 @@ public partial class SaoDatumCityScene : Node3D
             _tick, t, start, end, readout, estimatedPose, mount, environment,
             _liveCandidates, Occluded), _locomotion, out var sample, out _) && sample is not null)
         {
+            var observedCellsCount = 0;
             if (sample.Quality.Passed && _cityPhotoCoverage is { } coverage)
             {
                 var observedCells = coverage.Observe(start, CameraSensorProfile.Initial, Occluded);
-                if (observedCells.Count > 0)
+                observedCellsCount = observedCells.Count;
+                if (observedCellsCount > 0)
                     sample = new(sample.SampleId, sample.SensorId, sample.Sequence, sample.TimestampSeconds, sample.EstimatedPose,
                         sample.MountEstimate, sample.Intrinsics, sample.Quality, sample.ObservedFeatures.Concat(observedCells),
                         sample.PrivacyMasks, sample.Thumbnail);
             }
             _fieldSamples.Add(sample);
+            if (sample.Quality.Passed)
+                AddSampleCoverageCells(sample);
             _recentPhotoSeconds = .6;
             _coverageSpots.Add(pos);
             var visibleTargets = sample.ObservedFeatures.Where(f => f.ObjectClass != CityPhotoCoverage.ObservationClass)
                 .Select(f => f.TargetId).ToArray();
             if (sample.Quality.Passed) _observedTargetIds.UnionWith(visibleTargets);
             _audio.PlayShutter();
-            _feedbackText = visibleTargets.Length > 0
-                ? $"{Text("training.observed")} {string.Join(", ", visibleTargets)}"
-                : Text("training.nothing_visible");
+            if (_activeContract?.AreaId == FacadeArea && pos.Y > 7399999.0 && observedCellsCount < 3)
+            {
+                _feedbackText = Text("city.story.step_back_framing");
+            }
+            else
+            {
+                _feedbackText = visibleTargets.Length > 0
+                    ? $"{Text("training.observed")} {string.Join(", ", visibleTargets)}"
+                    : Text("training.nothing_visible");
+            }
         }
         _camScheduler.FlushBatchManifest("city_flush");
     }

@@ -166,15 +166,21 @@ public partial class TutorialBlockScene : Node3D
             node.Position = _coordinates.ToGodot(item.PositionEnu);
             _worldRoot.AddChild(node);
             _registry.Register(item, node);
-            node.AddChild(new MeshInstance3D
+            if (item.ObjectClass != "building_facade")
             {
-                Name = "Geometry",
-                Mesh = CreateBoxMesh(item, size),
-                MaterialOverride = CreateMaterial(item),
-                CastShadow = item.ObjectClass is "ground" or "survey_control" or "unload_point" || item.Material is "glass" or "water"
-                    ? GeometryInstance3D.ShadowCastingSetting.Off
-                    : GeometryInstance3D.ShadowCastingSetting.On,
-            });
+                var visual = new MeshInstance3D
+                {
+                    Name = "Geometry",
+                    Mesh = CreateBoxMesh(item, size),
+                    MaterialOverride = CreateMaterial(item),
+                    CastShadow = item.ObjectClass is "ground" or "survey_control" or "unload_point" || item.Material is "glass" or "water"
+                        ? GeometryInstance3D.ShadowCastingSetting.Off
+                        : GeometryInstance3D.ShadowCastingSetting.On,
+                };
+                if (item.ObjectClass == "unload_point")
+                    visual.Position = new Vector3(0f, -0.045f, 0f);
+                node.AddChild(visual);
+            }
             if (item.Collision)
                 node.AddChild(new CollisionShape3D { Name = "Collision", Shape = new BoxShape3D { Size = size } });
         }
@@ -322,8 +328,8 @@ public partial class TutorialBlockScene : Node3D
     private static Mesh CreateBoxMesh(WorldBoxObject item, Vector3 size) => item.ObjectClass switch
     {
         "ground" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.12f),
-        "building_shell" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.095f),
-        "building_facade" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.14f),
+        "building_shell" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.125f),
+        "unload_point" => new BoxMesh { Size = new Vector3(size.X, 0.03f, size.Z) },
         _ when item.Material == "glass" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.10f),
         _ when item.Material == "water" => GsaMeshBuilder.CreateWorldUvBoxMesh(size, 0.08f),
         _ => new BoxMesh { Size = size },

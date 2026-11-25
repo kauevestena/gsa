@@ -2233,3 +2233,15 @@ msgstr "Prazo em {0} h"
 
 msgid "city.finale.expiry"
 msgstr "Expira em {0} h"
+
+msgid "training.face_storefront"
+msgstr "Posicione-se em frente às fachadas 18–20, encare as lojas e pare bem antes de fotografar."
+
+msgid "training.stabilize_gimbalina"
+msgstr "Gimbalina está assustada! Reduza a velocidade ou aperte [G] para dar milho antes da foto."
+
+msgid "city.story.step_back_framing"
+msgstr "Perto demais da parede! Afaste-se para a calçada oposta (~9 m) olhando para o norte para enquadrar toda a fachada."
+
+msgid "city.story.coverage_status"
+msgstr "Fachadas: {0}/{1} · Cobertura: {2}% / 90% · Fotos: {3}"

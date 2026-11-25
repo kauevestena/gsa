@@ -73,7 +73,7 @@ public partial class SaoDatumCityScene
                 Mesh = new BoxMesh { Size = size },
                 MaterialOverride = material,
                 CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
-                VisibilityRangeEnd = 420f,
+                VisibilityRangeEnd = 520f,
             });
             if (collision != 0) body.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = size } });
             parent.AddChild(body);

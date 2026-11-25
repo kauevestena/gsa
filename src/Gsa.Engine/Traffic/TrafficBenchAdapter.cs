@@ -34,7 +34,11 @@ public sealed class TrafficBenchAdapter
     private readonly MultiMeshInstance3D[] _vehiclePools = new MultiMeshInstance3D[4];
     private readonly System.Collections.Generic.List<TrafficVisualAgent> _visualBuffer = new(TrafficBenchSimulator.TargetVehicleCount + TrafficBenchSimulator.TargetPedestrianCount);
     private readonly System.Collections.Generic.Dictionary<string, (int Pool, int Hash, Color Tint)> _agentVisualCache = new(StringComparer.Ordinal);
-    private MultiMeshInstance3D? _pedestrianMeshNode;
+    private MultiMeshInstance3D? _pedestrianBodyNode;
+    private MultiMeshInstance3D? _pedestrianLegLNode;
+    private MultiMeshInstance3D? _pedestrianLegRNode;
+    private MultiMeshInstance3D? _pedestrianArmLNode;
+    private MultiMeshInstance3D? _pedestrianArmRNode;
     private MultiMeshInstance3D? _shadowPool;
     private MultiMesh? _warningLamps;
     private double _walkTime;
@@ -73,17 +77,26 @@ public sealed class TrafficBenchAdapter
             _vehiclePools[v] = mmi;
         }
 
-        var pedMesh = GsaMeshBuilder.BuildTrafficPedestrianMesh();
-        pedMesh.SurfaceSetMaterial(0, GsaMeshBuilder.SolidMat(Colors.White));
-        var pedMm = new MultiMesh
+        MultiMeshInstance3D AddPedPartPool(string name, ArrayMesh mesh, bool useColors)
         {
-            TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
-            UseColors = true,
-            Mesh = pedMesh,
-            InstanceCount = TrafficBenchSimulator.TargetPedestrianCount,
-        };
-        _pedestrianMeshNode = new MultiMeshInstance3D { Name = "TrafficPedestrians", Multimesh = pedMm };
-        root.AddChild(_pedestrianMeshNode);
+            mesh.SurfaceSetMaterial(0, GsaMeshBuilder.SolidMat(Colors.White));
+            var mm = new MultiMesh
+            {
+                TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                UseColors = useColors,
+                Mesh = mesh,
+                InstanceCount = TrafficBenchSimulator.TargetPedestrianCount,
+            };
+            var mmi = new MultiMeshInstance3D { Name = name, Multimesh = mm, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+            root.AddChild(mmi);
+            return mmi;
+        }
+
+        _pedestrianBodyNode = AddPedPartPool("TrafficPedestrians_Body", GsaMeshBuilder.BuildTrafficPedestrianBodyMesh(), true);
+        _pedestrianLegLNode = AddPedPartPool("TrafficPedestrians_LegL", GsaMeshBuilder.BuildTrafficPedestrianLegMesh(isLeft: true), false);
+        _pedestrianLegRNode = AddPedPartPool("TrafficPedestrians_LegR", GsaMeshBuilder.BuildTrafficPedestrianLegMesh(isLeft: false), false);
+        _pedestrianArmLNode = AddPedPartPool("TrafficPedestrians_ArmL", GsaMeshBuilder.BuildTrafficPedestrianArmMesh(isLeft: true), true);
+        _pedestrianArmRNode = AddPedPartPool("TrafficPedestrians_ArmR", GsaMeshBuilder.BuildTrafficPedestrianArmMesh(isLeft: false), true);
 
         // Blob ground shadows for all 80 traffic agents (GTA III signature!)
         var shadowQuad = new QuadMesh
@@ -134,7 +147,8 @@ public sealed class TrafficBenchAdapter
 
     public void SyncVisuals()
     {
-        if (_vehiclePools[0] is null || _pedestrianMeshNode is null)
+        if (_vehiclePools[0] is null || _pedestrianBodyNode is null || _pedestrianLegLNode is null ||
+            _pedestrianLegRNode is null || _pedestrianArmLNode is null || _pedestrianArmRNode is null)
             return;
 
         _simulator.CopyVisualAgentsTo(_visualBuffer);
@@ -142,11 +156,11 @@ public sealed class TrafficBenchAdapter
         if (_agentVisualCache.Count > 2 * _visualBuffer.Count)
             _agentVisualCache.Clear();
         var warnedCars = 0;
-        var flashOn = _walkTime % .8 < .45;
         var pedIndex = 0;
         var shadowIndex = 0;
-        var pedShadowBasis = new Basis(new Vector3(0.85f, 0f, 0f), new Vector3(0f, 0f, -0.85f), Vector3.Up);
-        var walkPhase = (float)_walkTime * 7.5f;
+        var flashOn = _walkTime % .8 < .45;
+        var pedShadowBasis = new Basis(new Vector3(0.90f, 0f, 0f), new Vector3(0f, 0f, -0.90f), Vector3.Up);
+        var walkPhase = (float)_walkTime;
 
         foreach (var agent in _visualBuffer)
         {
@@ -193,26 +207,47 @@ public sealed class TrafficBenchAdapter
                         new Transform3D(shBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
                 }
             }
-            else if (pedIndex < _pedestrianMeshNode.Multimesh.InstanceCount)
+            else if (pedIndex < _pedestrianBodyNode.Multimesh.InstanceCount)
             {
-                var bob = agent.IsStartled
-                    ? MathF.Abs(MathF.Sin(walkPhase * 2.4f + vis.Hash)) * 0.28f
-                    : (agent.SpeedMetresPerSecond > 0.1
-                        ? MathF.Abs(MathF.Sin(walkPhase + vis.Hash)) * 0.055f
-                        : 0f);
-                var pedBasis = agent.IsStartled
-                    ? basis.Rotated(Vector3.Up, MathF.Sin(walkPhase * 3.0f + vis.Hash) * 0.35f)
+                var speedF = (float)agent.SpeedMetresPerSecond;
+                var phase = walkPhase * (agent.IsStartled ? 12.5f : MathF.Max(4.2f, speedF * 5.2f)) + (vis.Hash % 63) * 0.1f;
+                var moving = speedF > 0.08f;
+                var legSwing = moving ? MathF.Sin(phase) * (agent.IsStartled ? 0.68f : 0.54f) : 0f;
+                var strideDip = moving ? -MathF.Abs(MathF.Sin(phase)) * 0.035f : 0f;
+                var startleHop = agent.IsStartled ? MathF.Abs(MathF.Sin(phase * 1.4f)) * 0.12f : 0f;
+                var groundY = godotPos.Y + 0.045f;
+                var rootY = groundY + strideDip + startleHop;
+
+                var bodyBasis = agent.IsStartled
+                    ? basis.Rotated(Vector3.Up, MathF.Sin(phase * 1.2f) * 0.25f)
                     : basis;
+                var legLBasis = bodyBasis.Rotated(bodyBasis.Z, legSwing);
+                var legRBasis = bodyBasis.Rotated(bodyBasis.Z, -legSwing);
+                var armLBasis = agent.IsStartled
+                    ? bodyBasis.Rotated(bodyBasis.X, 1.35f + MathF.Sin(phase * 2.0f) * 0.4f)
+                    : bodyBasis.Rotated(bodyBasis.Z, -legSwing * 0.72f);
+                var armRBasis = agent.IsStartled
+                    ? bodyBasis.Rotated(bodyBasis.X, -(1.35f + MathF.Cos(phase * 2.0f) * 0.4f))
+                    : bodyBasis.Rotated(bodyBasis.Z, legSwing * 0.72f);
+
                 var idx = pedIndex++;
-                _pedestrianMeshNode.Multimesh.SetInstanceTransform(
-                    idx,
-                    new Transform3D(pedBasis, new Vector3(godotPos.X, godotPos.Y + bob, godotPos.Z)));
-                _pedestrianMeshNode.Multimesh.SetInstanceColor(idx, vis.Tint);
+                var bodyPos = new Vector3(godotPos.X, rootY, godotPos.Z);
+                var hipPos = new Vector3(godotPos.X, rootY + 0.76f, godotPos.Z);
+                var shoulderPos = new Vector3(godotPos.X, rootY + 1.24f, godotPos.Z);
+
+                _pedestrianBodyNode.Multimesh.SetInstanceTransform(idx, new Transform3D(bodyBasis, bodyPos));
+                _pedestrianBodyNode.Multimesh.SetInstanceColor(idx, vis.Tint);
+                _pedestrianLegLNode.Multimesh.SetInstanceTransform(idx, new Transform3D(legLBasis, hipPos));
+                _pedestrianLegRNode.Multimesh.SetInstanceTransform(idx, new Transform3D(legRBasis, hipPos));
+                _pedestrianArmLNode.Multimesh.SetInstanceTransform(idx, new Transform3D(armLBasis, shoulderPos));
+                _pedestrianArmLNode.Multimesh.SetInstanceColor(idx, vis.Tint);
+                _pedestrianArmRNode.Multimesh.SetInstanceTransform(idx, new Transform3D(armRBasis, shoulderPos));
+                _pedestrianArmRNode.Multimesh.SetInstanceColor(idx, vis.Tint);
 
                 if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)
                 {
                     _shadowPool.Multimesh.SetInstanceTransform(shadowIndex++,
-                        new Transform3D(pedShadowBasis, new Vector3(godotPos.X, godotPos.Y + 0.03f, godotPos.Z)));
+                        new Transform3D(pedShadowBasis, new Vector3(godotPos.X, godotPos.Y + 0.09f, godotPos.Z)));
                 }
             }
         }
@@ -222,7 +257,11 @@ public sealed class TrafficBenchAdapter
         // Hide unused slots if the model mix changes.
         for (var v = 0; v < 4; v++)
             _vehiclePools[v].Multimesh.VisibleInstanceCount = vehicleIndices[v];
-        _pedestrianMeshNode.Multimesh.VisibleInstanceCount = pedIndex;
+        _pedestrianBodyNode.Multimesh.VisibleInstanceCount = pedIndex;
+        _pedestrianLegLNode.Multimesh.VisibleInstanceCount = pedIndex;
+        _pedestrianLegRNode.Multimesh.VisibleInstanceCount = pedIndex;
+        _pedestrianArmLNode.Multimesh.VisibleInstanceCount = pedIndex;
+        _pedestrianArmRNode.Multimesh.VisibleInstanceCount = pedIndex;
         if (_shadowPool is not null)
             _shadowPool.Multimesh.VisibleInstanceCount = shadowIndex;
     }

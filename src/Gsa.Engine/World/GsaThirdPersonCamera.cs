@@ -198,7 +198,9 @@ public sealed class GsaThirdPersonCamera
         var speedBoostDist = Math.Clamp((float)Math.Abs(speedMps) * 0.14f, 0f, 2.6f);
         var desiredDist = _zoomDistance * sizeScale + speedBoostDist;
         var forwardXZ = new Vector3(MathF.Cos(viewYaw), 0f, -MathF.Sin(viewYaw));
-        var pivot = playerGodotPos + new Vector3(0f, platformMode >= LocomotionMode.Car ? 1.85f : 1.40f, 0f);
+        var rightXZ = new Vector3(-forwardXZ.Z, 0f, forwardXZ.X);
+        var shoulderShift = platformMode <= LocomotionMode.Bicycle ? rightXZ * 0.42f : Vector3.Zero;
+        var pivot = playerGodotPos + new Vector3(0f, platformMode >= LocomotionMode.Car ? 1.85f : 1.50f, 0f) + shoulderShift;
         var horizDist = desiredDist * MathF.Cos(_orbitPitch);
         var vertDist = desiredDist * MathF.Sin(_orbitPitch) + 0.75f;
         var idealCamPos = pivot - forwardXZ * horizDist + new Vector3(0f, vertDist, 0f);

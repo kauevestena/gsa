@@ -16,6 +16,16 @@ public sealed class CityPhotoCoverage
     private sealed record Cell(string Id, string TargetId, double North, Bounds2DEnu PlaneBounds, Vector3d Offset);
     private readonly Dictionary<string, Cell> _cells;
     public SurveySurfaceReference Reference { get; }
+    public int TotalCellCount => _cells.Count;
+
+    public int GetTargetCellCount(string targetId)
+    {
+        var count = 0;
+        foreach (var cell in _cells.Values)
+            if (cell.TargetId == targetId)
+                count++;
+        return count;
+    }
 
     public CityPhotoCoverage(string surfaceId, IEnumerable<WorldBoxObject> targets)
     {

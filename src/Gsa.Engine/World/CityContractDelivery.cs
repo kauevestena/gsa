@@ -1,6 +1,7 @@
 using System.Globalization;
 using Gsa.Missions.Gameplay;
 using Gsa.Core.Mobility;
+using Gsa.Core.Sensors.Camera;
 using Gsa.Core.World;
 using Godot;
 using Gsa.Missions.Campaign;
@@ -27,6 +28,8 @@ public partial class SaoDatumCityScene
     private int _lastCitySurveyTargetCount;
 
     private CityPhotoCoverage? _cityPhotoCoverage;
+    private readonly Dictionary<string, HashSet<string>> _coveredCellsByTarget = new(StringComparer.Ordinal);
+    private int _coveredCellTotal;
     private int _lastAdjustedPhotoCount;
     private IReadOnlyList<string> _lastIncompleteSurfaces = [];
 
@@ -86,10 +89,45 @@ public partial class SaoDatumCityScene
             .Where(floor => definition.Requirements.All(rule => rule.Metric != floor.Metric))).ToArray()
     };
 
-    private void PrepareCityPhotoCoverage() =>
+    private void PrepareCityPhotoCoverage()
+    {
         _cityPhotoCoverage = _activeContract is { } definition && SupportsCityDelivery(definition)
             ? CityPhotoCoverage.ForContract(CityEffectiveDefinition(definition), _manifestObjectsById)
             : null;
+        RebuildCoveredSurfaceCells();
+    }
+
+    private void RebuildCoveredSurfaceCells()
+    {
+        _coveredCellsByTarget.Clear();
+        _coveredCellTotal = 0;
+        if (_cityPhotoCoverage is null) return;
+        foreach (var sample in _fieldSamples.Concat(_protectedCityPhotos))
+        {
+            if (!sample.Quality.Passed) continue;
+            AddSampleCoverageCells(sample);
+        }
+    }
+
+    private void AddSampleCoverageCells(CameraObservationSample sample)
+    {
+        foreach (var feature in sample.ObservedFeatures)
+        {
+            if (feature.ObjectClass != CityPhotoCoverage.ObservationClass ||
+                !feature.TargetId.StartsWith("coverage/", StringComparison.Ordinal))
+                continue;
+            var slash = feature.TargetId.IndexOf('/', 9);
+            if (slash <= 9) continue;
+            var targetId = feature.TargetId[9..slash];
+            if (!_coveredCellsByTarget.TryGetValue(targetId, out var set))
+            {
+                set = new HashSet<string>(StringComparer.Ordinal);
+                _coveredCellsByTarget[targetId] = set;
+            }
+            if (set.Add(feature.TargetId))
+                _coveredCellTotal++;
+        }
+    }
 
     private bool CityMissionCompleted(string missionId) =>
         _campaignState.ObjectiveStates.TryGetValue(missionId, out var state) && state == $"completed:{missionId}";

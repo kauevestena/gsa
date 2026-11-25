@@ -35,7 +35,8 @@ public sealed class GsaStaticMeshBatcher
         Vector3 size,
         Vector3? rotDeg = null,
         float uvScale = 0.1f,
-        Color? vertexColor = null)
+        Color? vertexColor = null,
+        float uvOffsetY = 0f)
     {
         var bucket = GetBucket(material);
         var hx = size.X * 0.5f;
@@ -64,9 +65,9 @@ public sealed class GsaStaticMeshBatcher
 
             Vector2 CalcUv(Vector3 wp, Vector3 lp) => uvAxis switch
             {
-                0 => new Vector2(wp.Z * uvScale, -wp.Y * uvScale), // +/- X walls
+                0 => new Vector2(wp.Z * uvScale, -(wp.Y + uvOffsetY) * uvScale), // +/- X walls
                 1 => new Vector2(wp.X * uvScale, wp.Z * uvScale),  // +/- Y horizontal
-                _ => new Vector2(wp.X * uvScale, -wp.Y * uvScale), // +/- Z walls
+                _ => new Vector2(wp.X * uvScale, -(wp.Y + uvOffsetY) * uvScale), // +/- Z walls
             };
 
             var baseIdx = bucket.Vertices.Count;

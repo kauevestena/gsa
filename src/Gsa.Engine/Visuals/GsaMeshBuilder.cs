@@ -132,9 +132,94 @@ public static class GsaMeshBuilder
     {
         var batcher = new GsaStaticMeshBatcher();
         var dummy = SolidMat(Colors.White);
-        batcher.AddBox(dummy, Vector3.Zero, size, uvScale: uvScale);
+        batcher.AddBox(dummy, Vector3.Zero, size, uvScale: uvScale, uvOffsetY: size.Y * 0.5f);
         var mesh = batcher.BuildCombinedArrayMesh()!;
         return mesh;
+    }
+
+    public static Mesh CreateStorefrontFacadeMesh(Vector3 size, int facadeIndex)
+    {
+        var batch = new GsaStaticMeshBatcher();
+        AddStorefrontFacadeParts(batch, Vector3.Zero, size, facadeIndex, isCenteredLocal: true);
+        return batch.BuildCombinedArrayMesh()!;
+    }
+
+    public static void AddStorefrontFacadeToBatch(
+        GsaStaticMeshBatcher batch,
+        Vector3 facadeCenterG,
+        Vector3 facadeSizeG,
+        int facadeIndex) =>
+        AddStorefrontFacadeParts(batch, facadeCenterG, facadeSizeG, facadeIndex, isCenteredLocal: false);
+
+    private static void AddStorefrontFacadeParts(
+        GsaStaticMeshBatcher batch,
+        Vector3 center,
+        Vector3 size,
+        int facadeIndex,
+        bool isCenteredLocal)
+    {
+        // Facade manifest box is 8.0 x 2.0 x 0.2 centered at Z = -5.0 (Godot) -> front at +0.1, back at -0.1.
+        // Building shell starts at Godot Z = -5.4 (-0.4 behind center), so bridge depth back to -0.45 for zero gap!
+        var wallTints = new Color[]
+        {
+            new(0.66f, 0.36f, 0.28f), // Terracotta brick
+            new(0.76f, 0.69f, 0.54f), // Sandstone cream
+            new(0.46f, 0.50f, 0.54f), // Slate concrete
+            new(0.72f, 0.50f, 0.34f), // Warm ochre
+        };
+        var accentTints = new Color[]
+        {
+            new(0.58f, 0.18f, 0.16f),
+            new(0.16f, 0.44f, 0.34f),
+            new(0.18f, 0.34f, 0.54f),
+            new(0.64f, 0.42f, 0.16f),
+        };
+
+        var idx = Math.Max(0, facadeIndex - 1);
+        var wallMat = SolidMat(wallTints[idx % wallTints.Length], roughness: 0.86f);
+        var plinthMat = SolidMat(new Color(0.28f, 0.30f, 0.33f), roughness: 0.90f);
+        var trimMat = SolidMat(accentTints[idx % accentTints.Length], roughness: 0.65f);
+        var frameMat = SolidMat(new Color(0.14f, 0.16f, 0.18f), roughness: 0.55f);
+        var glassMat = SolidMat(new Color(0.14f, 0.26f, 0.36f), roughness: 0.20f);
+        var interiorMat = SolidMat(new Color(0.95f, 0.82f, 0.52f), emit: true, emissionEnergy: 0.22f);
+        var doorMat = SolidMat(new Color(0.24f, 0.18f, 0.14f), roughness: 0.72f);
+
+        var hy = size.Y * 0.5f;
+        var yBase = isCenteredLocal ? -hy : center.Y - hy;
+        var zFront = center.Z + size.Z * 0.5f;
+        var zBridgeCenter = center.Z - 0.18f; // spans [-0.46, +0.10] around center.Z -> seals flush into building_shell!
+        const float bridgeDepth = 0.56f;
+
+        void Part(Material m, float lx, float bottomY, float h, float w, float d = bridgeDepth, float zOff = 0f) =>
+            batch.AddBox(m, new Vector3(center.X + lx, yBase + bottomY + h * 0.5f, zBridgeCenter + zOff), new Vector3(w, h, d));
+
+        // Main masonry piers (left, center-left, center-right, right) + upper fascia bridging Z=2.0..2.45m flush to building_shell
+        Part(wallMat, -3.55f, 0f, 2.35f, 0.90f);
+        Part(wallMat, -1.05f, 0f, 2.35f, 0.55f);
+        Part(wallMat, 1.05f, 0f, 2.35f, 0.55f);
+        Part(wallMat, 3.55f, 0f, 2.35f, 0.90f);
+        Part(wallMat, 0f, 1.92f, 0.58f, 8.0f);
+        Part(trimMat, 0f, 2.42f, 0.12f, 8.12f, d: 0.62f, zOff: 0.03f);
+
+        // Low plinth base under left & right display bays
+        Part(plinthMat, -2.25f, 0f, 0.42f, 1.90f);
+        Part(plinthMat, 2.25f, 0f, 0.42f, 1.90f);
+        Part(plinthMat, -2.25f, 0.42f, 0.08f, 1.96f, d: 0.62f, zOff: 0.03f);
+        Part(plinthMat, 2.25f, 0.42f, 0.08f, 1.96f, d: 0.62f, zOff: 0.03f);
+
+        // Left & right storefront display windows (warm interior backdrop + dark glass pane + mullions)
+        foreach (var side in new[] { -2.25f, 2.25f })
+        {
+            Part(interiorMat, side, 0.50f, 1.42f, 1.72f, d: 0.42f, zOff: -0.05f);
+            batch.AddBox(glassMat, new Vector3(center.X + side, yBase + 1.21f, zFront - 0.02f), new Vector3(1.66f, 1.32f, 0.04f));
+            batch.AddBox(frameMat, new Vector3(center.X + side, yBase + 1.21f, zFront), new Vector3(0.06f, 1.36f, 0.06f));
+            batch.AddBox(frameMat, new Vector3(center.X + side, yBase + 1.56f, zFront), new Vector3(1.74f, 0.06f, 0.06f));
+        }
+
+        // Central recessed shop entrance door & transom
+        batch.AddBox(doorMat, new Vector3(center.X, yBase + 0.94f, zFront - 0.12f), new Vector3(1.12f, 1.88f, 0.34f));
+        batch.AddBox(frameMat, new Vector3(center.X, yBase + 1.88f, zFront - 0.04f), new Vector3(1.55f, 0.08f, 0.24f));
+        batch.AddBox(glassMat, new Vector3(center.X, yBase + 1.18f, zFront + 0.05f), new Vector3(0.72f, 0.78f, 0.03f));
     }
 
     public static void BuildBatchedStreetTrees(
@@ -307,6 +392,11 @@ public static class GsaMeshBuilder
         elias.AddChild(Box("Head", new Vector3(0.25f, 0.26f, 0.25f), new Vector3(0f, 1.49f, 0f), skinMat));
         elias.AddChild(Box("Cap", new Vector3(0.28f, 0.11f, 0.29f), new Vector3(0f, 1.62f, -0.02f), capMat));
         elias.AddChild(Box("CapVisor", new Vector3(0.26f, 0.04f, 0.12f), new Vector3(0f, 1.58f, -0.18f), capMat));
+        var bootMat = SolidMat(new Color(0.10f, 0.10f, 0.11f));
+        legL.AddChild(Box("BootL", new Vector3(0.15f, 0.12f, 0.22f), new Vector3(0f, -0.72f, -0.03f), bootMat));
+        legR.AddChild(Box("BootR", new Vector3(0.15f, 0.12f, 0.22f), new Vector3(0f, -0.72f, -0.03f), bootMat));
+        armL.AddChild(Box("HandL", new Vector3(0.10f, 0.10f, 0.10f), new Vector3(0f, -0.46f, 0f), skinMat));
+        armR.AddChild(Box("HandR", new Vector3(0.10f, 0.10f, 0.10f), new Vector3(0f, -0.46f, 0f), skinMat));
 
         if (wearingHelmet)
         {
@@ -821,48 +911,93 @@ public static class GsaMeshBuilder
         return st.Commit();
     }
 
+    private static void AddSurfaceBoxPart(
+        SurfaceTool st,
+        Vector3 center,
+        Vector3 size,
+        Color col)
+    {
+        var hx = size.X * 0.5f;
+        var hy = size.Y * 0.5f;
+        var hz = size.Z * 0.5f;
+        var p000 = center + new Vector3(-hx, -hy, -hz);
+        var p001 = center + new Vector3(-hx, -hy, hz);
+        var p010 = center + new Vector3(-hx, hy, -hz);
+        var p011 = center + new Vector3(-hx, hy, hz);
+        var p100 = center + new Vector3(hx, -hy, -hz);
+        var p101 = center + new Vector3(hx, -hy, hz);
+        var p110 = center + new Vector3(hx, hy, -hz);
+        var p111 = center + new Vector3(hx, hy, hz);
+
+        void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 normal)
+        {
+            st.SetColor(col); st.SetNormal(normal); st.AddVertex(a);
+            st.SetColor(col); st.SetNormal(normal); st.AddVertex(d);
+            st.SetColor(col); st.SetNormal(normal); st.AddVertex(c);
+            st.SetColor(col); st.SetNormal(normal); st.AddVertex(a);
+            st.SetColor(col); st.SetNormal(normal); st.AddVertex(c);
+            st.SetColor(col); st.SetNormal(normal); st.AddVertex(b);
+        }
+
+        Quad(p101, p100, p110, p111, Vector3.Right);
+        Quad(p000, p001, p011, p010, Vector3.Left);
+        Quad(p011, p111, p110, p010, Vector3.Up);
+        Quad(p000, p100, p101, p001, Vector3.Down);
+        Quad(p001, p101, p111, p011, Vector3.Back);
+        Quad(p100, p000, p010, p110, Vector3.Forward);
+    }
+
     public static ArrayMesh BuildTrafficPedestrianMesh()
     {
         var st = new SurfaceTool();
         st.Begin(Mesh.PrimitiveType.Triangles);
 
-        void AddBoxPart(Vector3 center, Vector3 size, Color col)
-        {
-            var hx = size.X * 0.5f;
-            var hy = size.Y * 0.5f;
-            var hz = size.Z * 0.5f;
-            var p000 = center + new Vector3(-hx, -hy, -hz);
-            var p001 = center + new Vector3(-hx, -hy, hz);
-            var p010 = center + new Vector3(-hx, hy, -hz);
-            var p011 = center + new Vector3(-hx, hy, hz);
-            var p100 = center + new Vector3(hx, -hy, -hz);
-            var p101 = center + new Vector3(hx, -hy, hz);
-            var p110 = center + new Vector3(hx, hy, -hz);
-            var p111 = center + new Vector3(hx, hy, hz);
+        var trouser = new Color(0.18f, 0.22f, 0.30f);
+        var shoe = new Color(0.10f, 0.10f, 0.12f);
+        var skin = new Color(0.82f, 0.65f, 0.53f);
+        AddSurfaceBoxPart(st, new Vector3(0f, 0.42f, -0.09f), new Vector3(0.14f, 0.68f, 0.14f), trouser);
+        AddSurfaceBoxPart(st, new Vector3(0.03f, 0.05f, -0.09f), new Vector3(0.20f, 0.10f, 0.15f), shoe);
+        AddSurfaceBoxPart(st, new Vector3(0f, 0.42f, 0.09f), new Vector3(0.14f, 0.68f, 0.14f), trouser);
+        AddSurfaceBoxPart(st, new Vector3(0.03f, 0.05f, 0.09f), new Vector3(0.20f, 0.10f, 0.15f), shoe);
+        AddSurfaceBoxPart(st, new Vector3(0f, 1.04f, 0f), new Vector3(0.24f, 0.56f, 0.40f), Colors.White);
+        AddSurfaceBoxPart(st, new Vector3(0f, 1.04f, -0.26f), new Vector3(0.12f, 0.44f, 0.11f), Colors.White);
+        AddSurfaceBoxPart(st, new Vector3(0f, 1.04f, 0.26f), new Vector3(0.12f, 0.44f, 0.11f), Colors.White);
+        AddSurfaceBoxPart(st, new Vector3(0f, 0.77f, -0.26f), new Vector3(0.10f, 0.10f, 0.10f), skin);
+        AddSurfaceBoxPart(st, new Vector3(0f, 0.77f, 0.26f), new Vector3(0.10f, 0.10f, 0.10f), skin);
+        AddSurfaceBoxPart(st, new Vector3(0f, 1.48f, 0f), new Vector3(0.22f, 0.26f, 0.22f), skin);
+        AddSurfaceBoxPart(st, new Vector3(-0.01f, 1.59f, 0f), new Vector3(0.24f, 0.09f, 0.24f), new Color(0.18f, 0.14f, 0.12f));
+        return st.Commit();
+    }
 
-            void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 normal)
-            {
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(a);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(d);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(c);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(a);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(c);
-                st.SetColor(col); st.SetNormal(normal); st.AddVertex(b);
-            }
+    public static ArrayMesh BuildTrafficPedestrianBodyMesh()
+    {
+        var st = new SurfaceTool();
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        AddSurfaceBoxPart(st, new Vector3(0f, 1.04f, 0f), new Vector3(0.24f, 0.56f, 0.40f), Colors.White);
+        AddSurfaceBoxPart(st, new Vector3(0f, 1.48f, 0f), new Vector3(0.22f, 0.26f, 0.22f), new Color(0.82f, 0.65f, 0.53f));
+        AddSurfaceBoxPart(st, new Vector3(-0.01f, 1.59f, 0f), new Vector3(0.24f, 0.09f, 0.24f), new Color(0.18f, 0.14f, 0.12f));
+        return st.Commit();
+    }
 
-            Quad(p101, p100, p110, p111, Vector3.Right);
-            Quad(p000, p001, p011, p010, Vector3.Left);
-            Quad(p011, p111, p110, p010, Vector3.Up);
-            Quad(p000, p100, p101, p001, Vector3.Down);
-            Quad(p001, p101, p111, p011, Vector3.Back);
-            Quad(p100, p000, p010, p110, Vector3.Forward);
-        }
+    public static ArrayMesh BuildTrafficPedestrianLegMesh(bool isLeft)
+    {
+        // Origin at hip pivot (Y = 0.76f above ground, local Z = +-0.09f)
+        var st = new SurfaceTool();
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        var z = isLeft ? -0.09f : 0.09f;
+        AddSurfaceBoxPart(st, new Vector3(0f, -0.33f, z), new Vector3(0.14f, 0.66f, 0.14f), new Color(0.18f, 0.22f, 0.30f));
+        AddSurfaceBoxPart(st, new Vector3(0.03f, -0.71f, z), new Vector3(0.21f, 0.10f, 0.15f), new Color(0.10f, 0.10f, 0.12f));
+        return st.Commit();
+    }
 
-        // Legs, tinted jacket torso, arms, head
-        AddBoxPart(new Vector3(0f, 0.38f, -0.09f), new Vector3(0.14f, 0.76f, 0.14f), new Color(0.18f, 0.22f, 0.30f));
-        AddBoxPart(new Vector3(0f, 0.38f, 0.09f), new Vector3(0.14f, 0.76f, 0.14f), new Color(0.18f, 0.22f, 0.30f));
-        AddBoxPart(new Vector3(0f, 1.04f, 0f), new Vector3(0.24f, 0.56f, 0.42f), Colors.White);
-        AddBoxPart(new Vector3(0f, 1.48f, 0f), new Vector3(0.22f, 0.26f, 0.22f), new Color(0.82f, 0.65f, 0.53f));
+    public static ArrayMesh BuildTrafficPedestrianArmMesh(bool isLeft)
+    {
+        // Origin at shoulder pivot (Y = 1.24f above ground, local Z = +-0.26f)
+        var st = new SurfaceTool();
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        var z = isLeft ? -0.26f : 0.26f;
+        AddSurfaceBoxPart(st, new Vector3(0f, -0.22f, z), new Vector3(0.12f, 0.44f, 0.11f), Colors.White);
+        AddSurfaceBoxPart(st, new Vector3(0f, -0.47f, z), new Vector3(0.10f, 0.10f, 0.10f), new Color(0.82f, 0.65f, 0.53f));
         return st.Commit();
     }
 
@@ -1049,13 +1184,13 @@ public static class GsaMeshBuilder
         sign.AddChild(new Label3D
         {
             Text = labelText,
-            Position = new Vector3(0f, 0f, 0.14f),
+            Position = new Vector3(0f, 0f, 0.16f),
             FontSize = 36,
             PixelSize = 0.008f,
             Modulate = Colors.White,
             OutlineModulate = Colors.Black,
-            OutlineSize = 6,
-            AlphaCut = Label3D.AlphaCutMode.Discard,
+            OutlineSize = 4,
+            AlphaCut = Label3D.AlphaCutMode.Disabled,
             VisibilityRangeEnd = 70f,
         });
         return sign;

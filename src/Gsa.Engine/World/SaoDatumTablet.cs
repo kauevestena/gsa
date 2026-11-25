@@ -649,6 +649,21 @@ public partial class SaoDatumCityScene
         if (_manifestObjectsById.TryGetValue("unload_point", out var unl))
             blips.Add(new RadarBlip("unload_point", unl.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
 
+        var showFacadeLabels = _activeContract?.AreaId == FacadeArea;
+        if (_cityFacadeLabels.Count > 0)
+        {
+            foreach (var (fid, lbl) in _cityFacadeLabels)
+            {
+                if (lbl.Visible != showFacadeLabels) lbl.Visible = showFacadeLabels;
+                if (!showFacadeLabels) continue;
+                var cells = _coveredCellsByTarget.TryGetValue(fid, out var cset) ? cset.Count : 0;
+                var nextText = cells >= 4 ? $"#{fid[7..]} ✓" : cells > 0 ? $"#{fid[7..]} {cells}/4" : $"#{fid[7..]}";
+                var nextColor = cells >= 4 ? new Color(0.28f, 0.95f, 0.50f) : cells > 0 ? new Color(0.30f, 0.90f, 0.98f) : new Color(1f, 0.85f, 0.25f);
+                if (lbl.Text != nextText) lbl.Text = nextText;
+                if (!lbl.Modulate.IsEqualApprox(nextColor)) lbl.Modulate = nextColor;
+            }
+        }
+
         if (_activeContract is not null)
         {
             foreach (var fid in _activeContract.RequiredFeatureIds)
@@ -657,9 +672,13 @@ public partial class SaoDatumCityScene
                 if (tPos is null && _geodeticNetwork.Benchmarks.TryGetValue(fid, out var bmNode))
                     tPos = bmNode.PhysicalPositionEnu;
                 if (tPos is null) continue;
-                var done = _observedTargetIds.Contains(fid);
+                var coveredCells = _coveredCellsByTarget.TryGetValue(fid, out var cset) ? cset.Count : 0;
+                var needCells = _cityPhotoCoverage is not null ? _cityPhotoCoverage.GetTargetCellCount(fid) : 0;
+                var done = needCells > 0 ? coveredCells >= needCells : _observedTargetIds.Contains(fid);
+                var partial = !done && (coveredCells > 0 || _observedTargetIds.Contains(fid));
                 if (done) foundTargets++;
-                blips.Add(new RadarBlip(fid, tPos.Value, done ? new Color(0.3f, 0.9f, 0.5f) : new Color(1.0f, 0.82f, 0.22f), "★", ClampToRim: !done));
+                var blipColor = done ? new Color(0.3f, 0.9f, 0.5f) : partial ? new Color(0.30f, 0.90f, 0.98f) : new Color(1.0f, 0.82f, 0.22f);
+                blips.Add(new RadarBlip(fid, tPos.Value, blipColor, "★", ClampToRim: !done));
             }
         }
 
@@ -681,9 +700,20 @@ public partial class SaoDatumCityScene
 
         var objTitle = _activeContract is not null ? Text(_activeContract.TitleKey)
             : (_isSandbox ? Text("city.sandbox.title") : Text("city.freeroam.title"));
-        var objDetails = _activeContract is not null
-            ? string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count)
-            : $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
+        string objDetails;
+        if (_activeContract is not null && _cityPhotoCoverage is { TotalCellCount: > 0 } cov)
+        {
+            var covPct = (int)Math.Floor(100.0 * _coveredCellTotal / cov.TotalCellCount);
+            objDetails = string.Format(Text("city.story.coverage_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, covPct, _fieldSamples.Count + _protectedCityPhotos.Count);
+        }
+        else if (_activeContract is not null)
+        {
+            objDetails = string.Format(Text("city.story.capture_status"), foundTargets, _activeContract.RequiredFeatureIds.Count, _fieldSamples.Count);
+        }
+        else
+        {
+            objDetails = $"Region: {Text(GetDistrictBannerKey(pos))} · Eggs: {_collectibles.CollectedEggIds.Count}/5 · Marks: {_collectibles.OccupiedLandmarkIds.Count}/8";
+        }
         if (IsCityLidarCollection(_activeContract)) objDetails = CityLidarCollectionStatus();
         if (IsFinalPavementSurvey(_activeContract))
         {

@@ -1,4 +1,5 @@
 #!/bin/bash
+unset LIBGL_ALWAYS_SOFTWARE GALLIUM_DRIVER MESA_LOADER_DRIVER_OVERRIDE __GLX_VENDOR_LIBRARY_NAME
 export DOTNET_ROOT=/home/kaue/tests/gsa/work/toolchain/dotnet
 export NUGET_PACKAGES=/home/kaue/tests/gsa/work/nuget/packages
 export XDG_DATA_HOME=/home/kaue/tests/gsa/work/xdg-data

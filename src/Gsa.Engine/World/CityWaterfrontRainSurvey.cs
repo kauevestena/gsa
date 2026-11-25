@@ -111,7 +111,7 @@ public partial class SaoDatumCityScene
                     Mesh = new BoxMesh { Size = size },
                     MaterialOverride = material,
                     CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
-                    VisibilityRangeEnd = 420f,
+                    VisibilityRangeEnd = 520f,
                 });
             if (surface is not null)
             {

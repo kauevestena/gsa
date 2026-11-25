@@ -2233,3 +2233,15 @@ msgstr "Due in {0} h"
 
 msgid "city.finale.expiry"
 msgstr "Expires in {0} h"
+
+msgid "training.face_storefront"
+msgstr "Step in front of façades 18–20, face the shops, and stop cleanly before shooting."
+
+msgid "training.stabilize_gimbalina"
+msgstr "Gimbalina is stressed! Slow down or press [G] to feed corn before taking the photo."
+
+msgid "city.story.step_back_framing"
+msgstr "Too close to the wall! Step back to the opposite curb (~9 m) and face north so all window cells fit in frame."
+
+msgid "city.story.coverage_status"
+msgstr "Façades: {0}/{1} · Surface coverage: {2}% / 90% · Photos: {3}"

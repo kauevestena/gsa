@@ -18,10 +18,12 @@ public partial class TutorialBlockScene
     private GsaGtaHud _gtaHud = null!;
     private readonly System.Collections.Generic.Dictionary<string, Button> _trainingButtons = new();
     private System.Collections.Generic.Dictionary<string, Gsa.Core.World.WorldBoxObject> _manifestById = new(StringComparer.Ordinal);
+    private readonly System.Collections.Generic.Dictionary<string, Label3D> _facadeStatusLabels = new(StringComparer.Ordinal);
     private readonly System.Collections.Generic.List<RadarBlip> _radarBlips = new(16);
     private long _liveTick;
     private bool _captureRequested;
     private double _hudElapsed;
+    private double _trafficStressCooldown;
     private string? _smokeSaveDirectory;
     private string _lastObservation = "—";
     private string _lastFeedbackText = "";
@@ -47,23 +49,26 @@ public partial class TutorialBlockScene
         foreach (var id in TrainingContractSession.TargetIds.Concat(new[] { "office_entry", "unload_point" }))
         {
             var item = _manifestById[id];
+            var isTarget = id.StartsWith("facade_", StringComparison.Ordinal);
             var label = new Label3D
             {
-                Text = id.StartsWith("facade_", StringComparison.Ordinal) ? id[7..] : Text("training." + id),
-                Position = _coordinates.ToGodot(item.PositionEnu + new Vector3d(0, 0, 2.4)),
-                FontSize = 28,
+                Text = isTarget ? $"#{id[7..]} · 0/2" : Text("training." + id),
+                Position = _coordinates.ToGodot(item.PositionEnu + new Vector3d(0, isTarget ? -0.35 : 0, isTarget ? 2.85 : 2.35)),
+                FontSize = isTarget ? 34 : 28,
                 PixelSize = 0.006f,
                 Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
-                Modulate = id.StartsWith("facade_", StringComparison.Ordinal)
+                Modulate = isTarget
                     ? new Color(1f, 0.85f, 0.25f)
                     : (id == "office_entry" ? new Color(0.25f, 0.95f, 0.88f) : new Color(1f, 0.78f, 0.28f)),
                 OutlineModulate = Colors.Black,
                 OutlineSize = 5,
                 NoDepthTest = false,
-                AlphaCut = Label3D.AlphaCutMode.Discard,
+                AlphaCut = Label3D.AlphaCutMode.Disabled,
                 VisibilityRangeEnd = 70f,
             };
             AddChild(label);
+            if (isTarget)
+                _facadeStatusLabels[id] = label;
         }
 
         _pendingDistrictPopup = Text("district.old_center.commerce");
@@ -132,7 +137,11 @@ public partial class TutorialBlockScene
                     break;
                 case "deliver":
                     succeeded = _training.Deliver(position);
-                    if (succeeded) _audio?.PlayPaymentSuccess();
+                    if (succeeded)
+                    {
+                        _audio?.PlayMissionPassedFanfare();
+                        _gtaHud?.TriggerCelebrationBanner(Text("city.mission_passed"), "+150 C$ · +25 XP");
+                    }
                     break;
                 case "save":
                     succeeded = _training.Save().Succeeded;
@@ -249,6 +258,19 @@ public partial class TutorialBlockScene
     private void StepTraining(double delta, double angularVelocity)
     {
         _training.AdvanceClock(delta);
+        _trafficStressCooldown = Math.Max(0.0, _trafficStressCooldown - delta);
+        if (!_smoke && _liveLocomotion is not null && _trafficStressCooldown <= 0.0)
+        {
+            var p = _liveLocomotion.PositionEnu;
+            var speed = Math.Abs(_liveLocomotion.ForwardSpeedMetresPerSecond);
+            // Stepping into the active traffic lane at speed startles Gimbalina
+            if ((p.Y < 7399996.6 || p.Y > 7400018.8) && speed > 1.4)
+            {
+                _trafficStressCooldown = 2.6;
+                _gimbalina.ApplyStartle(StartleEventKind.Horn);
+                _audio?.PlayHorn(LocomotionMode.Car);
+            }
+        }
         if (_captureRequested && _liveCamera.IsCaptureTick(_liveTick))
         {
             _captureRequested = false;
@@ -305,15 +327,24 @@ public partial class TutorialBlockScene
         }
         var weatherSnap = _calendarWeather.ExportSnapshot();
         var envSnap = weatherSnap.ToCameraEnvironment();
+        var candidates = _smoke
+            ? _liveCandidates
+            : _liveCandidates.Where(c => c.ObjectClass != "building_facade" ||
+                (origin.Y < c.CenterEnu.Y - 1.2 && Math.Abs(origin.X - c.CenterEnu.X) <= 8.5 && Math.Sin(body.HeadingRadians) >= 0.35)).ToArray();
         if (_training.CanCapture && _liveCamera.TryEnqueueSimulatedCapture(new CameraCaptureRequest(
             _liveTick, time, start, end, readout, new EstimatedBodyPose(time, origin, baseBody), mount, envSnap,
-            _liveCandidates, Occluded), body, out var sample, out _) && sample is not null)
+            candidates, Occluded), body, out var sample, out _) && sample is not null)
         {
             _training.RecordObservation(sample);
             _audio?.PlayShutter();
             _lastObservation = string.Join(", ", sample.ObservedFeatures.Select(f => f.TargetId));
             if (_lastObservation.Length == 0) _lastObservation = Text("training.nothing_visible");
-            _lastFeedbackText = Text(sample.Quality.Passed ? "training.capture_ok" : "training.capture_blurred");
+            if (!sample.Quality.Passed)
+                _lastFeedbackText = !_smoke && _gimbalina.Stress >= 40.0 ? Text("training.stabilize_gimbalina") : Text("training.capture_blurred");
+            else if (!_smoke && !sample.ObservedFeatures.Any(f => f.ObjectClass == "building_facade"))
+                _lastFeedbackText = Text("training.face_storefront");
+            else
+                _lastFeedbackText = Text("training.capture_ok");
         }
         // Ownership moves to custody; do not retain a second unbounded thumbnail buffer.
         _liveCamera.FlushBatchManifest("live_flush");
@@ -353,7 +384,15 @@ public partial class TutorialBlockScene
         {
             var obj = _manifestById[id];
             var isDone = resolved.Contains(id);
-            _radarBlips.Add(new RadarBlip(id, obj.PositionEnu, isDone ? new Color(0.28f, 0.92f, 0.54f) : new Color(1.0f, 0.80f, 0.22f), id[7..]));
+            var obsCount = _training.Samples.Count(s => s.Quality.Passed && s.ObservedFeatures.Any(f => f.TargetId == id));
+            if (_facadeStatusLabels.TryGetValue(id, out var lbl))
+            {
+                var nextText = isDone ? $"#{id[7..]} · ✓" : obsCount >= 1 ? $"#{id[7..]} · 1/2 (move >=2m)" : $"#{id[7..]} · 0/2";
+                var nextColor = isDone ? new Color(0.28f, 0.95f, 0.50f) : obsCount >= 1 ? new Color(0.30f, 0.90f, 0.98f) : new Color(1f, 0.85f, 0.25f);
+                if (lbl.Text != nextText) lbl.Text = nextText;
+                if (!lbl.Modulate.IsEqualApprox(nextColor)) lbl.Modulate = nextColor;
+            }
+            _radarBlips.Add(new RadarBlip(id, obj.PositionEnu, isDone ? new Color(0.28f, 0.92f, 0.54f) : obsCount >= 1 ? new Color(0.30f, 0.90f, 0.98f) : new Color(1.0f, 0.80f, 0.22f), id[7..]));
         }
         var officeObj = _manifestById["office_entry"];
         var unloadObj = _manifestById["unload_point"];

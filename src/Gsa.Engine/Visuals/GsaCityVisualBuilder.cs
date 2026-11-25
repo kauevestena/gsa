@@ -109,7 +109,16 @@ public sealed class GsaCityVisualBuilder
         AddRoadLaneMarkings(roadBatch, coords, xStart: 500006, xEnd: 500222, yCenter: 7400022.75, zHeight: 100.015, stripeYellow, stripeWhite);
         AddRoadLaneMarkings(roadBatch, coords, xStart: 500010, xEnd: 500230, yCenter: 7400047.0, zHeight: 100.025, stripeYellow, stripeWhite);
         AddRoadBox(new Vector3d(500120, 7400056.0, 100.02), new Vector3d(236, 5.0, 0.16), sidewalkMat, 0.24f);
-        AddRoadBox(new Vector3d(500112, 7400034.5, 100.01), new Vector3d(206, 11.5, 0.14), sidewalkMat, 0.24f);
+        // Split mid sidewalk cleanly around water_sample (X = 500039..500051, Y = 7400030..7400040)
+        AddRoadBox(new Vector3d(500023.5, 7400034.5, 100.01), new Vector3d(29, 11.5, 0.14), sidewalkMat, 0.24f);
+        AddRoadBox(new Vector3d(500133.5, 7400034.5, 100.01), new Vector3d(163, 11.5, 0.14), sidewalkMat, 0.24f);
+        // Reflecting pool stone rim around water_sample & frame posts on glass_sample
+        AddRoadBox(new Vector3d(500045.0, 7400029.8, 100.12), new Vector3d(12.6, 0.4, 0.24), curbMat);
+        AddRoadBox(new Vector3d(500045.0, 7400040.2, 100.12), new Vector3d(12.6, 0.4, 0.24), curbMat);
+        AddRoadBox(new Vector3d(500038.8, 7400035.0, 100.12), new Vector3d(0.4, 10.4, 0.24), curbMat);
+        AddRoadBox(new Vector3d(500051.2, 7400035.0, 100.12), new Vector3d(0.4, 10.4, 0.24), curbMat);
+        foreach (var gx in new[] { 500014.1, 500020.0, 500025.9 })
+            bldgBatch.AddBox(curbMat, coords.ToGodot(new Vector3d(gx, 7400030.0, 102.0)), new Vector3(0.18f, 4.05f, 0.26f));
 
         // Crosswalk stripes at main intersection (X = 500112)
         var cwMat = GsaRetroTextures.CreateWorldMaterial("crosswalk_mat_uv", "crosswalk", Colors.White, triplanar: false);
@@ -142,16 +151,27 @@ public sealed class GsaCityVisualBuilder
                 continue;
             var centerG = coords.ToGodot(shell.PositionEnu);
             var roofY = centerG.Y + (float)(shell.SizeEnu.Z * 0.5);
-            var frontZ = centerG.Z + (float)(shell.SizeEnu.Y * 0.5);
+            var shellFrontZ = centerG.Z + (float)(shell.SizeEnu.Y * 0.5);
+            // Seal the 0.45m step-back between upper stories and ground-floor storefront (Z = -4.95..-5.45)
+            var shellStyle = (i % 3) switch
+            {
+                0 => ("bldg_shell_bridge_comm_uv", "facade_commercial"),
+                1 => ("bldg_shell_bridge_res_uv", "facade_residential"),
+                _ => ("bldg_shell_bridge_conc_uv", "facade_concrete"),
+            };
+            var upperFrontMat = GsaRetroTextures.CreateWorldMaterial(shellStyle.Item1, shellStyle.Item2, Colors.White, triplanar: false, nightWindowGlow: true);
+            bldgBatch.AddBox(upperFrontMat, new Vector3(centerG.X, 5.20f, shellFrontZ + 0.24f), new Vector3(8.0f, 5.60f, 0.52f), uvScale: 0.125f);
+            var frontFaceZ = shellFrontZ + 0.50f;
+            GsaMeshBuilder.AddStorefrontFacadeToBatch(bldgBatch, new Vector3(centerG.X, 1.0f, shellFrontZ + 0.40f), new Vector3(8.0f, 2.0f, 0.2f), i);
 
-            bldgBatch.AddBox(roofTrimMat, new Vector3(centerG.X, roofY + 0.22f, centerG.Z), new Vector3(8.2f, 0.45f, 10.2f));
+            bldgBatch.AddBox(roofTrimMat, new Vector3(centerG.X, roofY + 0.22f, centerG.Z + 0.24f), new Vector3(8.2f, 0.45f, 10.7f));
             if (i % 2 == 1)
                 bldgBatch.AddCylinder(tankMat, new Vector3(centerG.X - 2.1f, roofY + 1.05f, centerG.Z - 2.0f), 0.85f, 0.78f, 1.25f, radialSegments: 8);
             if (i % 3 != 0)
                 bldgBatch.AddBox(acMat, new Vector3(centerG.X + 2.0f, roofY + 0.65f, centerG.Z + 1.5f), new Vector3(1.2f, 0.7f, 1.0f));
 
             var awningMat = GsaMeshBuilder.SolidMat(awningColors[i % awningColors.Length]);
-            bldgBatch.AddBox(awningMat, new Vector3(centerG.X, 2.75f, frontZ + 0.75f), new Vector3(7.4f, 0.22f, 1.5f), rotDeg: new Vector3(18f, 0f, 0f));
+            bldgBatch.AddBox(awningMat, new Vector3(centerG.X, 2.52f, frontFaceZ + 0.68f), new Vector3(7.4f, 0.16f, 1.4f), rotDeg: new Vector3(16f, 0f, 0f));
 
             if (i % 4 == 0)
             {
@@ -166,17 +186,17 @@ public sealed class GsaCityVisualBuilder
                 };
                 var idx = (i / 4) % signTitles.Length;
                 var sign = GsaMeshBuilder.BuildStorefrontSignboard($"ShopSign_{i:00}", signColors[idx], signTitles[idx], width: 4.2f);
-                sign.Position = new Vector3(centerG.X, 3.65f, frontZ + 0.22f);
+                sign.Position = new Vector3(centerG.X, 3.55f, frontFaceZ + 0.12f);
                 visualRoot.AddChild(sign);
             }
         }
 
-        // Office building behind office_entry (500232, 7400005)
-        var officeCenterEnu = new Vector3d(500232, 7400010.8, 104.5);
+        // Office building flush behind office_entry (500232, 7400005 -> back at 7400010.0 so zero gap!)
+        var officeCenterEnu = new Vector3d(500232, 7400010.0, 104.5);
         var officePos = coords.ToGodot(officeCenterEnu);
         bldgBatch.AddBox(
             GsaRetroTextures.CreateWorldMaterial("bldg_office_uv", "facade_concrete", new Color(0.88f, 0.96f, 0.94f), triplanar: false, nightWindowGlow: true),
-            officePos, new Vector3(10f, 9f, 10f), uvScale: 0.09f);
+            officePos, new Vector3(10f, 9f, 10f), uvScale: 0.125f);
         ExtraObstacles.Add(new ObstacleBoxEnu("OfficeBuildingHq", officeCenterEnu, new Vector3d(10.0, 10.0, 9.0), true));
         if (!includeBeacons)
         {
@@ -186,10 +206,14 @@ public sealed class GsaCityVisualBuilder
         }
         bldgBatch.AddBox(
             GsaMeshBuilder.SolidMat(new Color(0.12f, 0.56f, 0.44f)),
-            coords.ToGodot(new Vector3d(500232, 7400004.5, 103.3)), new Vector3(5.2f, 0.28f, 2.4f));
+            coords.ToGodot(new Vector3d(500232, 7400004.2, 103.25)), new Vector3(5.2f, 0.22f, 1.8f), rotDeg: new Vector3(14f, 0f, 0f));
         var officeSign = GsaMeshBuilder.BuildStorefrontSignboard("OfficeSign", new Color(0.12f, 0.68f, 0.58f), "GSA SURVEY HQ", width: 4.6f);
-        officeSign.Position = coords.ToGodot(new Vector3d(500232, 7400005.2, 104.3));
+        officeSign.Position = coords.ToGodot(new Vector3d(500232, 7400004.86, 104.35));
         visualRoot.AddChild(officeSign);
+
+        // Sleek curb-side data offload terminal post next to unload_point (500225, 7400002)
+        bldgBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.16f, 0.19f, 0.22f)), coords.ToGodot(new Vector3d(500226.4, 7400003.4, 100.75)), new Vector3(0.45f, 1.5f, 0.35f));
+        bldgBatch.AddBox(GsaMeshBuilder.SolidMat(new Color(0.18f, 0.85f, 0.92f), emit: true, emissionEnergy: 1.1f), coords.ToGodot(new Vector3d(500226.4, 7400003.2, 101.22)), new Vector3(0.34f, 0.26f, 0.08f));
 
         // Street furniture: bus shelter, fire hydrants, trash dumpsters
         var busStop = GsaMeshBuilder.BuildBusStopShelter("BusStopCommerce");
@@ -339,7 +363,7 @@ public sealed class GsaCityVisualBuilder
 
         for (var q = 0; q < quadrants.Length; q++)
         {
-            if (quadrants[q].BuildSingleMeshInstance($"SkylineQ{q}", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 420f) is { } node)
+            if (quadrants[q].BuildSingleMeshInstance($"SkylineQ{q}", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 0f) is { } node)
                 skyline.AddChild(node);
         }
     }
