@@ -59,6 +59,7 @@ public partial class SaoDatumCityScene
         _locomotion.RepositionSafeAfterRecovery(GimbalinaChallenge.Grid, LocomotionMode.Bicycle, 0);
         _mobility.SetVisualPlatformMode(LocomotionMode.Bicycle);
         _mobility.SyncAvatarPose(GimbalinaChallenge.Grid, 0);
+        _mobility.SyncParkedVehicle(_benchRoot, null, Vector3d.Zero, 0.0);
         _lastSpeedMps = _parkBankRadians = 0;
         _tabletPanel.Hide();
         _gtaHud.Layer.Hide();

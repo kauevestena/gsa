@@ -210,6 +210,8 @@ public partial class SaoDatumCityScene
     {
         foreach (var actor in _cityDogs.Values) actor.Label.Text = Text("city.encounters.dog_label");
         foreach (var actor in _cityParking.Values) actor.Label.Text = Text("city.encounters.parking_label");
+        RefreshBeaconLabels();
+        RefreshParkedVehicleLabels();
         RefreshCityEverydayStatus();
     }
 }

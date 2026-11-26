@@ -701,7 +701,7 @@ public partial class SaoDatumCityScene
             blips.Add(new RadarBlip("office_entry", off.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
         if (_manifestObjectsById.TryGetValue("unload_point", out var unl))
             blips.Add(new RadarBlip("unload_point", unl.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
-        blips.Add(new RadarBlip("workshop_garage", GarageBayCenterEnu, new Color(0.22f, 0.94f, 0.58f), "W", ClampToRim: false));
+        blips.Add(new RadarBlip("workshop_garage", GarageBayCenterEnu, new Color(1.0f, 0.46f, 0.18f), "W", ClampToRim: false));
         if (_activeContract is null && _activeDispatchMission is not null)
             blips.Add(new RadarBlip("story_corona", _activeStoryCoronaEnu, new Color(0.98f, 0.36f, 0.86f), "M", ClampToRim: true));
         if (_activeContract is null)
@@ -757,14 +757,17 @@ public partial class SaoDatumCityScene
         var promptText = string.IsNullOrEmpty(_hazardNotice) ? Text("city.prompt.controls") : _hazardNotice;
         if (_activeContract is null && string.IsNullOrEmpty(_hazardNotice) && (pos - GimbalinaChallenge.Start).Length < 15 &&
             GimbalinaChallenge.IsEligible(mode)) promptText = Text("park.approach");
-        if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
-        if (!attn.BombWarningActive && !_everyday.DogActive && _everyday.Parking is null && _cityTrafficWarningId is not null)
-            promptText = Text("city.traffic.erratic_warning");
-        if (string.IsNullOrEmpty(_hazardNotice) && _cityTrafficWarningId is null && !_everyday.DogActive && _everyday.Parking is null &&
+        if (string.IsNullOrEmpty(_hazardNotice) && !_everyday.DogActive && _everyday.Parking is null &&
             GetStreetContextPrompt(pos, _lastSpeedMps, mode) is { } streetPrompt)
         {
             promptText = streetPrompt;
         }
+        else if (!attn.BombWarningActive && string.IsNullOrEmpty(_hazardNotice) && !_everyday.DogActive &&
+                 _everyday.Parking is null && _cityTrafficWarningId is not null)
+        {
+            promptText = Text("city.traffic.erratic_warning");
+        }
+        if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
 
         var objTitle = _activeContract is not null ? Text(_activeContract.TitleKey)
             : (_isSandbox ? Text("city.sandbox.title") : Text("city.freeroam.title"));

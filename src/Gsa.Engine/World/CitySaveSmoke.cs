@@ -109,6 +109,29 @@ public partial class SaoDatumCityScene
         SaveCareer(); TryLoadCareer();
         Require(current.SequenceEqual(File.ReadAllBytes(_saveManager.CurrentSavePath)), "sandbox changed career slot");
         _isSandbox = false;
+        Require(!_cityBlockObstacles.Any(b =>
+                b.Id is "unload_point" or "unload_point_north" or "control_old_center_01" or "control_old_center_02" ||
+                b.Id.StartsWith("survey_control_", StringComparison.Ordinal)),
+            "unload_point or survey_control leaked into movement obstacles");
+        foreach (var beaconId in new[] { "Beacon_office_entry", "Beacon_unload_point", "Beacon_unload_point_north", "Beacon_Workshop" }
+            .Concat(_geodeticNetwork.Benchmarks.Keys.Select(k => $"Beacon_{k}")))
+        {
+            var beacon = FindChild(beaconId, true, false) as Node3D;
+            Require(beacon is not null && beacon.GetNodeOrNull<MeshInstance3D>("BaseRing") is not null &&
+                    beacon.GetNodeOrNull<MeshInstance3D>("Cylinder") is not null,
+                $"beacon {beaconId} missing visual children");
+            var bMap = _coordinates.ToMap(beacon!.Position);
+            Require(Math.Abs(bMap.Z - GetTerrainElevationEnu(bMap.X, bMap.Y)) < 0.15,
+                $"beacon {beaconId} is not grounded at terrain elevation");
+        }
+        Require(!string.IsNullOrEmpty(GetStreetContextPrompt(new Vector3d(500232.0, 7400002.6, 100.0), 0.0, LocomotionMode.Handcart)),
+            "office beacon missing street prompt");
+        Require(!string.IsNullOrEmpty(GetStreetContextPrompt(new Vector3d(500225.0, 7400002.0, 100.0), 0.0, LocomotionMode.Handcart)),
+            "unload beacon missing street prompt");
+        Require(!string.IsNullOrEmpty(GetStreetContextPrompt(GarageTriggerEnu, 0.0, LocomotionMode.Handcart)),
+            "workshop beacon missing street prompt");
+        Require(!string.IsNullOrEmpty(GetStreetContextPrompt(new Vector3d(500230.0, 7400025.0, 100.0), 0.0, LocomotionMode.Handcart)),
+            "benchmark beacon missing street prompt");
         _citySaveSmokeCompleted = true;
         _tabletPanel.Show();
         _tabletTabs.CurrentTab = 5;

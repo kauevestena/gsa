@@ -1165,36 +1165,104 @@ public static class GsaMeshBuilder
         return (root, redMat, amberMat, greenMat);
     }
 
-    public static Node3D BuildBeaconRing(string name, Color color, float radius = 1.3f, float height = 1.0f)
+    public static Node3D BuildBeaconRing(
+        string name,
+        Color color,
+        float radius = 1.3f,
+        float height = 1.0f,
+        string? labelText = null,
+        float labelVisibilityRange = 46f)
     {
         var ring = new Node3D { Name = name };
-        var mat = new StandardMaterial3D
+        var baseMat = new StandardMaterial3D
         {
-            AlbedoColor = new Color(color.R, color.G, color.B, 0.20f),
+            AlbedoColor = color,
             EmissionEnabled = true,
             Emission = color,
-            EmissionEnergyMultiplier = 0.95f,
-            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            EmissionEnergyMultiplier = 1.05f,
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+        };
+        ring.AddChild(new MeshInstance3D
+        {
+            Name = "BaseRing",
+            Position = new Vector3(0f, 0.035f, 0f),
+            Mesh = new TorusMesh
+            {
+                OuterRadius = radius,
+                InnerRadius = MathF.Max(0.10f, radius - 0.14f),
+                Rings = 24,
+                RingSegments = 8,
+            },
+            MaterialOverride = baseMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
+
+        var cylHeight = height * 0.75f;
+        var cylMat = new StandardMaterial3D
+        {
+            AlbedoColor = new Color(color.R, color.G, color.B, 0.14f),
+            EmissionEnabled = true,
+            Emission = color,
+            EmissionEnergyMultiplier = 0.75f,
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            DepthDrawMode = BaseMaterial3D.DepthDrawModeEnum.Disabled,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            CullMode = BaseMaterial3D.CullModeEnum.Back,
         };
         ring.AddChild(new MeshInstance3D
         {
             Name = "Cylinder",
-            Position = new Vector3(0f, height * 0.5f, 0f),
+            Position = new Vector3(0f, cylHeight * 0.5f + 0.04f, 0f),
             Mesh = new CylinderMesh
             {
-                TopRadius = radius,
-                BottomRadius = radius,
-                Height = height,
-                RadialSegments = 18,
+                TopRadius = radius * 0.96f,
+                BottomRadius = radius * 0.96f,
+                Height = cylHeight,
+                RadialSegments = 20,
                 CapTop = false,
                 CapBottom = false,
             },
-            MaterialOverride = mat,
+            MaterialOverride = cylMat,
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
+
+        if (!string.IsNullOrEmpty(labelText))
+        {
+            ring.AddChild(new Label3D
+            {
+                Name = "BeaconLabel",
+                Text = labelText,
+                Position = new Vector3(0f, MathF.Max(1.65f, height + 0.75f), 0f),
+                FontSize = 30,
+                PixelSize = 0.0065f,
+                Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
+                Modulate = color.Lightened(0.30f),
+                OutlineModulate = Colors.Black,
+                OutlineSize = 5,
+                AlphaCut = Label3D.AlphaCutMode.Disabled,
+                VisibilityRangeEnd = labelVisibilityRange,
+            });
+        }
+
         return ring;
+    }
+
+    public static void SetBeaconColor(Node3D ring, Color color, float alpha = 0.14f)
+    {
+        if (ring.GetNodeOrNull<MeshInstance3D>("BaseRing")?.MaterialOverride is StandardMaterial3D baseMat)
+        {
+            baseMat.AlbedoColor = color;
+            baseMat.Emission = color;
+        }
+        if (ring.GetNodeOrNull<MeshInstance3D>("Cylinder")?.MaterialOverride is StandardMaterial3D cylMat)
+        {
+            cylMat.AlbedoColor = new Color(color.R, color.G, color.B, alpha);
+            cylMat.Emission = color;
+        }
+        if (ring.GetNodeOrNull<Label3D>("BeaconLabel") is { } label)
+        {
+            label.Modulate = color.Lightened(0.30f);
+        }
     }
 
     public static MeshInstance3D Box(string name, Vector3 size, Vector3 pos, Material mat, Vector3? rotDeg = null)

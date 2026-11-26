@@ -114,7 +114,7 @@ public partial class SaoDatumCityScene
             if (city is not null) calendar.Restore(city.Calendar);
             var fleet = city is not null ? FleetProgressionManager.FromSnapshot(city.Fleet) : RestoreLegacyCityFleet(runtime.Equipment);
             var mobility = city is not null ? LocomotionSimulator.FromSaveSnapshot(city.Mobility, CitySaveBounds)
-                : new LocomotionSimulator(_locomotion.PositionEnu, _locomotion.HeadingRadians, fleet.ActivePlatform.Mode, _fullManifest.Bounds);
+                : new LocomotionSimulator(_locomotion.PositionEnu, _locomotion.HeadingRadians, fleet.ActivePlatform.Mode, CitySaveBounds);
             var samples = city?.CameraSamples.Select(s => s.ToDomain()).ToArray() ?? [];
             var hazards = Gsa.Missions.Gameplay.CityHazardState.Restore(city?.Hazards, city?.DisguiseActive ?? false);
             var everyday = CityEverydayEncounters.Restore(city?.Encounters);
@@ -228,5 +228,8 @@ public partial class SaoDatumCityScene
             if (_collectibleNodes.TryGetValue(egg.EggId, out var node)) node.Visible = !_collectibles.CollectedEggIds.Contains(egg.EggId);
         foreach (var card in MvpCollectiblesCoordinator.AllSixProjectionCards)
             if (_collectibleNodes.TryGetValue(card.CardId, out var node)) node.Visible = !_collectibles.CollectedCardIds.Contains(card.CardId);
+        RefreshBenchmarkBeaconVisuals();
+        SyncWorldParkedVehicleVisibility();
+        RefreshParkedVehicleLabels();
     }
 }

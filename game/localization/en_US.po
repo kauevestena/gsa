@@ -990,7 +990,7 @@ msgid "hud.prompt.controls"
 msgstr "WASD Drive · E Interact · C Photo · V Camera · F Dismount · G Corn · H Horn · X Radio · R Notebook"
 
 msgid "city.prompt.controls"
-msgstr "WASD Drive · C Photo · L LiDAR · B Vehicle · F Dismount · V Cam · Tab Tablet · X Radio · T Time · P Rain"
+msgstr "WASD Move · E Interact · F Dismount/Board · C Photo · L LiDAR · B Vehicle · V Cam · Tab Tablet · X Radio"
 
 msgid "platform.on_foot.name"
 msgstr "On Foot"
@@ -1176,7 +1176,7 @@ msgid "city.sandbox.welcome"
 msgstr "Free Roam Sandbox: all 4 districts & 7 survey platforms unlocked! Press B to swap vehicles."
 
 msgid "city.career.welcome"
-msgstr "Welcome to São Datum! Press Tab to accept a contract and start mapping."
+msgstr "Welcome to São Datum! Move with WASD/Arrows, press [F] to walk on foot or push Gimbalina's cart, and press [E] at the magenta ring (or [Tab]) to start a contract."
 
 msgid "city.sandbox.title"
 msgstr "Free Roam Sandbox · São Datum"
@@ -2380,3 +2380,54 @@ msgstr "Cosmetics & Workshop Style"
 
 msgid "city.cosmetics.equip"
 msgstr "Equip"
+
+msgid "beacon.office.label"
+msgstr "GSA HQ · Contracts & Delivery [E]"
+
+msgid "beacon.unload.label"
+msgstr "Data Offload Terminal [E]"
+
+msgid "beacon.payphone.label"
+msgstr "Dispatch Payphone [E]"
+
+msgid "beacon.workshop.label"
+msgstr "Workshop · Repair & Calibrate [E]"
+
+msgid "beacon.benchmark.label"
+msgstr "Geodetic Benchmark (On Foot 5s)"
+
+msgid "beacon.benchmark.done"
+msgstr "✓ Benchmark Occupied"
+
+msgid "city.street.office_open_prompt"
+msgstr "[E] Open GSA Survey HQ Tablet (Contracts & Office)"
+
+msgid "city.street.office_upload_first_prompt"
+msgstr "GSA Survey HQ · Upload field data at the amber Terminal first, or press [E] to open Office"
+
+msgid "city.street.office_recover_gimbalina"
+msgstr "[E] GSA Survey HQ · Recover Gimbalina & Open Tablet"
+
+msgid "city.street.unload_idle_prompt"
+msgstr "Data Offload Terminal · Accept a contract first, then press [E] here to upload field data"
+
+msgid "city.street.unload_collect_first_prompt"
+msgstr "Data Offload Terminal · Capture survey data ([C] / LiDAR) first, then press [E] here to upload"
+
+msgid "city.street.unload_recover_gimbalina"
+msgstr "[E] Data Offload Terminal · Recover Gimbalina"
+
+msgid "city.street.benchmark_dismount_prompt"
+msgstr "Geodetic Benchmark · Stop and press [F] to dismount on foot, then stand inside for 5s (+25 C$)"
+
+msgid "city.street.benchmark_holding_prompt"
+msgstr "Occupying Geodetic Benchmark… {0:0.0} / 5.0 s (stay on foot inside the green ring)"
+
+msgid "city.street.benchmark_occupied_prompt"
+msgstr "✓ Geodetic Benchmark already occupied (see Geopédia in [Tab])"
+
+msgid "city.street.switch_vehicle_prompt"
+msgstr "[E] Switch to {0} (or [F] Dismount)"
+
+msgid "city.street.vehicle_locked_detail"
+msgstr "{0} · Locked ({1})"

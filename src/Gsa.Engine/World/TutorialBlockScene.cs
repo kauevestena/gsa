@@ -237,10 +237,14 @@ public partial class TutorialBlockScene : Node3D
         _lidarBench = new LidarBenchRig(_coordinates);
         _audio = new GsaProceduralAudio(this);
 
-        _liveObstacles = ObstacleBoxEnu.FromWorldObjects(_manifest.Objects)
+        _liveObstacles = ObstacleBoxEnu.FromWorldObjects(
+                _manifest.Objects.Where(o => o.ObjectClass is not ("ground" or "unload_point" or "survey_control")))
             .Concat(_cityVisuals!.ExtraObstacles)
             .ToArray();
-        _liveLocomotion = new LocomotionSimulator(startEnu, Math.PI / 2.0, LocomotionMode.Handcart, _manifest.Bounds);
+        var playableBounds = new WorldBounds(
+            new Vector3d(_manifest.Bounds.Min.X, 7399976.0, _manifest.Bounds.Min.Z),
+            _manifest.Bounds.Max);
+        _liveLocomotion = new LocomotionSimulator(startEnu, Math.PI / 2.0, LocomotionMode.Handcart, playableBounds);
     }
 
     private void StepInteractiveBench(double delta)

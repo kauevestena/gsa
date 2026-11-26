@@ -16,6 +16,8 @@ public sealed record AnimatedTrafficSignal(
 /// <summary>Builds GTA III urban streetscapes, storefront architecture, traffic signals, skyline blocks, and beacon rings.</summary>
 public sealed class GsaCityVisualBuilder
 {
+    private float _beaconPulsePhase;
+
     public List<AnimatedTrafficSignal> Signals { get; } = [];
     public List<Node3D> SpinningBeacons { get; } = [];
     public List<ObstacleBoxEnu> ExtraObstacles { get; } = [];
@@ -237,13 +239,14 @@ public sealed class GsaCityVisualBuilder
             bldgBatch.AddBox(binLid, dp + new Vector3(0f, 1.12f, 0f), new Vector3(1.92f, 0.12f, 1.16f));
         }
 
-        // 4. GTA III Glowing Spinning Beacon Rings on Key Interactive Points
+        // 4. GTA III Glowing Beacon Rings on Key Interactive Points
         if (includeBeacons)
         {
             AddBeacon(visualRoot, coords, "BeaconOffice", new Vector3d(500232, 7400002.6, 100.05), new Color(0.15f, 0.88f, 0.85f), 1.35f);
             AddBeacon(visualRoot, coords, "BeaconUnload", new Vector3d(500225, 7400002.0, 100.05), new Color(0.98f, 0.76f, 0.16f), 1.25f);
-            AddBeacon(visualRoot, coords, "BeaconCtrl1", new Vector3d(500010, 7400002.0, 100.05), new Color(0.24f, 0.92f, 0.46f), 0.75f);
-            AddBeacon(visualRoot, coords, "BeaconCtrl2", new Vector3d(500230, 7400025.0, 100.05), new Color(0.24f, 0.92f, 0.46f), 0.75f);
+            var benchmarkLabel = TranslationServer.Translate("beacon.benchmark.label").ToString();
+            AddBeacon(visualRoot, coords, "BeaconCtrl1", new Vector3d(500010, 7400002.0, 100.05), new Color(0.24f, 0.92f, 0.46f), 0.75f, benchmarkLabel);
+            AddBeacon(visualRoot, coords, "BeaconCtrl2", new Vector3d(500230, 7400025.0, 100.05), new Color(0.24f, 0.92f, 0.46f), 0.75f, benchmarkLabel);
         }
 
         // 5. Traffic Signals synced to TrafficBenchSimulator
@@ -370,9 +373,16 @@ public sealed class GsaCityVisualBuilder
 
     public void UpdateAnimatedProps(double dt, TrafficBenchSimulator? traffic)
     {
-        var fdt = (float)dt;
+        _beaconPulsePhase += (float)dt * 2.6f;
+        var pulseScale = 0.86f + 0.14f * MathF.Sin(_beaconPulsePhase);
         foreach (var beacon in SpinningBeacons)
-            beacon.RotateY(fdt * 1.8f);
+        {
+            if (beacon.Visible && beacon.GetNodeOrNull<MeshInstance3D>("Cylinder") is { Mesh: CylinderMesh mesh } cyl)
+            {
+                cyl.Scale = new Vector3(1f, pulseScale, 1f);
+                cyl.Position = new Vector3(0f, mesh.Height * 0.5f * pulseScale + 0.04f, 0f);
+            }
+        }
 
         if (traffic is null)
             return;
@@ -386,9 +396,9 @@ public sealed class GsaCityVisualBuilder
         }
     }
 
-    private void AddBeacon(Node3D parent, GodotCoordinateAdapter coords, string name, Vector3d posEnu, Color color, float radius)
+    private void AddBeacon(Node3D parent, GodotCoordinateAdapter coords, string name, Vector3d posEnu, Color color, float radius, string? labelText = null)
     {
-        var beacon = GsaMeshBuilder.BuildBeaconRing(name, color, radius, 1.0f);
+        var beacon = GsaMeshBuilder.BuildBeaconRing(name, color, radius, 1.0f, labelText);
         beacon.Position = coords.ToGodot(posEnu);
         parent.AddChild(beacon);
         SpinningBeacons.Add(beacon);

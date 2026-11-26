@@ -170,4 +170,55 @@ public sealed class MobilityTests
         Assert.False(autonomySim.TryConsumeCaptureUnits(1, out var autonomyReason));
         Assert.Equal(CaptureStopReason.AutonomyExhausted, autonomyReason);
     }
+
+    [Fact]
+    public void SpawnWithHandcartCanWalkSouthOntoStreetStepOverUnloadPadAndDismount()
+    {
+        var playableBounds = new WorldBounds(
+            new Vector3d(500000, 7399976, 99.5),
+            new Vector3d(500240, 7400060, 115));
+
+        var manifestItems = new[]
+        {
+            (ObjectClass: "ground", Box: new ObstacleBoxEnu("tutorial_ground", new Vector3d(500120, 7400030, 99.75), new Vector3d(240, 60, 0.5), Collision: true)),
+            (ObjectClass: "office_entry", Box: new ObstacleBoxEnu("office_entry", new Vector3d(500232, 7400005, 101.5), new Vector3d(4, 0.2, 3), Collision: true)),
+            (ObjectClass: "unload_point", Box: new ObstacleBoxEnu("unload_point", new Vector3d(500225, 7400002, 100.1), new Vector3d(2, 2, 0.2), Collision: true)),
+            (ObjectClass: "survey_control", Box: new ObstacleBoxEnu("control_old_center_01", new Vector3d(500010, 7400002, 100.05), new Vector3d(0.25, 0.25, 0.1), Collision: true)),
+            (ObjectClass: "survey_control", Box: new ObstacleBoxEnu("control_old_center_02", new Vector3d(500230, 7400025, 100.05), new Vector3d(0.25, 0.25, 0.1), Collision: true)),
+            (ObjectClass: "building_shell", Box: new ObstacleBoxEnu("building_shell_20", new Vector3d(500210, 7400010.4, 104), new Vector3d(8, 10, 8), Collision: true)),
+        };
+
+        var obstacles = manifestItems
+            .Where(o => o.ObjectClass is not ("ground" or "unload_point" or "survey_control"))
+            .Select(o => o.Box)
+            .ToArray();
+
+        var sim = new LocomotionSimulator(new Vector3d(500228.0, 7400000.7, 100.0), Math.PI, LocomotionMode.Handcart, playableBounds);
+        const double dt = 1.0 / 60.0;
+
+        // Drive west across the unload_point pad without getting wedged.
+        for (var i = 0; i < 240; i++)
+        {
+            var step = sim.Step(dt, new LocomotionInput(1.0, 0.0, 0.0), 0.0, 1.0, obstacles);
+            Assert.False(step.Collided);
+        }
+        Assert.True(sim.PositionEnu.X < 500223.0);
+
+        // Stop, dismount onto foot, and walk south onto the street / sidewalk.
+        for (var i = 0; i < 45; i++)
+            sim.Step(dt, new LocomotionInput(0.0, 1.0, 0.0), 0.0, 1.0, obstacles);
+        Assert.True(sim.TryToggleMount(obstacles, out var reason), reason);
+        Assert.Equal(LocomotionMode.OnFoot, sim.Mode);
+
+        // Turn to face south (-PI / 2) and walk south onto South Commerce Blvd.
+        for (var i = 0; i < 30; i++)
+        {
+            var steer = Math.Abs(sim.HeadingRadians + Math.PI / 2.0) > 0.08 ? 1.0 : 0.0;
+            sim.Step(dt, new LocomotionInput(0.0, 0.0, steer), 0.0, 1.0, obstacles);
+        }
+        for (var i = 0; i < 90; i++)
+            sim.Step(dt, new LocomotionInput(1.0, 0.0, 0.0), 0.0, 1.0, obstacles);
+
+        Assert.True(sim.PositionEnu.Y < 7399998.0);
+    }
 }

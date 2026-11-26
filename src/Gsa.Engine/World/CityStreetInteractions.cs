@@ -103,10 +103,12 @@ public partial class SaoDatumCityScene
         garageSign.Position = _coordinates.ToGodot(new Vector3d(500174.0, 7400030.05, 103.55));
         visualBase.AddChild(garageSign);
 
-        var ring = GsaMeshBuilder.BuildBeaconRing("Beacon_Workshop", new Color(0.18f, 0.94f, 0.56f), 2.1f, 0.85f);
-        ring.Position = _coordinates.ToGodot(GarageTriggerEnu);
+        var ring = GsaMeshBuilder.BuildBeaconRing("Beacon_Workshop", new Color(1.0f, 0.46f, 0.18f), 2.1f, 0.85f, Text("beacon.workshop.label"));
+        ring.Position = _coordinates.ToGodot(new Vector3d(GarageTriggerEnu.X, GarageTriggerEnu.Y, GetTerrainElevationEnu(GarageTriggerEnu.X, GarageTriggerEnu.Y)));
+        ring.Visible = !_quickParkRun;
         visualBase.AddChild(ring);
         _cityVisuals.SpinningBeacons.Add(ring);
+        _staticBeaconLabels.Add((ring, "beacon.workshop.label"));
     }
 
     private void BuildDispatchPayphonesAndStoryCorona(Node3D visualBase)
@@ -127,10 +129,11 @@ public partial class SaoDatumCityScene
             phoneBatch.AddBox(shellMat, gPos + new Vector3(0f, 1.78f, 0f), new Vector3(0.64f, 0.68f, 0.52f));
             phoneBatch.AddBox(screenMat, gPos + new Vector3(0f, 1.66f, 0.04f), new Vector3(0.28f, 0.26f, 0.14f));
 
-            var ring = GsaMeshBuilder.BuildBeaconRing($"PayphoneRing_{regionId}", new Color(0.22f, 0.86f, 0.96f), 0.95f, 0.95f);
+            var ring = GsaMeshBuilder.BuildBeaconRing($"PayphoneRing_{regionId}", new Color(0.24f, 0.66f, 1.0f), 0.95f, 0.95f, Text("beacon.payphone.label"), labelVisibilityRange: 36f);
             ring.Position = gPos;
             visualBase.AddChild(ring);
             _cityVisuals.SpinningBeacons.Add(ring);
+            _staticBeaconLabels.Add((ring, "beacon.payphone.label"));
             _payphoneNodes.Add((regionId, pos, ring));
         }
         phoneBatch.BuildSeparatedNodes(visualBase, "DispatchPayphones", GeometryInstance3D.ShadowCastingSetting.Off);
@@ -277,7 +280,7 @@ public partial class SaoDatumCityScene
                 _activeStoryCoronaEnu = GetCoronaPositionForMission(nextSpec);
                 _storyCoronaNode.Position = _coordinates.ToGodot(_activeStoryCoronaEnu);
                 _storyCoronaNode.Visible = true;
-                var nextTxt = $"{nextSpec.MissionId} · {Text(nextSpec.TitleKey)}";
+                var nextTxt = $"[E] {nextSpec.MissionId} · {Text(nextSpec.TitleKey)}";
                 if (_storyCoronaLabel.Text != nextTxt)
                     _storyCoronaLabel.Text = nextTxt;
             }
@@ -450,7 +453,7 @@ public partial class SaoDatumCityScene
         if (_rackMisaligned || _cityHazards.TirePunctured || (_carSim?.ConditionDamage ?? 0.0) >= 45.0)
         {
             targetEnu = GarageTriggerEnu;
-            color = new Color(0.20f, 0.94f, 0.56f);
+            color = new Color(1.0f, 0.46f, 0.18f);
             return true;
         }
 
@@ -464,6 +467,40 @@ public partial class SaoDatumCityScene
         targetEnu = Vector3d.Zero;
         color = Colors.White;
         return false;
+    }
+
+    private bool NearBasicUnloadPad(Vector3d pos)
+    {
+        foreach (var id in new[] { "unload_point", "unload_point_north" })
+        {
+            if (_manifestObjectsById.TryGetValue(id, out var obj) &&
+                TrainingContractSession.HorizontalDistance(pos, obj.PositionEnu) <= 4.5)
+                return true;
+        }
+        return false;
+    }
+
+    private string? FindNearbyBenchmarkId(Vector3d pos)
+    {
+        foreach (var bm in _geodeticNetwork.Benchmarks.Values)
+        {
+            if (TrainingContractSession.HorizontalDistance(pos, bm.PhysicalPositionEnu) <= 4.0)
+                return bm.BenchmarkId;
+        }
+        return null;
+    }
+
+    private string GetLockedVehicleRequirementLabel(LocomotionMode mode)
+    {
+        var entry = FleetShopCatalog.GetPlatformEntry(mode);
+        return entry.RequiredStoryMissionId ?? mode switch
+        {
+            LocomotionMode.Car => "HIST-04",
+            LocomotionMode.Kombi => "HIST-05",
+            LocomotionMode.Pickup => "HIST-07",
+            LocomotionMode.Van => "HIST-10",
+            _ => "HIST-01",
+        };
     }
 
     private string? GetStreetContextPrompt(Vector3d pos, double speed, LocomotionMode mode)
@@ -482,16 +519,33 @@ public partial class SaoDatumCityScene
             return string.Format(Text("city.garage.prompt"), fee);
         }
 
+        var hasPending = _fieldSamples.Count > 0 || _pendingLidarReturns > 0 || _pendingBoundaryShots.Count > 0;
+        var hasProtected = _protectedCityPhotos.Count > 0 || _protectedLidarReturns > 0 || _protectedBoundaryShots.Count > 0;
         if (_activeContract is not null)
         {
-            var hasPending = _fieldSamples.Count > 0 || _pendingLidarReturns > 0 || _pendingBoundaryShots.Count > 0;
             if (hasPending && NearCityUnload(pos))
                 return Text("city.street.offload_prompt");
-            var hasProtected = _protectedCityPhotos.Count > 0 || _protectedLidarReturns > 0 || _protectedBoundaryShots.Count > 0;
             if (hasProtected && IsNearOfficeDoor(pos))
                 return Text("city.street.office_prompt");
         }
-        else
+
+        if (IsNearOfficeDoor(pos))
+        {
+            if (_gimbalina.HasFledToSafety)
+                return Text("city.street.office_recover_gimbalina");
+            if (_activeContract is not null && hasPending)
+                return Text("city.street.office_upload_first_prompt");
+            return Text("city.street.office_open_prompt");
+        }
+
+        if (NearBasicUnloadPad(pos))
+        {
+            if (_gimbalina.HasFledToSafety)
+                return Text("city.street.unload_recover_gimbalina");
+            return Text(_activeContract is not null ? "city.street.unload_collect_first_prompt" : "city.street.unload_idle_prompt");
+        }
+
+        if (_activeContract is null)
         {
             if (_activeDispatchMission is { } spec && TrainingContractSession.HorizontalDistance(pos, _activeStoryCoronaEnu) <= 3.2)
             {
@@ -506,20 +560,32 @@ public partial class SaoDatumCityScene
             }
         }
 
-        if (mode == LocomotionMode.OnFoot)
+        if (FindNearbyBenchmarkId(pos) is { } nearBm)
         {
-            foreach (var v in _worldParkedVehicles)
+            if (_collectibles.OccupiedLandmarkIds.Contains(nearBm))
+                return Text("city.street.benchmark_occupied_prompt");
+            return mode == LocomotionMode.OnFoot
+                ? string.Format(Text("city.street.benchmark_holding_prompt"), _benchmarkHoldSeconds)
+                : Text("city.street.benchmark_dismount_prompt");
+        }
+
+        foreach (var v in _worldParkedVehicles)
+        {
+            if (!v.Root.Visible || TrainingContractSession.HorizontalDistance(pos, v.PosEnu) >= 4.2) continue;
+            var vehName = Text($"platform.{v.Mode.ToString().ToLowerInvariant()}.name");
+            var owned = _isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode);
+            if (owned)
             {
-                if (TrainingContractSession.HorizontalDistance(pos, v.PosEnu) >= 4.2) continue;
-                var owned = _isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode);
-                if (owned) return Text("city.board_vehicle");
-                var completed = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
-                var quote = _fleet.QuotePlatformPurchase(v.Mode, _progression, completed);
-                var unlocked = quote.Unlocked && CityPlatformStoryUnlocked(v.Mode);
-                return unlocked
-                    ? string.Format(Text("city.street.buy_vehicle"), Text($"platform.{v.Mode.ToString().ToLowerInvariant()}.name"), quote.FinalPriceCoords)
-                    : Text("city.story.locked");
+                return mode == LocomotionMode.OnFoot
+                    ? Text("city.board_vehicle")
+                    : string.Format(Text("city.street.switch_vehicle_prompt"), vehName);
             }
+            var completed = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
+            var quote = _fleet.QuotePlatformPurchase(v.Mode, _progression, completed);
+            var unlocked = quote.Unlocked && CityPlatformStoryUnlocked(v.Mode);
+            return unlocked
+                ? string.Format(Text("city.street.buy_vehicle"), vehName, quote.FinalPriceCoords)
+                : string.Format(Text("city.street.vehicle_locked_detail"), vehName, GetLockedVehicleRequirementLabel(v.Mode));
         }
 
         return null;
@@ -594,15 +660,15 @@ public partial class SaoDatumCityScene
             return true;
         }
 
+        var hasPending = _fieldSamples.Count > 0 || _pendingLidarReturns > 0 || _pendingBoundaryShots.Count > 0;
+        var hasProtected = _protectedCityPhotos.Count > 0 || _protectedLidarReturns > 0 || _protectedBoundaryShots.Count > 0;
         if (_activeContract is not null)
         {
-            var hasPending = _fieldSamples.Count > 0 || _pendingLidarReturns > 0 || _pendingBoundaryShots.Count > 0;
             if (hasPending && NearCityUnload(pos))
             {
                 OffloadCityData();
                 return true;
             }
-            var hasProtected = _protectedCityPhotos.Count > 0 || _protectedLidarReturns > 0 || _protectedBoundaryShots.Count > 0;
             if (hasProtected && IsNearOfficeDoor(pos))
             {
                 if (IsViaductCollection(_activeContract) || (_officeMode == ProcessingMode.Technical && !_privacyMasksApplied))
@@ -618,7 +684,32 @@ public partial class SaoDatumCityScene
                 return true;
             }
         }
-        else
+
+        if (IsNearOfficeDoor(pos))
+        {
+            if (_gimbalina.HasFledToSafety)
+                RecoverCityGimbalina();
+            else if (_activeContract is not null && hasPending)
+                _feedbackText = Text("city.office.upload_first");
+            _tabletPanel.Show();
+            _tabletTabs.CurrentTab = _activeContract is not null ? 1 : 0;
+            RefreshTabletContents();
+            return true;
+        }
+
+        if (NearBasicUnloadPad(pos))
+        {
+            if (_gimbalina.HasFledToSafety)
+                RecoverCityGimbalina();
+            else
+            {
+                _feedbackText = Text(_activeContract is not null ? "city.street.unload_collect_first_prompt" : "city.street.unload_idle_prompt");
+                _audio.PlayAlert();
+            }
+            return true;
+        }
+
+        if (_activeContract is null)
         {
             if (_activeDispatchMission is { } spec && TrainingContractSession.HorizontalDistance(pos, _activeStoryCoronaEnu) <= 3.2)
             {
@@ -651,23 +742,55 @@ public partial class SaoDatumCityScene
             }
         }
 
-        if (mode == LocomotionMode.OnFoot)
+        if (FindNearbyBenchmarkId(pos) is { } nearBm)
         {
-            foreach (var v in _worldParkedVehicles)
+            if (_collectibles.OccupiedLandmarkIds.Contains(nearBm))
             {
-                if (_cityHazards.IsVehicleDisabled(v.Mode) ||
-                    TrainingContractSession.HorizontalDistance(pos, v.PosEnu) >= 4.2 ||
-                    _isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode))
+                _feedbackText = Text("city.street.benchmark_occupied_prompt");
+                return true;
+            }
+            if (mode != LocomotionMode.OnFoot && Math.Abs(speed) < LocomotionSimulator.MaxSpeedToToggleMount)
+            {
+                _feedbackText = Text("city.street.benchmark_dismount_prompt");
+                return true;
+            }
+        }
+
+        foreach (var v in _worldParkedVehicles)
+        {
+            if (!v.Root.Visible || TrainingContractSession.HorizontalDistance(pos, v.PosEnu) >= 4.2)
+                continue;
+            var owned = _isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode);
+            if (owned)
+            {
+                if (_cityHazards.IsVehicleDisabled(v.Mode) || Math.Abs(speed) >= 1.5)
                     continue;
-                if (TryPurchaseCityPlatform(v.Mode))
-                {
-                    if (_carSim is not null) _cityHazards.SetVehicleDamage(_carSim.Profile.Mode, _carSim.ConditionDamage);
-                    _carSim = null;
-                    _locomotion.RepositionSafeAfterRecovery(v.PosEnu, v.Mode, v.Heading, refillAutonomy: true, clearStorage: false);
-                    SwitchPlatform(v.Mode);
-                    SnapCamera();
-                    return true;
-                }
+                if (_carSim is not null) _cityHazards.SetVehicleDamage(_carSim.Profile.Mode, _carSim.ConditionDamage);
+                _carSim = null;
+                _locomotion.RepositionSafeAfterRecovery(v.PosEnu, v.Mode, v.Heading, refillAutonomy: true, clearStorage: false);
+                SwitchPlatform(v.Mode);
+                SnapCamera();
+                return true;
+            }
+
+            var completed = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
+            var quote = _fleet.QuotePlatformPurchase(v.Mode, _progression, completed);
+            var unlocked = quote.Unlocked && CityPlatformStoryUnlocked(v.Mode);
+            if (!unlocked)
+            {
+                var vehName = Text($"platform.{v.Mode.ToString().ToLowerInvariant()}.name");
+                _feedbackText = string.Format(Text("city.street.vehicle_locked_detail"), vehName, GetLockedVehicleRequirementLabel(v.Mode));
+                _audio.PlayAlert();
+                return true;
+            }
+            if (!_cityHazards.IsVehicleDisabled(v.Mode) && Math.Abs(speed) < 1.5 && TryPurchaseCityPlatform(v.Mode))
+            {
+                if (_carSim is not null) _cityHazards.SetVehicleDamage(_carSim.Profile.Mode, _carSim.ConditionDamage);
+                _carSim = null;
+                _locomotion.RepositionSafeAfterRecovery(v.PosEnu, v.Mode, v.Heading, refillAutonomy: true, clearStorage: false);
+                SwitchPlatform(v.Mode);
+                SnapCamera();
+                return true;
             }
         }
 
@@ -697,21 +820,56 @@ public partial class SaoDatumCityScene
         _mobility.SetVisualCustomization(paint, costume);
     }
 
+    private void SyncWorldParkedVehicleVisibility()
+    {
+        var activeVehicle = _locomotion?.MountedVehicleMode ?? LocomotionMode.Handcart;
+        foreach (var v in _worldParkedVehicles)
+            v.Root.Visible = !_quickParkRun && v.Mode != activeVehicle;
+    }
+
+    private void UpdateBenchmarkBeaconVisual(string benchmarkId, bool occupied)
+    {
+        if (!_benchmarkBeaconNodes.TryGetValue(benchmarkId, out var ring))
+            return;
+        var col = occupied ? new Color(0.20f, 0.78f, 0.68f) : new Color(0.24f, 0.92f, 0.46f);
+        GsaMeshBuilder.SetBeaconColor(ring, col, occupied ? 0.07f : 0.14f);
+        if (ring.GetNodeOrNull<Label3D>("BeaconLabel") is { } lbl)
+            lbl.Text = Text(occupied ? "beacon.benchmark.done" : "beacon.benchmark.label");
+    }
+
+    private void RefreshBenchmarkBeaconVisuals()
+    {
+        foreach (var id in _benchmarkBeaconNodes.Keys)
+            UpdateBenchmarkBeaconVisual(id, _collectibles.OccupiedLandmarkIds.Contains(id));
+    }
+
+    private void RefreshBeaconLabels()
+    {
+        foreach (var (node, key) in _staticBeaconLabels)
+        {
+            if (node.GetNodeOrNull<Label3D>("BeaconLabel") is { } lbl)
+                lbl.Text = Text(key);
+        }
+        RefreshBenchmarkBeaconVisuals();
+    }
+
     private void RefreshParkedVehicleLabels()
     {
         if (_parkedVehicleLabels.Count != _worldParkedVehicles.Count)
             return;
         var completed = _campaignState.ObjectiveStates.Keys.Where(CityMissionCompleted).ToHashSet(StringComparer.Ordinal);
+        var onFoot = _locomotion?.Mode == LocomotionMode.OnFoot;
         for (var i = 0; i < _worldParkedVehicles.Count; i++)
         {
             var v = _worldParkedVehicles[i];
             var lbl = _parkedVehicleLabels[i];
+            var vehName = Text($"platform.{v.Mode.ToString().ToLowerInvariant()}.name");
             var owned = _isSandbox || _fleet.OwnedPlatforms.Contains(v.Mode);
             string next;
             Color col;
             if (owned)
             {
-                next = "[F] " + Text($"platform.{v.Mode.ToString().ToLowerInvariant()}.name");
+                next = (onFoot ? "[F] " : "[E] ") + vehName;
                 col = new Color(0.32f, 0.92f, 0.96f);
             }
             else
@@ -720,12 +878,12 @@ public partial class SaoDatumCityScene
                 var unlocked = q.Unlocked && CityPlatformStoryUnlocked(v.Mode);
                 if (unlocked)
                 {
-                    next = $"[E] {q.FinalPriceCoords} C$";
+                    next = $"[E] {vehName} · {q.FinalPriceCoords} C$";
                     col = new Color(0.98f, 0.82f, 0.24f);
                 }
                 else
                 {
-                    next = Text("city.story.locked");
+                    next = string.Format(Text("city.street.vehicle_locked_detail"), vehName, GetLockedVehicleRequirementLabel(v.Mode));
                     col = new Color(0.75f, 0.78f, 0.82f);
                 }
             }

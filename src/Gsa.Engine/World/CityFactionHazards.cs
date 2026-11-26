@@ -174,7 +174,8 @@ public partial class SaoDatumCityScene
             node.Position = _coordinates.ToGodot(position);
             node.ForceUpdateTransform();
         }
-        if (FindChild("Beacon_" + id, true, false) is Node3D beacon) beacon.Position = _coordinates.ToGodot(position);
+        if (FindChild("Beacon_" + id, true, false) is Node3D beacon)
+            beacon.Position = _coordinates.ToGodot(new Vector3d(position.X, position.Y, GetTerrainElevationEnu(position.X, position.Y)));
         if (_manifestObjectsById.TryGetValue(id, out var definition)) _manifestObjectsById[id] = definition.WithPhysicalPosition(position);
         _registry.UpdatePhysicalPosition(id, position);
         for (var i = 0; i < _liveCandidates.Length; i++)

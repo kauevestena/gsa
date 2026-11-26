@@ -990,7 +990,7 @@ msgid "hud.prompt.controls"
 msgstr "WASD Mover · E Interagir · C Foto · V Câmera · F Descer · G Milho · H Buzina · X Rádio · R Caderno"
 
 msgid "city.prompt.controls"
-msgstr "WASD Dirigir · C Foto · L LiDAR · B Veículo · F Descer · V Câm · Tab Tablet · X Rádio · T Hora · P Chuva"
+msgstr "WASD Mover · E Interagir · F Descer/Embarcar · C Foto · L LiDAR · B Veículo · V Câm · Tab Tablet · X Rádio"
 
 msgid "platform.on_foot.name"
 msgstr "A Pé"
@@ -1176,7 +1176,7 @@ msgid "city.sandbox.welcome"
 msgstr "Cidade Livre: todas as 4 regiões e 7 plataformas liberadas! Pressione B para trocar veículo."
 
 msgid "city.career.welcome"
-msgstr "Bem-vindo a São Datum! Pressione Tab para aceitar um contrato e mapear."
+msgstr "Bem-vindo a São Datum! Use WASD/Setas para andar, [F] para ir a pé ou empurrar o carrinho da Gimbalina e [E] no cilindro magenta (ou [Tab]) para iniciar contrato."
 
 msgid "city.sandbox.title"
 msgstr "Cidade Livre · São Datum"
@@ -2380,3 +2380,54 @@ msgstr "Cosméticos e Estilo da Oficina"
 
 msgid "city.cosmetics.equip"
 msgstr "Equipar"
+
+msgid "beacon.office.label"
+msgstr "Sede GSA · Contratos e Entrega [E]"
+
+msgid "beacon.unload.label"
+msgstr "Terminal de Descarga [E]"
+
+msgid "beacon.payphone.label"
+msgstr "Orelhão de Despacho [E]"
+
+msgid "beacon.workshop.label"
+msgstr "Oficina · Reparo e Calibração [E]"
+
+msgid "beacon.benchmark.label"
+msgstr "Marco Geodésico (A pé 5s)"
+
+msgid "beacon.benchmark.done"
+msgstr "✓ Marco Ocupado"
+
+msgid "city.street.office_open_prompt"
+msgstr "[E] Abrir Tablet da Sede GSA (Contratos e Escritório)"
+
+msgid "city.street.office_upload_first_prompt"
+msgstr "Sede GSA · Descarregue os dados no Terminal âmbar antes, ou aperte [E] para abrir Escritório"
+
+msgid "city.street.office_recover_gimbalina"
+msgstr "[E] Sede GSA · Recuperar Gimbalina e Abrir Tablet"
+
+msgid "city.street.unload_idle_prompt"
+msgstr "Terminal de Descarga · Aceite um contrato primeiro e aperte [E] aqui para proteger os dados"
+
+msgid "city.street.unload_collect_first_prompt"
+msgstr "Terminal de Descarga · Capture dados ([C] / LiDAR) em campo antes de descarregar com [E]"
+
+msgid "city.street.unload_recover_gimbalina"
+msgstr "[E] Terminal de Descarga · Recuperar Gimbalina"
+
+msgid "city.street.benchmark_dismount_prompt"
+msgstr "Marco Geodésico · Pare e aperte [F] para descer a pé e permaneça por 5s (+25 C$)"
+
+msgid "city.street.benchmark_holding_prompt"
+msgstr "Ocupando Marco Geodésico… {0:0.0} / 5.0 s (fique a pé dentro do anel verde)"
+
+msgid "city.street.benchmark_occupied_prompt"
+msgstr "✓ Marco Geodésico já ocupado (veja na Geopédia em [Tab])"
+
+msgid "city.street.switch_vehicle_prompt"
+msgstr "[E] Trocar para {0} (ou [F] Descer)"
+
+msgid "city.street.vehicle_locked_detail"
+msgstr "{0} · Bloqueado ({1})"

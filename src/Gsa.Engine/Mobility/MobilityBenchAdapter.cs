@@ -138,6 +138,7 @@ public sealed class MobilityBenchAdapter
     {
         ArgumentNullException.ThrowIfNull(actionMap);
         _actionMap = actionMap;
+        var defaults = InputActionMap.CreateDefault().GetAllByWireName();
         foreach (var (wireName, binding) in actionMap.GetAllByWireName())
         {
             var actionName = new StringName(ActionPrefix + wireName);
@@ -147,7 +148,14 @@ public sealed class MobilityBenchAdapter
 
             var keycode = ParseKey(binding.Keyboard);
             if (keycode != Key.None)
+            {
                 InputMap.ActionAddEvent(actionName, new InputEventKey { Keycode = keycode });
+                if (defaults.TryGetValue(wireName, out var def) &&
+                    string.Equals(binding.Keyboard, def.Keyboard, StringComparison.OrdinalIgnoreCase))
+                {
+                    InputMap.ActionAddEvent(actionName, new InputEventKey { PhysicalKeycode = keycode });
+                }
+            }
         }
     }
 

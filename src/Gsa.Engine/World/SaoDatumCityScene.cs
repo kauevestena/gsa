@@ -36,7 +36,7 @@ public partial class SaoDatumCityScene : Node3D
     private const string TutorialManifestPath = "res://world/tutorial-block.json";
     private const string SkyCachePath = "res://world/tutorial-sky.json";
     private const int MaxLidarDisplayPoints = 18000;
-    private const double SouthAccessRoadMinimumNorth = 7399982.0;
+    private const double SouthAccessRoadMinimumNorth = 7399976.0;
 
     private readonly GodotCoordinateAdapter _coordinates = new();
     private readonly SemanticRegistry _registry = new();
@@ -55,6 +55,8 @@ public partial class SaoDatumCityScene : Node3D
     private readonly Dictionary<WorldSectorCellId, List<ObstacleBoxEnu>> _sectorObstacles = new();
     private readonly Dictionary<WorldSectorCellId, (Node3D Node, List<ObstacleBoxEnu> Obstacles)> _sectorCache = new();
     private readonly Dictionary<string, Node3D> _collectibleNodes = new();
+    private readonly Dictionary<string, Node3D> _benchmarkBeaconNodes = new(StringComparer.Ordinal);
+    private readonly List<(Node3D Node, string Key)> _staticBeaconLabels = [];
     private readonly Dictionary<string, Label3D> _cityFacadeLabels = new(StringComparer.Ordinal);
     private Dictionary<string, WorldBoxObject> _manifestObjectsById = new(StringComparer.Ordinal);
     private WorldSectorCellId? _lastStreamingSector;
@@ -322,24 +324,38 @@ public partial class SaoDatumCityScene : Node3D
         BuildStreetInteractions(visualBase);
         if (!_quickParkRun) BuildWorldParkedVehicles(visualBase);
 
-        // Glowing GTA III Beacons for Office, Unload, and 8 Geodetic Benchmarks
-        foreach (var id in new[] { "office_entry", "unload_point", "unload_point_north" })
+        // Glowing GTA III Beacons for Office, Unload, and 8 Geodetic Benchmarks (hidden in Quick Park Sprint)
+        if (!_quickParkRun)
         {
-            var obj = _fullManifest.Objects.FirstOrDefault(o => o.Id == id);
-            if (obj is null) continue;
-            var col = id == "office_entry" ? new Color(0.15f, 0.88f, 0.85f) : new Color(0.98f, 0.76f, 0.16f);
-            var ring = GsaMeshBuilder.BuildBeaconRing($"Beacon_{id}", col, 1.4f, 1.0f);
-            ring.Position = _coordinates.ToGodot(new Vector3d(obj.PositionEnu.X, obj.PositionEnu.Y - (id == "office_entry" ? 2.4 : 0.0), obj.PositionEnu.Z));
-            visualBase.AddChild(ring);
-            _cityVisuals.SpinningBeacons.Add(ring);
-        }
+            foreach (var id in new[] { "office_entry", "unload_point", "unload_point_north" })
+            {
+                var obj = _fullManifest.Objects.FirstOrDefault(o => o.Id == id);
+                if (obj is null) continue;
+                var col = id == "office_entry" ? new Color(0.15f, 0.88f, 0.85f) : new Color(0.98f, 0.76f, 0.16f);
+                var labelKey = id == "office_entry" ? "beacon.office.label" : "beacon.unload.label";
+                var bx = obj.PositionEnu.X;
+                var by = obj.PositionEnu.Y - (id == "office_entry" ? 2.4 : 0.0);
+                var bz = GetTerrainElevationEnu(bx, by);
+                var ring = GsaMeshBuilder.BuildBeaconRing($"Beacon_{id}", col, 1.4f, 1.0f, Text(labelKey));
+                ring.Position = _coordinates.ToGodot(new Vector3d(bx, by, bz));
+                visualBase.AddChild(ring);
+                _cityVisuals.SpinningBeacons.Add(ring);
+                _staticBeaconLabels.Add((ring, labelKey));
+            }
 
-        foreach (var bm in _geodeticNetwork.Benchmarks.Values)
-        {
-            var ring = GsaMeshBuilder.BuildBeaconRing($"Beacon_{bm.BenchmarkId}", new Color(0.24f, 0.92f, 0.46f), 0.9f, 0.95f);
-            ring.Position = _coordinates.ToGodot(bm.PhysicalPositionEnu);
-            visualBase.AddChild(ring);
-            _cityVisuals.SpinningBeacons.Add(ring);
+            foreach (var bm in _geodeticNetwork.Benchmarks.Values)
+            {
+                var bz = GetTerrainElevationEnu(bm.PhysicalPositionEnu.X, bm.PhysicalPositionEnu.Y);
+                var ring = GsaMeshBuilder.BuildBeaconRing($"Beacon_{bm.BenchmarkId}", new Color(0.24f, 0.92f, 0.46f), 0.9f, 0.95f, Text("beacon.benchmark.label"));
+                ring.Position = _coordinates.ToGodot(new Vector3d(bm.PhysicalPositionEnu.X, bm.PhysicalPositionEnu.Y, bz));
+                ring.AddChild(GsaMeshBuilder.Box("MarkerPlinth", new Vector3(0.32f, 0.16f, 0.32f), new Vector3(0f, 0.08f, 0f),
+                    GsaMeshBuilder.SolidMat(new Color(0.58f, 0.60f, 0.62f))));
+                ring.AddChild(GsaMeshBuilder.Box("MarkerBrass", new Vector3(0.16f, 0.03f, 0.16f), new Vector3(0f, 0.175f, 0f),
+                    GsaMeshBuilder.SolidMat(new Color(0.92f, 0.76f, 0.24f))));
+                visualBase.AddChild(ring);
+                _cityVisuals.SpinningBeacons.Add(ring);
+                _benchmarkBeaconNodes[bm.BenchmarkId] = ring;
+            }
         }
 
         _streamedBlocksRoot = new Node3D { Name = "StreamedCitySectors" };
@@ -473,7 +489,7 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         _manifestObstacles = _fullManifest.Objects
-            .Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot"))
+            .Where(o => o.ObjectClass is not ("ground" or "training_park" or "calm_zone" or "wifi_hotspot" or "unload_point" or "survey_control"))
             .Select(o => o.ObjectClass == "traffic_sign"
                 ? new ObstacleBoxEnu(o.Id, new Vector3d(o.PositionEnu.X, o.PositionEnu.Y, 101.15), new Vector3d(0.45, 0.45, 2.3), o.Collision)
                 : new ObstacleBoxEnu(o.Id, o.PositionEnu, o.SizeEnu, o.Collision))
@@ -521,7 +537,7 @@ public partial class SaoDatumCityScene : Node3D
         _mobility.ApplyInputMap(InputActionMap.CreateDefault());
         var spawn = new Vector3d(500228.0, 7400000.7, 100.0);
         _mobility.AttachAvatar(_benchRoot, spawn, LocomotionMode.Handcart);
-        _locomotion = new LocomotionSimulator(spawn, Math.PI, LocomotionMode.Handcart, _fullManifest.Bounds);
+        _locomotion = new LocomotionSimulator(spawn, Math.PI, LocomotionMode.Handcart, CitySaveBounds);
 
         _traffic = new TrafficBenchAdapter(_coordinates, new TrafficBenchSimulator(OldCenterTrafficNetwork.Create()));
         _traffic.AttachBenchMeshes(_benchRoot, warnForErraticDrivers: true);
@@ -828,9 +844,10 @@ public partial class SaoDatumCityScene : Node3D
         };
         foreach (var (mode, pos, heading) in spots)
         {
+            var groundedPos = new Vector3d(pos.X, pos.Y, GetTerrainElevationEnu(pos.X, pos.Y));
             var rig = GsaMeshBuilder.BuildPlayerRig(mode);
             rig.Root.Name = $"ParkedWorld_{mode}";
-            rig.Root.Position = _coordinates.ToGodot(pos);
+            rig.Root.Position = _coordinates.ToGodot(groundedPos);
             rig.Root.Rotation = new Vector3(0f, (float)(heading - Math.PI / 2.0), 0f);
             var ring = GsaMeshBuilder.BuildBeaconRing("BoardRing", new Color(0.24f, 0.88f, 0.96f), 1.8f, 0.55f);
             rig.Root.AddChild(ring);
@@ -850,8 +867,9 @@ public partial class SaoDatumCityScene : Node3D
             rig.Root.AddChild(lbl);
             _parkedVehicleLabels.Add(lbl);
             visualBase.AddChild(rig.Root);
-            _worldParkedVehicles.Add((mode, pos, heading, rig.Root));
+            _worldParkedVehicles.Add((mode, groundedPos, heading, rig.Root));
         }
+        SyncWorldParkedVehicleVisibility();
     }
 
     public string GetRegionIdForEnu(Vector3d enu)
@@ -917,7 +935,7 @@ public partial class SaoDatumCityScene : Node3D
         StepCityTraffic(delta, activePos, weather);
 
         var input = _mobility.SampleLiveInput(_carSim?.SpeedMetresPerSecond ?? _locomotion.ForwardSpeedMetresPerSecond);
-        input = _quickParkRun && _parkRun.IsOver ? new LocomotionInput(0, 1, 0) : ApplyCityEverydayInput(input, activeMode);
+        input = ApplyCityEverydayInput(input, activeMode);
         var regionId = GetRegionIdForEnu(activePos);
         if (regionId != _lastRegionId)
         {
@@ -1046,6 +1064,12 @@ public partial class SaoDatumCityScene : Node3D
             activePos = step.PositionEnu;
             activeHeading = step.HeadingRadians;
             activeSpeed = step.ForwardSpeedMetresPerSecond;
+            if (!_quickParkRun && HitsParkedVehicle(previousPlayerPosition, activePos, PlatformProfile.ForMode(activeMode).CollisionRadiusMetres, out _))
+            {
+                activePos = previousPlayerPosition;
+                _locomotion.StopAtExternalContact(activePos);
+                activeSpeed = 0;
+            }
             var contact = ResolveCityTrafficContact(delta, activeMode, previousPlayerPosition, ref activePos);
             if (contact is { } trafficHit)
             {
@@ -1246,6 +1270,18 @@ public partial class SaoDatumCityScene : Node3D
         }
 
         // Collide against unoccupied visible world parked vehicles
+        if (HitsParkedVehicle(prevPos, cur, radius, out var parkedHitId))
+        {
+            hitId ??= parkedHitId;
+            return prevPos;
+        }
+
+        return cur;
+    }
+
+    private bool HitsParkedVehicle(Vector3d prevPos, Vector3d cur, double radius, out string? hitId)
+    {
+        hitId = null;
         foreach (var parked in _worldParkedVehicles)
         {
             if (!parked.Root.Visible || Math.Abs(cur.Z - parked.PosEnu.Z) > 1.8)
@@ -1257,12 +1293,11 @@ public partial class SaoDatumCityScene : Node3D
             if (Math.Abs(cur.X - parked.PosEnu.X) < pHalf + radius &&
                 Math.Abs(cur.Y - parked.PosEnu.Y) < pHalf + radius)
             {
-                hitId ??= $"ParkedWorld_{parked.Mode}";
-                return prevPos;
+                hitId = $"ParkedWorld_{parked.Mode}";
+                return true;
             }
         }
-
-        return cur;
+        return false;
     }
 
     private void StepCityHazardsAndEvents(
@@ -1423,6 +1458,7 @@ public partial class SaoDatumCityScene : Node3D
                 if (_benchmarkHoldSeconds >= 5.0)
                 {
                     _collectibles.OccupySurveyLandmark(nearBm, _benchmarkHoldSeconds, pos, _calendar.CalendarTimeSeconds, _ledger, _geopedia);
+                    UpdateBenchmarkBeaconVisual(nearBm, occupied: true);
                     _audio.PlayPaymentSuccess();
                     _feedbackText = $"{Text("city.benchmark.occupied")} (+25 C$)";
                 }
@@ -1695,6 +1731,8 @@ public partial class SaoDatumCityScene : Node3D
             _carSim = null;
 
         _mobility.SetVisualPlatformMode(targetMode);
+        SyncWorldParkedVehicleVisibility();
+        RefreshParkedVehicleLabels();
         _geopedia.UnlockAdvancedForPlatformLevel(PlatformProfile.ForMode(targetMode).Level);
         ResetCityNavigation();
         _pendingVehiclePopup = Text($"platform.{targetMode.ToString().ToLowerInvariant()}.name");
@@ -1716,16 +1754,43 @@ public partial class SaoDatumCityScene : Node3D
         }
         if (_quickParkRun)
         {
-            if (@event is InputEventKey { Pressed: true, Echo: false, PhysicalKeycode: Key.R })
-                RestartQuickParkRun();
-            else if (@event.IsActionPressed("ui_cancel"))
+            if (@event is InputEventKey { Pressed: true, Echo: false } parkKey)
+            {
+                switch (parkKey.PhysicalKeycode)
+                {
+                    case Key.R:
+                        RestartQuickParkRun();
+                        GetViewport().SetInputAsHandled();
+                        return;
+                    case Key.F:
+                        if (_locomotion.TryToggleMount(_cityBlockObstacles, out _))
+                            _mobility.SetVisualPlatformMode(_locomotion.Mode);
+                        GetViewport().SetInputAsHandled();
+                        return;
+                    case Key.V:
+                        _chaseCamera.CycleMode();
+                        GetViewport().SetInputAsHandled();
+                        return;
+                    case Key.G:
+                        if (_gimbalina.TryFeedCorn()) _audio.PlayOffloadChime();
+                        GetViewport().SetInputAsHandled();
+                        return;
+                    case Key.H:
+                        _audio.PlayHorn(CurrentActiveMode(), _cosmetics.EquippedHornId);
+                        GetViewport().SetInputAsHandled();
+                        return;
+                    case Key.X:
+                        _audio.CycleRadioStation();
+                        GetViewport().SetInputAsHandled();
+                        return;
+                }
+            }
+            if (@event.IsActionPressed("ui_cancel"))
             {
                 GetViewport().SetInputAsHandled();
                 GetTree().ChangeSceneToFile("res://Bootstrap.tscn");
                 return;
             }
-            else return;
-            GetViewport().SetInputAsHandled();
             return;
         }
         if (@event is InputEventKey { Pressed: true, Echo: false } key)
