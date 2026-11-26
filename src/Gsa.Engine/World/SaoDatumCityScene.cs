@@ -94,10 +94,7 @@ public partial class SaoDatumCityScene : Node3D
     private readonly Color[] _vfxColors = new Color[MaxVfxParticles];
     private int _vfxWriteIdx;
     private double _nextAbsurdEventTimer = 18.0;
-    private bool _chickenChallengeActive;
-    private double _chickenChallengeTime;
-    private int _chickenChallengeSamples;
-    private int _chickenChallengeSteady;
+    private double _parkBankRadians;
     private LidarBenchSimulator _lidarSim = new(LidarProfile.L4);
     private CameraCaptureScheduler _camScheduler = new("city_cam");
 
@@ -154,8 +151,9 @@ public partial class SaoDatumCityScene : Node3D
         try
         {
             LocalizationService.EnsureCatalogsLoaded();
-            _isSandbox = OS.HasEnvironment("GSA_SANDBOX") ||
-                         (GetTree().Root.HasMeta(SandboxModeKey) && GetTree().Root.GetMeta(SandboxModeKey).AsString() == "sandbox");
+            var launch = GetTree().Root.GetMeta(SandboxModeKey, "career").AsString();
+            _quickParkRun = launch == "park_run";
+            _isSandbox = _quickParkRun || launch == "sandbox" || OS.HasEnvironment("GSA_SANDBOX");
             _perfProbe = GsaPerfProbe.TryCreateFromArgs(this, _isSandbox ? "sao_datum_sandbox" : "sao_datum_city");
 
             _tutorialManifest = WorldSceneManifest.Parse(Godot.FileAccess.GetFileAsString(TutorialManifestPath));
@@ -181,8 +179,14 @@ public partial class SaoDatumCityScene : Node3D
             BuildLidarPointCloudOverlay();
             BuildImpactVfxOverlay();
             BuildHudAndTablet();
+            BuildParkHud();
 
-            if (_isSandbox)
+            if (_quickParkRun)
+            {
+                _calmPolicy.SetCalmCityEnabled(true);
+                RestartQuickParkRun();
+            }
+            else if (_isSandbox)
             {
                 SetupSandboxMode();
             }
@@ -314,7 +318,7 @@ public partial class SaoDatumCityScene : Node3D
 
         // Commerce Street promenade, storefronts, curbs, signals, streetlamps & water tanks
         _cityVisuals.BuildCommerceStreetDetails(visualBase, _fullManifest, _coordinates, _atmosphere, includeBeacons: false);
-        BuildWorldParkedVehicles(visualBase);
+        if (!_quickParkRun) BuildWorldParkedVehicles(visualBase);
 
         // Glowing GTA III Beacons for Office, Unload, and 8 Geodetic Benchmarks
         foreach (var id in new[] { "office_entry", "unload_point", "unload_point_north" })
@@ -746,6 +750,7 @@ public partial class SaoDatumCityScene : Node3D
             // City sectors are 100 m wide and the painted avenues repeat every
             // 120 m, so sector-edge setbacks alone do not keep this grid clear.
             if (OldCenterTrafficNetwork.OverlapsAvenueGrid(e, n, w, d) ||
+                GimbalinaChallenge.OverlapsCourse(e, n, w, d) ||
                 OldCenterMvpWorldAssembler.OverlapsSurveyCorridor(e, n, w, d) ||
                 BusSurveyCorridor.OverlapsBuildings(e, n, w, d) || PortTunnelSurvey.OverlapsBuilding(e, n, w, d) ||
                 PortViaductSurvey.OverlapsBuilding(e, n, w, d) || WaterfrontRainSurvey.OverlapsBuilding(e, n, w, d) ||
@@ -885,6 +890,7 @@ public partial class SaoDatumCityScene : Node3D
         var activePos = CurrentPositionEnu();
         var activeHeading = CurrentHeadingRadians();
         var previousPlayerPosition = activePos;
+        var previousHeading = activeHeading;
         var activeMode = CurrentActiveMode();
         var activeSpeed = 0.0;
         var activePitch = 0.0;
@@ -893,7 +899,7 @@ public partial class SaoDatumCityScene : Node3D
         StepCityTraffic(delta, activePos, weather);
 
         var input = _mobility.SampleLiveInput(_carSim?.SpeedMetresPerSecond ?? _locomotion.ForwardSpeedMetresPerSecond);
-        input = ApplyCityEverydayInput(input, activeMode);
+        input = _quickParkRun && _parkRun.IsOver ? new LocomotionInput(0, 1, 0) : ApplyCityEverydayInput(input, activeMode);
         var regionId = GetRegionIdForEnu(activePos);
         if (regionId != _lastRegionId)
         {
@@ -1043,6 +1049,16 @@ public partial class SaoDatumCityScene : Node3D
             activeRoll = Math.Clamp(input.Steer * Math.Abs(activeSpeed) * 0.03, -0.14, 0.14);
         }
 
+        if (activeMode == LocomotionMode.Bicycle && _parkRun.State == ParkRunState.Riding)
+        {
+            // A coordinated turn leans the bike by atan(lateral acceleration / gravity).
+            var yawRate = Math.IEEERemainder(activeHeading - previousHeading, Math.Tau) / delta;
+            var lean = Math.Atan(activeSpeed * yawRate / 9.80665);
+            _parkBankRadians += (lean - _parkBankRadians) * (1 - Math.Exp(-delta / .10));
+            activeRoll = _parkBankRadians;
+        }
+        else _parkBankRadians = activeRoll;
+
         if (saveTrafficImpact) SaveHazardChange();
         _lastSpeedMps = activeSpeed;
         StepCityEverydayEncounters(delta, activePos, activeSpeed, activeMode);
@@ -1071,7 +1087,8 @@ public partial class SaoDatumCityScene : Node3D
         StepImpactVfx(delta);
 
         // Step world hazards, police blitz, absurd events & Chicken Challenge (200 m track)
-        StepCityHazardsAndEvents(delta, activePos, activeSpeed, activeMode, gStep);
+        StepCityHazardsAndEvents(delta, activePos, activeSpeed, activeMode);
+        StepParkRun(delta, previousPlayerPosition, activePos, activeMode, gStep);
 
         // Rotate collectibles & check proximity pickup / benchmark occupation
         StepCollectiblesAndBenchmarks(delta, activePos, activeMode);
@@ -1096,7 +1113,8 @@ public partial class SaoDatumCityScene : Node3D
         if (_hudElapsed >= 0.1)
         {
             _hudElapsed = 0;
-            RefreshCityHud(0.1, activePos, activeHeading, activeMode, weather, gStep.Stress, attn);
+            RefreshParkHud();
+            if (_gtaHud.Layer.Visible) RefreshCityHud(0.1, activePos, activeHeading, activeMode, weather, gStep.Stress, attn);
             if (_tabletPanel.Visible) RefreshCityHazardStatus();
             if (_tabletPanel.Visible && _tabletTabs.CurrentTab is MapTabletTab or TechnicalTabletTab)
                 RefreshTechnicalTablet();
@@ -1231,8 +1249,7 @@ public partial class SaoDatumCityScene : Node3D
         double dt,
         Vector3d pos,
         double speedMps,
-        LocomotionMode mode,
-        GimbalinaStepResult gStep)
+        LocomotionMode mode)
     {
         _hazardCooldown = Math.Max(0.0, _hazardCooldown - dt);
         _wallImpactCooldown = Math.Max(0.0, _wallImpactCooldown - dt);
@@ -1326,45 +1343,6 @@ public partial class SaoDatumCityScene : Node3D
                 _landmarks.PigeonFlockNode.RotateY((float)dt * 1.4f);
         }
 
-        // 4. Chicken Challenge (200 m Track along Central Park N=7400350, E=500288 -> E=500488)
-        if (!_chickenChallengeActive && mode <= LocomotionMode.Bicycle &&
-            TrainingContractSession.HorizontalDistance(pos, _landmarks.ChickenChallengeStartEnu) < 4.5)
-        {
-            _chickenChallengeActive = true;
-            _chickenChallengeTime = 0.0;
-            _chickenChallengeSamples = 0;
-            _chickenChallengeSteady = 0;
-            _audio.PlayOffloadChime();
-            _feedbackText = Text("city.challenge.start");
-        }
-        else if (_chickenChallengeActive)
-        {
-            _chickenChallengeTime += dt;
-            _chickenChallengeSamples++;
-            if (Math.Abs(gStep.ResidualPitchRadians) <= 0.088 && Math.Abs(gStep.ResidualRollRadians) <= 0.088)
-                _chickenChallengeSteady++;
-
-            if (pos.X >= _landmarks.ChickenChallengeEndEnu.X && Math.Abs(pos.Y - _landmarks.ChickenChallengeEndEnu.Y) < 15.0)
-            {
-                _chickenChallengeActive = false;
-                var steadyFrac = _chickenChallengeSamples > 0 ? (double)_chickenChallengeSteady / _chickenChallengeSamples : 0.0;
-                if (steadyFrac >= 0.95)
-                {
-                    _ledger.RecordActivityReward($"chicken_win_{_tick}", "chicken_challenge", _calendar.CalendarTimeSeconds, 100, "challenge", "city.challenge.passed");
-                    _audio.PlayMissionPassedFanfare();
-                    _gtaHud.TriggerCelebrationBanner(Text("city.challenge.passed"), $"{steadyFrac:P0} · {_chickenChallengeTime:F1}s");
-                }
-                else
-                {
-                    _audio.PlayAlert();
-                    _feedbackText = $"{steadyFrac:P0} (<95%)";
-                }
-            }
-            else if (TrainingContractSession.HorizontalDistance(pos, _landmarks.ChickenChallengeStartEnu) > 260.0)
-            {
-                _chickenChallengeActive = false;
-            }
-        }
     }
 
     private void StepCollectiblesAndBenchmarks(double dt, Vector3d pos, LocomotionMode mode)
@@ -1705,13 +1683,28 @@ public partial class SaoDatumCityScene : Node3D
 
     private void SnapCamera()
     {
-        _chaseCamera.Snap(_coordinates.ToGodot(CurrentPositionEnu()), CurrentHeadingRadians(), CurrentActiveMode());
+        _chaseCamera.Snap(_coordinates.ToGodot(CurrentPositionEnu()), CurrentHeadingRadians(), CurrentActiveMode(),
+            _quickParkRun && _parkRun.State == ParkRunState.Ready ? -.55f : 0);
     }
 
     public override void _UnhandledInput(InputEvent @event)
     {
         if (_chaseCamera.HandleInput(@event))
         {
+            GetViewport().SetInputAsHandled();
+            return;
+        }
+        if (_quickParkRun)
+        {
+            if (@event is InputEventKey { Pressed: true, Echo: false, PhysicalKeycode: Key.R })
+                RestartQuickParkRun();
+            else if (@event.IsActionPressed("ui_cancel"))
+            {
+                GetViewport().SetInputAsHandled();
+                GetTree().ChangeSceneToFile("res://Bootstrap.tscn");
+                return;
+            }
+            else return;
             GetViewport().SetInputAsHandled();
             return;
         }

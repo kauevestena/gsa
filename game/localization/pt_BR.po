@@ -11,7 +11,7 @@ msgid "bootstrap.title"
 msgstr "GSA"
 
 msgid "bootstrap.open_bench"
-msgstr "Explorar o quarteirão"
+msgstr "Treino de levantamento"
 
 msgid "bootstrap.status"
 msgstr "Em desenvolvimento · Treinamento de levantamento"
@@ -972,10 +972,10 @@ msgid "notebook.unit.ratio"
 msgstr "fração"
 
 msgid "bootstrap.play_career"
-msgstr "Modo Carreira — Cidade de São Datum"
+msgstr "Carreira"
 
 msgid "bootstrap.play_sandbox"
-msgstr "Cidade Livre (4 Regiões e 7 Veículos)"
+msgstr "Cidade livre"
 
 msgid "bootstrap.quit"
 msgstr "Sair"
@@ -2245,3 +2245,87 @@ msgstr "Perto demais da parede! Afaste-se para a calçada oposta (~9 m) olhando 
 
 msgid "city.story.coverage_status"
 msgstr "Fachadas: {0}/{1} · Cobertura: {2}% / 90% · Fotos: {3}"
+
+msgid "park.title"
+msgstr "Desafio da Gimbalina"
+
+msgid "park.menu_hint"
+msgstr "200 m de bicicleta pelo Centro Velho"
+
+msgid "park.start"
+msgstr "LARGADA"
+
+msgid "park.finish"
+msgstr "CHEGADA"
+
+msgid "park.at_grid"
+msgstr "Parque Central · 200 m"
+
+msgid "park.approach"
+msgstr "Desafio da Gimbalina · Passe sob a largada em direção às bandeiras."
+
+msgid "park.ride_to_start"
+msgstr "Pedale com W ou ↑. Cruze a largada e mantenha Gimbalina estável em 95% do percurso."
+
+msgid "park.ride_hint"
+msgstr "A/D ou ←/→ para virar · S ou ↓ para frear antes das curvas"
+
+msgid "park.banking"
+msgstr "Inclinação acima de 5°. Alivie a curva ou freie."
+
+msgid "park.split"
+msgstr "Portão {0}/3 · {1} m"
+
+msgid "park.last_split"
+msgstr "Chegada · {1} m"
+
+msgid "park.all_gates"
+msgstr "Percurso completo · 200 m"
+
+msgid "park.run_ended"
+msgstr "Tentativa encerrada"
+
+msgid "park.steadiness"
+msgstr "Estabilidade · {0}%"
+
+msgid "park.retry"
+msgstr "Tentar de novo"
+
+msgid "park.menu"
+msgstr "Menu"
+
+msgid "park.gold"
+msgstr "Medalha de ouro"
+
+msgid "park.silver"
+msgstr "Medalha de prata"
+
+msgid "park.bronze"
+msgstr "Medalha de bronze"
+
+msgid "park.try_again"
+msgstr "Fim da tentativa"
+
+msgid "park.missed"
+msgstr "Você passou fora do portão {0}. Mire entre as bandeiras."
+
+msgid "park.need_steady"
+msgstr "Estabilidade de {0}%. São necessários 95%. Freie antes de virar."
+
+msgid "park.partner"
+msgstr "Complete o percurso com Gimbalina na mesma plataforma."
+
+msgid "park.off_course"
+msgstr "Você saiu da pista. Siga as setas no asfalto."
+
+msgid "park.new_best"
+msgstr "Recorde pessoal!"
+
+msgid "park.best"
+msgstr "Recorde {0}"
+
+msgid "park.gold_target"
+msgstr "Ouro em até {0}"
+
+msgid "park.missed_finish"
+msgstr "Passe entre os postes do arco de chegada."

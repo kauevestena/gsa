@@ -123,6 +123,7 @@ public partial class SaoDatumCityScene
             _progression = runtime.Progression;
             _calendar = calendar;
             _fleet = fleet;
+            _parkRun = new();
             _locomotion = mobility;
             _carSim = mobility.Mode >= LocomotionMode.Car
                 ? new CarSuspensionSimulator(mobility.PositionEnu, mobility.HeadingRadians, mobility.Mode, conditionDamage: hazards.GetVehicleDamage(mobility.Mode)) : null;

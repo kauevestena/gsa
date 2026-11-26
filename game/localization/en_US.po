@@ -11,7 +11,7 @@ msgid "bootstrap.title"
 msgstr "GSA"
 
 msgid "bootstrap.open_bench"
-msgstr "Explore the block"
+msgstr "Survey training"
 
 msgid "bootstrap.status"
 msgstr "In development · Live survey training"
@@ -972,10 +972,10 @@ msgid "notebook.unit.ratio"
 msgstr "fraction"
 
 msgid "bootstrap.play_career"
-msgstr "Career Mode — São Datum City"
+msgstr "Career"
 
 msgid "bootstrap.play_sandbox"
-msgstr "Free Roam Sandbox (All 4 Regions & 7 Vehicles)"
+msgstr "Free roam"
 
 msgid "bootstrap.quit"
 msgstr "Quit"
@@ -2245,3 +2245,87 @@ msgstr "Too close to the wall! Step back to the opposite curb (~9 m) and face no
 
 msgid "city.story.coverage_status"
 msgstr "Façades: {0}/{1} · Surface coverage: {2}% / 90% · Photos: {3}"
+
+msgid "park.title"
+msgstr "Gimbalina’s Park Sprint"
+
+msgid "park.menu_hint"
+msgstr "A 200 m bike sprint through Old Center"
+
+msgid "park.start"
+msgstr "START"
+
+msgid "park.finish"
+msgstr "FINISH"
+
+msgid "park.at_grid"
+msgstr "Central Park · 200 m"
+
+msgid "park.approach"
+msgstr "Park Sprint · Ride through the start arch toward the flags."
+
+msgid "park.ride_to_start"
+msgstr "Pedal with W or ↑. Cross the start arch and keep Gimbalina steady for 95% of the ride."
+
+msgid "park.ride_hint"
+msgstr "Steer with A/D or ←/→ · Brake before turns with S or ↓"
+
+msgid "park.banking"
+msgstr "Head tilt over 5°. Ease the turn or brake."
+
+msgid "park.split"
+msgstr "Gate {0}/3 · {1} m"
+
+msgid "park.last_split"
+msgstr "Finish · {1} m"
+
+msgid "park.all_gates"
+msgstr "Course complete · 200 m"
+
+msgid "park.run_ended"
+msgstr "Run ended"
+
+msgid "park.steadiness"
+msgstr "Steadiness · {0}%"
+
+msgid "park.retry"
+msgstr "Ride again"
+
+msgid "park.menu"
+msgstr "Main menu"
+
+msgid "park.gold"
+msgstr "Gold medal"
+
+msgid "park.silver"
+msgstr "Silver medal"
+
+msgid "park.bronze"
+msgstr "Bronze medal"
+
+msgid "park.try_again"
+msgstr "End of run"
+
+msgid "park.missed"
+msgstr "Missed gate {0}. Aim between its flags."
+
+msgid "park.need_steady"
+msgstr "{0}% steady. You need 95%. Brake before turning."
+
+msgid "park.partner"
+msgstr "Finish with Gimbalina on the same platform."
+
+msgid "park.off_course"
+msgstr "Off course. Follow the painted arrows."
+
+msgid "park.new_best"
+msgstr "New personal best!"
+
+msgid "park.best"
+msgstr "Best {0}"
+
+msgid "park.gold_target"
+msgstr "Gold in {0}"
+
+msgid "park.missed_finish"
+msgstr "Ride between the posts of the finish arch."

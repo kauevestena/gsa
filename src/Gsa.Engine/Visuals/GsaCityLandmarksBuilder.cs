@@ -12,8 +12,6 @@ public sealed class GsaCityLandmarksBuilder
     public IReadOnlyList<Vector3d> PotholeCentersEnu { get; private set; } = [];
     public List<ObstacleBoxEnu> LandmarkObstacles { get; } = [];
     public Vector3d BlitzCheckpointEnu => OldCenterTrafficNetwork.CheckpointEnu;
-    public Vector3d ChickenChallengeStartEnu { get; } = new(500288.0, 7400350.0, 100.1);
-    public Vector3d ChickenChallengeEndEnu { get; } = new(500488.0, 7400350.0, 100.1);
 
     public Node3D? TrioTruckNode { get; private set; }
     public Node3D? MarathonPackNode { get; private set; }
@@ -189,6 +187,7 @@ public sealed class GsaCityLandmarksBuilder
     private void BuildLandmarkColliders(Node3D visualBase, GodotCoordinateAdapter coords)
     {
         LandmarkObstacles.Clear();
+        LandmarkObstacles.AddRange(GimbalinaCourseVisuals.StallObstacles());
         void AddBox(string id, Vector3d centerEnu, Vector3d sizeEnu) =>
             LandmarkObstacles.Add(new ObstacleBoxEnu(id, centerEnu, sizeEnu, true));
 
@@ -262,13 +261,7 @@ public sealed class GsaCityLandmarksBuilder
         structureBatch.AddCylinder(waterMat, parkPos + new Vector3(0f, 0.55f, 0f), 4.0f, 4.0f, 0.4f, radialSegments: 14, uvScale: 0.08f);
         structureBatch.AddCylinder(concMat, parkPos + new Vector3(0f, 2.0f, 0f), 0.9f, 1.3f, 2.8f, radialSegments: 8);
 
-        // Chicken Challenge 200 m Track Checkered Beacons (N = 7400350)
-        var startBeacon = GsaMeshBuilder.BuildBeaconRing("ChickenTrackStart", new Color(0.98f, 0.38f, 0.72f), 2.2f, 1.4f);
-        startBeacon.Position = coords.ToGodot(ChickenChallengeStartEnu);
-        parent.AddChild(startBeacon);
-        var finishBeacon = GsaMeshBuilder.BuildBeaconRing("ChickenTrackEnd", new Color(0.22f, 0.96f, 0.58f), 2.2f, 1.4f);
-        finishBeacon.Position = coords.ToGodot(ChickenChallengeEndEnu);
-        parent.AddChild(finishBeacon);
+        GimbalinaCourseVisuals.Build(parent, coords);
 
         // Ornamental park lamps
         foreach (var off in new Vector3[] { new(-14f, 0f, -14f), new(14f, 0f, 14f), new(-14f, 0f, 14f), new(14f, 0f, -14f) })

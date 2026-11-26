@@ -649,6 +649,10 @@ public partial class SaoDatumCityScene
         if (_manifestObjectsById.TryGetValue("unload_point", out var unl))
             blips.Add(new RadarBlip("unload_point", unl.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
 
+        var nearPark = (pos - GimbalinaChallenge.Start).Length < 125;
+        if (nearPark)
+            blips.Add(new RadarBlip("park_run", GimbalinaChallenge.Start, new Color("78ebc8"), "P", ClampToRim: false));
+
         var showFacadeLabels = _activeContract?.AreaId == FacadeArea;
         if (_cityFacadeLabels.Count > 0)
         {
@@ -683,6 +687,8 @@ public partial class SaoDatumCityScene
         }
 
         var promptText = string.IsNullOrEmpty(_hazardNotice) ? Text("city.prompt.controls") : _hazardNotice;
+        if (_activeContract is null && string.IsNullOrEmpty(_hazardNotice) && (pos - GimbalinaChallenge.Start).Length < 15 &&
+            GimbalinaChallenge.IsEligible(mode)) promptText = Text("park.approach");
         if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
         if (!attn.BombWarningActive && !_everyday.DogActive && _everyday.Parking is null && _cityTrafficWarningId is not null)
             promptText = Text("city.traffic.erratic_warning");

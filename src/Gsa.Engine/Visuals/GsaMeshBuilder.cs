@@ -12,6 +12,9 @@ public sealed class PlayerVisualRig
     public List<Node3D> SteerableWheels { get; } = [];
     public Node3D? LegL { get; set; }
     public Node3D? LegR { get; set; }
+    internal Node3D? BicycleCrank { get; set; }
+    internal Node3D? ShinL { get; set; }
+    internal Node3D? ShinR { get; set; }
     public Node3D? ArmL { get; set; }
     public Node3D? ArmR { get; set; }
     public Node3D? GimbalinaBody { get; set; }
@@ -64,7 +67,15 @@ public sealed class PlayerVisualRig
         BodyPivot.Rotation = new Vector3((float)bodyPitchRad, 0f, (float)bodyRollRad);
 
         // Walking / pedaling animation
-        if (MathF.Abs(speed) > 0.08f)
+        if (BicycleCrank is not null)
+        {
+            // The two pedals are half a revolution apart. Each knee follows its pedal.
+            _walkPhase = Mathf.Wrap(_walkPhase + speed * fdt * 1.65f, 0, Mathf.Tau);
+            BicycleCrank.Rotation = new Vector3(_walkPhase, 0, 0);
+            PosePedalingLeg(LegL!, ShinL!, _walkPhase);
+            PosePedalingLeg(LegR!, ShinR!, _walkPhase + Mathf.Pi);
+        }
+        else if (MathF.Abs(speed) > 0.08f)
         {
             _walkPhase += fdt * Math.Clamp(MathF.Abs(speed) * 3.8f, 3.5f, 14f);
             var swing = MathF.Sin(_walkPhase) * 0.55f;
@@ -92,9 +103,8 @@ public sealed class PlayerVisualRig
             }
             else
             {
-                var maxComp = (float)(45.0 * Math.PI / 180.0);
-                var compPitch = -Math.Clamp((float)bodyPitchRad, -maxComp, maxComp) + (float)gimbalinaResidualPitchRad;
-                var compRoll = -Math.Clamp((float)bodyRollRad, -maxComp, maxComp) + (float)gimbalinaResidualRollRad;
+                var compPitch = (float)(gimbalinaResidualPitchRad - bodyPitchRad);
+                var compRoll = (float)(gimbalinaResidualRollRad - bodyRollRad);
                 var stressFrac = Math.Clamp((float)(gimbalinaStress / 100.0), 0f, 1f);
                 var flutter = stressFrac > 0.35f ? MathF.Sin(_bobbleTime * 24f) * 0.45f * stressFrac : 0.04f * MathF.Sin(_bobbleTime * 4f);
                 if (WingL is not null) WingL.Rotation = new Vector3(0f, 0f, flutter);
@@ -117,6 +127,17 @@ public sealed class PlayerVisualRig
         if (TaillightMat is not null)
             TaillightMat.EmissionEnergyMultiplier = isBraking ? 2.6f : (isNight ? 1.1f : 0.1f);
     }
+    private static void PosePedalingLeg(Node3D thigh, Node3D shin, float phase)
+    {
+        // Both leg segments are 0.37 m. Hip and crank are 0.48 m apart vertically
+        // and 0.14 m apart fore/aft in the seated rig.
+        var down = .48f + .15f * MathF.Cos(phase);
+        var forward = .14f + .15f * MathF.Sin(phase);
+        var bend = MathF.Acos(Math.Clamp(MathF.Sqrt(down * down + forward * forward) / .74f, 0, 1));
+        thigh.Rotation = new Vector3(MathF.Atan2(forward, down) + bend, 0, 0);
+        shin.Rotation = new Vector3(-2 * bend, 0, 0);
+    }
+
 }
 
 /// <summary>Builds low-poly PS2/GTA III-era 3D vehicles, Elias + Gimbalina rigs, traffic silhouettes, and street props.</summary>
@@ -308,7 +329,8 @@ public static class GsaMeshBuilder
                 break;
             case LocomotionMode.Bicycle:
                 BuildBicycle(bodyPivot, rig);
-                BuildEliasActor(bodyPivot, rig, new Vector3(0f, 0.28f, 0.18f), pushingPose: true, wearingHelmet: true);
+                BuildEliasActor(bodyPivot, rig, new Vector3(0f, .07f, .14f), pushingPose: true, wearingHelmet: true);
+                rig.Animate(0, 0, 0, 0, 0, 0, 0, 0, false, false);
                 break;
             case LocomotionMode.Scooter:
                 BuildScooter(bodyPivot, rig);
@@ -360,14 +382,16 @@ public static class GsaMeshBuilder
         var skinMat = SolidMat(new Color(0.84f, 0.66f, 0.52f));
         var capMat = SolidMat(wearingHelmet ? new Color(0.95f, 0.78f, 0.14f) : new Color(0.18f, 0.30f, 0.45f));
 
+        var cycling = rig.BicycleCrank is not null;
+        var legLength = cycling ? .37f : .76f;
         // Legs
         var legL = new Node3D { Name = "LegL", Position = new Vector3(-0.11f, 0.78f, 0f) };
-        legL.AddChild(Box("LegMesh", new Vector3(0.14f, 0.76f, 0.15f), new Vector3(0f, -0.38f, 0f), pantsMat));
+        legL.AddChild(Box("LegMesh", new Vector3(.14f, legLength, .15f), new Vector3(0, -legLength / 2, 0), pantsMat));
         elias.AddChild(legL);
         rig.LegL = legL;
 
         var legR = new Node3D { Name = "LegR", Position = new Vector3(0.11f, 0.78f, 0f) };
-        legR.AddChild(Box("LegMesh", new Vector3(0.14f, 0.76f, 0.15f), new Vector3(0f, -0.38f, 0f), pantsMat));
+        legR.AddChild(Box("LegMesh", new Vector3(.14f, legLength, .15f), new Vector3(0, -legLength / 2, 0), pantsMat));
         elias.AddChild(legR);
         rig.LegR = legR;
 
@@ -377,7 +401,7 @@ public static class GsaMeshBuilder
         elias.AddChild(Box("Backpack", new Vector3(0.28f, 0.38f, 0.14f), new Vector3(0f, 1.08f, 0.17f), SolidMat(new Color(0.24f, 0.27f, 0.30f))));
 
         // Arms
-        var armPitch = pushingPose ? -0.95f : 0f;
+        var armPitch = cycling ? .99f : pushingPose ? -.95f : 0f;
         var armL = new Node3D { Name = "ArmL", Position = new Vector3(-0.26f, 1.28f, 0f), Rotation = new Vector3(armPitch, 0f, 0f) };
         armL.AddChild(Box("SleeveL", new Vector3(0.12f, 0.46f, 0.12f), new Vector3(0f, -0.22f, 0f), shirtMat));
         elias.AddChild(armL);
@@ -393,8 +417,21 @@ public static class GsaMeshBuilder
         elias.AddChild(Box("Cap", new Vector3(0.28f, 0.11f, 0.29f), new Vector3(0f, 1.62f, -0.02f), capMat));
         elias.AddChild(Box("CapVisor", new Vector3(0.26f, 0.04f, 0.12f), new Vector3(0f, 1.58f, -0.18f), capMat));
         var bootMat = SolidMat(new Color(0.10f, 0.10f, 0.11f));
-        legL.AddChild(Box("BootL", new Vector3(0.15f, 0.12f, 0.22f), new Vector3(0f, -0.72f, -0.03f), bootMat));
-        legR.AddChild(Box("BootR", new Vector3(0.15f, 0.12f, 0.22f), new Vector3(0f, -0.72f, -0.03f), bootMat));
+        Node3D AddShin(Node3D thigh)
+        {
+            var shin = new Node3D { Position = new Vector3(0, -.37f, 0) };
+            shin.AddChild(Box("Shin", new Vector3(.12f, .37f, .14f), new Vector3(0, -.185f, 0), pantsMat));
+            thigh.AddChild(shin);
+            return shin;
+        }
+        if (cycling)
+        {
+            rig.ShinL = AddShin(legL);
+            rig.ShinR = AddShin(legR);
+        }
+        var bootPosition = new Vector3(0, cycling ? -.35f : -.72f, -.04f);
+        (rig.ShinL ?? legL).AddChild(Box("BootL", new Vector3(.15f, .12f, .22f), bootPosition, bootMat));
+        (rig.ShinR ?? legR).AddChild(Box("BootR", new Vector3(.15f, .12f, .22f), bootPosition, bootMat));
         armL.AddChild(Box("HandL", new Vector3(0.10f, 0.10f, 0.10f), new Vector3(0f, -0.46f, 0f), skinMat));
         armR.AddChild(Box("HandR", new Vector3(0.10f, 0.10f, 0.10f), new Vector3(0f, -0.46f, 0f), skinMat));
 
@@ -483,23 +520,66 @@ public static class GsaMeshBuilder
     {
         var bike = new Node3D { Name = "CargoBicycle" };
         parent.AddChild(bike);
-        var frameMat = SolidMat(new Color(0.15f, 0.54f, 0.72f));
-        var tireMat = SolidMat(new Color(0.12f, 0.12f, 0.13f));
-        var basketMat = SolidMat(new Color(0.72f, 0.56f, 0.30f));
+        var frame = SolidMat(new Color("35beaa"));
+        var rubber = SolidMat(new Color("26282a"));
+        var metal = SolidMat(new Color("b7cdce"));
+        var oak = SolidMat(new Color("cb8b4c"));
+        var batch = new GsaStaticMeshBatcher();
+        void Tube(Vector3 a, Vector3 b, float diameter, Material mat)
+        {
+            var line = b - a;
+            var rotation = new Quaternion(Vector3.Up, line.Normalized()).GetEuler() * (180f / Mathf.Pi);
+            batch.AddBox(mat, (a + b) / 2, new Vector3(diameter, line.Length(), diameter), rotation);
+        }
+        var crank = new Vector3(0, .37f, 0);
+        var saddle = new Vector3(0, .84f, .16f);
+        var headset = new Vector3(0, .84f, -.47f);
+        Tube(crank, saddle, .065f, frame);
+        Tube(saddle, headset, .064f, frame);
+        Tube(headset, crank, .079f, frame);
+        foreach (var side in new[] { -.11f, .11f })
+        {
+            var rear = new Vector3(side, .32f, .62f);
+            Tube(rear, saddle, .043f, frame);
+            Tube(rear, crank, .041f, frame);
+            Tube(new Vector3(side * .62f, .32f, -.68f), headset, .044f, metal);
+        }
+        Tube(headset, new Vector3(0, 1.10f, -.36f), .048f, metal);
+        batch.AddBox(metal, new Vector3(0, 1.10f, -.36f), new Vector3(.57f, .046f, .046f));
+        batch.AddBox(rubber, saddle, new Vector3(.25f, .08f, .31f));
+        batch.AddBox(oak, new Vector3(0, .73f, -.78f), new Vector3(.52f, .06f, .49f));
+        foreach (var y in new[] { .80f, .89f })
+        {
+            foreach (var x in new[] { -.245f, .245f })
+                batch.AddBox(oak, new Vector3(x, y, -.78f), new Vector3(.025f, .052f, .49f));
+            foreach (var z in new[] { -1.01f, -.55f })
+                batch.AddBox(oak, new Vector3(0, y, z), new Vector3(.52f, .052f, .025f));
+        }
+        batch.BuildSeparatedNodes(bike, "Frame");
 
-        var wheelF = BuildWheelNode("Wheel_F", 0.32f, 0.07f, tireMat, new Vector3(0f, 0.32f, -0.68f));
-        var wheelR = BuildWheelNode("Wheel_R", 0.32f, 0.07f, tireMat, new Vector3(0f, 0.32f, 0.62f));
-        bike.AddChild(wheelF);
-        bike.AddChild(wheelR);
-        rig.Wheels.Add(wheelF);
-        rig.Wheels.Add(wheelR);
-
-        bike.AddChild(Box("TopTube", new Vector3(0.06f, 0.06f, 1.1f), new Vector3(0f, 0.76f, -0.05f), frameMat));
-        bike.AddChild(Box("Fork", new Vector3(0.08f, 0.62f, 0.07f), new Vector3(0f, 0.62f, -0.58f), frameMat, rotDeg: new Vector3(16f, 0f, 0f)));
-        bike.AddChild(Box("Handlebars", new Vector3(0.52f, 0.05f, 0.05f), new Vector3(0f, 0.96f, -0.48f), SolidMat(new Color(0.7f, 0.72f, 0.75f))));
-        bike.AddChild(Box("CargoBasket", new Vector3(0.42f, 0.22f, 0.44f), new Vector3(0f, 0.76f, -0.56f), basketMat));
-
-        BuildGimbalina(bike, rig, new Vector3(0f, 0.86f, -0.56f), scale: 0.9f);
+        var spokes = new GsaStaticMeshBatcher();
+        for (var i = 0; i < 6; i++)
+            spokes.AddBox(metal, Vector3.Zero, new Vector3(.015f, .57f, .015f), Vector3.Right * (i * 30));
+        var spokeMesh = spokes.BuildCombinedArrayMesh();
+        var tire = new TorusMesh { InnerRadius = .275f, OuterRadius = .328f, Rings = 20, RingSegments = 6 };
+        foreach (var z in new[] { -.68f, .62f })
+        {
+            var wheel = new Node3D { Position = new Vector3(0, .328f, z) };
+            wheel.AddChild(new MeshInstance3D { Mesh = tire, MaterialOverride = rubber, RotationDegrees = Vector3.Back * 90 });
+            wheel.AddChild(new MeshInstance3D { Mesh = spokeMesh });
+            bike.AddChild(wheel);
+            rig.Wheels.Add(wheel);
+            if (z < 0) rig.SteerableWheels.Add(wheel);
+        }
+        var pedals = new Node3D { Name = "PedalCrank", Position = crank };
+        bike.AddChild(pedals);
+        rig.BicycleCrank = pedals;
+        foreach (var side in new[] { -1, 1 })
+        {
+            pedals.AddChild(Box("CrankArm", new Vector3(.032f, .15f, .044f), new Vector3(side * .13f, side * .075f, 0), metal));
+            pedals.AddChild(Box("Pedal", new Vector3(.12f, .04f, .11f), new Vector3(side * .16f, side * .15f, 0), rubber));
+        }
+        BuildGimbalina(bike, rig, new Vector3(0, .76f, -.80f), scale: 1.15f);
     }
 
     private static void BuildScooter(Node3D parent, PlayerVisualRig rig)

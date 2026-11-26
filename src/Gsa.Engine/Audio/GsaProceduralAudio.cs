@@ -4,7 +4,7 @@ using Godot;
 namespace Gsa.Engine.Audio;
 
 /// <summary>Offline procedural PCM synthesizer for SFX (shutter, clucking, horn, chimes) and 3 fictional radio stations.</summary>
-public sealed class GsaProceduralAudio
+public sealed class GsaProceduralAudio : IDisposable
 {
     private const float SampleRate = 22050f;
 
@@ -75,6 +75,14 @@ public sealed class GsaProceduralAudio
 
         (_sfxPlayer, _sfxPlayback) = CreateGeneratorPlayer(parent, "SfxSynthPlayer");
         (_radioPlayer, _radioPlayback) = CreateGeneratorPlayer(parent, "RadioSynthPlayer");
+    }
+
+    public void Dispose()
+    {
+        _sfxPlayer?.Stop();
+        _radioPlayer?.Stop();
+        _sfxPlayback?.Dispose();
+        _radioPlayback?.Dispose();
     }
 
     private static (AudioStreamPlayer?, AudioStreamGeneratorPlayback?) CreateGeneratorPlayer(Node parent, string name)
