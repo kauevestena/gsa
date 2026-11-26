@@ -153,7 +153,8 @@ public partial class SaoDatumCityScene : Node3D
             LocalizationService.EnsureCatalogsLoaded();
             var launch = GetTree().Root.GetMeta(SandboxModeKey, "career").AsString();
             _quickParkRun = launch == "park_run";
-            _isSandbox = _quickParkRun || launch == "sandbox" || OS.HasEnvironment("GSA_SANDBOX");
+            _isSandbox = _quickParkRun || launch == "sandbox" || OS.HasEnvironment("GSA_SANDBOX") ||
+                         OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--sandbox", StringComparison.Ordinal));
             _perfProbe = GsaPerfProbe.TryCreateFromArgs(this, _isSandbox ? "sao_datum_sandbox" : "sao_datum_city");
 
             _tutorialManifest = WorldSceneManifest.Parse(Godot.FileAccess.GetFileAsString(TutorialManifestPath));
@@ -318,6 +319,7 @@ public partial class SaoDatumCityScene : Node3D
 
         // Commerce Street promenade, storefronts, curbs, signals, streetlamps & water tanks
         _cityVisuals.BuildCommerceStreetDetails(visualBase, _fullManifest, _coordinates, _atmosphere, includeBeacons: false);
+        BuildStreetInteractions(visualBase);
         if (!_quickParkRun) BuildWorldParkedVehicles(visualBase);
 
         // Glowing GTA III Beacons for Office, Unload, and 8 Geodetic Benchmarks
@@ -480,6 +482,7 @@ public partial class SaoDatumCityScene : Node3D
             .Concat(PortWorksColumns())
             .Concat(_cityVisuals.ExtraObstacles)
             .Concat(_landmarks.LandmarkObstacles)
+            .Concat(_garageObstacles)
             .ToArray();
         _liveCandidates = _fullManifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
     }
@@ -831,6 +834,21 @@ public partial class SaoDatumCityScene : Node3D
             rig.Root.Rotation = new Vector3(0f, (float)(heading - Math.PI / 2.0), 0f);
             var ring = GsaMeshBuilder.BuildBeaconRing("BoardRing", new Color(0.24f, 0.88f, 0.96f), 1.8f, 0.55f);
             rig.Root.AddChild(ring);
+            var lbl = new Label3D
+            {
+                Text = Text($"platform.{mode.ToString().ToLowerInvariant()}.name"),
+                Position = new Vector3(0f, 2.35f, 0f),
+                FontSize = 32,
+                PixelSize = 0.007f,
+                Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
+                Modulate = new Color(0.32f, 0.92f, 0.96f),
+                OutlineModulate = Colors.Black,
+                OutlineSize = 4,
+                AlphaCut = Label3D.AlphaCutMode.Disabled,
+                VisibilityRangeEnd = 36f,
+            };
+            rig.Root.AddChild(lbl);
+            _parkedVehicleLabels.Add(lbl);
             visualBase.AddChild(rig.Root);
             _worldParkedVehicles.Add((mode, pos, heading, rig.Root));
         }
@@ -1088,6 +1106,7 @@ public partial class SaoDatumCityScene : Node3D
 
         // Step world hazards, police blitz, absurd events & Chicken Challenge (200 m track)
         StepCityHazardsAndEvents(delta, activePos, activeSpeed, activeMode);
+        StepCityStreetInteractions(delta, activePos, activeHeading, activeSpeed, activeMode, input);
         StepParkRun(delta, previousPlayerPosition, activePos, activeMode, gStep);
 
         // Rotate collectibles & check proximity pickup / benchmark occupation
@@ -1114,6 +1133,7 @@ public partial class SaoDatumCityScene : Node3D
         {
             _hudElapsed = 0;
             RefreshParkHud();
+            RefreshParkedVehicleLabels();
             if (_gtaHud.Layer.Visible) RefreshCityHud(0.1, activePos, activeHeading, activeMode, weather, gStep.Stress, attn);
             if (_tabletPanel.Visible) RefreshCityHazardStatus();
             if (_tabletPanel.Visible && _tabletTabs.CurrentTab is MapTabletTab or TechnicalTabletTab)
@@ -1717,6 +1737,12 @@ public partial class SaoDatumCityScene : Node3D
                 case Key.E when _everyday.Parking is not null:
                     _tabletPanel.Show(); _tabletTabs.CurrentTab = 1; RefreshTabletContents();
                     GetViewport().SetInputAsHandled(); return;
+                case Key.E when TryHandleStreetInteraction(CurrentPositionEnu(), _lastSpeedMps, CurrentActiveMode()):
+                    GetViewport().SetInputAsHandled(); return;
+                case Key.N:
+                    _gpsArrowEnabled = !_gpsArrowEnabled;
+                    GetViewport().SetInputAsHandled();
+                    return;
                 case Key.R or Key.Tab or Key.M:
                     ToggleTablet();
                     GetViewport().SetInputAsHandled();
@@ -1774,7 +1800,7 @@ public partial class SaoDatumCityScene : Node3D
                     GetViewport().SetInputAsHandled();
                     return;
                 case Key.H:
-                    _audio.PlayHorn(CurrentActiveMode());
+                    _audio.PlayHorn(CurrentActiveMode(), _cosmetics.EquippedHornId);
                     _traffic.Simulator.StartleNearbyPedestrians(CurrentPositionEnu(), 9.0);
                     if (CurrentActiveMode() <= LocomotionMode.Bicycle) _gimbalina.ApplyStartle(StartleEventKind.Horn);
                     GetViewport().SetInputAsHandled();

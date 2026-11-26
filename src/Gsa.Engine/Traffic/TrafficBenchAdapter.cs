@@ -40,8 +40,9 @@ public sealed class TrafficBenchAdapter
     private MultiMeshInstance3D? _pedestrianArmLNode;
     private MultiMeshInstance3D? _pedestrianArmRNode;
     private MultiMeshInstance3D? _shadowPool;
-    private MultiMesh? _warningLamps;
+    private MultiMesh? _vehicleLamps;
     private double _walkTime;
+    private bool _lightsActive;
 
     public TrafficBenchSimulator Simulator => _simulator;
     public IReadOnlyList<TrafficVisualAgent> VisualAgents => _visualBuffer;
@@ -121,17 +122,30 @@ public sealed class TrafficBenchAdapter
 
         if (warnForErraticDrivers)
         {
-            var lamp = new BoxMesh { Size = new Vector3(.06f, .18f, .25f),
-                Material = GsaMeshBuilder.SolidMat(new Color(1f, .92f, .67f), emit: true, emissionEnergy: 2f) };
-            _warningLamps = new MultiMesh
+            var lamp = new BoxMesh
+            {
+                Size = new Vector3(.08f, .16f, .24f),
+                Material = new StandardMaterial3D
+                {
+                    VertexColorUseAsAlbedo = true,
+                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                },
+            };
+            _vehicleLamps = new MultiMesh
             {
                 TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                UseColors = true,
                 Mesh = lamp,
-                InstanceCount = 2 * TrafficBenchSimulator.TargetVehicleCount,
+                InstanceCount = 4 * TrafficBenchSimulator.TargetVehicleCount,
                 VisibleInstanceCount = 0,
             };
-            root.AddChild(new MultiMeshInstance3D { Name = "ErraticHeadlamps", Multimesh = _warningLamps,
-                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off });
+            root.AddChild(new MultiMeshInstance3D
+            {
+                Name = "TrafficVehicleLamps",
+                Multimesh = _vehicleLamps,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+                VisibilityRangeEnd = 160f,
+            });
         }
 
         SyncVisuals();
@@ -141,6 +155,7 @@ public sealed class TrafficBenchAdapter
         Vector3d? cameraPosition = null, Vector3d? cameraForward = null, CityTrafficConditions? city = null)
     {
         _walkTime += dtSeconds;
+        _lightsActive = city is { } c && (c.IsNight || c.CruiseSpeedMultiplier < 0.99);
         _simulator.Advance(dtSeconds, cameraPosition ?? (city.HasValue ? playerEnu : null), cameraForward, city);
         SyncVisuals();
     }
@@ -161,6 +176,9 @@ public sealed class TrafficBenchAdapter
         var flashOn = _walkTime % .8 < .45;
         var pedShadowBasis = new Basis(new Vector3(0.90f, 0f, 0f), new Vector3(0f, 0f, -0.90f), Vector3.Up);
         var walkPhase = (float)_walkTime;
+        var lampWarnColor = new Color(1.0f, 0.85f, 0.25f);
+        var lampHeadColor = new Color(1.0f, 0.96f, 0.80f);
+        var lampTailColor = new Color(0.98f, 0.16f, 0.14f);
 
         foreach (var agent in _visualBuffer)
         {
@@ -191,10 +209,26 @@ public sealed class TrafficBenchAdapter
                 mm.SetInstanceTransform(idx, new Transform3D(basis, godotPos));
                 mm.SetInstanceColor(idx, vis.Tint);
 
-                if (agent.IsErratic && flashOn && _warningLamps is { } lamps)
+                if (_vehicleLamps is { } lamps)
                 {
-                    lamps.SetInstanceTransform(warnedCars++, new Transform3D(basis, godotPos + basis * new Vector3(2.24f, .57f, .65f)));
-                    lamps.SetInstanceTransform(warnedCars++, new Transform3D(basis, godotPos + basis * new Vector3(2.24f, .57f, -.65f)));
+                    if (agent.IsErratic && flashOn && warnedCars + 2 <= lamps.InstanceCount)
+                    {
+                        lamps.SetInstanceTransform(warnedCars, new Transform3D(basis, godotPos + basis * new Vector3(2.24f, .57f, .65f)));
+                        lamps.SetInstanceColor(warnedCars++, lampWarnColor);
+                        lamps.SetInstanceTransform(warnedCars, new Transform3D(basis, godotPos + basis * new Vector3(2.24f, .57f, -.65f)));
+                        lamps.SetInstanceColor(warnedCars++, lampWarnColor);
+                    }
+                    else if (_lightsActive && warnedCars + 4 <= lamps.InstanceCount)
+                    {
+                        lamps.SetInstanceTransform(warnedCars, new Transform3D(basis, godotPos + basis * new Vector3(2.16f, .54f, .64f)));
+                        lamps.SetInstanceColor(warnedCars++, lampHeadColor);
+                        lamps.SetInstanceTransform(warnedCars, new Transform3D(basis, godotPos + basis * new Vector3(2.16f, .54f, -.64f)));
+                        lamps.SetInstanceColor(warnedCars++, lampHeadColor);
+                        lamps.SetInstanceTransform(warnedCars, new Transform3D(basis, godotPos + basis * new Vector3(-2.16f, .56f, .64f)));
+                        lamps.SetInstanceColor(warnedCars++, lampTailColor);
+                        lamps.SetInstanceTransform(warnedCars, new Transform3D(basis, godotPos + basis * new Vector3(-2.16f, .56f, -.64f)));
+                        lamps.SetInstanceColor(warnedCars++, lampTailColor);
+                    }
                 }
 
                 if (_shadowPool is not null && shadowIndex < _shadowPool.Multimesh.InstanceCount)
@@ -252,8 +286,8 @@ public sealed class TrafficBenchAdapter
             }
         }
 
-        if (_warningLamps is not null)
-            _warningLamps.VisibleInstanceCount = warnedCars;
+        if (_vehicleLamps is not null)
+            _vehicleLamps.VisibleInstanceCount = warnedCars;
         // Hide unused slots if the model mix changes.
         for (var v = 0; v < 4; v++)
             _vehiclePools[v].Multimesh.VisibleInstanceCount = vehicleIndices[v];

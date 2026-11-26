@@ -109,7 +109,7 @@ public partial class SaoDatumCityScene
     {
         if (_cityHazards.DisabledVehicle is { } mode)
         {
-            if (!NearCityUnload()) { _feedbackText = Text("city.hazards.recover_location"); return; }
+            if (!NearCityUnload() && !IsNearWorkshopGarage(CurrentPositionEnu())) { _feedbackText = Text("city.hazards.recover_location"); return; }
             var platform = PlatformProfile.ForMode(mode); var quote = _cityHazards.Services.QuoteService(ServiceKind.InsuranceClaim, platform);
             var id = _cityHazards.NextEventId();
             var paid = quote.Eligible

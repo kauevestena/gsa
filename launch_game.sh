@@ -13,4 +13,16 @@ if [[ ! -x "$editor" ]]; then
     echo "Install the pinned editor with python3 scripts/install_toolchain.py or set GODOT to its executable." >&2
     exit 1
 fi
-exec "$editor" --path "$repo_dir/game" "$@"
+extra_args=()
+if [[ " $* " != *" --headless "* ]]; then
+    unset LIBGL_ALWAYS_SOFTWARE GALLIUM_DRIVER MESA_LOADER_DRIVER_OVERRIDE __GLX_VENDOR_LIBRARY_NAME
+    if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
+        if [[ -z "${DRI_PRIME:-}" && -e /dev/dri/by-path/pci-0000:00:02.0-render ]]; then
+            export DRI_PRIME=pci-0000_00_02_0
+        fi
+        if [[ " $* " != *" --display-driver "* ]]; then
+            extra_args+=(--display-driver wayland)
+        fi
+    fi
+fi
+exec "$editor" ${extra_args[@]+"${extra_args[@]}"} --path "$repo_dir/game" "$@"

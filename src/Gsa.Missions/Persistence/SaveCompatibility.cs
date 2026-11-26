@@ -62,6 +62,9 @@ public sealed record SaveCitySessionState(
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public WorksUploadSaveState? WorksUpload { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public BlooperAndCosmeticSnapshot? Cosmetics { get; init; }
 }
 
 public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);
@@ -158,6 +161,7 @@ public static class SaveCompatibility
                     throw new ArgumentException("Active story and saved contract do not match.", nameof(state));
             }
             _ = CityHazardState.Restore(city.Hazards, city.DisguiseActive);
+            if (city.Cosmetics is not null) _ = BlooperAlbumAndCosmeticsCoordinator.FromSnapshot(city.Cosmetics);
             _ = CityEverydayEncounters.Restore(city.Encounters);
             if (city.Gimbalina is not null) _ = GimbalinaStabilizer.FromSaveSnapshot(city.Gimbalina);
             new TerritoryAttentionTracker().ImportSnapshot(city.Attention);

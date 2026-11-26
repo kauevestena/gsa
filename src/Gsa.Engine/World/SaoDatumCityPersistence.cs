@@ -52,7 +52,16 @@ public partial class SaoDatumCityScene
             RainSurveyFilterEnabled = IsRainCollection(_activeContract) && _rainSurveyFilterEnabled,
             BoundarySurvey = IsBoundarySurvey(_activeContract) ? new(_pendingBoundaryShots.ToArray(), _boundaryPursuitTriggered) : null,
             WorksUpload = IsWorksSurvey(_activeContract) ? _worksUpload : null,
+            Cosmetics = HasCustomCosmeticsState() ? _cosmetics.ExportSnapshot() : null,
         });
+
+    private bool HasCustomCosmeticsState() =>
+        _cosmetics.Entries.Count > 0 ||
+        _cosmetics.OwnedCosmeticIds.Count > 4 ||
+        _cosmetics.EquippedPaintId != Gsa.Missions.Activities.BlooperAndCosmeticCatalog.DefaultPaintId ||
+        _cosmetics.EquippedStickerId != Gsa.Missions.Activities.BlooperAndCosmeticCatalog.DefaultStickerId ||
+        _cosmetics.EquippedHornId != Gsa.Missions.Activities.BlooperAndCosmeticCatalog.DefaultHornId ||
+        _cosmetics.EquippedGimbalinaCostume != Gsa.Missions.Activities.GimbalinaCostumeId.SurveyorVest;
 
     private void SaveCityCareerState(SaveTrigger trigger = SaveTrigger.Manual, bool announce = true)
     {
@@ -143,6 +152,10 @@ public partial class SaoDatumCityScene
             _attention = attention;
             _cityHazards = hazards; _cityCustody = runtime.CustodyStore;
             _everyday = everyday; _gimbalina = gimbalina;
+            _cosmetics = city?.Cosmetics is { } savedCosmetics
+                ? Gsa.Missions.Activities.BlooperAlbumAndCosmeticsCoordinator.FromSnapshot(savedCosmetics)
+                : new Gsa.Missions.Activities.BlooperAlbumAndCosmeticsCoordinator();
+            _garagePaintOverride = null;
             _mobility.SetGimbalinaPresent(!gimbalina.HasFledToSafety);
             RestoreCityProtectedPhotos();
             _fieldSamples.Clear(); _fieldSamples.AddRange(samples);
@@ -184,6 +197,7 @@ public partial class SaoDatumCityScene
             BuildCollectiblesAndLandmarks();
             RefreshCollectibleNodesAfterLoad();
             _mobility.SetVisualPlatformMode(mobility.Mode);
+            ApplyEquippedCosmeticsToRig();
             UpdateSectorStreaming(mobility.PositionEnu);
             RestoreCityHazardWorld(); SyncCityEverydayActors();
             SnapCamera();

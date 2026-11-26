@@ -297,7 +297,7 @@ public static class GsaMeshBuilder
         AddLayer("Shadows", shadowMm, shadowMat, visibilityRangeEnd > 0f ? MathF.Min(visibilityRangeEnd, 90f) : 90f);
     }
 
-    public static PlayerVisualRig BuildPlayerRig(LocomotionMode mode)
+    public static PlayerVisualRig BuildPlayerRig(LocomotionMode mode, Color? customPaint = null, int gimbalinaCostume = 0)
     {
         var root = new Node3D { Name = $"PlayerVisual_{mode}" };
         var bodyPivot = new Node3D { Name = "BodyPivot" };
@@ -324,29 +324,29 @@ public static class GsaMeshBuilder
                 BuildEliasActor(bodyPivot, rig, Vector3.Zero, pushingPose: false);
                 break;
             case LocomotionMode.Handcart:
-                BuildHandcart(bodyPivot, rig);
+                BuildHandcart(bodyPivot, rig, gimbalinaCostume);
                 BuildEliasActor(bodyPivot, rig, new Vector3(0f, 0f, 0.72f), pushingPose: true);
                 break;
             case LocomotionMode.Bicycle:
-                BuildBicycle(bodyPivot, rig);
+                BuildBicycle(bodyPivot, rig, customPaint, gimbalinaCostume);
                 BuildEliasActor(bodyPivot, rig, new Vector3(0f, .07f, .14f), pushingPose: true, wearingHelmet: true);
                 rig.Animate(0, 0, 0, 0, 0, 0, 0, 0, false, false);
                 break;
             case LocomotionMode.Scooter:
-                BuildScooter(bodyPivot, rig);
+                BuildScooter(bodyPivot, rig, customPaint);
                 BuildEliasActor(bodyPivot, rig, new Vector3(0f, 0.30f, 0.14f), pushingPose: true, wearingHelmet: true);
                 break;
             case LocomotionMode.Car:
-                BuildSedanCar(bodyPivot, rig);
+                BuildSedanCar(bodyPivot, rig, customPaint);
                 break;
             case LocomotionMode.Kombi:
-                BuildKombiVan(bodyPivot, rig);
+                BuildKombiVan(bodyPivot, rig, customPaint);
                 break;
             case LocomotionMode.Pickup:
-                BuildPickup4x4(bodyPivot, rig);
+                BuildPickup4x4(bodyPivot, rig, customPaint);
                 break;
             case LocomotionMode.Van:
-                BuildEngineeringVan(bodyPivot, rig);
+                BuildEngineeringVan(bodyPivot, rig, customPaint, gimbalinaCostume);
                 break;
         }
 
@@ -443,7 +443,7 @@ public static class GsaMeshBuilder
         }
     }
 
-    private static void BuildHandcart(Node3D parent, PlayerVisualRig rig)
+    private static void BuildHandcart(Node3D parent, PlayerVisualRig rig, int gimbalinaCostume = 0)
     {
         var cart = new Node3D { Name = "Handcart" };
         parent.AddChild(cart);
@@ -467,10 +467,10 @@ public static class GsaMeshBuilder
         rig.Wheels.Add(wheel);
 
         // Gimbalina perched on front platform!
-        BuildGimbalina(cart, rig, new Vector3(0f, 0.74f, -0.35f), scale: 1.0f);
+        BuildGimbalina(cart, rig, new Vector3(0f, 0.74f, -0.35f), scale: 1.0f, dashboardMascot: false, costume: gimbalinaCostume);
     }
 
-    private static void BuildGimbalina(Node3D parent, PlayerVisualRig rig, Vector3 pos, float scale, bool dashboardMascot = false)
+    private static void BuildGimbalina(Node3D parent, PlayerVisualRig rig, Vector3 pos, float scale, bool dashboardMascot = false, int costume = 0)
     {
         var gBody = new Node3D { Name = "GimbalinaBody", Position = pos, Scale = Vector3.One * scale };
         parent.AddChild(gBody);
@@ -486,6 +486,10 @@ public static class GsaMeshBuilder
         // Plump body & tail
         gBody.AddChild(Box("Body", new Vector3(0.24f, 0.22f, 0.30f), new Vector3(0f, 0.11f, 0f), featherMat));
         gBody.AddChild(Box("Tail", new Vector3(0.14f, 0.14f, 0.12f), new Vector3(0f, 0.20f, 0.16f), wingMat, rotDeg: new Vector3(-28f, 0f, 0f)));
+        if (costume == 2) // RainPoncho
+            gBody.AddChild(Box("CostumePoncho", new Vector3(0.27f, 0.16f, 0.32f), new Vector3(0f, 0.14f, 0.01f), SolidMat(new Color(0.16f, 0.72f, 0.88f))));
+        else if (costume == 3) // NightReflective
+            gBody.AddChild(Box("CostumeVest", new Vector3(0.27f, 0.12f, 0.24f), new Vector3(0f, 0.12f, 0f), SolidMat(new Color(0.84f, 0.98f, 0.20f), emit: true, emissionEnergy: 0.45f)));
 
         var wingL = new Node3D { Name = "WingL", Position = new Vector3(-0.13f, 0.15f, 0f) };
         wingL.AddChild(Box("WingMesh", new Vector3(0.04f, 0.14f, 0.20f), new Vector3(-0.02f, -0.04f, 0f), wingMat));
@@ -507,6 +511,10 @@ public static class GsaMeshBuilder
         gHead.AddChild(Box("Beak", new Vector3(0.05f, 0.04f, 0.08f), new Vector3(0f, 0.10f, -0.10f), beakMat));
         gHead.AddChild(Box("EyeL", new Vector3(0.02f, 0.03f, 0.03f), new Vector3(-0.07f, 0.12f, -0.04f), SolidMat(Colors.Black)));
         gHead.AddChild(Box("EyeR", new Vector3(0.02f, 0.03f, 0.03f), new Vector3(0.07f, 0.12f, -0.04f), SolidMat(Colors.Black)));
+        if (costume == 1) // HardHatSafety
+            gHead.AddChild(Box("CostumeHardHat", new Vector3(0.16f, 0.08f, 0.17f), new Vector3(0f, 0.21f, -0.01f), SolidMat(new Color(0.96f, 0.78f, 0.12f))));
+        else if (costume == 4) // FestiveCap
+            gHead.AddChild(Box("CostumePartyCap", new Vector3(0.11f, 0.12f, 0.11f), new Vector3(0f, 0.23f, 0f), SolidMat(new Color(0.92f, 0.22f, 0.68f), emit: true, emissionEnergy: 0.30f)));
 
         if (!dashboardMascot)
         {
@@ -516,11 +524,11 @@ public static class GsaMeshBuilder
         }
     }
 
-    private static void BuildBicycle(Node3D parent, PlayerVisualRig rig)
+    private static void BuildBicycle(Node3D parent, PlayerVisualRig rig, Color? customPaint = null, int gimbalinaCostume = 0)
     {
         var bike = new Node3D { Name = "CargoBicycle" };
         parent.AddChild(bike);
-        var frame = SolidMat(new Color("35beaa"));
+        var frame = SolidMat(customPaint ?? new Color("35beaa"));
         var rubber = SolidMat(new Color("26282a"));
         var metal = SolidMat(new Color("b7cdce"));
         var oak = SolidMat(new Color("cb8b4c"));
@@ -579,14 +587,14 @@ public static class GsaMeshBuilder
             pedals.AddChild(Box("CrankArm", new Vector3(.032f, .15f, .044f), new Vector3(side * .13f, side * .075f, 0), metal));
             pedals.AddChild(Box("Pedal", new Vector3(.12f, .04f, .11f), new Vector3(side * .16f, side * .15f, 0), rubber));
         }
-        BuildGimbalina(bike, rig, new Vector3(0, .76f, -.80f), scale: 1.15f);
+        BuildGimbalina(bike, rig, new Vector3(0, .76f, -.80f), scale: 1.15f, dashboardMascot: false, costume: gimbalinaCostume);
     }
 
-    private static void BuildScooter(Node3D parent, PlayerVisualRig rig)
+    private static void BuildScooter(Node3D parent, PlayerVisualRig rig, Color? customPaint = null)
     {
         var scooter = new Node3D { Name = "DeliveryScooter" };
         parent.AddChild(scooter);
-        var bodyMat = SolidMat(new Color(0.84f, 0.18f, 0.16f));
+        var bodyMat = SolidMat(customPaint ?? new Color(0.84f, 0.18f, 0.16f));
         var trimMat = SolidMat(new Color(0.16f, 0.17f, 0.19f));
         var boxMat = SolidMat(new Color(0.95f, 0.74f, 0.18f));
 
@@ -607,11 +615,11 @@ public static class GsaMeshBuilder
         AttachVehicleLights(scooter, rig, zFront: -0.67f, zRear: 0.78f, halfWidth: 0.12f, height: 0.68f);
     }
 
-    private static void BuildSedanCar(Node3D parent, PlayerVisualRig rig)
+    private static void BuildSedanCar(Node3D parent, PlayerVisualRig rig, Color? customPaint = null)
     {
         var car = new Node3D { Name = "SurveyCar" };
         parent.AddChild(car);
-        var paintMat = SolidMat(new Color(0.22f, 0.44f, 0.70f), roughness: 0.45f);
+        var paintMat = SolidMat(customPaint ?? new Color(0.22f, 0.44f, 0.70f), roughness: 0.45f);
         var glassMat = SolidMat(new Color(0.10f, 0.17f, 0.24f), roughness: 0.18f);
         var bumperMat = SolidMat(new Color(0.14f, 0.15f, 0.17f));
 
@@ -628,11 +636,11 @@ public static class GsaMeshBuilder
         AttachVehicleLights(car, rig, zFront: -1.95f, zRear: 1.95f, halfWidth: 0.62f, height: 0.56f);
     }
 
-    private static void BuildKombiVan(Node3D parent, PlayerVisualRig rig)
+    private static void BuildKombiVan(Node3D parent, PlayerVisualRig rig, Color? customPaint = null)
     {
         var kombi = new Node3D { Name = "SurveyKombi" };
         parent.AddChild(kombi);
-        var lowerMat = SolidMat(new Color(0.88f, 0.44f, 0.12f), roughness: 0.5f);
+        var lowerMat = SolidMat(customPaint ?? new Color(0.88f, 0.44f, 0.12f), roughness: 0.5f);
         var upperMat = SolidMat(new Color(0.95f, 0.92f, 0.84f), roughness: 0.55f);
         var glassMat = SolidMat(new Color(0.11f, 0.18f, 0.25f), roughness: 0.2f);
         var bumperMat = SolidMat(new Color(0.75f, 0.77f, 0.79f));
@@ -650,11 +658,11 @@ public static class GsaMeshBuilder
         AttachVehicleLights(kombi, rig, zFront: -2.15f, zRear: 2.15f, halfWidth: 0.64f, height: 0.58f);
     }
 
-    private static void BuildPickup4x4(Node3D parent, PlayerVisualRig rig)
+    private static void BuildPickup4x4(Node3D parent, PlayerVisualRig rig, Color? customPaint = null)
     {
         var pickup = new Node3D { Name = "SurveyPickup4x4" };
         parent.AddChild(pickup);
-        var paintMat = SolidMat(new Color(0.20f, 0.38f, 0.28f), roughness: 0.52f);
+        var paintMat = SolidMat(customPaint ?? new Color(0.20f, 0.38f, 0.28f), roughness: 0.52f);
         var bedMat = SolidMat(new Color(0.14f, 0.15f, 0.16f));
         var glassMat = SolidMat(new Color(0.10f, 0.16f, 0.22f), roughness: 0.2f);
         var chromeMat = SolidMat(new Color(0.76f, 0.78f, 0.80f), roughness: 0.3f);
@@ -672,12 +680,12 @@ public static class GsaMeshBuilder
         AttachVehicleLights(pickup, rig, zFront: -2.29f, zRear: 2.38f, halfWidth: 0.68f, height: 0.72f);
     }
 
-    private static void BuildEngineeringVan(Node3D parent, PlayerVisualRig rig)
+    private static void BuildEngineeringVan(Node3D parent, PlayerVisualRig rig, Color? customPaint = null, int gimbalinaCostume = 0)
     {
         var van = new Node3D { Name = "EngineeringMmsVan" };
         parent.AddChild(van);
         var whiteMat = SolidMat(new Color(0.92f, 0.94f, 0.95f), roughness: 0.42f);
-        var stripeMat = SolidMat(new Color(0.08f, 0.58f, 0.62f), roughness: 0.4f);
+        var stripeMat = SolidMat(customPaint ?? new Color(0.08f, 0.58f, 0.62f), roughness: 0.4f);
         var amberMat = SolidMat(new Color(0.95f, 0.68f, 0.12f), emit: true);
         var glassMat = SolidMat(new Color(0.09f, 0.15f, 0.22f), roughness: 0.18f);
         var trimMat = SolidMat(new Color(0.14f, 0.16f, 0.18f));
@@ -695,7 +703,7 @@ public static class GsaMeshBuilder
         AttachVehicleLights(van, rig, zFront: -2.64f, zRear: 2.54f, halfWidth: 0.72f, height: 0.66f);
 
         // Retired Gimbalina happily bobbling on the dashboard!
-        BuildGimbalina(van, rig, new Vector3(0.35f, 1.16f, -1.80f), scale: 0.45f, dashboardMascot: true);
+        BuildGimbalina(van, rig, new Vector3(0.35f, 1.16f, -1.80f), scale: 0.45f, dashboardMascot: true, costume: gimbalinaCostume);
     }
 
     private static void AddFourWheels(Node3D parent, PlayerVisualRig rig, float xOff, float zFront, float zRear, float radius, float width)

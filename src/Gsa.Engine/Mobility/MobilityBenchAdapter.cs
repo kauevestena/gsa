@@ -17,8 +17,12 @@ public sealed class MobilityBenchAdapter
     private PlayerVisualRig? _activeRig;
     private bool _gimbalinaPresent = true;
     private LocomotionMode _visualMode = LocomotionMode.Handcart;
+    private Color? _customPaint;
+    private int _gimbalinaCostume;
     private Node3D? _parkedVehicleNode;
     private LocomotionMode? _parkedVehicleMode;
+    private Color? _parkedPaint;
+    private int _parkedCostume;
     private InputActionMap _actionMap = InputActionMap.CreateDefault();
 
     public MobilityBenchAdapter(GodotCoordinateAdapter coordinates)
@@ -40,7 +44,7 @@ public sealed class MobilityBenchAdapter
             CollisionMask = 1,
         };
         _visualMode = initialMode;
-        _activeRig = GsaMeshBuilder.BuildPlayerRig(initialMode);
+        _activeRig = GsaMeshBuilder.BuildPlayerRig(initialMode, _customPaint, _gimbalinaCostume);
         body.AddChild(_activeRig.Root);
         body.AddChild(new CollisionShape3D
         {
@@ -58,12 +62,31 @@ public sealed class MobilityBenchAdapter
         if (_avatarBody is null || mode == _visualMode)
             return;
         _visualMode = mode;
+        RebuildActiveRig();
+    }
+
+    public void SetVisualCustomization(Color? customPaint, int gimbalinaCostume)
+    {
+        var samePaint = (customPaint is null && _customPaint is null) ||
+                        (customPaint is { } a && _customPaint is { } b && a.IsEqualApprox(b));
+        if (samePaint && gimbalinaCostume == _gimbalinaCostume)
+            return;
+        _customPaint = customPaint;
+        _gimbalinaCostume = gimbalinaCostume;
+        if (_avatarBody is not null)
+            RebuildActiveRig();
+    }
+
+    private void RebuildActiveRig()
+    {
+        if (_avatarBody is null)
+            return;
         if (_activeRig is not null)
         {
             _avatarBody.RemoveChild(_activeRig.Root);
             _activeRig.Root.QueueFree();
         }
-        _activeRig = GsaMeshBuilder.BuildPlayerRig(mode);
+        _activeRig = GsaMeshBuilder.BuildPlayerRig(_visualMode, _customPaint, _gimbalinaCostume);
         _avatarBody.AddChild(_activeRig.Root);
         if (_activeRig.GimbalinaBody is { } body) body.Visible = _gimbalinaPresent;
     }
@@ -89,17 +112,21 @@ public sealed class MobilityBenchAdapter
             return;
         }
 
-        if (_parkedVehicleNode is null || _parkedVehicleMode != parkedMode)
+        var samePaint = (_customPaint is null && _parkedPaint is null) ||
+                        (_customPaint is { } a && _parkedPaint is { } b && a.IsEqualApprox(b));
+        if (_parkedVehicleNode is null || _parkedVehicleMode != parkedMode || !samePaint || _parkedCostume != _gimbalinaCostume)
         {
             if (_parkedVehicleNode is not null)
             {
                 _parkedVehicleNode.GetParent()?.RemoveChild(_parkedVehicleNode);
                 _parkedVehicleNode.QueueFree();
             }
-            var parkedRig = GsaMeshBuilder.BuildPlayerRig(parkedMode.Value);
+            var parkedRig = GsaMeshBuilder.BuildPlayerRig(parkedMode.Value, _customPaint, _gimbalinaCostume);
             _parkedVehicleNode = parkedRig.Root;
             _parkedVehicleNode.Name = "ParkedPlatformProxy";
             _parkedVehicleMode = parkedMode;
+            _parkedPaint = _customPaint;
+            _parkedCostume = _gimbalinaCostume;
             parent.AddChild(_parkedVehicleNode);
         }
 

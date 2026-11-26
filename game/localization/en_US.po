@@ -2329,3 +2329,54 @@ msgstr "Gold in {0}"
 
 msgid "park.missed_finish"
 msgstr "Ride between the posts of the finish arch."
+
+msgid "city.garage.stop_hint"
+msgstr "GSA Workshop · Stop inside the bay and press [E] to repair, calibrate & respray"
+
+msgid "city.garage.prompt"
+msgstr "[E] Workshop Respray, Repair & Rack Calibration ({0} C$)"
+
+msgid "city.garage.recover_prompt"
+msgstr "[E] Recover Damaged {0} ({1} C$)"
+
+msgid "city.garage.resprayed_title"
+msgstr "WORKSHOP RESPRAY & CALIBRATED!"
+
+msgid "city.garage.resprayed_sub"
+msgstr "Bodywork repaired · Sensor rack aligned · Lens clean · Factions cooled"
+
+msgid "city.payphone.prompt"
+msgstr "[E] Answer Dispatch Payphone (Accept Street Contract)"
+
+msgid "city.payphone.speaker"
+msgstr "DISPATCH PAYPHONE · SÃO DATUM"
+
+msgid "city.payphone.no_jobs"
+msgstr "No compatible dispatch offers right now. Upgrade your platform or check Tablet [Tab]."
+
+msgid "city.street.offload_prompt"
+msgstr "[E] Upload Field Observations to Terminal"
+
+msgid "city.street.office_prompt"
+msgstr "[E] Deliver & Settle Contract at GSA Survey HQ"
+
+msgid "city.street.mission_prompt"
+msgstr "[E] Start Mission {0}: {1}"
+
+msgid "city.street.mission_need_vehicle"
+msgstr "Mission {0} requires a Level {1}+ platform — press [Tab] for Fleet & Shop"
+
+msgid "city.street.buy_vehicle"
+msgstr "[E] Buy {0} ({1} C$)"
+
+msgid "city.banner.vehicle_towed"
+msgstr "VEHICLE TOWED!"
+
+msgid "city.banner.towed_sub"
+msgstr "Un-uploaded field batch lost — protected batches preserved at HQ"
+
+msgid "city.cosmetics.header"
+msgstr "Cosmetics & Workshop Style"
+
+msgid "city.cosmetics.equip"
+msgstr "Equip"

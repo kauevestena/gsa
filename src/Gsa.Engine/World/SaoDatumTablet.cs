@@ -601,6 +601,59 @@ public partial class SaoDatumCityScene
             _fleetTab.AddChild(row);
         }
 
+        // Cosmetics & Workshop section (Paint, Horns, Gimbalina Costumes — scientifically invariant!)
+        var cosHeader = new Label { Text = "★ " + Text("city.cosmetics.header") };
+        cosHeader.AddThemeFontSizeOverride("font_size", 15);
+        cosHeader.AddThemeColorOverride("font_color", new Color(0.32f, 0.90f, 0.96f));
+        _fleetTab.AddChild(cosHeader);
+
+        foreach (var item in Gsa.Missions.Activities.BlooperAndCosmeticCatalog.AllCosmetics)
+        {
+            if (item.Kind == Gsa.Missions.Activities.CosmeticKind.VehicleSticker)
+                continue;
+            var owned = _cosmetics.OwnedCosmeticIds.Contains(item.ItemId);
+            var equipped = item.ItemId == _cosmetics.EquippedPaintId ||
+                           item.ItemId == _cosmetics.EquippedHornId ||
+                           (item.CostumeId is { } cid && cid == _cosmetics.EquippedGimbalinaCostume);
+            var row = new HBoxContainer();
+            var lbl = new Label
+            {
+                Text = $"{Text(item.TitleKey)} · {item.PriceCoords} C$",
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            };
+            var btn = new Button
+            {
+                Text = Text(equipped ? "city.fleet.active" : owned ? "city.cosmetics.equip" : "city.fleet.buy"),
+                Disabled = equipped && _garagePaintOverride is null,
+                FocusMode = Control.FocusModeEnum.None,
+            };
+            var captured = item;
+            btn.Pressed += () =>
+            {
+                if (_cosmetics.OwnedCosmeticIds.Contains(captured.ItemId))
+                {
+                    _cosmetics.TryEquipCosmetic(captured.ItemId);
+                }
+                else if (_isSandbox)
+                {
+                    _cosmetics.TryPurchaseCosmetic($"sb_{captured.ItemId}_{_tick}", _calendar.CalendarTimeSeconds, captured.ItemId, new CareerLedger(9999), out _, autoEquip: true);
+                }
+                else
+                {
+                    _cosmetics.TryPurchaseCosmetic($"cos_{captured.ItemId}_{_tick}", _calendar.CalendarTimeSeconds, captured.ItemId, _ledger, out _, autoEquip: true);
+                }
+                if (captured.Kind == Gsa.Missions.Activities.CosmeticKind.VehiclePaint)
+                    _garagePaintOverride = null;
+                ApplyEquippedCosmeticsToRig();
+                _audio.PlayOffloadChime();
+                SaveHazardChange();
+                RefreshTabletContents();
+            };
+            row.AddChild(lbl);
+            row.AddChild(btn);
+            _fleetTab.AddChild(row);
+        }
+
         // Map tab
         RefreshCityMapSnapshot();
 
@@ -648,6 +701,21 @@ public partial class SaoDatumCityScene
             blips.Add(new RadarBlip("office_entry", off.PositionEnu, new Color(0.20f, 0.90f, 0.95f), "O"));
         if (_manifestObjectsById.TryGetValue("unload_point", out var unl))
             blips.Add(new RadarBlip("unload_point", unl.PositionEnu, new Color(0.98f, 0.76f, 0.18f), "D"));
+        blips.Add(new RadarBlip("workshop_garage", GarageBayCenterEnu, new Color(0.22f, 0.94f, 0.58f), "W", ClampToRim: false));
+        if (_activeContract is null && _activeDispatchMission is not null)
+            blips.Add(new RadarBlip("story_corona", _activeStoryCoronaEnu, new Color(0.98f, 0.36f, 0.86f), "M", ClampToRim: true));
+        if (_activeContract is null)
+        {
+            foreach (var (regionId, phonePos, ring) in _payphoneNodes)
+            {
+                if (ring.Visible && TrainingContractSession.HorizontalDistance(pos, phonePos) <= 135.0)
+                    blips.Add(new RadarBlip("phone_" + regionId, phonePos, new Color(0.28f, 0.86f, 0.98f), "C", ClampToRim: false));
+            }
+        }
+        if (_pursuerVisual is not null)
+            blips.Add(new RadarBlip("pursuer", _coordinates.ToMap(_pursuerVisual.Position), new Color(1.0f, 0.20f, 0.20f), "!", ClampToRim: true));
+        if (_roadblockObstacle is { } rb)
+            blips.Add(new RadarBlip("roadblock", rb.CenterEnu, new Color(1.0f, 0.48f, 0.12f), "X", ClampToRim: false));
 
         var nearPark = (pos - GimbalinaChallenge.Start).Length < 125;
         if (nearPark)
@@ -692,16 +760,10 @@ public partial class SaoDatumCityScene
         if (!attn.BombWarningActive && (_everyday.DogActive || _everyday.Parking is not null)) promptText = CityEverydayPrompt();
         if (!attn.BombWarningActive && !_everyday.DogActive && _everyday.Parking is null && _cityTrafficWarningId is not null)
             promptText = Text("city.traffic.erratic_warning");
-        if (string.IsNullOrEmpty(_hazardNotice) && _cityTrafficWarningId is null && !_everyday.DogActive && _everyday.Parking is null && mode == LocomotionMode.OnFoot)
+        if (string.IsNullOrEmpty(_hazardNotice) && _cityTrafficWarningId is null && !_everyday.DogActive && _everyday.Parking is null &&
+            GetStreetContextPrompt(pos, _lastSpeedMps, mode) is { } streetPrompt)
         {
-            foreach (var v in _worldParkedVehicles)
-            {
-                if (TrainingContractSession.HorizontalDistance(pos, v.PosEnu) < 4.2)
-                {
-                    promptText = Text("city.board_vehicle");
-                    break;
-                }
-            }
+            promptText = streetPrompt;
         }
 
         var objTitle = _activeContract is not null ? Text(_activeContract.TitleKey)

@@ -123,8 +123,21 @@ public sealed class GsaProceduralAudio : IDisposable
         _voices.Add(new SynthVoice { FreqStart = 920f, FreqEnd = 1280f, Duration = 0.06f, Gain = 0.22f, Wave = 0 });
     }
 
-    public void PlayHorn(LocomotionMode mode)
+    public void PlayHorn(LocomotionMode mode, string? hornCosmeticId = null)
     {
+        if (hornCosmeticId == "horn_cackle")
+        {
+            PlayChickenCluckVoice(stressFraction: 0.95f);
+            _voices.Add(new SynthVoice { FreqStart = 960f, FreqEnd = 1320f, Duration = 0.14f, Gain = 0.24f, Wave = 3 });
+            return;
+        }
+        if (hornCosmeticId == "horn_air_chime")
+        {
+            _voices.Add(new SynthVoice { FreqStart = 523.25f, FreqEnd = 523.25f, Duration = 0.14f, Gain = 0.22f, Wave = 3 });
+            _voices.Add(new SynthVoice { FreqStart = 659.25f, FreqEnd = 659.25f, Duration = 0.22f, Gain = 0.22f, Wave = 3 });
+            _voices.Add(new SynthVoice { FreqStart = 783.99f, FreqEnd = 783.99f, Duration = 0.30f, Gain = 0.24f, Wave = 3 });
+            return;
+        }
         if (mode == LocomotionMode.Bicycle)
         {
             _voices.Add(new SynthVoice { FreqStart = 1560f, FreqEnd = 1520f, Duration = 0.22f, Gain = 0.30f, Wave = 0 });
@@ -141,6 +154,19 @@ public sealed class GsaProceduralAudio : IDisposable
             _voices.Add(new SynthVoice { FreqStart = 392f, FreqEnd = 390f, Duration = 0.28f, Gain = 0.26f, Wave = 3 });
             _voices.Add(new SynthVoice { FreqStart = 494f, FreqEnd = 492f, Duration = 0.28f, Gain = 0.24f, Wave = 3 });
         }
+    }
+
+    public void PlayPayphoneRing()
+    {
+        _voices.Add(new SynthVoice { FreqStart = 940f, FreqEnd = 1180f, Duration = 0.18f, Gain = 0.22f, Wave = 1 });
+        _voices.Add(new SynthVoice { FreqStart = 1180f, FreqEnd = 940f, Duration = 0.22f, Gain = 0.20f, Wave = 1 });
+    }
+
+    public void PlayGarageRespray()
+    {
+        _voices.Add(new SynthVoice { FreqStart = 1400f, FreqEnd = 850f, Duration = 0.24f, Gain = 0.24f, Wave = 2 });
+        _voices.Add(new SynthVoice { FreqStart = 440f, FreqEnd = 660f, Duration = 0.28f, Gain = 0.24f, Wave = 0 });
+        _voices.Add(new SynthVoice { FreqStart = 880f, FreqEnd = 1046.5f, Duration = 0.36f, Gain = 0.24f, Wave = 0 });
     }
 
     public void PlayDogBark()

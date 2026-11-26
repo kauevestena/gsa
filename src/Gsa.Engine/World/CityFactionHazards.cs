@@ -229,13 +229,30 @@ public partial class SaoDatumCityScene
         {
             if (_pursuerVisual is null)
             {
-                _pursuerVisual = new Node3D { Name = "FactionPursuer", Position = _coordinates.ToGodot(pos - new Vector3d(Math.Cos(CurrentHeadingRadians()) * 20, Math.Sin(CurrentHeadingRadians()) * 20, 0)) };
+                var spawnEnu = pos - new Vector3d(Math.Cos(CurrentHeadingRadians()) * 20, Math.Sin(CurrentHeadingRadians()) * 20, 0);
+                _pursuerVisual = new Node3D { Name = "FactionPursuer", Position = _coordinates.ToGodot(spawnEnu) };
                 _pursuerVisual.AddChild(new MeshInstance3D { Mesh = GsaMeshBuilder.BuildTrafficCarMesh(3), MaterialOverride = GsaMeshBuilder.SolidMat(new Color(.65f, .14f, .19f)) });
+                _pursuerVisual.AddChild(GsaMeshBuilder.Box("PursuerSirenRed", new Vector3(0.24f, 0.14f, 0.34f), new Vector3(0.35f, 1.58f, -0.24f),
+                    GsaMeshBuilder.SolidMat(new Color(0.98f, 0.16f, 0.16f), emit: true, emissionEnergy: 2.2f)));
+                _pursuerVisual.AddChild(GsaMeshBuilder.Box("PursuerSirenAmber", new Vector3(0.24f, 0.14f, 0.34f), new Vector3(0.35f, 1.58f, 0.24f),
+                    GsaMeshBuilder.SolidMat(new Color(0.98f, 0.72f, 0.12f), emit: true, emissionEnergy: 2.2f)));
                 AddChild(_pursuerVisual);
             }
             var previous = _coordinates.ToMap(_pursuerVisual.Position);
             var desired = _coordinates.ToMap(_pursuerVisual.Position.MoveToward(_coordinates.ToGodot(pos), (float)(dt * 14)));
-            _pursuerVisual.Position = _coordinates.ToGodot(ResolveObstaclePushout(previous, desired, 1, out _));
+            var resolved = ResolveObstaclePushout(previous, desired, 1, out _);
+            _pursuerVisual.Position = _coordinates.ToGodot(resolved);
+            var dx = resolved.X - previous.X;
+            var dy = resolved.Y - previous.Y;
+            if (dx * dx + dy * dy > 1e-6)
+                _pursuerVisual.Rotation = new Vector3(0f, (float)Math.Atan2(dy, dx), 0f);
+            if (_pursuerVisual.GetNodeOrNull<Node3D>("PursuerSirenRed") is { } sRed &&
+                _pursuerVisual.GetNodeOrNull<Node3D>("PursuerSirenAmber") is { } sAmber)
+            {
+                var flash = (_tick / 8) % 2 == 0;
+                sRed.Visible = flash;
+                sAmber.Visible = !flash;
+            }
             _pursuitCollisionCooldown = Math.Max(0, _pursuitCollisionCooldown - dt);
             if (_pursuitCollisionCooldown <= 0 && _pursuerVisual.Position.DistanceTo(_coordinates.ToGodot(pos)) < 2.5)
             {
@@ -357,6 +374,7 @@ public partial class SaoDatumCityScene
         _locomotion.RepositionSafeAfterRecovery(office, LocomotionMode.Handcart, 0, true, true);
         _mobility.SetVisualPlatformMode(LocomotionMode.Handcart); ResetCityNavigation(); SnapCamera();
         _audio.PlayAlert(critical: true);
+        _gtaHud.TriggerCelebrationBanner(Text("city.banner.vehicle_towed"), Text("city.banner.towed_sub"), 3.8);
         _feedbackText = _hazardNotice = string.Format(Text("city.hazards.vehicle_lost"), lost, _protectedCityPhotos.Count);
         if (IsCityLidarCollection(_activeContract))
             _feedbackText = _hazardNotice = $"{_hazardNotice} {string.Format(Text("city.lidar.vehicle_lost"), lostLidar, _protectedLidarReturns)}";

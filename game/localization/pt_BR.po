@@ -2329,3 +2329,54 @@ msgstr "Ouro em até {0}"
 
 msgid "park.missed_finish"
 msgstr "Passe entre os postes do arco de chegada."
+
+msgid "city.garage.stop_hint"
+msgstr "Oficina GSA · Pare na garagem e pressione [E] para reparar, calibrar e repintar"
+
+msgid "city.garage.prompt"
+msgstr "[E] Pintura, Reparo e Calibração de Rack ({0} C$)"
+
+msgid "city.garage.recover_prompt"
+msgstr "[E] Recuperar {0} Danificado ({1} C$)"
+
+msgid "city.garage.resprayed_title"
+msgstr "REPINTADO E CALIBRADO!"
+
+msgid "city.garage.resprayed_sub"
+msgstr "Lataria restaurada · Rack alinhado · Lente limpa · Atenção reduzida"
+
+msgid "city.payphone.prompt"
+msgstr "[E] Atender Orelhão de Despacho (Aceitar Contrato)"
+
+msgid "city.payphone.speaker"
+msgstr "ORELHÃO DE DESPACHO · SÃO DATUM"
+
+msgid "city.payphone.no_jobs"
+msgstr "Sem chamadas compatíveis agora. Evolua a plataforma ou abra o Tablet [Tab]."
+
+msgid "city.street.offload_prompt"
+msgstr "[E] Descarregar Observações no Terminal"
+
+msgid "city.street.office_prompt"
+msgstr "[E] Entregar e Liquidar Contrato na Sede GSA"
+
+msgid "city.street.mission_prompt"
+msgstr "[E] Iniciar Missão {0}: {1}"
+
+msgid "city.street.mission_need_vehicle"
+msgstr "Missão {0} exige plataforma Nível {1}+ — abra o Tablet [Tab] em Frota"
+
+msgid "city.street.buy_vehicle"
+msgstr "[E] Comprar {0} ({1} C$)"
+
+msgid "city.banner.vehicle_towed"
+msgstr "VEÍCULO REBOCADO!"
+
+msgid "city.banner.towed_sub"
+msgstr "Coleta não descarregada perdida — lotes protegidos salvos na Sede"
+
+msgid "city.cosmetics.header"
+msgstr "Cosméticos e Estilo da Oficina"
+
+msgid "city.cosmetics.equip"
+msgstr "Equipar"
