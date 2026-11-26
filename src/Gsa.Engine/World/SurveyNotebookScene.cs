@@ -178,6 +178,7 @@ public partial class TutorialBlockScene
 
     public override void _ExitTree()
     {
+        _audio?.Dispose();
         if (_photoPreview is not null) _photoPreview.Texture = null;
         _reviewTexture?.Dispose();
         _reviewTexture = null;

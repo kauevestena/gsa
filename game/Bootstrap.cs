@@ -35,14 +35,15 @@ public partial class Bootstrap : Control
         }
         _localization.Initialize();
         _localization.LocaleChanged += _ => RefreshText();
-        GetNode<Button>("Center/Panel/Languages/Portuguese").Pressed += () => ChangeLanguage("pt-BR");
-        GetNode<Button>("Center/Panel/Languages/English").Pressed += () => ChangeLanguage("en-US");
-        GetNode<Button>("Center/Panel/OpenBench").Pressed += OpenBench;
-        GetNode<Button>("Center/Panel/PlayCareer").Pressed += () => OpenCity("career");
-        GetNode<Button>("Center/Panel/PlaySandbox").Pressed += () => OpenCity("sandbox");
-        GetNode<Button>("Center/Panel/QuitButton").Pressed += () => GetTree().Quit();
+        GetNode<Button>("%Portuguese").Pressed += () => ChangeLanguage("pt-BR");
+        GetNode<Button>("%English").Pressed += () => ChangeLanguage("en-US");
+        GetNode<Button>("%OpenBench").Pressed += OpenBench;
+        GetNode<Button>("%PlayCareer").Pressed += () => OpenCity("career");
+        GetNode<Button>("%PlaySandbox").Pressed += () => OpenCity("sandbox");
+        GetNode<Button>("%QuitButton").Pressed += () => GetTree().Quit();
 
-        StyleMenuCard();
+        GetNode<Button>("%PlayChallenge").Pressed += () => OpenCity("park_run");
+        GetNode<Button>("%PlayChallenge").GrabFocus();
         if (!_smokeTest && !string.Equals(DisplayServer.GetName(), "headless", StringComparison.OrdinalIgnoreCase))
             Build3DMenuDiorama();
 
@@ -63,27 +64,6 @@ public partial class Bootstrap : Control
         }
         GD.Print($"GSA_BOOTSTRAP_READY godot={Godot.Engine.GetVersionInfo()["string"]} " +
                  $"dotnet={System.Environment.Version} rid={RuntimeInformation.RuntimeIdentifier}");
-    }
-
-    private void StyleMenuCard()
-    {
-        var frame = GetNode<PanelContainer>("Center/PanelFrame");
-        var panel = GetNode<VBoxContainer>("Center/Panel");
-        frame.CustomMinimumSize = new Vector2(420f, 470f);
-        frame.AddThemeStyleboxOverride("panel", new StyleBoxFlat
-        {
-            BgColor = new Color(0.04f, 0.06f, 0.08f, 0.78f),
-            BorderColor = new Color(0.95f, 0.76f, 0.24f, 0.85f),
-            BorderWidthBottom = 2,
-            BorderWidthLeft = 2,
-            BorderWidthRight = 2,
-            BorderWidthTop = 2,
-            CornerRadiusBottomLeft = 8,
-            CornerRadiusBottomRight = 8,
-            CornerRadiusTopLeft = 8,
-            CornerRadiusTopRight = 8,
-        });
-        panel.MouseFilter = Control.MouseFilterEnum.Pass;
     }
 
     private void Build3DMenuDiorama()
@@ -129,8 +109,8 @@ public partial class Bootstrap : Control
         var menuSunDir = Basis.FromEuler(new Vector3(Mathf.DegToRad(-22f), Mathf.DegToRad(-35f), 0f)).Z;
         GsaRetroShaders.UpdateAtmosphere(
             menuSunDir,
-            new Color(1.0f, 0.78f, 0.56f), 1.45f,
-            new Color(0.68f, 0.54f, 0.52f), 1.05f,
+            new Color(1.0f, .93f, .84f), .88f,
+            new Color(.78f, .83f, .88f), .78f,
             new Color(0.62f, 0.44f, 0.38f), 40f, 190f);
 
         // Batched asphalt street & glowing city towers (world UVs, zero triplanar shader cost)
@@ -160,18 +140,31 @@ public partial class Bootstrap : Control
             var bMat = GsaRetroTextures.CreateWorldMaterial($"menu_bldg_{i % 3}_uv", style, Colors.White, triplanar: false, nightWindowGlow: true);
             dioramaBatch.AddBox(bMat, new Vector3(x * dist, h * 0.5f, z * dist), new Vector3(w, h, w), uvScale: 0.085f);
         }
+        var cream = GsaMeshBuilder.SolidStandardMat(new Color("f4d59f"));
+        var curb = GsaMeshBuilder.SolidStandardMat(new Color("477167"));
+        for (var z = -68; z <= 10; z += 7)
+            dioramaBatch.AddBox(cream, new Vector3(-1.3f, .024f, z), new Vector3(.17f, .025f, 3.3f));
+        foreach (var side in new[] { -1, 1 })
+            dioramaBatch.AddBox(curb, new Vector3(side * 13f, .04f, -20f), new Vector3(3, .19f, 100));
         dioramaBatch.BuildSeparatedNodes(world, "MenuBackdrop", GeometryInstance3D.ShadowCastingSetting.Off);
         GsaRetroTextures.SetNightWindowEmissionEnergy(0.55f);
 
+        var trees = new List<(Vector3 Position, float Scale)>();
+        for (var z = -54; z <= 8; z += 11)
+        {
+            trees.Add((new Vector3(11, .12f, z), .82f));
+            trees.Add((new Vector3(-12, .12f, z - 4), .94f));
+        }
+        GsaMeshBuilder.BuildBatchedStreetTrees(world, "BoulevardTrees", trees);
         var kombi = GsaMeshBuilder.BuildPlayerRig(LocomotionMode.Kombi);
-        kombi.Root.Position = new Vector3(2.4f, 0f, -1.0f);
-        kombi.Root.RotationDegrees = new Vector3(0f, 34f, 0f);
+        kombi.Root.Position = new Vector3(.4f, 0f, -3.6f);
+        kombi.Root.RotationDegrees = new Vector3(0f, 62f, 0f);
         world.AddChild(kombi.Root);
 
-        var cart = GsaMeshBuilder.BuildPlayerRig(LocomotionMode.Handcart);
-        cart.Root.Position = new Vector3(-2.3f, 0f, 1.2f);
-        cart.Root.RotationDegrees = new Vector3(0f, -24f, 0f);
-        world.AddChild(cart.Root);
+        var bike = GsaMeshBuilder.BuildPlayerRig(LocomotionMode.Bicycle);
+        bike.Root.Position = new Vector3(1.85f, 0f, 3.05f);
+        bike.Root.RotationDegrees = new Vector3(0f, 118f, 0f);
+        world.AddChild(bike.Root);
 
         world.AddChild(new OmniLight3D
         {
@@ -189,9 +182,9 @@ public partial class Bootstrap : Control
 
     private void ChangeLanguage(string locale)
     {
-        var result = _localization.SetLocale(locale);
+        var result = _localization.SetLocale(locale, persist: !OS.GetCmdlineUserArgs().Contains("--park-run-smoke"));
         if (result != Error.Ok)
-            GetNode<Label>("Center/Panel/Status").Text = _localization.Translate("bootstrap.language_error");
+            GetNode<Label>("%Hint").Text = _localization.Translate("bootstrap.language_error");
     }
 
     private void OpenBench()
@@ -217,28 +210,25 @@ public partial class Bootstrap : Control
 
     private void RefreshText()
     {
-        GetNode<Label>("Center/Panel/Title").Text = _localization.Translate("bootstrap.title");
-        GetNode<Label>("Center/Panel/Status").Text = _localization.Translate("bootstrap.status");
-        GetNode<Label>("Center/Panel/Number").Text =
-            _localization.Translate("bootstrap.coordinate_label") + ": " + _localization.FormatNumber(1234.56) + " m";
-        GetNode<Label>("Center/Panel/Samples").Text = _localization.TranslatePlural("fixture.sample_count", 2);
-        GetNode<Label>("Center/Panel/Language").Text = _localization.Translate("bootstrap.language");
-        GetNode<Button>("Center/Panel/Languages/Portuguese").Text = _localization.Translate("language.pt_BR");
-        GetNode<Button>("Center/Panel/Languages/English").Text = _localization.Translate("language.en_US");
-        GetNode<Button>("Center/Panel/OpenBench").Text = _localization.Translate("bootstrap.open_bench");
-        GetNode<Button>("Center/Panel/PlayCareer").Text = _localization.Translate("bootstrap.play_career");
-        GetNode<Button>("Center/Panel/PlaySandbox").Text = _localization.Translate("bootstrap.play_sandbox");
-        GetNode<Button>("Center/Panel/QuitButton").Text = _localization.Translate("bootstrap.quit");
+        GetNode<Label>("%Hint").Text = _localization.Translate("park.menu_hint");
+        GetNode<Button>("%PlayChallenge").Text = _localization.Translate("park.title");
+        GetNode<Button>("%Portuguese").Text = "PT-BR";
+        GetNode<Button>("%English").Text = "EN-US";
+        GetNode<Button>("%Portuguese").TooltipText = _localization.Translate("language.pt_BR");
+        GetNode<Button>("%English").TooltipText = _localization.Translate("language.en_US");
+        GetNode<Button>("%OpenBench").Text = _localization.Translate("bootstrap.open_bench");
+        GetNode<Button>("%PlayCareer").Text = _localization.Translate("bootstrap.play_career");
+        GetNode<Button>("%PlaySandbox").Text = _localization.Translate("bootstrap.play_sandbox");
+        GetNode<Button>("%QuitButton").Text = _localization.Translate("bootstrap.quit");
     }
 
     public override void _Process(double delta)
     {
         if (_menuCamera is not null)
         {
-            _menuOrbitAngle += (float)delta * 0.18f;
-            var r = 10.5f;
-            _menuCamera.Position = new Vector3(MathF.Sin(_menuOrbitAngle) * r, 3.8f + MathF.Sin(_menuOrbitAngle * 0.5f) * 0.8f, MathF.Cos(_menuOrbitAngle) * r);
-            _menuCamera.LookAt(new Vector3(0f, 1.8f, 0f), Vector3.Up);
+            _menuOrbitAngle += (float)delta * .13f;
+            _menuCamera.Position = new Vector3(-1.4f + .85f * MathF.Sin(_menuOrbitAngle), 2.35f, 7.7f);
+            _menuCamera.LookAt(new Vector3(.3f, 1.35f, -.2f), Vector3.Up);
         }
         if (_smokeTest && ++_frames == 3)
         {

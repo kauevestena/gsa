@@ -58,3 +58,9 @@ Consulte o [roadmap](specs/roadmap.md) e as evidências por tarefa para o estado
 Os gates humanos M2/M3 seguem em `pending_human_playtest_cohort`. O desempenho na GPU de referência continua em `pending_reference_hardware`. Inspeção gráfica e isolamento de rede Windows permanecem separados da CI headless. A licença do jogo ainda está pendente conforme EXT-02.
 
 Os [encontros de cães e estacionamento](docs/city-everyday-encounters.md) ligam perseguição, petisco, cambaleio, pagamento/recusa e dano cosmético à cidade. Estresse e fase de Gimbalina são salvos e afetam a exposição das câmeras iniciais.
+
+## Desafio da Gimbalina
+
+Na tela inicial, escolha **Desafio da Gimbalina** para sair de bicicleta no Parque Central de São Datum. W ou ↑ pedala, A/D ou ←/→ viram e S ou ↓ freia. Cruze o arco de largada, passe entre as bandeiras dos três portões e cruze a chegada. O cronômetro mede os 200 m entre os arcos. A medalha exige que a cabeça de Gimbalina fique dentro de ±5° em pelo menos 95% das amostras. Frear antes de virar reduz a inclinação da bicicleta. R reinicia a tentativa rápida e Esc volta ao menu.
+
+O recorde é local e separado por plataforma. A prova também pode ser encontrada na cidade, junto ao parque, de bicicleta ou carrinho e entre contratos. Uma vitória na cidade rende 100 Coords. A entrada rápida guarda apenas o recorde da prova.

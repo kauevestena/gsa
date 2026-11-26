@@ -39,12 +39,12 @@ public sealed class GsaThirdPersonCamera
         _camera = camera;
     }
 
-    public void Snap(Vector3 playerGodotPos, double headingRadians, LocomotionMode platformMode)
+    public void Snap(Vector3 playerGodotPos, double headingRadians, LocomotionMode platformMode, float orbitYaw = 0)
     {
         _smoothedYaw = (float)headingRadians;
-        _orbitYawOffset = 0f;
+        _orbitYawOffset = orbitYaw;
         _initialized = true;
-        var (pivot, _, idealCamPos, lookTarget) = ComputeChaseTransform(playerGodotPos, _smoothedYaw, 0.0, platformMode);
+        var (pivot, _, idealCamPos, lookTarget) = ComputeChaseTransform(playerGodotPos, _smoothedYaw + orbitYaw, 0.0, platformMode);
         _ = pivot;
         _camera.Fov = 58f;
         _camera.Position = idealCamPos;

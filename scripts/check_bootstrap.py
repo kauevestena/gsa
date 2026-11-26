@@ -128,6 +128,12 @@ def main() -> int:
         check["status"] = "passed"
         return result.stdout.strip()
 
+    def ride_park_sprint(name, command, runtime_env):
+        with tempfile.TemporaryDirectory(prefix="gsa-park-ride-") as data:
+            isolated = dict(runtime_env, XDG_DATA_HOME=data, APPDATA=data, GSA_PARK_TEST_DIR=data)
+            run(name, [*command, "--headless", "--fixed-fps", "60", "--", "--park-run-smoke"],
+                runtime_env=isolated, marker="GSA_PARK_SPRINT_SMOKE_OK")
+
     try:
         expected_sdk = json.loads((ROOT / "global.json").read_text())["sdk"]["version"]
         actual_sdk = run("dotnet-version", [dotnet, "--version"])
@@ -210,6 +216,7 @@ def main() -> int:
         m3_summary = json.loads(m3_output)
         if m3_summary.get("valid") is not True or m3_summary.get("procedural_seeds_passed") != 500:
             raise RuntimeError("M3 gate CLI smoke check did not verify MVP campaign and 500 procedural seeds")
+        ride_park_sprint("park-sprint", [godot, "--path", "game"], env)
         smoke = run("editor-smoke", [godot, "--headless", "--path", "game", "--", "--smoke-test"],
                     marker="GSA_BOOTSTRAP_SMOKE_OK")
         for marker in ("GSA_BRIDGE_SMOKE_OK", "GSA_LOCALIZATION_SMOKE_OK"):
@@ -286,6 +293,7 @@ def main() -> int:
                 wrapper = out / "gsa.console.exe"
                 executable = wrapper if target == "windows" and wrapper.exists() else binary
                 prefix = ["unshare", "--user", "--map-root-user", "--net"] if args.offline_smoke else []
+                ride_park_sprint(f"export-park-sprint-{target}", prefix + [executable], clean)
                 output = run(f"export-smoke-{target}", prefix + [executable, "--headless", "--", "--smoke-test"],
                              marker="GSA_BOOTSTRAP_SMOKE_OK", runtime_env=clean)
                 if any(marker not in output for marker in ("GSA_BRIDGE_SMOKE_OK", "GSA_LOCALIZATION_SMOKE_OK")):

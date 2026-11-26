@@ -2,6 +2,11 @@ extends Node
 
 
 func _ready() -> void:
+	if "--park-run-smoke" in OS.get_cmdline_user_args() and not get_tree().root.has_node("ParkSprintSmoke"):
+		var ride := preload("res://tests/ParkSprintSmoke.gd").new()
+		ride.name = "ParkSprintSmoke"
+		get_tree().root.add_child.call_deferred(ride)
+		return
 	if not "--smoke-test" in OS.get_cmdline_user_args():
 		return
 	var bridge = get_parent().get_node("DomainBridge")

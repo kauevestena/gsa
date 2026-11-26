@@ -81,3 +81,5 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 **Critério de aceite:** Medalha usa amostras reais de orientação e filtro final depende do evento de campanha.
 
 **Evidência:** Fixtures do desafio e screenshots antes/depois.
+
+O percurso jogável de 200 m, o teste de condução e as capturas estão na [evidência do Desafio da Gimbalina](../../../artifacts/evidence/T-F18-04/README.md).

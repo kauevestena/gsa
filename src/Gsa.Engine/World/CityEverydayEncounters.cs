@@ -56,7 +56,7 @@ public partial class SaoDatumCityScene
         RefreshCityEverydayLocale();
     }
 
-    private static Label3D CityNpcLabel() => new() { Position = new(0, 1.9f, 0), FontSize = 38,
+    private Label3D CityNpcLabel() => new() { Visible = !_quickParkRun, Position = new(0, 1.9f, 0), FontSize = 38,
         PixelSize = .006f, Billboard = BaseMaterial3D.BillboardModeEnum.Enabled, Modulate = Colors.White };
 
     private Vector3d FindCityNpcStandingPoint(Vector3d proposed)

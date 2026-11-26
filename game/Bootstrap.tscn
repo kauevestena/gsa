@@ -1,8 +1,70 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://Bootstrap.cs" id="1_bootstrap"]
 [ext_resource type="Script" path="res://DomainBridge.cs" id="2_bridge"]
 [ext_resource type="Script" path="res://BridgeSmoke.gd" id="3_smoke"]
+
+[sub_resource type="StyleBoxFlat" id="MenuPanel"]
+bg_color = Color(0.047, 0.113, 0.137, 0.96)
+border_width_right = 2
+border_color = Color(0.42, 0.83, 0.72, 0.8)
+content_margin_left = 28.0
+content_margin_right = 26.0
+content_margin_top = 12.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="Row"]
+bg_color = Color(0.13, 0.22, 0.24, 1)
+content_margin_left = 14.0
+content_margin_right = 10.0
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="Hover"]
+bg_color = Color(0.20, 0.36, 0.36, 1)
+content_margin_left = 14.0
+content_margin_right = 10.0
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="Featured"]
+bg_color = Color(1, 0.76, 0.35, 1)
+content_margin_left = 14.0
+content_margin_right = 10.0
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="FeaturedHover"]
+bg_color = Color(1, 0.87, 0.57, 1)
+content_margin_left = 14.0
+content_margin_right = 10.0
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="Focus"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 1, 0.94, 1)
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="Theme" id="MenuTheme"]
+Button/font_sizes/font_size = 16
+Button/colors/font_color = Color(0.94, 0.96, 0.90, 1)
+Button/styles/normal = SubResource("Row")
+Button/styles/hover = SubResource("Hover")
+Button/styles/pressed = SubResource("Hover")
+Button/styles/focus = SubResource("Focus")
+
+[sub_resource type="FontVariation" id="Wordmark"]
+variation_embolden = 0.9
+variation_transform = Transform2D(1, 0, -0.17, 1, 0, 0)
+spacing_glyph = 1
 
 [node name="Bootstrap" type="Control"]
 layout_mode = 3
@@ -33,79 +95,90 @@ handle_input_locally = false
 size = Vector2i(960, 540)
 render_target_update_mode = 4
 
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
+[node name="MenuPanel" type="PanelContainer" parent="."]
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 327.0
+theme = SubResource("MenuTheme")
+theme_override_styles/panel = SubResource("MenuPanel")
 
-[node name="PanelFrame" type="PanelContainer" parent="Center"]
+[node name="Menu" type="VBoxContainer" parent="MenuPanel"]
 layout_mode = 2
-
-[node name="Panel" type="VBoxContainer" parent="Center"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Title" type="Label" parent="Center/Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 58
-text = "GSA"
-horizontal_alignment = 1
-
-[node name="Status" type="Label" parent="Center/Panel"]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-horizontal_alignment = 1
-
-[node name="PlayCareer" type="Button" parent="Center/Panel"]
-layout_mode = 2
-custom_minimum_size = Vector2(360, 42)
-
-[node name="PlaySandbox" type="Button" parent="Center/Panel"]
-layout_mode = 2
-custom_minimum_size = Vector2(360, 42)
-
-[node name="OpenBench" type="Button" parent="Center/Panel"]
-layout_mode = 2
-custom_minimum_size = Vector2(360, 40)
-
-[node name="Number" type="Label" parent="Center/Panel"]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-horizontal_alignment = 1
-
-[node name="Samples" type="Label" parent="Center/Panel"]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-horizontal_alignment = 1
-
-[node name="Language" type="Label" parent="Center/Panel"]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-horizontal_alignment = 1
-
-[node name="Languages" type="HBoxContainer" parent="Center/Panel"]
-layout_mode = 2
+theme_override_constants/separation = 8
 alignment = 1
-theme_override_constants/separation = 12
 
-[node name="Portuguese" type="Button" parent="Center/Panel/Languages"]
+[node name="Location" type="Label" parent="MenuPanel/Menu"]
 layout_mode = 2
-custom_minimum_size = Vector2(174, 38)
+theme_override_colors/font_color = Color(0.47, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 19
+text = "SÃO DATUM"
 
-[node name="English" type="Button" parent="Center/Panel/Languages"]
+[node name="Title" type="Label" parent="MenuPanel/Menu"]
 layout_mode = 2
-custom_minimum_size = Vector2(174, 38)
+theme_override_colors/font_color = Color(1, 0.94, 0.83, 1)
+theme_override_fonts/font = SubResource("Wordmark")
+theme_override_font_sizes/font_size = 76
+text = "GSA"
 
-[node name="QuitButton" type="Button" parent="Center/Panel"]
+[node name="PlayChallenge" type="Button" parent="MenuPanel/Menu"]
+unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(360, 36)
+custom_minimum_size = Vector2(0, 45)
+theme_override_styles/normal = SubResource("Featured")
+theme_override_styles/pressed = SubResource("FeaturedHover")
+theme_override_styles/hover = SubResource("FeaturedHover")
+theme_override_colors/font_color = Color(0.055, 0.12, 0.13, 1)
+theme_override_colors/font_hover_color = Color(0.055, 0.12, 0.13, 1)
+theme_override_colors/font_focus_color = Color(0.055, 0.12, 0.13, 1)
+theme_override_colors/font_pressed_color = Color(0.055, 0.12, 0.13, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.055, 0.12, 0.13, 1)
+alignment = 0
+
+[node name="Hint" type="Label" parent="MenuPanel/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.85, 0.81, 1)
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 3
+
+[node name="PlayCareer" type="Button" parent="MenuPanel/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
+alignment = 0
+
+[node name="PlaySandbox" type="Button" parent="MenuPanel/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
+alignment = 0
+
+[node name="OpenBench" type="Button" parent="MenuPanel/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
+alignment = 0
+
+[node name="Footer" type="HBoxContainer" parent="MenuPanel/Menu"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Portuguese" type="Button" parent="MenuPanel/Menu/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 32)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+
+[node name="English" type="Button" parent="MenuPanel/Menu/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 32)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+
+[node name="QuitButton" type="Button" parent="MenuPanel/Menu/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 32)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
