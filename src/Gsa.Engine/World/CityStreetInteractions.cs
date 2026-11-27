@@ -372,6 +372,27 @@ public partial class SaoDatumCityScene
                     return true;
                 }
             }
+            else if (ActiveSingleCorridorSector(active) is { } singleSector)
+            {
+                if (_pendingLidarReturns > 0)
+                {
+                    targetEnu = singleSector.Upload;
+                    color = new Color(0.98f, 0.76f, 0.16f);
+                    return true;
+                }
+                if (!_finaleUploadedSectors.Contains(singleSector.Manifest.SectorId))
+                {
+                    targetEnu = singleSector.Start;
+                    color = new Color(1.0f, 0.62f, 0.16f);
+                    return true;
+                }
+                if (hasProtected && _manifestObjectsById.TryGetValue("office_entry", out var procOffice))
+                {
+                    targetEnu = procOffice.PositionEnu;
+                    color = new Color(0.18f, 0.90f, 0.96f);
+                    return true;
+                }
+            }
             else if (IsWorksSurvey(active))
             {
                 targetEnu = hasPending
@@ -438,7 +459,9 @@ public partial class SaoDatumCityScene
             }
             if (hasPending)
             {
-                targetEnu = _manifestObjectsById["unload_point"].PositionEnu;
+                targetEnu = active.RegionId == "serra"
+                    ? SerraBoundarySurvey.UploadPads.OrderBy(p => TrainingContractSession.HorizontalDistance(playerPos, p)).First()
+                    : _manifestObjectsById["unload_point"].PositionEnu;
                 color = new Color(0.98f, 0.76f, 0.16f);
                 return true;
             }
@@ -722,13 +745,17 @@ public partial class SaoDatumCityScene
                     continue;
                 if (_offeredContracts.Count == 0)
                     GenerateContractOffers();
-                var match = _offeredContracts.FirstOrDefault(o =>
-                    o.Contract.RegionId == regionId &&
-                    CityHasSurveyPlatform(o.WitnessCertificate.RequiredPlatformLevel) &&
-                    SupportsCityDelivery(o.Contract))
-                    ?? _offeredContracts.FirstOrDefault(o =>
-                        CityHasSurveyPlatform(o.WitnessCertificate.RequiredPlatformLevel) &&
-                        SupportsCityDelivery(o.Contract));
+                var match = _offeredContracts
+                    .Where(o => o.Contract.RegionId == regionId &&
+                                CityHasSurveyPlatform(o.WitnessCertificate.RequiredPlatformLevel) &&
+                                SupportsCityContract(o.Contract))
+                    .OrderByDescending(o => o.WitnessCertificate.RequiredPlatformLevel)
+                    .FirstOrDefault()
+                    ?? _offeredContracts
+                        .Where(o => CityHasSurveyPlatform(o.WitnessCertificate.RequiredPlatformLevel) &&
+                                    SupportsCityContract(o.Contract))
+                        .OrderByDescending(o => o.WitnessCertificate.RequiredPlatformLevel)
+                        .FirstOrDefault();
                 if (match is not null && TryAcceptCityProceduralOffer(match))
                 {
                     _gtaHud.ShowCutsceneLetterbox(

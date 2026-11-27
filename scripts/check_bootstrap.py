@@ -89,7 +89,7 @@ def main() -> int:
                   "T-F03-06", "T-F14-02", "T-F14-03", "T-F14-04", "T-F15-02", "T-F15-03",
                   "T-F06-06", "T-F07-03", "T-F07-05", "T-F13-04", "T-F16-03",
                   "T-F02-05", "T-F03-07", "T-F15-04", "T-F18-03", "T-F10-04",
-                  "T-F02-06", "T-F03-08", "T-F15-05", "T-F04-07", "T-F16-04"],
+                  "T-F02-06", "T-F03-08", "T-F15-05", "T-F04-07", "T-F16-04", "T-F10-05"],
         "base_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "host": {"system": platform.system(), "machine": platform.machine(),
@@ -260,6 +260,8 @@ def main() -> int:
             raise RuntimeError("Missing Port works delivery integration marker")
         if "GSA_FINAL_CITY_PAVEMENT_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing final city pavement campaign marker")
+        if "GSA_ADVANCED_PROCEDURAL_SMOKE_OK" not in city_smoke:
+            raise RuntimeError("Missing advanced procedural contracts integration marker")
         if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_smoke:
             raise RuntimeError("Missing live Old Center traffic integration marker")
 
@@ -334,6 +336,8 @@ def main() -> int:
                     raise RuntimeError(f"{target}: missing exported Port works delivery marker")
                 if "GSA_FINAL_CITY_PAVEMENT_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported final city pavement campaign marker")
+                if "GSA_ADVANCED_PROCEDURAL_SMOKE_OK" not in city_output:
+                    raise RuntimeError(f"{target}: missing exported advanced procedural contracts marker")
                 if "GSA_CITY_TRAFFIC_SMOKE_OK" not in city_output:
                     raise RuntimeError(f"{target}: missing exported live Old Center traffic marker")
                 if args.offline_smoke:

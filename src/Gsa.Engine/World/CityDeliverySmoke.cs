@@ -387,6 +387,7 @@ public partial class SaoDatumCityScene
         RunBoundarySurveySmoke();
         RunWorksSurveySmoke();
         RunFinalPavementSurveySmoke();
+        RunCityAdvancedProceduralSmoke();
         _saveManager = previous;
         _citySaveBlocked = false;
         TryLoadCareer();

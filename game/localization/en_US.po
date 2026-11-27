@@ -2467,3 +2467,27 @@ msgstr "Faction spotter nearby! Move away or they will slap a flyer on your lens
 
 msgid "city.hazard.spotter_flyer"
 msgstr "Saboteur slapped a flyer on the lens! Stop & hold [E] for 3 s to clean."
+
+msgid "proc.template.energy.title"
+msgstr "Serra utility pole inventory"
+
+msgid "proc.template.works.title"
+msgstr "Serra earthworks point cloud"
+
+msgid "proc.template.tunnel.title"
+msgstr "Port tunnel section scan"
+
+msgid "proc.template.pavement.title"
+msgstr "Municipal pavement profile"
+
+msgid "city.earthworks.office_help"
+msgstr "Serra Earthworks: scan the Serra highway lane with LiDAR [L] (Pickup+), upload at the corridor pad, and submit here."
+
+msgid "city.earthworks.review_required"
+msgstr "Earthworks cloud failed QC. Rescan uncovered cells or check planes at 3 m/s and re-upload."
+
+msgid "city.earthworks.report"
+msgstr "Earthworks cloud: {0}/{1} useful cells ({2:P0}), {3:F1} pts/m², check plane RMSE {4} m."
+
+msgid "city.pavement_proc.office_help"
+msgstr "Municipal Pavement Profile: drive the assigned corridor in the L6 Van with LiDAR [L] enabled at 3 m/s, upload at its pad, and deliver here."

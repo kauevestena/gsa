@@ -534,6 +534,33 @@ public sealed class GsaCityLandmarksBuilder
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
         });
 
+        var utilSt = new SurfaceTool();
+        utilSt.Begin(Mesh.PrimitiveType.Triangles);
+        const int utilSteps = 16;
+        for (var us = 0; us < utilSteps; us++)
+        {
+            var e0 = 501150.0 + (us / (double)utilSteps) * 430.0;
+            var e1 = 501150.0 + ((us + 1) / (double)utilSteps) * 430.0;
+            var u0S = coords.ToGodot(new Vector3d(e0, 7401166.0, SampleDriveableElevationEnu(e0, 7401166.0) + 0.06));
+            var u0N = coords.ToGodot(new Vector3d(e0, 7401174.0, SampleDriveableElevationEnu(e0, 7401174.0) + 0.06));
+            var u1S = coords.ToGodot(new Vector3d(e1, 7401166.0, SampleDriveableElevationEnu(e1, 7401166.0) + 0.06));
+            var u1N = coords.ToGodot(new Vector3d(e1, 7401174.0, SampleDriveableElevationEnu(e1, 7401174.0) + 0.06));
+            utilSt.SetUV(new Vector2((float)us, 0f)); utilSt.AddVertex(u0S);
+            utilSt.SetUV(new Vector2((float)(us + 1), 1f)); utilSt.AddVertex(u1N);
+            utilSt.SetUV(new Vector2((float)(us + 1), 0f)); utilSt.AddVertex(u1S);
+            utilSt.SetUV(new Vector2((float)us, 0f)); utilSt.AddVertex(u0S);
+            utilSt.SetUV(new Vector2((float)us, 1f)); utilSt.AddVertex(u0N);
+            utilSt.SetUV(new Vector2((float)(us + 1), 1f)); utilSt.AddVertex(u1N);
+        }
+        utilSt.GenerateNormals();
+        serra.AddChild(new MeshInstance3D
+        {
+            Name = "SerraUtilityServiceRoad",
+            Mesh = utilSt.Commit(),
+            MaterialOverride = asphaltMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
+
         for (var i = 0; i < 24; i++)
         {
             var e = 501080.0 + (i % 6) * 155.0;

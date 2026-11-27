@@ -184,6 +184,9 @@ public static class SerraWorldAssembler
 
         for (var i = 1; i <= 8; i++)
         {
+            var poleE = 501120.0 + i * 55.0;
+            const double poleN = 7401180.0;
+            var groundZ = SerraBoundarySurvey.CityGroundElevation(poleE, poleN);
             serraObjects.Add(new WorldBoxObject(
                 $"serra_utility_pole_{i:00}",
                 "utility_pole",
@@ -193,8 +196,8 @@ public static class SerraWorldAssembler
                 ["power_line", "energy_template"],
                 false,
                 true,
-                new Vector3d(501120.0 + i * 55.0, 7401180.0, 122.0 + i * 3.0),
-                new Vector3d(0.6, 0.6, 8.5)));
+                new Vector3d(poleE, poleN, groundZ + 2.1),
+                new Vector3d(0.7, 0.7, 4.2)));
         }
 
         foreach (var obj in serraObjects)

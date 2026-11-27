@@ -4,6 +4,7 @@ using Gsa.Core.Mobility;
 using Gsa.Core.Traffic;
 using Gsa.Core.World;
 using Gsa.Missions.Activities;
+using Gsa.Missions.Contracts;
 using Gsa.Missions.Economy;
 using Gsa.Missions.Office;
 using Gsa.Missions.Gameplay;
@@ -185,7 +186,15 @@ public static class SaveCompatibility
             var ids = city.CameraSamples.Select(s => s.SampleId).ToHashSet(StringComparer.Ordinal);
             var lidarTicks = new HashSet<long>();
             var lidarReturns = 0;
-            void CheckLidar(IEnumerable<CityLidarSlice> slices, int limit, string? missionId)
+            var activeContract = state.Contracts.Count == 1 ? state.Contracts[0].CatalogDefinition : null;
+            static bool IsProcTunnel(ContractDefinition? c) =>
+                c is { Product: "point_cloud", AreaId: "port_tunnel" or "port_tunnel_section" } && c.Id != "HIST-06";
+            static bool IsProcEarthworks(ContractDefinition? c) =>
+                c is { Product: "point_cloud", AreaId: "serra_earthworks_cut" or "serra_retaining_corridor" };
+            static bool IsProcPavement(ContractDefinition? c) =>
+                c is { Product: "pavement_profile" } && c.Id != FinalCityPavementSurvey.MissionId &&
+                FinalCityPavementSurvey.Sectors.Any(s => s.Manifest.RegionId == c.RegionId);
+            void CheckLidar(IEnumerable<CityLidarSlice> slices, int limit, string? missionOrContractId, ContractDefinition? contract = null)
             {
                 foreach (var slice in slices)
                 {
@@ -193,15 +202,19 @@ public static class SaveCompatibility
                         throw new ArgumentException("Duplicate or missing LiDAR slice.");
                     slice.Validate(city.PhysicsTick);
                     var corridor = slice.TunnelRanges?.Corridor;
-                    if (!(missionId switch
+                    var validSlice = missionOrContractId switch
                     {
                         "HIST-06" => corridor is null,
                         PortViaductSurvey.MissionId => corridor == PortViaductSurvey.AreaId,
                         WaterfrontRainSurvey.MissionId => corridor == WaterfrontRainSurvey.AreaId && slice.ProfileId == "lidar-l5",
                         PortWorksSurvey.MissionId => corridor == PortWorksSurvey.AreaId && slice.ProfileId == "lidar-bench",
                         FinalCityPavementSurvey.MissionId => FinalCityPavementSurvey.FindSector(corridor) is not null && slice.ProfileId == "lidar-l6",
-                        _ => false,
-                    }))
+                        _ => (IsProcTunnel(contract) && corridor is null) ||
+                             (IsProcEarthworks(contract) && corridor == FinalCityPavementSurvey.Sectors[3].Manifest.SectorId && slice.ProfileId is "lidar-l5" or "lidar-l6") ||
+                             (IsProcPavement(contract) && FinalCityPavementSurvey.FindSector(corridor) is { } procSec &&
+                                 procSec.Manifest.RegionId == contract!.RegionId && slice.ProfileId == "lidar-l6"),
+                    };
+                    if (!validSlice)
                         throw new ArgumentException("City LiDAR observations do not match the contract.");
                     lidarReturns += slice.Returns.Count;
                     if (lidarReturns > limit) throw new ArgumentException("City LiDAR storage exceeds its limit.");
@@ -209,11 +222,13 @@ public static class SaveCompatibility
             }
             if (city.LidarBuffer is { } lidar)
             {
+                var storyLidar = city.ActiveStoryMissionId is "HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId or FinalCityPavementSurvey.MissionId;
+                var procLidar = city.ActiveStoryMissionId is null && (IsProcTunnel(activeContract) || IsProcEarthworks(activeContract) || IsProcPavement(activeContract));
                 if (lidar.Pending is null || lidar.Pending.Count > CityLidarSlice.MaxBufferedReturns || lidar.SkippedNoPose < 0 || lidar.SkippedCapacity < 0 ||
-                    city.ActiveStoryMissionId is not ("HIST-06" or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId or FinalCityPavementSurvey.MissionId))
+                    (!storyLidar && !procLidar))
                     throw new ArgumentException("Invalid pending city LiDAR buffer.");
-                CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns, city.ActiveStoryMissionId);
-                if (city.ActiveStoryMissionId == FinalCityPavementSurvey.MissionId &&
+                CheckLidar(lidar.Pending, CityLidarSlice.MaxBufferedReturns, city.ActiveStoryMissionId ?? activeContract?.Id, activeContract);
+                if ((city.ActiveStoryMissionId == FinalCityPavementSurvey.MissionId || IsProcEarthworks(activeContract) || IsProcPavement(activeContract)) &&
                     lidar.Pending.Select(slice => slice.TunnelRanges!.Corridor).Distinct(StringComparer.Ordinal).Skip(1).Any())
                     throw new ArgumentException("The finale buffer contains multiple sectors.");
                 if (CityLidarSlice.StorageUnits(lidarReturns) > city.Mobility.UsedVirtualStorageUnits)
@@ -252,13 +267,19 @@ public static class SaveCompatibility
             {
                 var batch = System.Text.Json.JsonSerializer.Deserialize<SurveyBatchArtifact>(entry.PayloadJson)
                     ?? throw new ArgumentException("Invalid protected city batch.");
+                var batchContract = activeContract?.Id == batch.ContractId ? activeContract : null;
                 if (batch.LidarSlices is { } slices)
                 {
-                    CheckLidar(slices, CityLidarSlice.MaxContractReturns, batch.ContractId);
+                    CheckLidar(slices, CityLidarSlice.MaxContractReturns, batch.ContractId, batchContract);
                 }
                 if (batch.ContractId == FinalCityPavementSurvey.MissionId || batch.FinalSurveyUploadSectorId is not null)
                 {
-                    if (batch.ContractId != FinalCityPavementSurvey.MissionId ||
+                    var validSectorOwner = batch.ContractId == FinalCityPavementSurvey.MissionId ||
+                        (IsProcPavement(batchContract) &&
+                            FinalCityPavementSurvey.FindSector(batch.FinalSurveyUploadSectorId)?.Manifest.RegionId == batchContract!.RegionId) ||
+                        (IsProcEarthworks(batchContract) &&
+                            batch.FinalSurveyUploadSectorId == FinalCityPavementSurvey.Sectors[3].Manifest.SectorId);
+                    if (!validSectorOwner ||
                         FinalCityPavementSurvey.FindSector(batch.FinalSurveyUploadSectorId) is null ||
                         batch.LidarSlices is not { Count: > 0 and <= CityLidarSlice.MaxBufferedReturns } || batch.Samples.Count != 0 ||
                         !batch.LidarSlices.Any(slice => slice.Returns.Count > 0) ||

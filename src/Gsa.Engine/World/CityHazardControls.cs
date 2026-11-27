@@ -148,6 +148,7 @@ public partial class SaoDatumCityScene
         RestoreBoundarySurvey();
         RestoreWorksSurvey();
         _lastFinalSurveyReview = null;
+        _lastSerraEarthworksCloud = null;
         _finaleUploadedSectors.Clear();
         _lastSidewalkMeasurements = [];
         _cityHazards.Services.ExpireInsurance(); _cityHazards.BeginContract(); SyncCityHazardProtection();

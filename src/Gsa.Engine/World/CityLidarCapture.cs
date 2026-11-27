@@ -18,13 +18,16 @@ public partial class SaoDatumCityScene
     private int _lidarTicksWithoutPose, _lidarTicksWithoutCapacity;
 
     private static bool IsTunnelCollection(ContractDefinition? definition) =>
-        definition is { Id: TunnelMissionId, Product: "point_cloud" };
+        definition is { Product: "point_cloud" } &&
+        (definition.Id == TunnelMissionId || definition.AreaId is "port_tunnel" or "port_tunnel_section");
 
     private static bool IsViaductCollection(ContractDefinition? definition) =>
         definition is { Id: PortViaductSurvey.MissionId, Product: "point_cloud" };
 
     private static bool IsCityLidarCollection(ContractDefinition? definition) =>
-        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition) || IsWorksSurvey(definition) || IsFinalPavementSurvey(definition);
+        IsTunnelCollection(definition) || IsViaductCollection(definition) || IsRainCollection(definition) ||
+        IsWorksSurvey(definition) || IsFinalPavementSurvey(definition) ||
+        IsSerraEarthworksSurvey(definition) || IsProceduralPavementSurvey(definition);
 
     private void BuildPortLidarDeck(Node3D parent)
     {
@@ -43,7 +46,11 @@ public partial class SaoDatumCityScene
             IsWorksSurvey(_activeContract) && _worksUpload is null && mode >= LocomotionMode.Kombi && PortWorksSurvey.IsSurveyLane(position) ||
             IsFinalPavementSurvey(_activeContract) && mode == LocomotionMode.Van && Math.Abs(_lastSpeedMps) >= 1 &&
                 FinalCityPavementSurvey.LaneAt(position) is { } sector &&
-                (PendingFinaleSector is null || PendingFinaleSector == sector.Manifest.SectorId)) &&
+                (PendingFinaleSector is null || PendingFinaleSector == sector.Manifest.SectorId) ||
+            IsSerraEarthworksSurvey(_activeContract) && mode >= LocomotionMode.Pickup && Math.Abs(_lastSpeedMps) >= 1 &&
+                SerraEarthworksSector.ContainsLane(position) ||
+            TryGetProceduralPavementSector(_activeContract, out var procPavSector) && mode == LocomotionMode.Van &&
+                Math.Abs(_lastSpeedMps) >= 1 && procPavSector.ContainsLane(position)) &&
         _activeMachine is { IsActiveState: true, Snapshot: { } accepted } &&
         _calendar.CalendarTimeSeconds <= accepted.ExpiresAtSeconds &&
         _fleet.OwnedPlatforms.Contains(mode) && !_cityHazards.IsVehicleDisabled(mode);

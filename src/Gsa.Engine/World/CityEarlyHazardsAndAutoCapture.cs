@@ -598,7 +598,7 @@ public partial class SaoDatumCityScene
         if (_gimbalina.HasFledToSafety)
             return false;
 
-        if (IsCityLidarCollection(contract) || IsFinalPavementSurvey(contract))
+        if (IsCityLidarCollection(contract) || IsFinalPavementSurvey(contract) || IsProceduralPavementSurvey(contract))
             return false;
 
         if (IsBoundarySurvey(contract))

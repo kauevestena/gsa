@@ -427,6 +427,7 @@ public partial class SaoDatumCityScene : Node3D
                     "metal" when item.ObjectClass == "sidewalk_control_mark" => new Color(.18f, .8f, .92f),
                     "metal" when item.Tags.Contains("bus_stop") => new Color(.18f, .55f, .85f),
                     "metal" when item.ObjectClass == "traffic_sign" => new Color(.12f, .56f, .38f),
+                    "metal" when item.ObjectClass == "utility_pole" => new Color(0.46f, 0.58f, 0.70f),
                     "metal" when item.ObjectClass == "unload_point" => new Color(.95f, .76f, .20f),
                     "wood" => new Color(.63f, .35f, .19f),
                     "metal" => new Color(0.62f, 0.68f, 0.72f),
@@ -481,6 +482,8 @@ public partial class SaoDatumCityScene : Node3D
                 }
                 if (item.ObjectClass == "traffic_sign")
                     batch.AddBox(postMat, posG + new Vector3(0f, -1.1f, .05f), new Vector3(.07f, 1.65f, .07f));
+                if (item.ObjectClass == "utility_pole")
+                    batch.AddBox(material, posG + new Vector3(0f, size.Y * 0.42f, 0f), new Vector3(1.4f, 0.12f, 0.14f));
                 if (item.ObjectClass == "park_bench")
                     batch.AddBox(material, posG + new Vector3(0f, -.25f, .25f), new Vector3(size.X, .10f, .60f));
             }
@@ -966,6 +969,12 @@ public partial class SaoDatumCityScene : Node3D
                 speedLimit = Math.Min(speedLimit, PortWorksSurvey.SurveySpeed);
             if (_lidarEnabled && activeMode == LocomotionMode.Van && IsFinalPavementSurvey(_activeContract) &&
                 FinalCityPavementSurvey.LaneAt(prevCarPos) is not null)
+                speedLimit = Math.Min(speedLimit, FinalCityPavementSurvey.SurveySpeed);
+            if (_lidarEnabled && activeMode >= LocomotionMode.Pickup && IsSerraEarthworksSurvey(_activeContract) &&
+                SerraEarthworksSector.ContainsLane(prevCarPos))
+                speedLimit = Math.Min(speedLimit, FinalCityPavementSurvey.SurveySpeed);
+            if (_lidarEnabled && activeMode == LocomotionMode.Van && TryGetProceduralPavementSector(_activeContract, out var procPavCar) &&
+                procPavCar.ContainsLane(prevCarPos))
                 speedLimit = Math.Min(speedLimit, FinalCityPavementSurvey.SurveySpeed);
             var handbrake = !_gtaHud.IsCutsceneVisible && Input.IsPhysicalKeyPressed(Key.Space) && Math.Abs(_carSim.SpeedMetresPerSecond) > 3.0;
             _handbrakeActive = handbrake;
@@ -1527,7 +1536,15 @@ public partial class SaoDatumCityScene : Node3D
         var scientific = ShouldRecordCityLidar(pos, mode, isRaining);
         var rainySurvey = scientific && IsRainCollection(_activeContract);
         var worksSurvey = scientific && IsWorksSurvey(_activeContract);
-        var finalSector = scientific && IsFinalPavementSurvey(_activeContract) ? FinalCityPavementSurvey.LaneAt(pos) : null;
+        var pavementSurvey = scientific && (IsFinalPavementSurvey(_activeContract) || IsProceduralPavementSurvey(_activeContract));
+        var earthworksSurvey = scientific && IsSerraEarthworksSurvey(_activeContract);
+        FinalCityPavementSector? corridorSector = null;
+        if (scientific && IsFinalPavementSurvey(_activeContract))
+            corridorSector = FinalCityPavementSurvey.LaneAt(pos);
+        else if (scientific && TryGetProceduralPavementSector(_activeContract, out var procPavLidar) && procPavLidar.ContainsLane(pos))
+            corridorSector = procPavLidar;
+        else if (earthworksSurvey && SerraEarthworksSector.ContainsLane(pos))
+            corridorSector = SerraEarthworksSector;
         var profile = worksSurvey ? LidarProfile.L4 : rainySurvey ? LidarProfile.L5 : CityLidarProfile(mode);
         if (_lidarSim.Profile.Id != profile.Id)
         {
@@ -1541,7 +1558,7 @@ public partial class SaoDatumCityScene : Node3D
         _lidarSliceIndex++;
 
         var viaduct = scientific && IsViaductCollection(_activeContract);
-        var ranges = finalSector is not null ? FinalCityPavementSurvey.Observe(finalSector, pos, heading, _tick)
+        var ranges = corridorSector is not null ? FinalCityPavementSurvey.Observe(corridorSector, pos, heading, _tick)
             : worksSurvey ? PortWorksSurvey.Observe(pos, heading, _tick)
             : rainySurvey ? WaterfrontRainSurvey.Observe(pos, heading, _tick)
             : viaduct ? PortViaductSurvey.Observe(pos, heading, _tick)
@@ -1557,7 +1574,7 @@ public partial class SaoDatumCityScene : Node3D
         var yaw = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading);
         // Turn the survey heads toward the contracted underside or pavement.
         var scannerRotation = viaduct ? Quaterniond.FromAxisAngle(Vector3d.UnitY, -Math.PI / 2)
-            : rainySurvey || finalSector is not null || ranges is not null && profile.Grade == 4 ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2)
+            : rainySurvey || corridorSector is not null || ranges is not null && profile.Grade == 4 ? Quaterniond.FromAxisAngle(Vector3d.UnitY, Math.PI / 2)
             : Quaterniond.Identity;
         var mount = new LidarMountEstimate(new Vector3d(0, 0, mode == LocomotionMode.Van ? 2.4 : 2.0), scannerRotation);
         var physicalMount = scientific ? mount with
@@ -1573,7 +1590,7 @@ public partial class SaoDatumCityScene : Node3D
         _lidarRayQuery ??= new PhysicsRayQueryParameters3D { CollisionMask = 1 };
         _lidarRayQuery.CollisionMask = scientific ? 1 | SurveyLidarSurfaceLayer : 1;
 
-        var captureRange = finalSector is not null ? FinalCityPavementSurvey.CaptureRange : worksSurvey ? PortWorksSurvey.CaptureRange : rainySurvey ? WaterfrontRainSurvey.CaptureRange : double.PositiveInfinity;
+        var captureRange = corridorSector is not null ? FinalCityPavementSurvey.CaptureRange : worksSurvey ? PortWorksSurvey.CaptureRange : rainySurvey ? WaterfrontRainSurvey.CaptureRange : double.PositiveInfinity;
         LidarRayHit? CastRay(Vector3d startEnu, Vector3d dirEnu, double maxRange)
         {
             _lidarRayQuery.From = _coordinates.ToGodot(startEnu);
@@ -1594,19 +1611,19 @@ public partial class SaoDatumCityScene : Node3D
             return new LidarRayHit(dist, new Vector3d(hitNormG.X, -hitNormG.Z, hitNormG.Y), mat, id);
         }
 
-        var channelStep = finalSector is not null ? FinalCityPavementSurvey.LidarChannelStep : scientific ? 1 : CityLidarChannelStep(profile);
+        var channelStep = corridorSector is not null ? (mode == LocomotionMode.Van ? FinalCityPavementSurvey.LidarChannelStep : 1) : scientific ? 1 : CityLidarChannelStep(profile);
         if (_lidarSim.TrySimulateScanSlice(time, lidarToMap, traj, mount,
             isRaining && !PortTunnelSurvey.IsUnderRoof(pos), CastRay, scientific ? (int)(_tick % sliceCount) : sliceIdx, sliceCount, _lidarSliceScratch, channelStep))
         {
             if (worksSurvey) _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > PortWorksSurvey.CaptureRange);
             else if (rainySurvey) _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > WaterfrontRainSurvey.CaptureRange);
-            if (finalSector is not null)
+            if (corridorSector is not null)
                 _lidarSliceScratch.RemoveAll(point => point.MeasuredRangeMetres > captureRange ||
-                    Math.Abs(point.GeoreferencedPointEnu.Y - finalSector.North) > FinalCityPavementSurvey.HalfWidth + .05 ||
-                    point.GeoreferencedPointEnu.X < finalSector.StartEast - .05 || point.GeoreferencedPointEnu.X > finalSector.EndEast + .05);
+                    Math.Abs(point.GeoreferencedPointEnu.Y - corridorSector.North) > FinalCityPavementSurvey.HalfWidth + .05 ||
+                    point.GeoreferencedPointEnu.X < corridorSector.StartEast - .05 || point.GeoreferencedPointEnu.X > corridorSector.EndEast + .05);
             if (scientific)
                 RecordCityLidarSlice(profile.Id, pose, mount, ranges,
-                    finalSector is not null ? ObserveFinalPavementFrame(finalSector, pos, pose, isRaining) : null);
+                    pavementSurvey && corridorSector is not null ? ObserveFinalPavementFrame(corridorSector, pos, pose, isRaining) : null);
             if (!_lidarCloudMesh.Visible) return;
             var mm = _lidarCloudMesh.Multimesh;
             var maxPointsPerSlice = Math.Max(1, 480 / sliceCount);
@@ -1636,7 +1653,7 @@ public partial class SaoDatumCityScene : Node3D
             CaptureBoundaryShot(pos, speed);
             return;
         }
-        if (IsFinalPavementSurvey(_activeContract)) return; // Downward frames are recorded with the synchronized L6 slices.
+        if (IsFinalPavementSurvey(_activeContract) || IsProceduralPavementSurvey(_activeContract)) return; // Downward frames are recorded with the synchronized L6 slices.
         var usesGimbalina = CurrentActiveMode() is LocomotionMode.Handcart or LocomotionMode.Bicycle ||
             (CurrentActiveMode() == LocomotionMode.OnFoot && _locomotion.MountedVehicleMode <= LocomotionMode.Bicycle);
         if (_gimbalina.HasFledToSafety) { _feedbackText = Text("city.encounters.chicken_safe"); return; }

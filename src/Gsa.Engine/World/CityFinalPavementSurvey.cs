@@ -12,11 +12,55 @@ namespace Gsa.Engine.World;
 public partial class SaoDatumCityScene
 {
     private FinalCityPavementReview? _lastFinalSurveyReview;
+    private PointCloudQualityReport? _lastSerraEarthworksCloud;
     private readonly HashSet<string> _finaleUploadedSectors = new(StringComparer.Ordinal);
     private static bool IsFinalPavementSurvey(ContractDefinition? definition) =>
         definition is { Id: FinalCityPavementSurvey.MissionId, AreaId: FinalCityPavementSurvey.AreaId, Product: "pavement_profile" };
 
+    private static FinalCityPavementSector SerraEarthworksSector => FinalCityPavementSurvey.Sectors[3];
+
+    private static bool IsSerraEarthworksSurvey(ContractDefinition? definition) =>
+        definition is { Product: "point_cloud", AreaId: "serra_earthworks_cut" or "serra_retaining_corridor" };
+
+    private static bool TryGetProceduralPavementSector(ContractDefinition? definition, out FinalCityPavementSector sector)
+    {
+        if (definition is { Product: "pavement_profile" } && definition.Id != FinalCityPavementSurvey.MissionId &&
+            FinalCityPavementSurvey.Sectors.FirstOrDefault(s => s.Manifest.RegionId == definition.RegionId) is { } found)
+        {
+            sector = found;
+            return true;
+        }
+        sector = null!;
+        return false;
+    }
+
+    private static bool IsProceduralPavementSurvey(ContractDefinition? definition) =>
+        TryGetProceduralPavementSector(definition, out _);
+
+    private static FinalCityPavementSector? ActiveSingleCorridorSector(ContractDefinition? definition)
+    {
+        if (IsSerraEarthworksSurvey(definition)) return SerraEarthworksSector;
+        if (TryGetProceduralPavementSector(definition, out var sector)) return sector;
+        return null;
+    }
+
     private string? PendingFinaleSector => _pendingLidar.Count > 0 ? _pendingLidar[0].TunnelRanges?.Corridor : null;
+
+    private string SingleCorridorStatus(FinalCityPavementSector sector)
+    {
+        var uploaded = _finaleUploadedSectors.Contains(sector.Manifest.SectorId) ? 1 : 0;
+        var buffer = Text(FinalCityPavementSurvey.FindSector(PendingFinaleSector) is { } pending
+            ? $"city.map.{pending.Manifest.RegionId}" : "city.finale.empty_buffer");
+        return string.Format(Text("city.finale.collection"), uploaded, 1, buffer);
+    }
+
+    private string SerraEarthworksReviewText()
+    {
+        if (_lastSerraEarthworksCloud is not { } cloud) return "";
+        static string Metres(double? value) => value is { } n && double.IsFinite(n) ? n.ToString("F3") : "—";
+        return string.Format(Text("city.earthworks.report"), cloud.CoveredUsefulCells, cloud.TotalUsefulCells,
+            cloud.CoverageFraction, cloud.MeanDensityPointsPerM2, Metres(cloud.WorstPlaneRmseMetres));
+    }
 
     private string FinalSurveyStatus()
     {
@@ -58,11 +102,49 @@ public partial class SaoDatumCityScene
         CompleteCitySurveyReview(machine, now, _lastFinalSurveyReview.Delivery, "city.finale.review_required");
     }
 
+    private void ProcessProceduralPavementDelivery(ContractStateMachine machine, double now, FinalCityPavementSector sector)
+    {
+        if (_pendingLidarReturns > 0)
+        {
+            _feedbackText = Text("city.finale.upload_first");
+            return;
+        }
+        _lastFinalSurveyReview = FinalCityPavementQuality.EvaluateSingleSectorPavement(machine.ContractId, ReadProtectedCityLidarBatches(), sector);
+        CompleteCitySurveyReview(machine, now, _lastFinalSurveyReview.Delivery, "city.finale.review_required");
+    }
+
+    private void ProcessSerraEarthworksDelivery(ContractStateMachine machine, double now)
+    {
+        if (_pendingLidarReturns > 0)
+        {
+            _feedbackText = Text("city.finale.upload_first");
+            return;
+        }
+        var (cloud, delivery) = FinalCityPavementQuality.EvaluateSingleSectorEarthworksCloud(
+            machine.ContractId, ReadProtectedCityLidarBatches(), SerraEarthworksSector);
+        _lastSerraEarthworksCloud = cloud;
+        CompleteCitySurveyReview(machine, now, delivery, "city.earthworks.review_required");
+    }
+
     private void OffloadFinalPavementSector()
     {
         var sector = FinalCityPavementSurvey.UploadAt(CurrentPositionEnu());
         if (sector is null || PendingFinaleSector != sector.Manifest.SectorId || CurrentActiveMode() != LocomotionMode.Van ||
             Math.Abs(_lastSpeedMps) > .5)
+        {
+            _feedbackText = Text("city.finale.upload_first");
+            return;
+        }
+        CommitCityOffload(finalSurveyUploadSectorId: sector.Manifest.SectorId);
+    }
+
+    private void OffloadSingleCorridorSector(FinalCityPavementSector sector)
+    {
+        var validMode = IsProceduralPavementSurvey(_activeContract)
+            ? CurrentActiveMode() == LocomotionMode.Van
+            : CurrentActiveMode() >= LocomotionMode.Pickup;
+        if ((CurrentPositionEnu() - sector.Upload).Length > 5 || PendingFinaleSector != sector.Manifest.SectorId ||
+            !validMode || Math.Abs(_lastSpeedMps) > .5)
         {
             _feedbackText = Text("city.finale.upload_first");
             return;

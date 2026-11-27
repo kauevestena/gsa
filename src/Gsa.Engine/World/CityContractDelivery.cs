@@ -36,6 +36,8 @@ public partial class SaoDatumCityScene
     private const string FacadeArea = "commerce_street_facades";
     private const string ParkArea = "central_park_calm";
     private const string DrainageArea = "commerce_street_drainage";
+    public const string SerraPowerArea = "serra_power_corridor";
+    public const string SerraRidgeArea = "serra_ridge_feeder";
 
     private static IReadOnlyList<ContractRequirementSpec> CitySurveyRequirements(string area, bool story) => area switch
     {
@@ -44,6 +46,7 @@ public partial class SaoDatumCityScene
         ParkArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("area_coverage", "ratio", "min",
             .85, .96, "central_park_planes", CityPhotoCoverage.CellSizeMetres)],
         DrainageArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("absolute_rmse", "m", "max", 2, .5)],
+        SerraPowerArea or SerraRidgeArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("absolute_rmse", "m", "max", 4, .5)],
         CitySurveyInventory.SidewalkArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .2, .05)],
         CitySurveyInventory.SignsArea => [.. CityPhotoRequirements, new ThresholdRequirementSpec("relative_rmse", "m", "max", .15, .05)],
         BusSurveyCorridor.AreaId =>
@@ -61,6 +64,9 @@ public partial class SaoDatumCityScene
         spec.MissionId is "HIST-01" or "HIST-02" or "HIST-03" or "HIST-04" or BusSurveyCorridor.MissionId or TunnelMissionId or
             PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or SerraBoundarySurvey.MissionId or PortWorksSurvey.MissionId or FinalCityPavementSurvey.MissionId;
 
+    private bool SupportsCityContract(ContractDefinition definition) =>
+        SupportsCityDelivery(definition) || IsCityLidarCollection(definition) || IsBoundarySurvey(definition);
+
     private bool SupportsCityDelivery(ContractDefinition definition)
     {
         if (definition.RequiredFeatureIds.Count == 0 || definition.PartialPolicy.Mode != "disabled" ||
@@ -68,7 +74,7 @@ public partial class SaoDatumCityScene
             return false;
 
         var inventory = definition.Product == "feature_inventory" &&
-            definition.AreaId is DrainageArea or CitySurveyInventory.SidewalkArea or CitySurveyInventory.SignsArea or BusSurveyCorridor.AreaId;
+            definition.AreaId is DrainageArea or CitySurveyInventory.SidewalkArea or CitySurveyInventory.SignsArea or BusSurveyCorridor.AreaId or SerraPowerArea or SerraRidgeArea;
         var photos = definition.Product == "images" && definition.AreaId is FacadeArea or ParkArea;
         if (!photos && !inventory)
             return false;
@@ -245,6 +251,18 @@ public partial class SaoDatumCityScene
         if (IsFinalPavementSurvey(definition))
         {
             ProcessFinalPavementDelivery(machine, now);
+            return;
+        }
+
+        if (IsSerraEarthworksSurvey(definition))
+        {
+            ProcessSerraEarthworksDelivery(machine, now);
+            return;
+        }
+
+        if (TryGetProceduralPavementSector(definition, out var procPavSector))
+        {
+            ProcessProceduralPavementDelivery(machine, now, procPavSector);
             return;
         }
 

@@ -20,6 +20,14 @@ public static class FinalCityPavementQuality
     private const string UploadMetric = "final_sector_uploads";
     private static readonly PavementProfileQualitySpec ProfileSpec = new(FinalCityPavementSurvey.MissionId);
 
+    public static IReadOnlyList<ContractRequirementSpec> SerraEarthworksRequirements { get; } = Array.AsReadOnly<ContractRequirementSpec>(
+    [
+        new ThresholdRequirementSpec("lidar_coverage", "ratio", "min", .85, .96),
+        new ThresholdRequirementSpec("lidar_density_points_per_m2", "pts/m2", "min", 12, 22),
+        new ThresholdRequirementSpec("plane_to_plane_rmse_m", "m", "max", .05, .025),
+        new PredicateRequirementSpec("format_valid", true),
+    ]);
+
     public static IReadOnlyList<ContractRequirementSpec> Requirements { get; } = Array.AsReadOnly<ContractRequirementSpec>(
     [
         new ThresholdRequirementSpec("lidar_coverage", "ratio", "min", .9, .98),
@@ -37,7 +45,7 @@ public static class FinalCityPavementQuality
     public static FinalCityPavementReview Evaluate(IReadOnlyList<SurveyBatchArtifact> batches)
     {
         var id = FinalCityPavementSurvey.MissionId;
-        var sectors = FinalCityPavementSurvey.Sectors.Select(sector => EvaluateSector(sector,
+        var sectors = FinalCityPavementSurvey.Sectors.Select(sector => EvaluateSector(id, sector,
             batches.Where(batch => batch.FinalSurveyUploadSectorId == sector.Manifest.SectorId)
                 .SelectMany(batch => batch.LidarSlices ?? []).ToArray())).ToArray();
 
@@ -63,9 +71,94 @@ public static class FinalCityPavementQuality
         return new(sectors, delivery);
     }
 
-    private static FinalCitySectorReview EvaluateSector(FinalCityPavementSector sector, CityLidarSlice[] uploadedSlices)
+    public static FinalCityPavementReview EvaluateSingleSectorPavement(
+        string contractId,
+        IReadOnlyList<SurveyBatchArtifact> batches,
+        FinalCityPavementSector sector)
     {
-        var id = FinalCityPavementSurvey.MissionId;
+        ArgumentException.ThrowIfNullOrWhiteSpace(contractId);
+        ArgumentNullException.ThrowIfNull(batches);
+        ArgumentNullException.ThrowIfNull(sector);
+
+        var uploaded = batches.Where(batch => batch.FinalSurveyUploadSectorId == sector.Manifest.SectorId)
+            .SelectMany(batch => batch.LidarSlices ?? []).ToArray();
+        var review = EvaluateSector(contractId, sector, uploaded);
+        var upload = LidarCorridorQuality.Predicate(UploadMetric, review.Uploaded, review.Uploaded ? 1 : 0, "city.finale.upload_required");
+        var format = LidarCorridorQuality.Predicate("format_valid", batches.Count > 0 && review.Uploaded, batches.Count, "cq.failure.format_valid");
+        var failures = review.Cloud.FailureReasonKeys.Concat(review.Pavement.FailureReasonKeys)
+            .Concat(new[] { upload.FailureReasonKey, format.FailureReasonKey }.OfType<string>())
+            .Distinct(StringComparer.Ordinal).ToArray();
+        var delivery = new QualityReport(
+            contractId,
+            batches.Select(b => b.BatchId).ToArray(),
+            review.Passed && batches.Count > 0,
+            [.. review.Cloud.Metrics, .. review.Pavement.Metrics, upload, format],
+            failures,
+            [.. review.Cloud.RecollectionAreas, .. review.Pavement.RecollectionAreas],
+            review.Passed ? [sector.Manifest.SectorId] : [],
+            review.Cloud.RawSubmittedPointCount,
+            review.Cloud.UniquePointCount,
+            review.Passed ? 1 : 0,
+            review.Cloud.Planes.Count(p => p.Passed));
+        return new([review], delivery);
+    }
+
+    public static (PointCloudQualityReport Cloud, QualityReport Delivery) EvaluateSingleSectorEarthworksCloud(
+        string contractId,
+        IReadOnlyList<SurveyBatchArtifact> batches,
+        FinalCityPavementSector sector,
+        double minDensityPointsPerM2 = 12.0)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contractId);
+        ArgumentNullException.ThrowIfNull(batches);
+        ArgumentNullException.ThrowIfNull(sector);
+
+        var slices = batches
+            .Where(batch => batch.FinalSurveyUploadSectorId == sector.Manifest.SectorId)
+            .SelectMany(batch => batch.LidarSlices ?? [])
+            .Where(slice => !slice.RackNeedsCalibration)
+            .ToArray();
+        var points = slices.SelectMany(slice => slice.Georeference())
+            .Where(sample => !sample.IsSpuriousRain && Math.Abs(sample.MapPositionEnu.Z -
+                sector.SurfaceElevation(sample.MapPositionEnu.X, sample.MapPositionEnu.Y)) <= .4).ToArray();
+        var west = sector.StartEast;
+        var east = sector.EndEast;
+        var north = sector.North;
+        const double halfWidth = FinalCityPavementSurvey.HalfWidth;
+        var footprint = new Bounds2DEnu(west, north - halfWidth, east, north + halfWidth);
+        var normal = new Vector3d(-sector.Grade, -sector.Crossfall, 1).Normalized();
+        var planes = sector.CheckpointChainages.Select((chainage, index) =>
+        {
+            var x = west + chainage;
+            var z = sector.SurfaceElevation(x, north);
+            return new ReferencePlaneQualitySpec(sector.Manifest.ContractCheckpointIds[index], new(x, north, z), normal,
+                new(x - 1, north - halfWidth, x + 1, north + halfWidth), z - .4, z + .4);
+        }).ToArray();
+        var cloud = PointCloudQualityEvaluator.Evaluate(
+            new(contractId, minDensityPointsPerM2, MinCoverageFraction: 0.85,
+                MaxPlaneRmseMetres: sector.Manifest.MaxPlaneRmseMetres, ReferencePlanes: planes),
+            [new(sector.Manifest.SurfaceId, footprint, elevationEnuZ: sector.BaseUp)],
+            points, new EvaluationReference(contractId, [], [], [], []), []);
+        var format = LidarCorridorQuality.Predicate("format_valid", slices.Length > 0 && points.Length > 0, batches.Count, "cq.failure.format_valid");
+        var failures = cloud.FailureReasonKeys.Concat(new[] { format.FailureReasonKey }.OfType<string>())
+            .Distinct(StringComparer.Ordinal).ToArray();
+        var delivery = new QualityReport(
+            contractId,
+            batches.Select(b => b.BatchId).ToArray(),
+            cloud.Passed && format.Status == MetricEvaluationStatus.Passed,
+            [.. cloud.Metrics, format],
+            failures,
+            cloud.RecollectionAreas,
+            cloud.Passed ? [sector.Manifest.SectorId] : [],
+            cloud.RawSubmittedPointCount,
+            cloud.UniquePointCount,
+            cloud.Passed ? 1 : 0,
+            cloud.Planes.Count(p => p.Passed));
+        return (cloud, delivery);
+    }
+
+    private static FinalCitySectorReview EvaluateSector(string contractId, FinalCityPavementSector sector, CityLidarSlice[] uploadedSlices)
+    {
         var slices = uploadedSlices.Where(slice => !slice.RackNeedsCalibration).ToArray();
         var points = slices.SelectMany(slice => slice.Georeference())
             .Where(sample => !sample.IsSpuriousRain && Math.Abs(sample.MapPositionEnu.Z -
@@ -83,10 +176,10 @@ public static class FinalCityPavementQuality
             return new ReferencePlaneQualitySpec(sector.Manifest.ContractCheckpointIds[index], new(x, north, z), normal,
                 new(x - 1, north - halfWidth, x + 1, north + halfWidth), z - .4, z + .4);
         }).ToArray();
-        var cloud = PointCloudQualityEvaluator.Evaluate(new(id, sector.Manifest.MinPointDensityPerM2,
+        var cloud = PointCloudQualityEvaluator.Evaluate(new(contractId, sector.Manifest.MinPointDensityPerM2,
             MaxPlaneRmseMetres: sector.Manifest.MaxPlaneRmseMetres, ReferencePlanes: planes),
             [new(sector.Manifest.SurfaceId, footprint, elevationEnuZ: sector.BaseUp)],
-            points, new EvaluationReference(id, [], [], [], []), []);
+            points, new EvaluationReference(contractId, [], [], [], []), []);
 
         var frames = slices.Where(slice => slice.PavementFrame is not null).Select(slice => slice.PavementFrame!).ToArray();
         var extracted = PavementProfileExtractor.ExtractLongitudinalProfile(sector.Manifest.SectorId, 0,
@@ -115,7 +208,10 @@ public static class FinalCityPavementQuality
             observations.Add(new(station.SectionId, station.ChainageMetres, 0, centerZ, fit.Crossfall,
                 station.EstimatedRutDepthMillimetres!.Value, 1.2 + 100 * roughness, samples.Length));
         }
-        var pavement = new PavementProfileEvaluator().Evaluate(ProfileSpec, truth, observations);
+        var pavement = new PavementProfileEvaluator().Evaluate(
+            new PavementProfileQualitySpec(contractId, ProfileSpec.MinSectionCoverageFraction, ProfileSpec.MinPointsPerSection,
+                ProfileSpec.MaxElevationRmseMetres, ProfileSpec.MaxCrossSlopeRmseFraction, ProfileSpec.MaxRutDepthRmseMillimetres, ProfileSpec.MaxIriRmseMPerKm),
+            truth, observations);
         return new(sector, uploadedSlices.Length > 0, cloud, pavement);
     }
 

@@ -2467,3 +2467,27 @@ msgstr "Olheiro de facção por perto! Afaste-se ou colarão panfleto na lente!"
 
 msgid "city.hazard.spotter_flyer"
 msgstr "Sabotador colou panfleto na lente! Pare e segure [E] por 3 s para limpar."
+
+msgid "proc.template.energy.title"
+msgstr "Inventário de postes da Serra"
+
+msgid "proc.template.works.title"
+msgstr "Nuvem de terraplenagem na Serra"
+
+msgid "proc.template.tunnel.title"
+msgstr "Varredura de seção do túnel"
+
+msgid "proc.template.pavement.title"
+msgstr "Perfil municipal de pavimento"
+
+msgid "city.earthworks.office_help"
+msgstr "Terraplenagem na Serra: faça a varredura da pista na Serra com LiDAR [L] (Picape+), descarregue no ponto da pista e entregue aqui."
+
+msgid "city.earthworks.review_required"
+msgstr "Nuvem de terraplenagem reprovada no CQ. Refaça as células descobertas a 3 m/s e reenvie."
+
+msgid "city.earthworks.report"
+msgstr "Nuvem de terraplenagem: {0}/{1} células úteis ({2:P0}), {3:F1} pts/m², RMSE de plano {4} m."
+
+msgid "city.pavement_proc.office_help"
+msgstr "Perfil Municipal de Pavimento: percorra o corredor contratado na Van L6 com LiDAR [L] ligado a 3 m/s, descarregue no ponto da pista e entregue aqui."

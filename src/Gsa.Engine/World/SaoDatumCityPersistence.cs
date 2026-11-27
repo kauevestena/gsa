@@ -46,7 +46,9 @@ public partial class SaoDatumCityScene
             _attention.ExportSnapshot(), _activeStorySpec?.MissionId, _officeMode, _privacyMasksApplied, _rackMisaligned,
             _calmPolicy.CalmCityEnabled, _disguiseActive, _contractSeed, _tick, NextCityCameraSequence, _cityHazards.Export(), _everyday.Export(), _gimbalina.ExportSaveSnapshot())
         {
-            LidarBuffer = IsCityLidarCollection(_activeContract) && _activeStorySpec?.MissionId == _activeContract?.Id
+            LidarBuffer = IsCityLidarCollection(_activeContract) &&
+                (_activeStorySpec is not null ? _activeStorySpec.MissionId == _activeContract?.Id
+                    : _pendingLidar.Count + _lidarTicksWithoutPose + _lidarTicksWithoutCapacity > 0)
                 ? new(_pendingLidar.ToArray(), _lidarTicksWithoutPose, _lidarTicksWithoutCapacity) : null,
             ViaductHeights = IsViaductCollection(_activeContract) ? _viaductHeightFields.Select(field => field.Text).ToArray() : null,
             RainSurveyFilterEnabled = IsRainCollection(_activeContract) && _rainSurveyFilterEnabled,
@@ -145,6 +147,7 @@ public partial class SaoDatumCityScene
             RestoreBoundarySurvey(city?.BoundarySurvey);
             RestoreWorksSurvey(city?.WorksUpload);
             _lastFinalSurveyReview = null;
+            _lastSerraEarthworksCloud = null;
             _lastSidewalkMeasurements = [];
             _cityTrafficContactId = _cityTrafficWarningId = null;
             _cityTrafficContactGrace = _cityTrafficWarningSilence = 0;

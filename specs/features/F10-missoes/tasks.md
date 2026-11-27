@@ -101,6 +101,8 @@ Estado inicial de todas as tarefas: pendente. Marcar a caixa somente após evid�
 
 **Evidência:** Playthrough completo e relatório final de CQ.
 
+**Estado:** Implementada; em revisão delegada à CI (ver [evidência T-F10-05](../../../artifacts/evidence/T-F10-05/README.md)).
+
 ### T-F10-06 — Estabilizar roteiros para gravação
 
 - [x] Aceita

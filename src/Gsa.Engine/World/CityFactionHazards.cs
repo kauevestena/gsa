@@ -50,6 +50,10 @@ public partial class SaoDatumCityScene
             return PortWorksSurvey.UploadPadAt(p).HasValue;
         if (IsFinalPavementSurvey(_activeContract))
             return FinalCityPavementSurvey.UploadAt(p) is not null;
+        if (_activeContract?.RegionId == "serra" && SerraBoundarySurvey.UploadPads.Any(pad => (p - pad).Length <= 9))
+            return true;
+        if (ActiveSingleCorridorSector(_activeContract) is { } singleSector)
+            return (p - singleSector.Upload).Length <= 5;
         return false;
     }
 
@@ -269,6 +273,11 @@ public partial class SaoDatumCityScene
         if (IsFinalPavementSurvey(_activeContract))
         {
             OffloadFinalPavementSector();
+            return;
+        }
+        if (ActiveSingleCorridorSector(_activeContract) is { } singleSector)
+        {
+            OffloadSingleCorridorSector(singleSector);
             return;
         }
         if (WorksFieldPadAt(CurrentPositionEnu()) is { } pad)

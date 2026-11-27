@@ -247,6 +247,49 @@ public partial class SaoDatumCityScene
         }};
     }
 
+    private bool CityRegionUnlocked(string regionId) => _isSandbox || _campaignState.UnlockedRegions.Contains(regionId);
+
+    private GeneratedContractOffer BuildCityAdvancedOffer(string templateId, ulong seed)
+    {
+        var offer = Act2AdvancedProceduralGenerator.GenerateFromAdvancedTemplate(templateId, seed);
+        var def = offer.Contract;
+        var due = Math.Max(def.Deadline.DueAfterSeconds, 28800);
+        var reqs = templateId switch
+        {
+            "PROC-ENERGIA" => CitySurveyRequirements(def.AreaId, story: false),
+            "PROC-OBRAS" => FinalCityPavementQuality.SerraEarthworksRequirements,
+            "PROC-TUNEL" => PortTunnelQuality.Requirements,
+            _ => def.Requirements,
+        };
+        var areaId = templateId == "PROC-OBRAS" ? "serra_earthworks_cut" : def.AreaId;
+        var featureIds = templateId is "PROC-OBRAS" or "PROC-TUNEL" ? [] : def.RequiredFeatureIds;
+        return offer with
+        {
+            Contract = def with
+            {
+                AreaId = areaId,
+                RequiredFeatureIds = featureIds,
+                Requirements = reqs,
+                Deadline = def.Deadline with { DueAfterSeconds = due, ExpiresAfterSeconds = due + 14400 },
+            },
+        };
+    }
+
+    private GeneratedContractOffer BuildCityPavementContractOffer(string regionId, ulong seed)
+    {
+        var offer = Act3PavementProceduralGenerator.GenerateFromPavementTemplate(seed, regionIdOverride: regionId);
+        var def = offer.Contract;
+        var due = Math.Max(def.Deadline.DueAfterSeconds, 28800);
+        return offer with
+        {
+            Contract = def with
+            {
+                Requirements = FinalCityPavementQuality.Requirements,
+                Deadline = def.Deadline with { DueAfterSeconds = due, ExpiresAfterSeconds = due + 14400 },
+            },
+        };
+    }
+
     private void GenerateContractOffers()
     {
         _offeredContracts.Clear();
@@ -257,6 +300,30 @@ public partial class SaoDatumCityScene
                 offer = BuildCityContractOffer(template.TemplateId, _contractSeed++);
             if (CityHasSurveyPlatform(offer.WitnessCertificate.RequiredPlatformLevel))
                 _offeredContracts.Add(offer);
+        }
+
+        if (CityRegionUnlocked("port") && CityHasSurveyPlatform(4))
+            _offeredContracts.Add(BuildCityAdvancedOffer("PROC-TUNEL", _contractSeed++));
+
+        if (CityRegionUnlocked("serra") && CityHasSurveyPlatform(4))
+        {
+            var energyOffer = BuildCityAdvancedOffer("PROC-ENERGIA", _contractSeed++);
+            if (!CityHasSurveyPlatform(energyOffer.WitnessCertificate.RequiredPlatformLevel))
+                energyOffer = BuildCityAdvancedOffer("PROC-ENERGIA", _contractSeed++);
+            if (CityHasSurveyPlatform(energyOffer.WitnessCertificate.RequiredPlatformLevel))
+                _offeredContracts.Add(energyOffer);
+        }
+
+        if (CityRegionUnlocked("serra") && CityHasSurveyPlatform(5))
+            _offeredContracts.Add(BuildCityAdvancedOffer("PROC-OBRAS", _contractSeed++));
+
+        if (CityHasSurveyPlatform(6))
+        {
+            foreach (var regionId in new[] { "old_center", "port", "waterfront", "serra" })
+            {
+                if (CityRegionUnlocked(regionId))
+                    _offeredContracts.Add(BuildCityPavementContractOffer(regionId, _contractSeed++));
+            }
         }
     }
 
@@ -375,7 +442,7 @@ public partial class SaoDatumCityScene
     private bool AcceptCityContract(ContractDefinition def, CampaignMissionFullSpec? story = null)
     {
         if (_activeContract is not null) { _feedbackText = Text("city.hazards.active_job"); return false; }
-        if (!SupportsCityDelivery(def) && !IsCityLidarCollection(def) && !IsBoundarySurvey(def))
+        if (!SupportsCityContract(def))
         { _feedbackText = Text(CityOfficeUnavailableKey(def.Product)); return false; }
         if (_progression.SettledContractIds.Contains(def.Id) || (story is not null && CityMissionCompleted(story.MissionId)))
         {
@@ -389,6 +456,7 @@ public partial class SaoDatumCityScene
         RestoreBoundarySurvey();
         RestoreWorksSurvey();
         _lastFinalSurveyReview = null;
+        _lastSerraEarthworksCloud = null;
         _finaleUploadedSectors.Clear();
         _protectedBoundaryShots.Clear();
         _lastSidewalkMeasurements = [];
@@ -504,7 +572,7 @@ public partial class SaoDatumCityScene
                 AutowrapMode = TextServer.AutowrapMode.WordSmart,
             };
             var compatible = CityHasSurveyPlatform(offer.WitnessCertificate.RequiredPlatformLevel);
-            var supported = compatible && SupportsCityDelivery(def);
+            var supported = compatible && SupportsCityContract(def);
             var accept = new Button
             {
                 Text = Text(supported ? "city.contracts.accept" : compatible ? "city.office.unavailable" : "city.story.requires_platform"),
@@ -566,8 +634,14 @@ public partial class SaoDatumCityScene
             _officeStatusLabel.Text += "\n" + Text("city.works.office_help");
         if (IsFinalPavementSurvey(_activeContract))
             _officeStatusLabel.Text += "\n" + Text("city.finale.office_help") + "\n" + FinalSurveyStatus();
+        if (IsSerraEarthworksSurvey(_activeContract))
+            _officeStatusLabel.Text += "\n" + Text("city.earthworks.office_help") + "\n" + SingleCorridorStatus(SerraEarthworksSector);
+        if (TryGetProceduralPavementSector(_activeContract, out var procPavOfficeSector))
+            _officeStatusLabel.Text += "\n" + Text("city.pavement_proc.office_help") + "\n" + SingleCorridorStatus(procPavOfficeSector);
         var finalSurveyReview = FinalSurveyReviewText();
         if (finalSurveyReview.Length > 0) _officeStatusLabel.Text += "\n" + finalSurveyReview;
+        var earthworksReview = SerraEarthworksReviewText();
+        if (earthworksReview.Length > 0) _officeStatusLabel.Text += "\n" + earthworksReview;
         var worksReview = WorksReviewText();
         if (worksReview.Length > 0) _officeStatusLabel.Text += "\n" + worksReview;
         var review = CitySurveyReviewText();
@@ -839,6 +913,14 @@ public partial class SaoDatumCityScene
                 blips.Add(new RadarBlip(id + "_upload", sector.Upload, color, "U", ClampToRim: false));
             }
         }
+        else if (ActiveSingleCorridorSector(_activeContract) is { } singleRadarSector)
+        {
+            objDetails = SingleCorridorStatus(singleRadarSector);
+            var id = singleRadarSector.Manifest.SectorId;
+            var color = _finaleUploadedSectors.Contains(id) ? Colors.LimeGreen : Colors.DeepSkyBlue;
+            blips.Add(new RadarBlip(id, singleRadarSector.Start, Colors.Orange, "S", ClampToRim: true));
+            blips.Add(new RadarBlip(id + "_upload", singleRadarSector.Upload, color, "U", ClampToRim: true));
+        }
         if (IsWorksSurvey(_activeContract))
         {
             objDetails = WorksCollectionStatus();
@@ -963,6 +1045,11 @@ public partial class SaoDatumCityScene
                 targets.Add(sector.Start);
                 targets.Add(sector.Upload);
             }
+        else if (ActiveSingleCorridorSector(_activeContract) is { } singleMapSector)
+        {
+            targets.Add(singleMapSector.Start);
+            targets.Add(singleMapSector.Upload);
+        }
         _cityMap.UpdateMap(CurrentPositionEnu(), CurrentHeadingRadians(), _geodeticNetwork.Benchmarks.Values.ToArray(), targets);
     }
 
