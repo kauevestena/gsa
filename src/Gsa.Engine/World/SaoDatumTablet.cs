@@ -27,6 +27,8 @@ public partial class SaoDatumCityScene
     private VBoxContainer _fleetTab = null!;
     private CityFullMapControl _cityMap = null!;
     private Button _calmToggleBtn = null!;
+    private Button _captureModeBtn = null!;
+    private Button _pruneRejectedBtn = null!;
     private Button _ditherToggleBtn = null!;
     private Button _daguerreotypeBtn = null!;
     private readonly List<RadarBlip> _radarBlips = new(32);
@@ -145,6 +147,10 @@ public partial class SaoDatumCityScene
             _audio.PlayOffloadChime();
             _feedbackText = Text("city.office.rack_calibrated");
         });
+        _pruneRejectedBtn = AddOfficeBtn("city.office.prune_rejected", () =>
+        {
+            _pruneRejectedFramesInOffice = !_pruneRejectedFramesInOffice;
+        });
         BuildCityHazardControls(officeTab);
         BuildViaductOfficeForm(officeTab);
         _rainFilterButton = AddOfficeBtn("city.rain_survey.enable_filter", ToggleRainSurveyFilter);
@@ -181,6 +187,15 @@ public partial class SaoDatumCityScene
             RefreshTabletContents();
         };
         setTab.AddChild(_calmToggleBtn);
+
+        _captureModeBtn = new Button { FocusMode = Control.FocusModeEnum.None };
+        _captureModeBtn.Pressed += () =>
+        {
+            _autoCamera.ManualMode = !_autoCamera.ManualMode;
+            if (!_isSandbox) SaveCityCareerState(SaveTrigger.Manual, announce: false);
+            RefreshTabletContents();
+        };
+        setTab.AddChild(_captureModeBtn);
 
         _ditherToggleBtn = new Button { FocusMode = Control.FocusModeEnum.None };
         _ditherToggleBtn.Pressed += () =>
@@ -301,7 +316,7 @@ public partial class SaoDatumCityScene
             TunnelMissionId or PortViaductSurvey.MissionId or WaterfrontRainSurvey.MissionId or PortWorksSurvey.MissionId or FinalCityPavementSurvey.MissionId => [],
             _ => Enumerable.Range(1, count).Select(index => $"{prefix}_{index:00}").ToArray(),
         };
-        var calm = !(isBusSurvey || isViaduct || isRain || isBoundary || isWorks || isFinale) || _calmPolicy.CalmCityEnabled;
+        var calm = !spec.HasHostileOrDynamicHazards || _calmPolicy.CalmCityEnabled;
         var def = new ContractDefinition(
             SchemaVersion: 1,
             Id: spec.MissionId,
@@ -385,6 +400,8 @@ public partial class SaoDatumCityScene
         if (IsRainCollection(def)) BeginRainSurveyWeather();
         _activeMachine.Accept(_calendar.CalendarTimeSeconds);
         _fieldSamples.Clear();
+        _autoCamera.Reset();
+        _pruneRejectedFramesInOffice = false;
         RestorePendingCityLidar(null);
         _protectedLidarReturns = 0;
         if (IsCityLidarCollection(def)) _lidarEnabled = false;
@@ -664,6 +681,8 @@ public partial class SaoDatumCityScene
         _citySaveLabel.Text = Text("save.ui.help") + "\n" + _citySaveNotice;
         _recoverCitySaveButton.Visible = !_isSandbox && _citySaveStatus?.PreviousGenerationAvailable == true;
         _calmToggleBtn.Text = Text(_calmPolicy.CalmCityEnabled ? "hud.calm_protection.active" : "hud.calm_protection.inactive");
+        _captureModeBtn.Text = Text(_autoCamera.ManualMode ? "city.settings.capture_manual" : "city.settings.capture_auto");
+        _pruneRejectedBtn.Text = Text(_pruneRejectedFramesInOffice ? "city.office.keep_all_frames" : "city.office.prune_rejected");
         _ditherToggleBtn.Text = Text("city.settings.dither") + ": " + (_atmosphere.RetroDitherEnabled ? "ON" : "OFF");
         _daguerreotypeBtn.Text = Text("city.settings.daguerreotype") + ": " + (_atmosphere.DaguerreotypeEnabled ? "ON" : "OFF");
     }
@@ -716,6 +735,29 @@ public partial class SaoDatumCityScene
             blips.Add(new RadarBlip("pursuer", _coordinates.ToMap(_pursuerVisual.Position), new Color(1.0f, 0.20f, 0.20f), "!", ClampToRim: true));
         if (_roadblockObstacle is { } rb)
             blips.Add(new RadarBlip("roadblock", rb.CenterEnu, new Color(1.0f, 0.48f, 0.12f), "X", ClampToRim: false));
+        foreach (var dog in _streetDogs)
+        {
+            if (dog.Active)
+                blips.Add(new RadarBlip(dog.Id, dog.PositionEnu, new Color(1.0f, 0.52f, 0.16f), "D", ClampToRim: false));
+        }
+        if (_activeEarlySpotterId is { } activeSpotterId && _earlySpotterWarningShown)
+        {
+            foreach (var sp in _landmarks.EarlySpottersEnu)
+                if (sp.Id == activeSpotterId)
+                    blips.Add(new RadarBlip(sp.Id, sp.PositionEnu, new Color(1.0f, 0.26f, 0.26f), "!", ClampToRim: false));
+        }
+        foreach (var car in _commerceCars)
+        {
+            if (car.IsErratic && !_calmPolicy.IsProtectionActive &&
+                TrainingContractSession.HorizontalDistance(pos, car.PositionEnu) <= 85.0)
+                blips.Add(new RadarBlip(car.Id, car.PositionEnu, new Color(1.0f, 0.55f, 0.12f), "~", ClampToRim: false));
+        }
+        if (_landmarks.TrioTruckNode is { Visible: true } trioNode)
+            blips.Add(new RadarBlip("absurd_trio", _coordinates.ToMap(trioNode.Position), new Color(0.95f, 0.30f, 0.72f), "E", ClampToRim: false));
+        if (_landmarks.MarathonPackNode is { Visible: true } marathonNode)
+            blips.Add(new RadarBlip("absurd_marathon", _coordinates.ToMap(marathonNode.Position), new Color(0.95f, 0.65f, 0.22f), "E", ClampToRim: false));
+        if (_landmarks.PigeonFlockNode is { Visible: true } pigeonNode)
+            blips.Add(new RadarBlip("absurd_pigeons", _coordinates.ToMap(pigeonNode.Position), new Color(0.84f, 0.88f, 0.94f), "E", ClampToRim: false));
 
         var nearPark = (pos - GimbalinaChallenge.Start).Length < 125;
         if (nearPark)
@@ -876,7 +918,8 @@ public partial class SaoDatumCityScene
                 SurveyViewfinderActive: _chaseCamera.Mode == GsaCameraMode.SurveyView,
                 DistrictPopup: _pendingDistrictPopup,
                 VehiclePopup: _pendingVehiclePopup,
-                SpeedText: speedText),
+                SpeedText: speedText,
+                AutoCameraActive: !_autoCamera.ManualMode),
             pos,
             heading,
             blips,

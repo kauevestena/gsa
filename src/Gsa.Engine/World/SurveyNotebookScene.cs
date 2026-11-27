@@ -15,6 +15,7 @@ public partial class TutorialBlockScene
     private ItemList _photoList = null!;
     private TextureRect _photoPreview = null!;
     private SurveyNotebookView? _notebookView;
+    private Button _trainingCaptureModeBtn = null!;
     private string? _selectedPhotoId;
     private string? _selectedThumbnailHash;
     private string _photoListVersion = "";
@@ -60,6 +61,9 @@ public partial class TutorialBlockScene
         var header = new HBoxContainer();
         layout.AddChild(header);
         header.AddChild(NotebookLabel(Text("notebook.title")));
+        _trainingCaptureModeBtn = new Button { FocusMode = Control.FocusModeEnum.None };
+        _trainingCaptureModeBtn.Pressed += () => TrainingAction("toggle_capture_mode");
+        header.AddChild(_trainingCaptureModeBtn);
         var close = new Button { Text = Text("notebook.close"), FocusMode = Control.FocusModeEnum.None };
         close.Pressed += () => _notebookPanel.Hide();
         header.AddChild(close);
@@ -112,6 +116,8 @@ public partial class TutorialBlockScene
 
     private void RefreshSurveyNotebook()
     {
+        if (_trainingCaptureModeBtn is not null)
+            _trainingCaptureModeBtn.Text = Text(_trainingAutoCamera.ManualMode ? "city.settings.capture_manual" : "city.settings.capture_auto");
         if (_notebookPanel is null || !_notebookPanel.Visible) return;
         _notebookView = SurveyNotebookPresenter.Build(_training, TranslationServer.GetLocale().ToString());
         _notebookTargets.Text = string.Join("\n\n", _notebookView.Targets.Select(t => string.Format(Text("notebook.target_row"),

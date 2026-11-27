@@ -95,7 +95,7 @@ public partial class SaoDatumCityScene : Node3D
     private readonly float[] _vfxMaxLife = new float[MaxVfxParticles];
     private readonly Color[] _vfxColors = new Color[MaxVfxParticles];
     private int _vfxWriteIdx;
-    private double _nextAbsurdEventTimer = 18.0;
+    private double _nextAbsurdEventTimer = 14.0;
     private double _parkBankRadians;
     private LidarBenchSimulator _lidarSim = new(LidarProfile.L4);
     private CameraCaptureScheduler _camScheduler = new("city_cam");
@@ -322,7 +322,11 @@ public partial class SaoDatumCityScene : Node3D
         // Commerce Street promenade, storefronts, curbs, signals, streetlamps & water tanks
         _cityVisuals.BuildCommerceStreetDetails(visualBase, _fullManifest, _coordinates, _atmosphere, includeBeacons: false);
         BuildStreetInteractions(visualBase);
-        if (!_quickParkRun) BuildWorldParkedVehicles(visualBase);
+        if (!_quickParkRun)
+        {
+            BuildWorldParkedVehicles(visualBase);
+            BuildCityEarlyHazardActors(visualBase);
+        }
 
         // Glowing GTA III Beacons for Office, Unload, and 8 Geodetic Benchmarks (hidden in Quick Park Sprint)
         if (!_quickParkRun)
@@ -933,9 +937,12 @@ public partial class SaoDatumCityScene : Node3D
         var activeRoll = 0.0;
         var saveTrafficImpact = false;
         StepCityTraffic(delta, activePos, weather);
+        if (!_quickParkRun && !_citySaveSmoke)
+            StepCommerceBoulevardTraffic(delta, activePos, weather);
 
         var input = _mobility.SampleLiveInput(_carSim?.SpeedMetresPerSecond ?? _locomotion.ForwardSpeedMetresPerSecond);
         input = ApplyCityEverydayInput(input, activeMode);
+        input = ApplyStreetDogAndMarathonSlowdown(input, activeMode, activePos);
         var regionId = GetRegionIdForEnu(activePos);
         if (regionId != _lastRegionId)
         {
@@ -1014,6 +1021,10 @@ public partial class SaoDatumCityScene : Node3D
                 else
                     _carSim.StopAtExternalContact();
             }
+            if (!_quickParkRun && !_citySaveSmoke && ResolveCommerceTrafficContact(delta, activeMode, prevCarPos, ref resolvedPos))
+            {
+                _carSim.DampSpeedOnWallSlide(0.25);
+            }
 
             if (!CityMayEnterRegion(prevCarPos, resolvedPos))
             {
@@ -1078,6 +1089,12 @@ public partial class SaoDatumCityScene : Node3D
                 activeSpeed = 0;
                 ApplyCityTrafficImpact(trafficHit, activeMode);
             }
+            if (!_quickParkRun && !_citySaveSmoke && ResolveCommerceTrafficContact(delta, activeMode, previousPlayerPosition, ref activePos))
+            {
+                activePos = new Vector3d(activePos.X, activePos.Y, GetTerrainElevationEnu(activePos.X, activePos.Y));
+                _locomotion.StopAtExternalContact(activePos);
+                activeSpeed = 0;
+            }
             if (!CityMayEnterRegion(previousPlayerPosition, activePos))
             {
                 activePos = previousPlayerPosition;
@@ -1103,6 +1120,8 @@ public partial class SaoDatumCityScene : Node3D
 
         if (saveTrafficImpact) SaveHazardChange();
         _lastSpeedMps = activeSpeed;
+        _lastAngularVelocityRadPerSec = Math.IEEERemainder(activeHeading - previousHeading, Math.Tau) / delta;
+        _joltBlurRemainingSeconds = Math.Max(0.0, _joltBlurRemainingSeconds - delta);
         StepCityEverydayEncounters(delta, activePos, activeSpeed, activeMode);
         var gStep = _gimbalina.Step(delta, isResting: Math.Abs(activeSpeed) < 0.1,
             bodyPitchRadians: activePitch, bodyRollRadians: activeRoll);
@@ -1130,6 +1149,8 @@ public partial class SaoDatumCityScene : Node3D
 
         // Step world hazards, police blitz, absurd events & Chicken Challenge (200 m track)
         StepCityHazardsAndEvents(delta, activePos, activeSpeed, activeMode);
+        if (!_quickParkRun && !_citySaveSmoke)
+            StepEarlyStreetAndSpotterHazards(delta, activePos, activeSpeed, activeMode, weather);
         StepCityStreetInteractions(delta, activePos, activeHeading, activeSpeed, activeMode, input);
         StepParkRun(delta, previousPlayerPosition, activePos, activeMode, gStep);
 
@@ -1140,11 +1161,14 @@ public partial class SaoDatumCityScene : Node3D
         StepCityNavigation(delta, activePos, activeHeading, activeMode, weather.IsRaining);
         StepLiveLidar(delta, activePos, activeHeading, activeMode, weather.IsRaining);
 
-        // Camera capture tick
-        if (_captureRequested && _camScheduler.IsCaptureTick(_tick))
+        // Camera capture tick (Automatic MMS trigger by default, or Manual [C])
+        _autoCamera.StepCooldown(delta, _cityHazards.Lens.ObstructionFraction);
+        if (_camScheduler.IsCaptureTick(_tick) &&
+            (_captureRequested || ShouldAutoCaptureThisTick(activePos, activeHeading, activeSpeed, weather)))
         {
+            var wasManual = _captureRequested;
             _captureRequested = false;
-            CaptureCityPhoto(activePos, activeHeading, activeSpeed, weather);
+            CaptureCityPhoto(activePos, activeHeading, activeSpeed, weather, isAutoTriggered: !wasManual);
         }
 
         var attn = StepCityFactionHazards(delta, activePos, activeSpeed, activeMode);
@@ -1311,13 +1335,14 @@ public partial class SaoDatumCityScene : Node3D
         _stuntJumpCooldown = Math.Max(0.0, _stuntJumpCooldown - dt);
 
         // 1. Pothole jolts & rack impact
-        if (_hazardCooldown <= 0.0 && Math.Abs(speedMps) > 4.5 && mode != LocomotionMode.OnFoot)
+        if (_hazardCooldown <= 0.0 && Math.Abs(speedMps) > PotholeTriggerSpeedMps(mode) && mode != LocomotionMode.OnFoot)
         {
             foreach (var hole in _landmarks.PotholeCentersEnu)
             {
                 if (TrainingContractSession.HorizontalDistance(pos, hole) < 2.1)
                 {
                     _hazardCooldown = 3.0;
+                    _joltBlurRemainingSeconds = Math.Max(_joltBlurRemainingSeconds, 0.85);
                     _gimbalina.ApplyStartle(StartleEventKind.Pothole);
                     _audio.PlayCollisionThud(Math.Abs(speedMps) * 0.5);
                     _chaseCamera.TriggerShake(0.28f, 0.30f);
@@ -1363,7 +1388,7 @@ public partial class SaoDatumCityScene : Node3D
             _nextAbsurdEventTimer -= dt;
             if (_nextAbsurdEventTimer <= 0.0)
             {
-                _nextAbsurdEventTimer = 55.0;
+                _nextAbsurdEventTimer = 38.0;
                 var kind = (AbsurdUrbanEventKind)((_tick / 100) % 3);
                 var started = _absurdEvents.TryStartEvent(
                     $"evt_{_tick}", kind, _eventRoadGraph, ["seg_main"], "seg_entry", "seg_unique_bridge", 35.0,
@@ -1380,23 +1405,17 @@ public partial class SaoDatumCityScene : Node3D
             }
         }
         if (_landmarks.TrioTruckNode is not null)
-        {
             _landmarks.TrioTruckNode.Visible = activeEv?.Kind == AbsurdUrbanEventKind.TrioEletrico;
-            if (_landmarks.TrioTruckNode.Visible)
-                _landmarks.TrioTruckNode.Position = _coordinates.ToGodot(new Vector3d(500240.0 + Math.Sin(_tick * 0.02) * 35.0, 7400236.0, 100.0));
-        }
         if (_landmarks.MarathonPackNode is not null)
-        {
             _landmarks.MarathonPackNode.Visible = activeEv?.Kind == AbsurdUrbanEventKind.StreetMarathon;
-            if (_landmarks.MarathonPackNode.Visible)
-                _landmarks.MarathonPackNode.Position = _coordinates.ToGodot(new Vector3d(500360.0, 7400236.0 + Math.Sin(_tick * 0.03) * 28.0, 100.0));
-        }
         if (_landmarks.PigeonFlockNode is not null)
         {
             _landmarks.PigeonFlockNode.Visible = activeEv?.Kind == AbsurdUrbanEventKind.PigeonFlock;
             if (_landmarks.PigeonFlockNode.Visible)
                 _landmarks.PigeonFlockNode.RotateY((float)dt * 1.4f);
         }
+        if (!_quickParkRun && !_citySaveSmoke)
+            StepProximityAbsurdEventEffects(dt, pos, mode, activeEv);
 
     }
 
@@ -1610,7 +1629,7 @@ public partial class SaoDatumCityScene : Node3D
         }
     }
 
-    private void CaptureCityPhoto(Vector3d pos, double heading, double speed, WeatherAndTimeSnapshot weather)
+    private void CaptureCityPhoto(Vector3d pos, double heading, double speed, WeatherAndTimeSnapshot weather, bool isAutoTriggered = false)
     {
         if (IsBoundarySurvey(_activeContract))
         {
@@ -1628,16 +1647,27 @@ public partial class SaoDatumCityScene : Node3D
         var mount = CameraMountEstimate.ForwardFacing;
         var origin = pos + Vector3d.UnitZ * 1.4;
         var t = _calendar.CalendarTimeSeconds;
-        var bodyQuat = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading +
-            (CurrentActiveMode() >= LocomotionMode.Car ? _cityHazards.RackYawErrorRadians : 0));
-        EstimatedBodyPose Pose(double dt) => new(t + dt, origin + new Vector3d(Math.Cos(heading) * speed * dt, Math.Sin(heading) * speed * dt, 0),
-            usesGimbalina ? _gimbalina.ComputeEffectiveBodyToMap(bodyQuat, dt, _gimbalina.LastBodyPitchRadians, _gimbalina.LastBodyRollRadians) : bodyQuat);
+        var rackYaw = CurrentActiveMode() >= LocomotionMode.Car ? _cityHazards.RackYawErrorRadians : 0;
+        var effectiveYawRate = _citySaveSmoke
+            ? 0.0
+            : _lastAngularVelocityRadPerSec + (_joltBlurRemainingSeconds > 0 ? 1.85 * Math.Sin(_tick * 1.7) : 0.0);
+        var bodyQuat = Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading + rackYaw);
+        EstimatedBodyPose Pose(double dt)
+        {
+            var q = Math.Abs(effectiveYawRate) > 1e-6
+                ? Quaterniond.FromAxisAngle(Vector3d.UnitZ, heading + rackYaw + effectiveYawRate * dt)
+                : bodyQuat;
+            return new(t + dt, origin + new Vector3d(Math.Cos(heading) * speed * dt, Math.Sin(heading) * speed * dt, 0),
+                usesGimbalina ? _gimbalina.ComputeEffectiveBodyToMap(q, dt, _gimbalina.LastBodyPitchRadians, _gimbalina.LastBodyRollRadians) : q);
+        }
         var start = CameraGeometry.CameraToMap(Pose(0), mount);
         var end = CameraGeometry.CameraToMap(Pose(weather.IsNight ? CameraSensorProfile.Initial.NightExposureSeconds : CameraSensorProfile.Initial.DayExposureSeconds), mount);
         var readout = CameraGeometry.CameraToMap(Pose(CameraSensorProfile.Initial.ReadoutTimeSeconds), mount);
 
         bool Occluded(Vector3d fromEnu, Vector3d toEnu, string targetId)
         {
+            if (!_citySaveSmoke && IsOccludedByCommerceCar(fromEnu, toEnu))
+                return true;
             var from = _coordinates.ToGodot(fromEnu);
             var to = _coordinates.ToGodot(toEnu);
             if (from.DistanceSquaredTo(to) < 1e-8f) return false;
@@ -1686,13 +1716,23 @@ public partial class SaoDatumCityScene : Node3D
             _fieldSamples.Add(sample);
             if (sample.Quality.Passed)
                 AddSampleCoverageCells(sample);
+            _autoCamera.RecordCaptureOutcome(pos, heading, sample, _activeContract?.RequiredFeatureIds);
             _recentPhotoSeconds = .6;
             _coverageSpots.Add(pos);
             var visibleTargets = sample.ObservedFeatures.Where(f => f.ObjectClass != CityPhotoCoverage.ObservationClass)
                 .Select(f => f.TargetId).ToArray();
             if (sample.Quality.Passed) _observedTargetIds.UnionWith(visibleTargets);
             _audio.PlayShutter();
-            if (_activeContract?.AreaId == FacadeArea && pos.Y > 7399999.0 && observedCellsCount < 3)
+            if (!sample.Quality.Passed)
+            {
+                if (isAutoTriggered) _audio.PlayAlert();
+                _feedbackText = sample.Quality.LensObstructionExceeded
+                    ? Text("city.capture.rejected_lens")
+                    : (!_citySaveSmoke && usesGimbalina && _gimbalina.Stress >= 40.0)
+                        ? Text("training.stabilize_gimbalina")
+                        : Text("city.capture.rejected_blur");
+            }
+            else if (_activeContract?.AreaId == FacadeArea && pos.Y > 7399999.0 && observedCellsCount < 3)
             {
                 _feedbackText = Text("city.story.step_back_framing");
             }
@@ -1797,6 +1837,8 @@ public partial class SaoDatumCityScene : Node3D
         {
             switch (key.PhysicalKeycode)
             {
+                case Key.E when HasActiveStreetDogEncounter():
+                    TryPacifyStreetDog(); GetViewport().SetInputAsHandled(); return;
                 case Key.E when _everyday.DogActive:
                     GiveCityDogTreat(); GetViewport().SetInputAsHandled(); return;
                 case Key.E when _everyday.Parking is not null:
@@ -1804,6 +1846,8 @@ public partial class SaoDatumCityScene : Node3D
                     GetViewport().SetInputAsHandled(); return;
                 case Key.E when TryHandleStreetInteraction(CurrentPositionEnu(), _lastSpeedMps, CurrentActiveMode()):
                     GetViewport().SetInputAsHandled(); return;
+                case Key.E when _cityHazards.Lens.ObstructionFraction > 0 && Math.Abs(_lastSpeedMps) < 0.25:
+                    _cleanLensRequested = true; GetViewport().SetInputAsHandled(); return;
                 case Key.N:
                     _gpsArrowEnabled = !_gpsArrowEnabled;
                     GetViewport().SetInputAsHandled();

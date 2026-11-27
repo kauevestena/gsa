@@ -33,7 +33,8 @@ public sealed record GtaHudState(
     bool SurveyViewfinderActive,
     string? DistrictPopup,
     string? VehiclePopup,
-    string SpeedText = "");
+    string SpeedText = "",
+    bool AutoCameraActive = true);
 
 /// <summary>GTA III-styled HUD overlay: bottom-left circular radar, top-right telemetry/money/stars, and district banners.</summary>
 public sealed class GsaGtaHud
@@ -445,9 +446,10 @@ public sealed class GsaGtaHud
             _cachedGnssColor = state.GnssColor;
             _gnssLabel.AddThemeColorOverride("font_color", state.GnssColor);
         }
+        var camTag = state.AutoCameraActive ? "CAM·A" : "CAM·M";
         var sensorsText = state.ShowLidar
-            ? (state.LidarActive ? "CAM · GNSS · LiDAR●" : "CAM · GNSS · LiDAR○")
-            : "CAM · GNSS";
+            ? (state.LidarActive ? $"{camTag} · GNSS · LiDAR●" : $"{camTag} · GNSS · LiDAR○")
+            : $"{camTag} · GNSS";
         if (sensorsText != _cachedSensorsText)
         {
             _cachedSensorsText = sensorsText;
@@ -456,7 +458,7 @@ public sealed class GsaGtaHud
 
         var slotIcon = state.ShowLidar
             ? (state.LidarActive ? "LiDAR" : "360°")
-            : (state.ShowVehicleCondition ? "CAM+" : "CAM");
+            : (state.AutoCameraActive ? "CAM·A" : "CAM·M");
         if (slotIcon != _cachedSlotIcon)
         {
             _cachedSlotIcon = slotIcon;

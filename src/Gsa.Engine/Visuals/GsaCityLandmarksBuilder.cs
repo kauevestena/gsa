@@ -10,6 +10,8 @@ namespace Gsa.Engine.Visuals;
 public sealed class GsaCityLandmarksBuilder
 {
     public IReadOnlyList<Vector3d> PotholeCentersEnu { get; private set; } = [];
+    public IReadOnlyList<Vector3d> MudPuddleCentersEnu { get; private set; } = [];
+    public IReadOnlyList<(string Id, FactionId Faction, Vector3d PositionEnu)> EarlySpottersEnu { get; private set; } = [];
     public List<ObstacleBoxEnu> LandmarkObstacles { get; } = [];
     public Vector3d BlitzCheckpointEnu => OldCenterTrafficNetwork.CheckpointEnu;
 
@@ -123,12 +125,16 @@ public sealed class GsaCityLandmarksBuilder
         lampBulbBatch.BuildSeparatedNodes(visualBase, "CityLandmarkBulbs", GeometryInstance3D.ShadowCastingSetting.Off, visibilityRangeEnd: 320f);
         GsaMeshBuilder.BuildBatchedStreetTrees(visualBase, "LandmarkTrees", treeList, visibilityRangeEnd: 380f);
 
-        // 8. Street Hazards: Roadwork Potholes & Cones + Police Blitz Checkpoint + Trio Elétrico / Marathon / Pigeons
+        // 8. Street Hazards: Roadwork Potholes & Cones + Mud Puddles + Faction Spotters + Police Blitz Checkpoint + Trio Elétrico / Marathon / Pigeons
         var potholes = new[]
         {
+            new Vector3d(500072.0, 7399995.8, 100.0),
             new Vector3d(500145.0, 7399989.5, 100.0),
-            new Vector3d(500290.0, 7400116.0, 100.0),
-            new Vector3d(500420.0, 7400236.0, 100.0),
+            new Vector3d(500186.0, 7399995.8, 100.0),
+            new Vector3d(500110.0, 7400136.5, 100.0),
+            new Vector3d(500280.0, 7400136.5, 100.0),
+            new Vector3d(500155.0, 7400305.5, 100.0),
+            new Vector3d(500255.0, 7400356.0, 100.0),
             new Vector3d(500180.0, 7401196.0, 100.0),
         };
         PotholeCentersEnu = potholes;
@@ -137,6 +143,37 @@ public sealed class GsaCityLandmarksBuilder
             var hole = GsaMeshBuilder.BuildPotholeAndCones($"RoadPothole_{i}");
             hole.Position = coords.ToGodot(potholes[i]);
             visualBase.AddChild(hole);
+        }
+
+        var mudPuddles = new[]
+        {
+            new Vector3d(500048.0, 7399996.0, 100.0),
+            new Vector3d(500128.0, 7399995.5, 100.0),
+            new Vector3d(500202.0, 7400137.0, 100.0),
+            new Vector3d(500230.0, 7400306.0, 100.0),
+            new Vector3d(500340.0, 7400356.5, 100.0),
+        };
+        MudPuddleCentersEnu = mudPuddles;
+        for (var i = 0; i < mudPuddles.Length; i++)
+        {
+            var puddle = GsaMeshBuilder.BuildMudPuddle($"MudPuddle_{i}");
+            puddle.Position = coords.ToGodot(mudPuddles[i]);
+            visualBase.AddChild(puddle);
+        }
+
+        var earlySpotters = new (string Id, FactionId Faction, Vector3d Pos, Color Coat, Color SignCol, string Banner)[]
+        {
+            ("spotter_commerce_west", FactionId.SociedadeDaTerraPlana, new(500058.0, 7400002.6, 100.0), new Color(0.24f, 0.26f, 0.36f), new Color(0.56f, 0.62f, 0.72f), "TERRA PLANA"),
+            ("spotter_commerce_mid", FactionId.MafiaDoMapaVelho, new(500152.0, 7400002.6, 100.0), new Color(0.42f, 0.35f, 0.28f), new Color(0.84f, 0.76f, 0.62f), "MAPA 1974"),
+            ("spotter_drainage", FactionId.MapaFacilSa, new(500315.0, 7400138.8, 100.0), new Color(0.14f, 0.28f, 0.44f), new Color(0.24f, 0.68f, 0.82f), "MAPAFÁCIL"),
+            ("spotter_signs", FactionId.SociedadeDaTerraPlana, new(500330.0, 7400360.8, 100.0), new Color(0.24f, 0.26f, 0.36f), new Color(0.56f, 0.62f, 0.72f), "SEM GPS!"),
+        };
+        EarlySpottersEnu = earlySpotters.Select(s => (s.Id, s.Faction, s.Pos)).ToArray();
+        foreach (var s in earlySpotters)
+        {
+            var npc = GsaMeshBuilder.BuildFactionSpotterNpc(s.Id, s.Coat, s.SignCol, s.Banner);
+            npc.Position = coords.ToGodot(s.Pos);
+            visualBase.AddChild(npc);
         }
 
         var blitz = GsaMeshBuilder.BuildPoliceBlitzUnit("PoliceBlitzCheckpoint");

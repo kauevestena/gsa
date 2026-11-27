@@ -53,6 +53,7 @@ public partial class SaoDatumCityScene
             BoundarySurvey = IsBoundarySurvey(_activeContract) ? new(_pendingBoundaryShots.ToArray(), _boundaryPursuitTriggered) : null,
             WorksUpload = IsWorksSurvey(_activeContract) ? _worksUpload : null,
             Cosmetics = HasCustomCosmeticsState() ? _cosmetics.ExportSnapshot() : null,
+            ManualCameraCapture = _autoCamera.ManualMode,
         });
 
     private bool HasCustomCosmeticsState() =>
@@ -170,6 +171,10 @@ public partial class SaoDatumCityScene
             _camScheduler = new CameraCaptureScheduler("city_cam", initialSequence: city?.CameraNextSequence ?? 0);
             _panoramicCameras = [];
             _captureRequested = false;
+            _autoCamera.Reset();
+            _autoCamera.ManualMode = city?.ManualCameraCapture ?? false;
+            _autoCamera.RebuildFromSamples(_protectedCityPhotos.Concat(_fieldSamples));
+            _pruneRejectedFramesInOffice = false;
             _recentPhotoSeconds = 0; _cleanLensRequested = _disarmRequested = false; _hazardNotice = ""; _lastHazardWarning = null;
             _gtaHud.HideCutsceneLetterbox();
             _officeMode = city?.OfficeMode ?? Gsa.Missions.Office.ProcessingMode.Arcade;

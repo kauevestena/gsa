@@ -65,6 +65,9 @@ public sealed record SaveCitySessionState(
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public BlooperAndCosmeticSnapshot? Cosmetics { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool ManualCameraCapture { get; init; }
 }
 
 public sealed record CityLidarBufferSnapshot(IReadOnlyList<CityLidarSlice> Pending, int SkippedNoPose, int SkippedCapacity);

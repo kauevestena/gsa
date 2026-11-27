@@ -14,6 +14,7 @@ public partial class TutorialBlockScene
 {
     private TrainingContractSession _training = null!;
     private CameraCaptureScheduler _liveCamera = null!;
+    private readonly AutoCameraTriggerController _trainingAutoCamera = new();
     private CameraVisibilityCandidate[] _liveCandidates = [];
     private GsaGtaHud _gtaHud = null!;
     private readonly System.Collections.Generic.Dictionary<string, Button> _trainingButtons = new();
@@ -40,6 +41,10 @@ public partial class TutorialBlockScene
         _training = new TrainingContractSession(_manifest, slot);
         var loaded = _smoke ? null : _training.Load();
         _liveCamera = new CameraCaptureScheduler("training_" + Guid.NewGuid().ToString("N"));
+        _trainingAutoCamera.Reset();
+        _trainingAutoCamera.ManualMode = _smoke;
+        if (loaded?.Succeeded == true)
+            _trainingAutoCamera.RebuildFromSamples(_training.Samples, minBaselineMetres: 2.0);
         _manifestById = _manifest.Objects.ToDictionary(o => o.Id, StringComparer.Ordinal);
         _liveCandidates = _manifest.Objects.Select(CameraVisibilityCandidate.FromWorldObject).ToArray();
         _liveLocomotion!.RepositionSafeAfterRecovery(TrainingContractSession.SpawnPosition, headingRadians: Math.PI);
@@ -159,6 +164,10 @@ public partial class TutorialBlockScene
                     _notebookPanel.Visible = !_notebookPanel.Visible;
                     succeeded = true;
                     break;
+                case "toggle_capture_mode":
+                    _trainingAutoCamera.ManualMode = !_trainingAutoCamera.ManualMode;
+                    succeeded = true;
+                    break;
                 case "view":
                     _chaseCamera?.CycleMode();
                     succeeded = true;
@@ -271,7 +280,8 @@ public partial class TutorialBlockScene
                 _audio?.PlayHorn(LocomotionMode.Car);
             }
         }
-        if (_captureRequested && _liveCamera.IsCaptureTick(_liveTick))
+        _trainingAutoCamera.StepCooldown(delta, 0.0);
+        if (_liveCamera.IsCaptureTick(_liveTick) && (_captureRequested || ShouldAutoCaptureTrainingFrame()))
         {
             _captureRequested = false;
             CaptureLiveFrame(angularVelocity);
@@ -336,6 +346,7 @@ public partial class TutorialBlockScene
             candidates, Occluded), body, out var sample, out _) && sample is not null)
         {
             _training.RecordObservation(sample);
+            _trainingAutoCamera.RecordCaptureOutcome(body.PositionEnu, body.HeadingRadians, sample, TrainingContractSession.TargetIds, minBaselineMetres: 2.0);
             _audio?.PlayShutter();
             _lastObservation = string.Join(", ", sample.ObservedFeatures.Select(f => f.TargetId));
             if (_lastObservation.Length == 0) _lastObservation = Text("training.nothing_visible");
@@ -349,6 +360,40 @@ public partial class TutorialBlockScene
         // Ownership moves to custody; do not retain a second unbounded thumbnail buffer.
         _liveCamera.FlushBatchManifest("live_flush");
         RefreshTrainingHud();
+    }
+
+    private bool ShouldAutoCaptureTrainingFrame()
+    {
+        if (_trainingAutoCamera.ManualMode || !_training.CanCapture || _smoke || _notebookPanel.Visible ||
+            _liveLocomotion is null || _gimbalina.HasFledToSafety)
+            return false;
+
+        var origin = _liveLocomotion.PositionEnu + Vector3d.UnitZ;
+        var pose = new EstimatedBodyPose(_training.ClockSeconds, origin, Quaterniond.FromAxisAngle(Vector3d.UnitZ, _liveLocomotion.HeadingRadians));
+        var mapToCam = CameraGeometry.CameraToMap(pose, CameraMountEstimate.ForwardFacing).Inverse();
+        var projector = new CameraProjector(CameraSensorProfile.Initial.Intrinsics);
+        var visibleTargets = new List<string>(3);
+
+        foreach (var c in _liveCandidates)
+        {
+            if (c.ObjectClass != "building_facade" || !TrainingContractSession.TargetIds.Contains(c.TargetId))
+                continue;
+            if (!(origin.Y < c.CenterEnu.Y - 1.2 && Math.Abs(origin.X - c.CenterEnu.X) <= 8.5 && Math.Sin(_liveLocomotion.HeadingRadians) >= 0.35))
+                continue;
+            var pCam = mapToCam.Transform(c.CenterEnu);
+            if (pCam.Z <= 0.3 || pCam.Z > CameraSensorProfile.Initial.RangeMetres)
+                continue;
+            var proj = projector.ProjectCameraPoint(pCam);
+            if (proj.IsVisible && proj.Pixel is { } px &&
+                px.U >= projector.Intrinsics.Width * 0.05 && px.U <= projector.Intrinsics.Width * 0.95 &&
+                px.V >= projector.Intrinsics.Height * 0.05 && px.V <= projector.Intrinsics.Height * 0.95)
+            {
+                visibleTargets.Add(c.TargetId);
+            }
+        }
+
+        return visibleTargets.Count > 0 && _trainingAutoCamera.ShouldAutoTriggerStereoTarget(
+            _liveLocomotion.PositionEnu, visibleTargets, requiredViewsPerTarget: 2, minBaselineMetres: 2.0);
     }
 
     private void RefreshTrainingHud(double dt = 0.1)
@@ -441,7 +486,8 @@ public partial class TutorialBlockScene
                 ContextPromptText: Text("hud.prompt.controls"),
                 SurveyViewfinderActive: _chaseCamera?.Mode == GsaCameraMode.SurveyView,
                 DistrictPopup: _pendingDistrictPopup,
-                VehiclePopup: _pendingVehiclePopup),
+                VehiclePopup: _pendingVehiclePopup,
+                AutoCameraActive: !_trainingAutoCamera.ManualMode),
             position,
             _liveLocomotion.HeadingRadians,
             _radarBlips,

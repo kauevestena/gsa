@@ -2431,3 +2431,39 @@ msgstr "[E] Trocar para {0} (ou [F] Descer)"
 
 msgid "city.street.vehicle_locked_detail"
 msgstr "{0} · Bloqueado ({1})"
+
+msgid "city.settings.capture_auto"
+msgstr "Disparo da Câmera: Automático (MMS)"
+
+msgid "city.settings.capture_manual"
+msgstr "Disparo da Câmera: Manual [C]"
+
+msgid "city.office.prune_rejected"
+msgstr "Filtrar Fotos Reprovadas: NÃO"
+
+msgid "city.office.keep_all_frames"
+msgstr "Filtrar Fotos Reprovadas: SIM"
+
+msgid "city.capture.rejected_blur"
+msgstr "Foto automática borrada! Suavize curvas, reduza nos buracos ou use [G] na Gimbalina."
+
+msgid "city.capture.rejected_lens"
+msgstr "Lente obstruída! Captura automática pausada — pare e segure [E] por 3 s para limpar."
+
+msgid "city.hazard.mud_splatter"
+msgstr "Poça de lama sujou a lente! Pare e segure [E] por 3 s para limpar."
+
+msgid "city.hazard.street_dog_warning"
+msgstr "Cachorro latindo para a Gimbalina! Aperte [E] para dar petisco ou desvie!"
+
+msgid "city.hazard.street_dog_startle"
+msgstr "O cachorro assustou a Gimbalina! Aperte [E] para petisco ou [G] para milho!"
+
+msgid "city.encounters.street_dog_label"
+msgstr "Cão de Rua · [E] Petisco"
+
+msgid "city.hazard.spotter_warning"
+msgstr "Olheiro de facção por perto! Afaste-se ou colarão panfleto na lente!"
+
+msgid "city.hazard.spotter_flyer"
+msgstr "Sabotador colou panfleto na lente! Pare e segure [E] por 3 s para limpar."

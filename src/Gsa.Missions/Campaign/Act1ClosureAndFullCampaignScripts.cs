@@ -245,13 +245,13 @@ public static class FullCampaignCatalog
     private static IReadOnlyList<CampaignMissionFullSpec> BuildCatalog() =>
     [
         CreateSpec("HIST-01", 1, "mission.hist_01.title", ["old_center"], 0, "cart", [], "images", 300, 2,
-            [], [], [], "dona_clara", "on_fail_hist_01", "on_rework_hist_01", false, 30.0),
+            [], [], [], "dona_clara", "on_fail_hist_01", "on_rework_hist_01", true, 30.0),
         CreateSpec("HIST-02", 1, "mission.hist_02.title", ["old_center"], 0, "cart", ["HIST-01"], "feature_inventory", 500, 3,
-            ["bicycle"], [], ["rack_bike_clip"], "eng_arnaldo", "on_fail_hist_02", "on_rework_hist_02", false, 35.0),
+            ["bicycle"], [], ["rack_bike_clip"], "eng_arnaldo", "on_fail_hist_02", "on_rework_hist_02", true, 35.0),
         CreateSpec("HIST-03", 1, "mission.hist_03.title", ["old_center"], 1, "bicycle", ["HIST-02"], "feature_inventory", 700, 2,
-            ["scooter"], [], ["gimbal_scooter_mount"], "inspetora_bia", "on_fail_hist_03", "on_rework_hist_03", false, 35.0),
+            ["scooter"], [], ["gimbal_scooter_mount"], "inspetora_bia", "on_fail_hist_03", "on_rework_hist_03", true, 35.0),
         CreateSpec("HIST-04", 1, "mission.hist_04.title", ["old_center"], 2, "scooter", ["HIST-03"], "feature_inventory", 900, 10,
-            ["car"], ["port", "waterfront"], ["rack_car_basic", "imu_tactical_m4"], "eng_arnaldo", "on_fail_hist_04", "on_rework_hist_04", false, 45.0),
+            ["car"], ["port", "waterfront"], ["rack_car_basic", "imu_tactical_m4"], "eng_arnaldo", "on_fail_hist_04", "on_rework_hist_04", true, 45.0),
         CreateSpec("HIST-05", 2, "mission.hist_05.title", ["port", "waterfront"], 3, "car", ["HIST-04"], "feature_inventory", 3600, 10,
             ["kombi"], [], ["camera_360_m4", "rtk_radio_link"], "mestre_bastos", "on_fail_hist_05", "on_rework_hist_05", true, 50.0),
         CreateSpec("HIST-06", 2, "mission.hist_06.title", ["port"], 4, "kombi", ["HIST-05"], "point_cloud", 4400, 12,

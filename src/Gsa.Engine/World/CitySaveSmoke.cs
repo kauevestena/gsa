@@ -132,6 +132,17 @@ public partial class SaoDatumCityScene
             "workshop beacon missing street prompt");
         Require(!string.IsNullOrEmpty(GetStreetContextPrompt(new Vector3d(500230.0, 7400025.0, 100.0), 0.0, LocomotionMode.Handcart)),
             "benchmark beacon missing street prompt");
+        Require(!_autoCamera.ManualMode, "camera trigger should default to automatic mode");
+        Require(_landmarks.PotholeCentersEnu.Count >= 8 && _landmarks.MudPuddleCentersEnu.Count >= 5 && _landmarks.EarlySpottersEnu.Count >= 4,
+            "early-game hazard props missing from city landmarks");
+        _captureModeBtn.EmitSignal(BaseButton.SignalName.Pressed);
+        Require(_autoCamera.ManualMode && BuildCitySaveState().City!.ManualCameraCapture, "manual capture toggle failed to update save state");
+        TryLoadCareer();
+        Require(_autoCamera.ManualMode, "manual capture toggle did not persist across reload");
+        _captureModeBtn.EmitSignal(BaseButton.SignalName.Pressed);
+        Require(!_autoCamera.ManualMode, "automatic capture restore failed");
+        TryLoadCareer();
+        Require(JsonSerializer.Serialize(BuildCitySaveState().City) == expected, "manual capture smoke altered fixture session");
         _citySaveSmokeCompleted = true;
         _tabletPanel.Show();
         _tabletTabs.CurrentTab = 5;

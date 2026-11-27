@@ -2431,3 +2431,39 @@ msgstr "[E] Switch to {0} (or [F] Dismount)"
 
 msgid "city.street.vehicle_locked_detail"
 msgstr "{0} · Locked ({1})"
+
+msgid "city.settings.capture_auto"
+msgstr "Camera Trigger: Automatic (MMS)"
+
+msgid "city.settings.capture_manual"
+msgstr "Camera Trigger: Manual [C]"
+
+msgid "city.office.prune_rejected"
+msgstr "Filter Rejected Frames: OFF"
+
+msgid "city.office.keep_all_frames"
+msgstr "Filter Rejected Frames: ON"
+
+msgid "city.capture.rejected_blur"
+msgstr "Auto-photo blurred! Ease turns, slow over bumps, or press [G] to calm Gimbalina."
+
+msgid "city.capture.rejected_lens"
+msgstr "Lens obstructed! Auto-capture paused — stop & hold [E] for 3 s to clean."
+
+msgid "city.hazard.mud_splatter"
+msgstr "Mud puddle splashed the lens! Stop & hold [E] for 3 s to clean."
+
+msgid "city.hazard.street_dog_warning"
+msgstr "Stray dog barking at Gimbalina! Press [E] to toss a treat or steer clear!"
+
+msgid "city.hazard.street_dog_startle"
+msgstr "Stray dog startled Gimbalina! Press [E] for treat or [G] to feed corn!"
+
+msgid "city.encounters.street_dog_label"
+msgstr "Stray Dog · [E] Treat"
+
+msgid "city.hazard.spotter_warning"
+msgstr "Faction spotter nearby! Move away or they will slap a flyer on your lens!"
+
+msgid "city.hazard.spotter_flyer"
+msgstr "Saboteur slapped a flyer on the lens! Stop & hold [E] for 3 s to clean."

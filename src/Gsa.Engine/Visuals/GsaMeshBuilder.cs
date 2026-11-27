@@ -1439,5 +1439,57 @@ public static class GsaMeshBuilder
         trio.AddChild(Box("TopBanner", new Vector3(2.6f, 0.55f, 0.4f), new Vector3(0f, 3.65f, -2.0f), neonGold));
         return trio;
     }
+
+    public static Node3D BuildMudPuddle(string name)
+    {
+        var puddle = new Node3D { Name = name };
+        var rimMat = SolidMat(new Color(0.24f, 0.17f, 0.10f), roughness: 0.85f);
+        var waterMat = SolidMat(new Color(0.16f, 0.12f, 0.08f), roughness: 0.12f);
+        puddle.AddChild(new MeshInstance3D
+        {
+            Position = new Vector3(0f, 0.015f, 0f),
+            Mesh = new CylinderMesh { TopRadius = 1.65f, BottomRadius = 1.75f, Height = 0.025f, RadialSegments = 14 },
+            MaterialOverride = rimMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
+        puddle.AddChild(new MeshInstance3D
+        {
+            Position = new Vector3(0.12f, 0.024f, -0.08f),
+            Mesh = new CylinderMesh { TopRadius = 1.25f, BottomRadius = 1.30f, Height = 0.020f, RadialSegments = 12 },
+            MaterialOverride = waterMat,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
+        return puddle;
+    }
+
+    public static Node3D BuildFactionSpotterNpc(string name, Color coatColor, Color signColor, string bannerText)
+    {
+        var spotter = new Node3D { Name = name };
+        spotter.AddChild(new MeshInstance3D
+        {
+            Name = "Body",
+            Mesh = BuildTrafficPedestrianMesh(),
+            MaterialOverride = SolidMat(coatColor),
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+        });
+        var woodMat = SolidMat(new Color(0.45f, 0.30f, 0.16f));
+        spotter.AddChild(Box("PicketPole", new Vector3(0.06f, 1.85f, 0.06f), new Vector3(0.22f, 1.45f, 0.28f), woodMat));
+        spotter.AddChild(Box("PicketBoard", new Vector3(0.75f, 0.42f, 0.06f), new Vector3(0.22f, 2.25f, 0.28f), SolidMat(signColor, roughness: 0.55f)));
+        spotter.AddChild(new Label3D
+        {
+            Name = "SpotterLabel",
+            Text = bannerText,
+            Position = new Vector3(0.22f, 2.25f, 0.33f),
+            FontSize = 26,
+            PixelSize = 0.0055f,
+            Billboard = BaseMaterial3D.BillboardModeEnum.Enabled,
+            Modulate = Colors.White,
+            OutlineModulate = Colors.Black,
+            OutlineSize = 4,
+            AlphaCut = Label3D.AlphaCutMode.Disabled,
+            VisibilityRangeEnd = 45f,
+        });
+        return spotter;
+    }
 }
 

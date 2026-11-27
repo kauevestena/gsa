@@ -273,10 +273,13 @@ public partial class SaoDatumCityScene
 
         var isInventory = definition.Product == "feature_inventory";
         var recipeId = isInventory ? "city_inventory" : "city_images";
+        var selectedSamples = _pruneRejectedFramesInOffice && samples.Any(s => s.Quality.Passed)
+            ? samples.Where(s => s.Quality.Passed).Select(sample => sample.SampleId).Distinct(StringComparer.Ordinal).ToArray()
+            : samples.Select(sample => sample.SampleId).Distinct(StringComparer.Ordinal).ToArray();
         var recipe = new ProcessingRecipe(
             1, recipeId, definition.Id, _officeMode,
             artifacts.Select(batch => batch.BatchId).ToArray(),
-            samples.Select(sample => sample.SampleId).Distinct(StringComparer.Ordinal).ToArray(),
+            selectedSamples,
             [], new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal), 0, 0);
 
         if (_officeMode == ProcessingMode.Technical && _privacyMasksApplied)

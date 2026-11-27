@@ -93,7 +93,10 @@ public partial class SaoDatumCityScene
             _fieldSamples.Add(sample);
             capturedCount++;
             if (sample.Quality.Passed)
+            {
                 visibleTargets.UnionWith(sample.ObservedFeatures.Select(feature => feature.TargetId));
+                _autoCamera.RecordCaptureOutcome(position, heading, sample, _activeContract?.RequiredFeatureIds, minBaselineMetres: 4.5);
+            }
         }
 
         if (capturedCount == 0) return;
